@@ -8,6 +8,7 @@ find_package(blaze 3.5 REQUIRED)
 # ~~~~~~~~~~ Our tests ~~~~~~~~~~~~~~
 add_executable(test-smoke
     PanelTest.cpp
+    simd/HsumTest.cpp
 )
 
 target_link_libraries(test-smoke PRIVATE

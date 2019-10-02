@@ -5,7 +5,7 @@
 #include <array>
 
 
-namespace smoke :: testing
+namespace smoke
 {
     template <typename T, std::size_t N>
     inline void randomize(std::array<T, N>& a)

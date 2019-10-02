@@ -1,6 +1,10 @@
 #pragma once
 
 #include <smoke/SizeT.hpp>
+#include <smoke/simd/Hsum.hpp>
+#include <smoke/Exception.hpp>
+
+#include <immintrin.h>
 
 
 namespace smoke
@@ -34,5 +38,74 @@ namespace smoke
 
     private:
         T v_[N * N];
+    };
+
+
+    template <>
+    class Panel<double, 4>
+    {
+    public:
+        void load(double const * ptr)
+        {
+            v0_ = _mm256_load_pd(ptr);
+            v1_ = _mm256_load_pd(ptr + 4);
+            v2_ = _mm256_load_pd(ptr + 8);
+            v3_ = _mm256_load_pd(ptr + 12);
+        }
+
+
+        void store(double * ptr)
+        {
+            _mm256_store_pd(ptr, v0_);
+            _mm256_store_pd(ptr + 4, v1_);
+            _mm256_store_pd(ptr + 8, v2_);
+            _mm256_store_pd(ptr + 12, v3_);
+        }
+
+
+        friend void gemm(Panel const& a, bool ta, Panel const& b, bool tb, Panel& c)
+        {
+            if (ta && !tb)
+            {
+                c.v0_ = _mm256_add_pd(c.v0_, hsum(
+                    _mm256_mul_pd(a.v0_, b.v0_),
+                    _mm256_mul_pd(a.v1_, b.v0_),
+                    _mm256_mul_pd(a.v2_, b.v0_),
+                    _mm256_mul_pd(a.v3_, b.v0_)
+                ));
+
+                c.v1_ = _mm256_add_pd(c.v1_, hsum(
+                    _mm256_mul_pd(a.v0_, b.v1_),
+                    _mm256_mul_pd(a.v1_, b.v1_),
+                    _mm256_mul_pd(a.v2_, b.v1_),
+                    _mm256_mul_pd(a.v3_, b.v1_)
+                ));
+
+                c.v2_ = _mm256_add_pd(c.v2_, hsum(
+                    _mm256_mul_pd(a.v0_, b.v2_),
+                    _mm256_mul_pd(a.v1_, b.v2_),
+                    _mm256_mul_pd(a.v2_, b.v2_),
+                    _mm256_mul_pd(a.v3_, b.v2_)
+                ));
+
+                c.v3_ = _mm256_add_pd(c.v3_, hsum(
+                    _mm256_mul_pd(a.v0_, b.v3_),
+                    _mm256_mul_pd(a.v1_, b.v3_),
+                    _mm256_mul_pd(a.v2_, b.v3_),
+                    _mm256_mul_pd(a.v3_, b.v3_)
+                ));
+            }
+            else
+            {
+                SMOKE_THROW_EXCEPTION(std::logic_error("Not implemented"));
+            }
+        }
+
+
+    private:
+        __m256d v0_;
+        __m256d v1_;
+        __m256d v2_;
+        __m256d v3_;
     };
 }

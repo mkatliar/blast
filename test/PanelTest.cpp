@@ -25,10 +25,10 @@ namespace smoke :: testing
         pb.load(b.data());
         pc.load(c.data());
 
-        gemm(pa, pb, pc);
+        gemm(pa, true, pb, false, pc);
 
         pc.store(c.data());
 
-        SMOKE_ASSERT_EQ(mc, evaluate(mc0 + ma * mb));
+        SMOKE_EXPECT_EQ(mc, evaluate(mc0 + trans(ma) * mb));
     }
 }
