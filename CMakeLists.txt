@@ -19,8 +19,7 @@ set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_DEBUG_POSTFIX d)
 
-# find_package(blaze 3.5 REQUIRED)
-find_package(LAPACK REQUIRED)
+# find_package(LAPACK REQUIRED)
 
 # Find boost.
 find_package(Boost REQUIRED COMPONENTS exception)
