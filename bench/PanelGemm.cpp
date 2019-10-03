@@ -11,7 +11,7 @@ namespace smoke :: benchmark
     {
         size_t constexpr N = 4;
 
-        std::array<double, N * N> a, b, c;
+        alignas(Panel<double, N>::alignment) std::array<double, N * N> a, b, c;
         randomize(a);
         randomize(b);
         randomize(c);
@@ -26,6 +26,9 @@ namespace smoke :: benchmark
             gemm(pa, true, pb, false, pc);
             DoNotOptimize(pc);
         }
+
+        state.counters["flops"] = Counter(N * N * N, Counter::kIsIterationInvariantRate);
+        state.counters["m"] = N;
     }
 
 
