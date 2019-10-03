@@ -126,6 +126,28 @@ namespace smoke
                     _mm256_mul_pd(a.v3_, b.v3_)
                 ));
             }
+            else if (!ta && !tb)
+            {
+                c.v0_ = _mm256_fmadd_pd(a.v0_, _mm256_permute4x64_pd(b.v0_, 0b00000000), c.v0_);
+                c.v0_ = _mm256_fmadd_pd(a.v1_, _mm256_permute4x64_pd(b.v0_, 0b01010101), c.v0_);
+                c.v0_ = _mm256_fmadd_pd(a.v2_, _mm256_permute4x64_pd(b.v0_, 0b10101010), c.v0_);
+                c.v0_ = _mm256_fmadd_pd(a.v3_, _mm256_permute4x64_pd(b.v0_, 0b11111111), c.v0_);
+
+                c.v1_ = _mm256_fmadd_pd(a.v0_, _mm256_permute4x64_pd(b.v1_, 0b00000000), c.v1_);
+                c.v1_ = _mm256_fmadd_pd(a.v1_, _mm256_permute4x64_pd(b.v1_, 0b01010101), c.v1_);
+                c.v1_ = _mm256_fmadd_pd(a.v2_, _mm256_permute4x64_pd(b.v1_, 0b10101010), c.v1_);
+                c.v1_ = _mm256_fmadd_pd(a.v3_, _mm256_permute4x64_pd(b.v1_, 0b11111111), c.v1_);
+
+                c.v2_ = _mm256_fmadd_pd(a.v0_, _mm256_permute4x64_pd(b.v2_, 0b00000000), c.v2_);
+                c.v2_ = _mm256_fmadd_pd(a.v1_, _mm256_permute4x64_pd(b.v2_, 0b01010101), c.v2_);
+                c.v2_ = _mm256_fmadd_pd(a.v2_, _mm256_permute4x64_pd(b.v2_, 0b10101010), c.v2_);
+                c.v2_ = _mm256_fmadd_pd(a.v3_, _mm256_permute4x64_pd(b.v2_, 0b11111111), c.v2_);
+
+                c.v3_ = _mm256_fmadd_pd(a.v0_, _mm256_permute4x64_pd(b.v3_, 0b00000000), c.v3_);
+                c.v3_ = _mm256_fmadd_pd(a.v1_, _mm256_permute4x64_pd(b.v3_, 0b01010101), c.v3_);
+                c.v3_ = _mm256_fmadd_pd(a.v2_, _mm256_permute4x64_pd(b.v3_, 0b10101010), c.v3_);
+                c.v3_ = _mm256_fmadd_pd(a.v3_, _mm256_permute4x64_pd(b.v3_, 0b11111111), c.v3_);
+            }
             else
             {
                 SMOKE_THROW_EXCEPTION(std::logic_error("Not implemented"));
