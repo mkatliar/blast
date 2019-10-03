@@ -156,4 +156,82 @@ namespace smoke
                 D.store(i, j, p);
             }
     }
+
+
+    template <typename T, size_t M, size_t N, size_t K, size_t P>
+    inline void gemm_nn(
+        StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, K, N, P> const& B, 
+        StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D)
+    {
+        static_assert(M % P == 0);
+        static_assert(N % P == 0);
+        static_assert(K % P == 0);
+
+        size_t const MM = M / P;
+        size_t const NN = N / P;
+        size_t const KK = K / P;
+
+        for (size_t i = 0; i < MM; ++i)
+            for (size_t j = 0; j < NN; ++j)
+            {
+                Panel<T, P> p = C.load(i, j);
+
+                for (size_t k = 0; k < KK; ++k)
+                    gemm(A.load(i, k), false, B.load(k, j), false, p);
+
+                D.store(i, j, p);
+            }
+
+        /*
+        for (size_t i = 0; i < MM; ++i)
+            for (size_t j = 0; j < NN; ++j)
+                D.store(i, j, C.load(i, j));
+
+        for (size_t i = 0; i < MM; ++i)
+            for (size_t k = 0; k < KK; ++k)
+            {
+                Panel<T, P> A_ik = A.load(i, k);
+
+                for (size_t j = 0; j < NN; ++j)
+                {
+                    Panel<T, P> p = D.load(i, j);                
+                    gemm(A_ik, false, B.load(k, j), false, p);
+                    D.store(i, j, p);
+                }
+            }
+        */
+    }
+
+
+    // template <typename T>
+    // inline void gemm_tn(
+    //     StaticMatrix<T, 8, 8, 4> const& A, StaticMatrix<T, 8, 8, 4> const& B, 
+    //     StaticMatrix<T, 8, 8, 4> const& C, StaticMatrix<T, 8, 8, 4>& D)
+    // {
+    //     size_t const MM = 2;
+    //     size_t const NN = 2;
+    //     size_t const KK = 2;
+
+    //     Panel<T, 4> p;
+        
+    //     p = C.load(0, 0);
+    //     gemm(A.load(0, 0), true, B.load(0, 0), false, p);
+    //     gemm(A.load(1, 0), true, B.load(1, 0), false, p);
+    //     D.store(0, 0, p);
+
+    //     p = C.load(0, 1);
+    //     gemm(A.load(0, 0), true, B.load(0, 1), false, p);
+    //     gemm(A.load(1, 0), true, B.load(1, 1), false, p);
+    //     D.store(0, 1, p);
+
+    //     p = C.load(1, 0);
+    //     gemm(A.load(0, 1), true, B.load(0, 0), false, p);
+    //     gemm(A.load(1, 1), true, B.load(1, 0), false, p);
+    //     D.store(1, 0, p);
+
+    //     p = C.load(1, 1);
+    //     gemm(A.load(0, 1), true, B.load(0, 1), false, p);
+    //     gemm(A.load(1, 1), true, B.load(1, 1), false, p);
+    //     D.store(1, 1, p);
+    // }
 }

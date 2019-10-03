@@ -7,6 +7,11 @@
 
 namespace smoke :: benchmark
 {
+    template <bool TA, bool TB, typename T, size_t N>
+    void gemm_impl(Panel<T, N> const& a, Panel<T, N> const& b, Panel<T, N>& c);
+
+
+    template <bool TA, bool TB>
     static void BM_PanelGemm(State& state)
     {
         size_t constexpr N = 4;
@@ -23,7 +28,7 @@ namespace smoke :: benchmark
 
         for (auto _ : state)
         {
-            gemm(pa, true, pb, false, pc);
+            gemm(pa, TA, pb, TB, pc);
             DoNotOptimize(pc);
         }
 
@@ -32,5 +37,6 @@ namespace smoke :: benchmark
     }
 
 
-    BENCHMARK(BM_PanelGemm);
+    BENCHMARK_TEMPLATE(BM_PanelGemm, true, false);
+    BENCHMARK_TEMPLATE(BM_PanelGemm, false, false);
 }

@@ -6,7 +6,9 @@ find_package(Threads REQUIRED)
 add_executable(bench-smoke
     Main.cpp
     PanelGemm.cpp
+    PanelGemmImpl.cpp
     Gemm.cpp
+    GemmImpl.cpp
 )
 
 
