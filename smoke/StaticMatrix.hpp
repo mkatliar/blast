@@ -34,6 +34,18 @@ namespace smoke
         }
 
 
+        size_t constexpr rows() const
+        {
+            return M;
+        }
+
+
+        size_t constexpr columns() const
+        {
+            return N;
+        }
+
+
         size_t constexpr panelRows() const
         {
             return panelRows_;
@@ -43,6 +55,22 @@ namespace smoke
         size_t constexpr panelColumns() const
         {
             return panelColumns_;
+        }
+
+
+        void pack(T const * data, size_t lda)
+        {
+            for (size_t i = 0; i < M; ++i)
+                for (size_t j = 0; j < N; ++j)
+                    (*this)(i, j) = data[i + lda * j];
+        }
+
+
+        void unpack(T * data, size_t lda) const
+        {
+            for (size_t i = 0; i < M; ++i)
+                for (size_t j = 0; j < N; ++j)
+                    data[i + lda * j] = (*this)(i, j);
         }
 
 
@@ -76,4 +104,56 @@ namespace smoke
             return (panel_i * panelColumns_ + panel_j) * elementsPerPanel_ + subpanel_i + subpanel_j * P;
         }
     };
+
+
+    template <typename T, size_t M, size_t N, size_t K, size_t P>
+    inline void gemm_nt(
+        StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, N, K, P> const& B, 
+        StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D)
+    {
+        static_assert(M % P == 0);
+        static_assert(N % P == 0);
+        static_assert(K % P == 0);
+
+        size_t const MM = M / P;
+        size_t const NN = N / P;
+        size_t const KK = K / P;
+
+        for (size_t i = 0; i < MM; ++i)
+            for (size_t j = 0; j < NN; ++j)
+            {
+                Panel<T, P> p = C.load(i, j);
+
+                for (size_t k = 0; k < KK; ++k)
+                    gemm(A.load(i, k), false, B.load(j, k), true, p);
+
+                D.store(i, j, p);
+            }
+    }
+
+
+    template <typename T, size_t M, size_t N, size_t K, size_t P>
+    inline void gemm_tn(
+        StaticMatrix<T, K, M, P> const& A, StaticMatrix<T, K, N, P> const& B, 
+        StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D)
+    {
+        static_assert(M % P == 0);
+        static_assert(N % P == 0);
+        static_assert(K % P == 0);
+
+        size_t const MM = M / P;
+        size_t const NN = N / P;
+        size_t const KK = K / P;
+
+        for (size_t i = 0; i < MM; ++i)
+            for (size_t j = 0; j < NN; ++j)
+            {
+                Panel<T, P> p = C.load(i, j);
+
+                for (size_t k = 0; k < KK; ++k)
+                    gemm(A.load(k, i), true, B.load(k, j), false, p);
+
+                D.store(i, j, p);
+            }
+    }
 }

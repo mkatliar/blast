@@ -4,9 +4,6 @@
 #include <test/Randomize.hpp>
 
 
-using namespace blaze;
-
-
 namespace smoke :: testing
 {
     TEST(StaticMatrixTest, testPanelRows)
@@ -46,6 +43,46 @@ namespace smoke :: testing
                 EXPECT_EQ(A(i, j), A_ref(i, j)) << "element mismatch at (" << i << ", " << j << ")";
                 EXPECT_EQ(A_cref(i, j), A_ref(i, j)) << "element mismatch at (" << i << ", " << j << ")";
             }
+    }
+
+
+    TEST(StaticMatrixTest, testPack)
+    {
+        size_t constexpr M = 5;
+        size_t constexpr N = 7;
+        size_t constexpr P = 4;
+
+        blaze::StaticMatrix<double, M, N, blaze::columnMajor> A_ref;
+        randomize(A_ref);
+
+        StaticMatrix<double, M, N, P> A;
+        A.pack(data(A_ref), spacing(A_ref));
+
+        auto const& A_cref = A;
+
+        for (size_t i = 0; i < M; ++i)
+            for (size_t j = 0; j < N; ++j)
+                EXPECT_EQ(A(i, j), A_ref(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+    }
+
+
+    TEST(StaticMatrixTest, testUnpack)
+    {
+        size_t constexpr M = 5;
+        size_t constexpr N = 7;
+        size_t constexpr P = 4;        
+
+        StaticMatrix<double, M, N, P> A;
+        for (size_t i = 0; i < M; ++i)
+            for (size_t j = 0; j < N; ++j)
+                blaze::randomize(A(i, j));
+
+        blaze::StaticMatrix<double, M, N, blaze::columnMajor> A1;
+        A.unpack(data(A1), spacing(A1));
+
+        for (size_t i = 0; i < M; ++i)
+            for (size_t j = 0; j < N; ++j)
+                EXPECT_EQ(A(i, j), A1(i, j)) << "element mismatch at (" << i << ", " << j << ")";
     }
 
 
@@ -104,5 +141,40 @@ namespace smoke :: testing
         for (size_t i = 0; i < M; ++i)
             for (size_t j = 0; j < N; ++j)
                 EXPECT_EQ(A(i, j), A_ref(i, j));
+    }
+
+
+    TEST(StaticMatrixTest, testGemmTN)
+    {
+        size_t const M = 8, N = 8, K = 8;
+
+        // Init Blaze matrices
+        //
+        blaze::DynamicMatrix<double, blaze::columnMajor> blaze_A(K, M), blaze_B(K, N), blaze_C(M, N), blaze_D(M, N);
+        randomize(blaze_A);
+        randomize(blaze_B);
+        randomize(blaze_C);
+
+        // Init Smoke matrices
+        //
+        StaticMatrix<double, K, M> A;
+        StaticMatrix<double, K, N> B;
+        StaticMatrix<double, M, N> C;
+        StaticMatrix<double, M, N> D;
+
+        A.pack(data(blaze_A), spacing(blaze_A));
+        B.pack(data(blaze_B), spacing(blaze_B));
+        C.pack(data(blaze_C), spacing(blaze_C));
+        
+        // Do gemm with Smoke
+        gemm_tn(A, B, C, D);
+
+        // Copy the resulting D matrix from BLASFEO to Blaze
+        D.unpack(data(blaze_D), spacing(blaze_D));
+
+        // Print the result from BLASFEO
+        // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
+
+        SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + trans(blaze_A) * blaze_B), 1e-10, 1e-10);
     }
 }
