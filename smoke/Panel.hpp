@@ -13,6 +13,17 @@ namespace smoke
     class Panel
     {
     public:
+        Panel()
+        {            
+        }
+
+
+        explicit Panel(T const * ptr)
+        {
+            load(ptr);
+        }
+
+
         void load(T const * ptr)
         {
             for (size_t j = 0; j < N * N; ++j)
@@ -20,7 +31,7 @@ namespace smoke
         }
 
 
-        void store(T * ptr)
+        void store(T * ptr) const
         {
             for (size_t j = 0; j < N * N; ++j)
                 ptr[j] = v_[j];
@@ -45,6 +56,17 @@ namespace smoke
     class Panel<double, 4>
     {
     public:
+        Panel()
+        {            
+        }
+
+
+        explicit Panel(double const * ptr)
+        {
+            load(ptr);
+        }
+
+
         void load(double const * ptr)
         {
             v0_ = _mm256_load_pd(ptr);
@@ -54,7 +76,7 @@ namespace smoke
         }
 
 
-        void store(double * ptr)
+        void store(double * ptr) const
         {
             _mm256_store_pd(ptr, v0_);
             _mm256_store_pd(ptr + 4, v1_);
