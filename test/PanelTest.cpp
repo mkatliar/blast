@@ -12,7 +12,7 @@ namespace smoke :: testing
     {
         size_t constexpr N = 4;
 
-        std::array<double, N * N> a, b, c;
+        alignas(Panel<double, N>::alignment) std::array<double, N * N> a, b, c;
         randomize(a);
         randomize(b);
         randomize(c);

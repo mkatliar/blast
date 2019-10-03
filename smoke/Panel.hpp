@@ -9,10 +9,16 @@
 
 namespace smoke
 {
-    template <typename T, size_t N>
+    size_t constexpr panelSize = 4;
+
+
+    template <typename T, size_t N = panelSize>
     class Panel
     {
     public:
+        static size_t constexpr alignment = 0x1;
+
+
         Panel()
         {            
         }
@@ -56,6 +62,9 @@ namespace smoke
     class Panel<double, 4>
     {
     public:
+        static size_t constexpr alignment = 0x20;
+
+
         Panel()
         {            
         }

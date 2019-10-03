@@ -6,7 +6,7 @@
 
 namespace smoke
 {
-    template <typename T, size_t M, size_t N, size_t P>
+    template <typename T, size_t M, size_t N, size_t P = panelSize>
     class StaticMatrix
     {
     public:
@@ -51,7 +51,7 @@ namespace smoke
         static size_t constexpr panelColumns_ = N / P + (N % P > 0);
         static size_t constexpr elementsPerPanel_ = P * P;
 
-        T v_[panelRows_ * panelColumns_ * elementsPerPanel_];
+        alignas(Panel<T, P>::alignment) T v_[panelRows_ * panelColumns_ * elementsPerPanel_];
 
 
         T * panelPtr(size_t i, size_t j)
