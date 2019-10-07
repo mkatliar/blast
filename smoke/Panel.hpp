@@ -12,6 +12,7 @@ namespace smoke
     size_t constexpr panelSize = 4;
 
 
+    // TODO: deprecate?
     template <typename T, size_t N = panelSize>
     class Panel
     {

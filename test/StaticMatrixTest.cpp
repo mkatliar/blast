@@ -167,7 +167,7 @@ namespace smoke :: testing
         C.pack(data(blaze_C), spacing(blaze_C));
         
         // Do gemm with Smoke
-        gemm_tn(A, B, C, D);
+        gemm_tn<1, 1>(A, B, C, D);
 
         // Copy the resulting D matrix from BLASFEO to Blaze
         D.unpack(data(blaze_D), spacing(blaze_D));
@@ -202,7 +202,7 @@ namespace smoke :: testing
         C.pack(data(blaze_C), spacing(blaze_C));
         
         // Do gemm with Smoke
-        gemm_nn(A, B, C, D);
+        gemm_nn<1, 1>(A, B, C, D);
 
         // Copy the resulting D matrix from BLASFEO to Blaze
         D.unpack(data(blaze_D), spacing(blaze_D));
@@ -211,5 +211,40 @@ namespace smoke :: testing
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
         SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * blaze_B), 1e-10, 1e-10);
+    }
+
+
+    TEST(StaticMatrixTest, testGemmNT)
+    {
+        size_t const M = 8, N = 8, K = 8;
+
+        // Init Blaze matrices
+        //
+        blaze::DynamicMatrix<double, blaze::columnMajor> blaze_A(M, K), blaze_B(K, N), blaze_C(M, N), blaze_D(M, N);
+        randomize(blaze_A);
+        randomize(blaze_B);
+        randomize(blaze_C);
+
+        // Init Smoke matrices
+        //
+        StaticMatrix<double, M, K> A;
+        StaticMatrix<double, K, N> B;
+        StaticMatrix<double, M, N> C;
+        StaticMatrix<double, M, N> D;
+
+        A.pack(data(blaze_A), spacing(blaze_A));
+        B.pack(data(blaze_B), spacing(blaze_B));
+        C.pack(data(blaze_C), spacing(blaze_C));
+        
+        // Do gemm with Smoke
+        gemm_nt<1, 1>(A, B, C, D);
+
+        // Copy the resulting D matrix from BLASFEO to Blaze
+        D.unpack(data(blaze_D), spacing(blaze_D));
+
+        // Print the result from BLASFEO
+        // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
+
+        SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
     }
 }

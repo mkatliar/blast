@@ -2,6 +2,7 @@
 
 #include <smoke/SizeT.hpp>
 #include <smoke/Panel.hpp>
+#include <smoke/GemmKernel.hpp>
 
 
 namespace smoke
@@ -12,13 +13,13 @@ namespace smoke
     public:
         Panel<T, P> load(size_t i, size_t j) const
         {
-            return Panel<T, P>(panelPtr(i, j));
+            return Panel<T, P>(block(i, j));
         }
 
 
         void store(size_t i, size_t j, Panel<T, P> const& panel)
         {
-            panel.store(panelPtr(i, j));
+            panel.store(block(i, j));
         }
 
 
@@ -43,6 +44,12 @@ namespace smoke
         size_t constexpr columns() const
         {
             return N;
+        }
+
+
+        size_t constexpr spacing() const
+        {
+            return panelColumns_ * elementsPerPanel_;
         }
 
 
@@ -74,24 +81,24 @@ namespace smoke
         }
 
 
+        T * block(size_t i, size_t j)
+        {
+            return v_ + (i * panelColumns_ + j) * elementsPerPanel_;
+        }
+
+
+        T const * block(size_t i, size_t j) const
+        {
+            return v_ + (i * panelColumns_ + j) * elementsPerPanel_;
+        }
+
+
     private:
         static size_t constexpr panelRows_ = M / P + (M % P > 0);
         static size_t constexpr panelColumns_ = N / P + (N % P > 0);
         static size_t constexpr elementsPerPanel_ = P * P;
 
         alignas(Panel<T, P>::alignment) T v_[panelRows_ * panelColumns_ * elementsPerPanel_];
-
-
-        T * panelPtr(size_t i, size_t j)
-        {
-            return v_ + (i * panelColumns_ + j) * elementsPerPanel_;
-        }
-
-
-        T const * panelPtr(size_t i, size_t j) const
-        {
-            return v_ + (i * panelColumns_ + j) * elementsPerPanel_;
-        }
 
 
         size_t elementIndex(size_t i, size_t j) const
@@ -106,80 +113,83 @@ namespace smoke
     };
 
 
-    template <typename T, size_t M, size_t N, size_t K, size_t P>
+    template <size_t KM, size_t KN, typename T, size_t M, size_t N, size_t K, size_t P>
     inline void gemm_nt(
         StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, N, K, P> const& B, 
         StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D)
     {
-        static_assert(M % P == 0);
-        static_assert(N % P == 0);
+        static_assert(M % (KM * P) == 0);
+        static_assert(N % (KN * P) == 0);
         static_assert(K % P == 0);
 
-        size_t const MM = M / P;
-        size_t const NN = N / P;
+        size_t const MM = M / (KM * P);
+        size_t const NN = N / (KN * P);
         size_t const KK = K / P;
 
         for (size_t i = 0; i < MM; ++i)
             for (size_t j = 0; j < NN; ++j)
             {
-                Panel<T, P> p = C.load(i, j);
+                GemmKernel<T, KM, KN, P> ker;
+                ker.load(C.block(KM * i, KN * j), C.spacing());
 
                 for (size_t k = 0; k < KK; ++k)
-                    gemm(A.load(i, k), false, B.load(j, k), true, p);
+                    ker(A.block(KM * i, k), false, B.block(KN * j, k), true);
 
-                D.store(i, j, p);
+                ker.store(D.block(KM * i, KN * j), D.spacing());
             }
     }
 
 
-    template <typename T, size_t M, size_t N, size_t K, size_t P>
+    template <size_t KM, size_t KN, typename T, size_t M, size_t N, size_t K, size_t P>
     inline void gemm_tn(
         StaticMatrix<T, K, M, P> const& A, StaticMatrix<T, K, N, P> const& B, 
         StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D)
     {
-        static_assert(M % P == 0);
-        static_assert(N % P == 0);
+        static_assert(M % (KM * P) == 0);
+        static_assert(N % (KN * P) == 0);
         static_assert(K % P == 0);
 
-        size_t const MM = M / P;
-        size_t const NN = N / P;
+        size_t const MM = M / (KM * P);
+        size_t const NN = N / (KN * P);
         size_t const KK = K / P;
 
         for (size_t i = 0; i < MM; ++i)
             for (size_t j = 0; j < NN; ++j)
             {
-                Panel<T, P> p = C.load(i, j);
+                GemmKernel<T, KM, KN, P> ker;
+                ker.load(C.block(KM * i, KN * j), C.spacing());
 
                 for (size_t k = 0; k < KK; ++k)
-                    gemm(A.load(k, i), true, B.load(k, j), false, p);
+                    ker(A.block(k, KM * i), true, B.block(k, KN * j), false);
 
-                D.store(i, j, p);
+                ker.store(D.block(i, j), D.spacing());
             }
     }
 
 
-    template <typename T, size_t M, size_t N, size_t K, size_t P>
+    template <size_t KM, size_t KN, typename T, size_t M, size_t N, size_t K, size_t P>
     inline void gemm_nn(
         StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, K, N, P> const& B, 
         StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D)
     {
-        static_assert(M % P == 0);
-        static_assert(N % P == 0);
+        static_assert(M % (KM * P) == 0);
+        static_assert(N % (KN * P) == 0);
         static_assert(K % P == 0);
 
-        size_t const MM = M / P;
-        size_t const NN = N / P;
+        size_t const MM = M / (KM * P);
+        size_t const NN = N / (KN * P);
         size_t const KK = K / P;
 
         for (size_t i = 0; i < MM; ++i)
             for (size_t j = 0; j < NN; ++j)
             {
-                Panel<T, P> p = C.load(i, j);
+                GemmKernel<T, KM, KN, P> ker;
+                ker.load(C.block(KM * i, KN * j), C.spacing());
 
                 for (size_t k = 0; k < KK; ++k)
-                    gemm(A.load(i, k), false, B.load(k, j), false, p);
+                    ker(A.block(KM * i, k), false, B.block(k, KN * j), false);
 
-                D.store(i, j, p);
+                ker.store(D.block(i, j), D.spacing());
             }
 
         /*

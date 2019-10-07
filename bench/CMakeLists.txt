@@ -7,6 +7,7 @@ add_executable(bench-smoke
     Main.cpp
     PanelGemm.cpp
     PanelGemmImpl.cpp
+    GemmKernel.cpp
     Gemm.cpp
     GemmImpl.cpp
 )
