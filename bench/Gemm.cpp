@@ -1,6 +1,7 @@
 #include <smoke/StaticMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
+#include <test/Randomize.hpp>
 
 #include <random>
 #include <memory>
@@ -24,19 +25,6 @@ namespace smoke :: benchmark
     void gemm_nt_impl(
         StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, N, K, P> const& B, 
         StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D);
-
-
-    template <typename T, size_t M, size_t N, size_t P>
-    static void randomize(StaticMatrix<T, M, N, P>& A)
-    {
-        std::random_device rd;  //Will be used to obtain a seed for the random number engine
-		std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-		std::uniform_real_distribution<> dis(-1.0, 1.0);	
-
-        for (size_t i = 0; i < A.rows(); ++i)
-            for (size_t j = 0; j < A.columns(); ++j)
-                A(i, j) = dis(gen);
-    }
 
 
     template <typename Real, size_t M>

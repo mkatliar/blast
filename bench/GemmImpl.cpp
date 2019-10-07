@@ -1,4 +1,5 @@
-#include <smoke/StaticMatrix.hpp>
+#include <smoke/Gemm.hpp>
+#include <smoke/GemmKernel_double_1_1_4.hpp>
 
 #include <bench/Benchmark.hpp>
 

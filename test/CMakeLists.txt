@@ -7,10 +7,10 @@ find_package(blaze 3.5 REQUIRED)
 
 # ~~~~~~~~~~ Our tests ~~~~~~~~~~~~~~
 add_executable(test-smoke
-    PanelTest.cpp
     GemmKernelTest.cpp
     PaddedSizeTest.cpp
     StaticMatrixTest.cpp
+    GemmTest.cpp
 
     simd/HsumTest.cpp
 )

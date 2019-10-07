@@ -1,72 +1,137 @@
-#include <smoke/GemmKernel.hpp>
+#include <smoke/GemmKernel_double_1_1_4.hpp>
+#include <smoke/StaticMatrix.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 
-using namespace blaze;
-
 
 namespace smoke :: testing
 {
-    TEST(GemmKernelTest, testGemmTN)
+    template <typename Ker>
+    class GemmKernelTest
+    :   public Test
     {
-        size_t constexpr N = 4;
+    };
 
-        alignas(GemmKernel<double, 1, 1, N>::alignment) std::array<double, N * N> a, b, c;
-        randomize(a);
-        randomize(b);
-        randomize(c);
 
-        CustomMatrix<double, unaligned, unpadded, columnMajor> ma(a.data(), N, N), mb(b.data(), N, N), mc(c.data(), N, N);
-        StaticMatrix<double, N, N> const mc0 = mc;
+    TYPED_TEST_SUITE_P(GemmKernelTest);
 
-        GemmKernel<double, 1, 1, N> kc;
-        kc.load(c.data(), c.size());
-        kc(a.data(), true, b.data(), false);
-        kc.store(c.data(), c.size());
 
-        SMOKE_EXPECT_EQ(mc, evaluate(mc0 + trans(ma) * mb));
+    TYPED_TEST_P(GemmKernelTest, testLoadStore)
+    {
+        using Traits = GemmKernelTraits<TypeParam>;
+
+        blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
+        randomize(A_ref);
+
+        StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> A, B;
+        A.pack(data(A_ref), spacing(A_ref));
+
+        TypeParam ker;
+        ker.load(A.block(0, 0), A.spacing());
+        ker.store(B.block(0, 0), B.spacing());
+
+        for (size_t i = 0; i < Traits::rows; ++i)
+            for (size_t j = 0; j < Traits::columns; ++j)
+                EXPECT_EQ(B(i, j), A_ref(i, j)) << "element mismatch at (" << i << ", " << j << ")";
     }
 
 
-    TEST(GemmKernelTest, testGemmNN)
+    TYPED_TEST_P(GemmKernelTest, testGemmTN)
     {
-        size_t constexpr N = 4;
+        using Traits = GemmKernelTraits<TypeParam>;
 
-        alignas(GemmKernel<double, 1, 1, N>::alignment) std::array<double, N * N> a, b, c;
-        randomize(a);
-        randomize(b);
-        randomize(c);
+        blaze::StaticMatrix<double, Traits::blockSize, Traits::rows, blaze::columnMajor> ma;
+        blaze::StaticMatrix<double, Traits::blockSize, Traits::columns, blaze::columnMajor> mb;
+        blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
+        randomize(ma);
+        randomize(mb);
+        randomize(mc);
 
-        CustomMatrix<double, unaligned, unpadded, columnMajor> ma(a.data(), N, N), mb(b.data(), N, N), mc(c.data(), N, N);
-        StaticMatrix<double, N, N> const mc0 = mc;
+        StaticMatrix<double, Traits::blockSize, Traits::rows, Traits::blockSize, Traits::alignment> a;
+        StaticMatrix<double, Traits::blockSize, Traits::columns, Traits::blockSize, Traits::alignment> b;
+        StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> c, d;
+        a.pack(data(ma), spacing(ma));
+        b.pack(data(mb), spacing(mb));
+        c.pack(data(mc), spacing(mc));
+        
+        TypeParam kc;
+        kc.load(c.block(0, 0), c.spacing());
+        kc(a.block(0, 0), a.spacing(), true, b.block(0, 0), b.spacing(), false);
+        kc.store(d.block(0, 0), d.spacing());
+        d.unpack(data(md), spacing(md));
 
-        GemmKernel<double, 1, 1, N> kc;
-        kc.load(c.data(), c.size());
-        kc(a.data(), false, b.data(), false);
-        kc.store(c.data(), c.size());
-
-        SMOKE_EXPECT_EQ(mc, evaluate(mc0 + ma * mb));
+        SMOKE_EXPECT_EQ(md, evaluate(mc + trans(ma) * mb));
     }
 
 
-    TEST(GemmKernelTest, testGemmNT)
+    TYPED_TEST_P(GemmKernelTest, testGemmNN)
     {
-        size_t constexpr N = 4;
+        using Traits = GemmKernelTraits<TypeParam>;
 
-        alignas(GemmKernel<double, 1, 1, N>::alignment) std::array<double, N * N> a, b, c;
-        randomize(a);
-        randomize(b);
-        randomize(c);
+        blaze::StaticMatrix<double, Traits::rows, Traits::blockSize, blaze::columnMajor> ma;
+        blaze::StaticMatrix<double, Traits::blockSize, Traits::columns, blaze::columnMajor> mb;
+        blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
+        randomize(ma);
+        randomize(mb);
+        randomize(mc);
 
-        CustomMatrix<double, unaligned, unpadded, columnMajor> ma(a.data(), N, N), mb(b.data(), N, N), mc(c.data(), N, N);
-        StaticMatrix<double, N, N> const mc0 = mc;
+        StaticMatrix<double, Traits::rows, Traits::blockSize, Traits::blockSize, Traits::alignment> a;
+        StaticMatrix<double, Traits::blockSize, Traits::columns, Traits::blockSize, Traits::alignment> b;
+        StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> c, d;
+        a.pack(data(ma), spacing(ma));
+        b.pack(data(mb), spacing(mb));
+        c.pack(data(mc), spacing(mc));
+        
+        TypeParam kc;
+        kc.load(c.block(0, 0), c.spacing());
+        kc(a.block(0, 0), a.spacing(), false, b.block(0, 0), b.spacing(), false);
+        kc.store(d.block(0, 0), d.spacing());
+        d.unpack(data(md), spacing(md));
 
-        GemmKernel<double, 1, 1, N> kc;
-        kc.load(c.data(), c.size());
-        kc(a.data(), false, b.data(), true);
-        kc.store(c.data(), c.size());
-
-        SMOKE_EXPECT_EQ(mc, evaluate(mc0 + ma * trans(mb)));
+        SMOKE_EXPECT_EQ(md, evaluate(mc + ma * mb));
     }
+
+
+    TYPED_TEST_P(GemmKernelTest, testGemmNT)
+    {
+        using Traits = GemmKernelTraits<TypeParam>;
+
+        blaze::StaticMatrix<double, Traits::rows, Traits::blockSize, blaze::columnMajor> ma;
+        blaze::StaticMatrix<double, Traits::columns, Traits::blockSize, blaze::columnMajor> mb;
+        blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
+        randomize(ma);
+        randomize(mb);
+        randomize(mc);
+
+        StaticMatrix<double, Traits::rows, Traits::blockSize, Traits::blockSize, Traits::alignment> a;
+        StaticMatrix<double, Traits::columns, Traits::blockSize, Traits::blockSize, Traits::alignment> b;
+        StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> c, d;
+        a.pack(data(ma), spacing(ma));
+        b.pack(data(mb), spacing(mb));
+        c.pack(data(mc), spacing(mc));
+        
+        TypeParam kc;
+        kc.load(c.block(0, 0), c.spacing());
+        kc(a.block(0, 0), a.spacing(), false, b.block(0, 0), b.spacing(), true);
+        kc.store(d.block(0, 0), d.spacing());
+        d.unpack(data(md), spacing(md));
+
+        SMOKE_EXPECT_EQ(md, evaluate(mc + ma * trans(mb)));
+    }
+
+
+    REGISTER_TYPED_TEST_SUITE_P(GemmKernelTest,
+        testLoadStore,
+        testGemmTN,
+        testGemmNN,
+        testGemmNT
+    );
+
+
+    using GemmKernel_double_1_1_4 = GemmKernel<double, 1, 1, 4>;
+    using GemmKernel_double_2_1_4 = GemmKernel<double, 2, 1, 4>;
+
+    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4, GemmKernelTest, GemmKernel_double_1_1_4);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4, GemmKernelTest, GemmKernel_double_2_1_4);
 }
