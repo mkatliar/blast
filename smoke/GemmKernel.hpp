@@ -23,5 +23,6 @@ namespace smoke
         static size_t constexpr rows = M * BS;
         static size_t constexpr columns = N * BS;
         static size_t constexpr elementCount = rows * columns;
+        static size_t constexpr blockElementCount = BS * BS;
     };
 }

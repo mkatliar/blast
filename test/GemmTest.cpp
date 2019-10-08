@@ -10,7 +10,7 @@ namespace smoke :: testing
 {
     TEST(GemmTest, testTN)
     {
-        size_t const M = 8, N = 8, K = 8;
+        size_t const M = 8, N = 8, K = 3 * 8;
 
         // Init Blaze matrices
         //
@@ -45,7 +45,7 @@ namespace smoke :: testing
 
     TEST(GemmTest, testNN)
     {
-        size_t const M = 8, N = 8, K = 8;
+        size_t const M = 8, N = 8, K = 3 * 8;
 
         // Init Blaze matrices
         //
@@ -80,11 +80,11 @@ namespace smoke :: testing
 
     TEST(GemmTest, testNT)
     {
-        size_t const M = 8, N = 8, K = 8;
+        size_t const M = 8, N = 8, K = 3 * 8;
 
         // Init Blaze matrices
         //
-        blaze::DynamicMatrix<double, blaze::columnMajor> blaze_A(M, K), blaze_B(K, N), blaze_C(M, N), blaze_D(M, N);
+        blaze::DynamicMatrix<double, blaze::columnMajor> blaze_A(M, K), blaze_B(N, K), blaze_C(M, N), blaze_D(M, N);
         randomize(blaze_A);
         randomize(blaze_B);
         randomize(blaze_C);
@@ -92,7 +92,7 @@ namespace smoke :: testing
         // Init Smoke matrices
         //
         StaticMatrix<double, M, K> A;
-        StaticMatrix<double, K, N> B;
+        StaticMatrix<double, N, K> B;
         StaticMatrix<double, M, N> C;
         StaticMatrix<double, M, N> D;
 

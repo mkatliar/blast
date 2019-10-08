@@ -24,10 +24,7 @@ namespace smoke
             {
                 GemmKernel<T, KM, KN, P> ker;
                 ker.load(C.block(KM * i, KN * j), C.spacing());
-
-                for (size_t k = 0; k < KK; ++k)
-                    ker(A.block(KM * i, k), A.spacing(), false, B.block(KN * j, k), B.spacing(), true);
-
+                ker(K, A.block(KM * i, 0), A.spacing(), false, B.block(KN * j, 0), B.spacing(), true);
                 ker.store(D.block(KM * i, KN * j), D.spacing());
             }
     }
@@ -51,10 +48,7 @@ namespace smoke
             {
                 GemmKernel<T, KM, KN, P> ker;
                 ker.load(C.block(KM * i, KN * j), C.spacing());
-
-                for (size_t k = 0; k < KK; ++k)
-                    ker(A.block(k, KM * i), A.spacing(), true, B.block(k, KN * j), B.spacing(), false);
-
+                ker(K, A.block(0, KM * i), A.spacing(), true, B.block(0, KN * j), B.spacing(), false);
                 ker.store(D.block(i, j), D.spacing());
             }
     }
@@ -78,10 +72,7 @@ namespace smoke
             {
                 GemmKernel<T, KM, KN, P> ker;
                 ker.load(C.block(KM * i, KN * j), C.spacing());
-
-                for (size_t k = 0; k < KK; ++k)
-                    ker(A.block(KM * i, k), A.spacing(), false, B.block(k, KN * j), B.spacing(), false);
-
+                ker(K, A.block(KM * i, 0), A.spacing(), false, B.block(0, KN * j), B.spacing(), false);
                 ker.store(D.block(i, j), D.spacing());
             }
 

@@ -1,4 +1,5 @@
 #include <smoke/GemmKernel_double_1_1_4.hpp>
+#include <smoke/GemmKernel_double_2_1_4.hpp>
 #include <smoke/StaticMatrix.hpp>
 
 #include <test/Testing.hpp>
@@ -40,16 +41,17 @@ namespace smoke :: testing
     TYPED_TEST_P(GemmKernelTest, testGemmTN)
     {
         using Traits = GemmKernelTraits<TypeParam>;
+        size_t constexpr K = 3 * Traits::blockSize;
 
-        blaze::StaticMatrix<double, Traits::blockSize, Traits::rows, blaze::columnMajor> ma;
-        blaze::StaticMatrix<double, Traits::blockSize, Traits::columns, blaze::columnMajor> mb;
+        blaze::StaticMatrix<double, K, Traits::rows, blaze::columnMajor> ma;
+        blaze::StaticMatrix<double, K, Traits::columns, blaze::columnMajor> mb;
         blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
         randomize(ma);
         randomize(mb);
         randomize(mc);
 
-        StaticMatrix<double, Traits::blockSize, Traits::rows, Traits::blockSize, Traits::alignment> a;
-        StaticMatrix<double, Traits::blockSize, Traits::columns, Traits::blockSize, Traits::alignment> b;
+        StaticMatrix<double, K, Traits::rows, Traits::blockSize, Traits::alignment> a;
+        StaticMatrix<double, K, Traits::columns, Traits::blockSize, Traits::alignment> b;
         StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> c, d;
         a.pack(data(ma), spacing(ma));
         b.pack(data(mb), spacing(mb));
@@ -57,7 +59,7 @@ namespace smoke :: testing
         
         TypeParam kc;
         kc.load(c.block(0, 0), c.spacing());
-        kc(a.block(0, 0), a.spacing(), true, b.block(0, 0), b.spacing(), false);
+        kc(K, a.block(0, 0), a.spacing(), true, b.block(0, 0), b.spacing(), false);
         kc.store(d.block(0, 0), d.spacing());
         d.unpack(data(md), spacing(md));
 
@@ -68,16 +70,17 @@ namespace smoke :: testing
     TYPED_TEST_P(GemmKernelTest, testGemmNN)
     {
         using Traits = GemmKernelTraits<TypeParam>;
+        size_t constexpr K = 3 * Traits::blockSize;
 
-        blaze::StaticMatrix<double, Traits::rows, Traits::blockSize, blaze::columnMajor> ma;
-        blaze::StaticMatrix<double, Traits::blockSize, Traits::columns, blaze::columnMajor> mb;
+        blaze::StaticMatrix<double, Traits::rows, K, blaze::columnMajor> ma;
+        blaze::StaticMatrix<double, K, Traits::columns, blaze::columnMajor> mb;
         blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
         randomize(ma);
         randomize(mb);
         randomize(mc);
 
-        StaticMatrix<double, Traits::rows, Traits::blockSize, Traits::blockSize, Traits::alignment> a;
-        StaticMatrix<double, Traits::blockSize, Traits::columns, Traits::blockSize, Traits::alignment> b;
+        StaticMatrix<double, Traits::rows, K, Traits::blockSize, Traits::alignment> a;
+        StaticMatrix<double, K, Traits::columns, Traits::blockSize, Traits::alignment> b;
         StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> c, d;
         a.pack(data(ma), spacing(ma));
         b.pack(data(mb), spacing(mb));
@@ -85,7 +88,7 @@ namespace smoke :: testing
         
         TypeParam kc;
         kc.load(c.block(0, 0), c.spacing());
-        kc(a.block(0, 0), a.spacing(), false, b.block(0, 0), b.spacing(), false);
+        kc(K, a.block(0, 0), a.spacing(), false, b.block(0, 0), b.spacing(), false);
         kc.store(d.block(0, 0), d.spacing());
         d.unpack(data(md), spacing(md));
 
@@ -96,16 +99,17 @@ namespace smoke :: testing
     TYPED_TEST_P(GemmKernelTest, testGemmNT)
     {
         using Traits = GemmKernelTraits<TypeParam>;
+        size_t constexpr K = 3 * Traits::blockSize;
 
-        blaze::StaticMatrix<double, Traits::rows, Traits::blockSize, blaze::columnMajor> ma;
-        blaze::StaticMatrix<double, Traits::columns, Traits::blockSize, blaze::columnMajor> mb;
+        blaze::StaticMatrix<double, Traits::rows, K, blaze::columnMajor> ma;
+        blaze::StaticMatrix<double, Traits::columns, K, blaze::columnMajor> mb;
         blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
         randomize(ma);
         randomize(mb);
         randomize(mc);
 
-        StaticMatrix<double, Traits::rows, Traits::blockSize, Traits::blockSize, Traits::alignment> a;
-        StaticMatrix<double, Traits::columns, Traits::blockSize, Traits::blockSize, Traits::alignment> b;
+        StaticMatrix<double, Traits::rows, K, Traits::blockSize, Traits::alignment> a;
+        StaticMatrix<double, Traits::columns, K, Traits::blockSize, Traits::alignment> b;
         StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> c, d;
         a.pack(data(ma), spacing(ma));
         b.pack(data(mb), spacing(mb));
@@ -113,7 +117,7 @@ namespace smoke :: testing
         
         TypeParam kc;
         kc.load(c.block(0, 0), c.spacing());
-        kc(a.block(0, 0), a.spacing(), false, b.block(0, 0), b.spacing(), true);
+        kc(K, a.block(0, 0), a.spacing(), false, b.block(0, 0), b.spacing(), true);
         kc.store(d.block(0, 0), d.spacing());
         d.unpack(data(md), spacing(md));
 
@@ -133,5 +137,5 @@ namespace smoke :: testing
     using GemmKernel_double_2_1_4 = GemmKernel<double, 2, 1, 4>;
 
     INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4, GemmKernelTest, GemmKernel_double_1_1_4);
-    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4, GemmKernelTest, GemmKernel_double_2_1_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4, GemmKernelTest, GemmKernel_double_2_1_4);
 }
