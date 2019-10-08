@@ -196,8 +196,8 @@ namespace smoke
                 for (size_t k = 0; k + Traits::blockSize <= K; k += Traits::blockSize, a += Traits::blockElementCount, b += Traits::blockElementCount)
                 {
                     {
-                        __m256d a00 = _mm256_load_pd(a);
-                        __m256d a40 = _mm256_load_pd(a + sa);
+                        __m256d const a00 = _mm256_load_pd(a);
+                        __m256d const a40 = _mm256_load_pd(a + sa);
                         v00_ = _mm256_fmadd_pd(a00, _mm256_broadcast_sd(b), v00_);
                         v40_ = _mm256_fmadd_pd(a40, _mm256_broadcast_sd(b), v40_);
                         v01_ = _mm256_fmadd_pd(a00, _mm256_broadcast_sd(b + 1), v01_);
@@ -209,8 +209,8 @@ namespace smoke
                     }
 
                     {
-                        __m256d a01 = _mm256_load_pd(a + 4);
-                        __m256d a41 = _mm256_load_pd(a + sa + 4);
+                        __m256d const a01 = _mm256_load_pd(a + 4);
+                        __m256d const a41 = _mm256_load_pd(a + sa + 4);
                         v00_ = _mm256_fmadd_pd(a01, _mm256_broadcast_sd(b + 4), v00_);
                         v40_ = _mm256_fmadd_pd(a41, _mm256_broadcast_sd(b + 4), v40_);
                         v01_ = _mm256_fmadd_pd(a01, _mm256_broadcast_sd(b + 5), v01_);
@@ -222,8 +222,8 @@ namespace smoke
                     }
                     
                     {
-                        __m256d a02 = _mm256_load_pd(a + 8);
-                        __m256d a42 = _mm256_load_pd(a + sa + 8);
+                        __m256d const a02 = _mm256_load_pd(a + 8);
+                        __m256d const a42 = _mm256_load_pd(a + sa + 8);
                         v00_ = _mm256_fmadd_pd(a02, _mm256_broadcast_sd(b + 8), v00_);
                         v40_ = _mm256_fmadd_pd(a42, _mm256_broadcast_sd(b + 8), v40_);
                         v01_ = _mm256_fmadd_pd(a02, _mm256_broadcast_sd(b + 9), v01_);
@@ -235,8 +235,8 @@ namespace smoke
                     }
                     
                     {
-                        __m256d a03 = _mm256_load_pd(a + 12);
-                        __m256d a43 = _mm256_load_pd(a + sa + 12);
+                        __m256d const a03 = _mm256_load_pd(a + 12);
+                        __m256d const a43 = _mm256_load_pd(a + sa + 12);
                         v00_ = _mm256_fmadd_pd(a03, _mm256_broadcast_sd(b + 12), v00_);
                         v40_ = _mm256_fmadd_pd(a43, _mm256_broadcast_sd(b + 12), v40_);
                         v01_ = _mm256_fmadd_pd(a03, _mm256_broadcast_sd(b + 13), v01_);
