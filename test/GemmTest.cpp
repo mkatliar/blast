@@ -31,7 +31,7 @@ namespace smoke :: testing
         C.pack(data(blaze_C), spacing(blaze_C));
         
         // Do gemm with Smoke
-        gemm_tn<1, 1>(A, B, C, D);
+        gemm(GemmKernel<double, 1, 1, 4, true, false> {}, A, B, C, D);
 
         // Copy the resulting D matrix from BLASFEO to Blaze
         D.unpack(data(blaze_D), spacing(blaze_D));
@@ -66,7 +66,7 @@ namespace smoke :: testing
         C.pack(data(blaze_C), spacing(blaze_C));
         
         // Do gemm with Smoke
-        gemm_nn<1, 1>(A, B, C, D);
+        gemm(GemmKernel<double, 1, 1, 4, false, false> {}, A, B, C, D);
 
         // Copy the resulting D matrix from BLASFEO to Blaze
         D.unpack(data(blaze_D), spacing(blaze_D));
@@ -101,7 +101,7 @@ namespace smoke :: testing
         C.pack(data(blaze_C), spacing(blaze_C));
         
         // Do gemm with Smoke
-        gemm_nt<1, 1>(A, B, C, D);
+        gemm(GemmKernel<double, 1, 1, 4, false, true> {}, A, B, C, D);
 
         // Copy the resulting D matrix from BLASFEO to Blaze
         D.unpack(data(blaze_D), spacing(blaze_D));

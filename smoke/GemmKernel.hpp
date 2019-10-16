@@ -5,7 +5,7 @@
 
 namespace smoke
 {
-    template <typename T, size_t M, size_t N, size_t BS>
+    template <typename T, size_t M, size_t N, size_t BS, bool TA, bool TB>
     class GemmKernel;
 
 
@@ -13,10 +13,10 @@ namespace smoke
     struct GemmKernelTraits;
 
 
-    template <typename T, size_t M, size_t N, size_t BS>
-    struct GemmKernelTraits<GemmKernel<T, M, N, BS>>
+    template <typename T, size_t M, size_t N, size_t BS, bool TA, bool TB>
+    struct GemmKernelTraits<GemmKernel<T, M, N, BS, TA, TB>>
     {
-        static size_t constexpr alignment = GemmKernel<T, M, N, BS>::alignment;
+        static size_t constexpr alignment = GemmKernel<T, M, N, BS, TA, TB>::alignment;
         static size_t constexpr blockSize = BS;
         static size_t constexpr blockRows = M;
         static size_t constexpr blockColumns = N;
@@ -24,5 +24,7 @@ namespace smoke
         static size_t constexpr columns = N * BS;
         static size_t constexpr elementCount = rows * columns;
         static size_t constexpr blockElementCount = BS * BS;
+        static bool constexpr tA = TA;
+        static bool constexpr tB = TB;
     };
 }

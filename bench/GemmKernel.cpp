@@ -10,13 +10,15 @@
 
 namespace smoke :: benchmark
 {
-    template <typename Kernel, bool TA, bool TB>
+    template <typename Kernel>
     static void BM_GemmKernel(State& state)
     {
         using Traits = GemmKernelTraits<Kernel>;
         size_t constexpr M = Traits::rows;
         size_t constexpr N = Traits::columns;
         size_t constexpr K = 10 * Traits::blockSize;
+        bool constexpr TA = Traits::tA;
+        bool constexpr TB = Traits::tB;
 
         StaticMatrix<double, !TA ? M : K, !TA ? K : M, Traits::blockSize, Traits::alignment> a;
         StaticMatrix<double, !TB ? K : N, !TB ? N : K, Traits::blockSize, Traits::alignment> b;
@@ -29,7 +31,7 @@ namespace smoke :: benchmark
         for (auto _ : state)
         {
             gemm(Kernel {}, K, 
-                a.block(0, 0), a.spacing(), TA, b.block(0, 0), b.spacing(), TB, 
+                a.block(0, 0), a.spacing(), b.block(0, 0), b.spacing(),
                 c.block(0, 0), c.spacing(), d.block(0, 0), d.spacing());
             DoNotOptimize(d);
         }
@@ -38,12 +40,12 @@ namespace smoke :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 1, 1, 4>, true, false);
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 1, 1, 4>, false, false);
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 1, 1, 4>, false, true);
+    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 1, 1, 4, true, false>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 1, 1, 4, false, false>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 1, 1, 4, false, true>);
     
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 2, 1, 4>, true, false);
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 2, 1, 4>, false, true);
+    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 2, 1, 4, true, false>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 2, 1, 4, false, true>);
 
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 3, 1, 4>, false, true);
+    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 3, 1, 4, false, true>);
 }

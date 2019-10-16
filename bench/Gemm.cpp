@@ -15,7 +15,7 @@ namespace smoke :: benchmark
         StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D);
 
     
-    template <typename T, size_t M, size_t N, size_t K, size_t P>
+    template <size_t KM, size_t KN, typename T, size_t M, size_t N, size_t K, size_t P>
     void gemm_nn_impl(
         StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, K, N, P> const& B, 
         StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D);
@@ -50,7 +50,7 @@ namespace smoke :: benchmark
     }
 
 
-    template <typename Real, size_t M>
+    template <size_t KM, size_t KN, typename Real, size_t M>
     static void BM_gemm_nn(::benchmark::State& state)
     {
         size_t constexpr N = M;
@@ -66,7 +66,7 @@ namespace smoke :: benchmark
         randomize(C);
 
         for (auto _ : state)
-            gemm_nn_impl(A, B, C, D);
+            gemm_nn_impl<KM, KN>(A, B, C, D);
 
         state.counters["flops"] = Counter(M * N * K, Counter::kIsIterationInvariantRate);
         state.counters["m"] = M;
@@ -113,16 +113,16 @@ namespace smoke :: benchmark
     BENCHMARK_TEMPLATE(BM_gemm_tn, 2, 1, double, 32);
     BENCHMARK_TEMPLATE(BM_gemm_tn, 2, 1, double, 40);
 
-    BENCHMARK_TEMPLATE(BM_gemm_nn, double, 4);
-    BENCHMARK_TEMPLATE(BM_gemm_nn, double, 8);
-    BENCHMARK_TEMPLATE(BM_gemm_nn, double, 12);
-    BENCHMARK_TEMPLATE(BM_gemm_nn, double, 16);
-    BENCHMARK_TEMPLATE(BM_gemm_nn, double, 20);
-    BENCHMARK_TEMPLATE(BM_gemm_nn, double, 24);
-    BENCHMARK_TEMPLATE(BM_gemm_nn, double, 28);
-    BENCHMARK_TEMPLATE(BM_gemm_nn, double, 32);
-    BENCHMARK_TEMPLATE(BM_gemm_nn, double, 36);
-    BENCHMARK_TEMPLATE(BM_gemm_nn, double, 40);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, 1, 1, double, 4);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, 1, 1, double, 8);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, 1, 1, double, 12);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, 1, 1, double, 16);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, 1, 1, double, 20);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, 1, 1, double, 24);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, 1, 1, double, 28);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, 1, 1, double, 32);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, 1, 1, double, 36);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, 1, 1, double, 40);
 
     BENCHMARK_TEMPLATE(BM_gemm_nt, 1, 1, double, 4);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 1, 1, double, 8);
