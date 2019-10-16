@@ -19,26 +19,6 @@ namespace smoke :: testing
     TYPED_TEST_SUITE_P(GemmKernelTest);
 
 
-    TYPED_TEST_P(GemmKernelTest, testLoadStore)
-    {
-        using Traits = GemmKernelTraits<TypeParam>;
-
-        blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
-        randomize(A_ref);
-
-        StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> A, B;
-        A.pack(data(A_ref), spacing(A_ref));
-
-        TypeParam ker;
-        ker.load(A.block(0, 0), A.spacing());
-        ker.store(B.block(0, 0), B.spacing());
-
-        for (size_t i = 0; i < Traits::rows; ++i)
-            for (size_t j = 0; j < Traits::columns; ++j)
-                EXPECT_EQ(B(i, j), A_ref(i, j)) << "element mismatch at (" << i << ", " << j << ")";
-    }
-
-
     TYPED_TEST_P(GemmKernelTest, testGemmTN)
     {
         using Traits = GemmKernelTraits<TypeParam>;
@@ -58,10 +38,9 @@ namespace smoke :: testing
         b.pack(data(mb), spacing(mb));
         c.pack(data(mc), spacing(mc));
         
-        TypeParam kc;
-        kc.load(c.block(0, 0), c.spacing());
-        kc(K, a.block(0, 0), a.spacing(), true, b.block(0, 0), b.spacing(), false);
-        kc.store(d.block(0, 0), d.spacing());
+        gemm(TypeParam {}, K,
+            a.block(0, 0), a.spacing(), true, b.block(0, 0), b.spacing(), false,
+            c.block(0, 0), c.spacing(), d.block(0, 0), d.spacing());
         d.unpack(data(md), spacing(md));
 
         SMOKE_EXPECT_EQ(md, evaluate(mc + trans(ma) * mb));
@@ -87,10 +66,9 @@ namespace smoke :: testing
         b.pack(data(mb), spacing(mb));
         c.pack(data(mc), spacing(mc));
         
-        TypeParam kc;
-        kc.load(c.block(0, 0), c.spacing());
-        kc(K, a.block(0, 0), a.spacing(), false, b.block(0, 0), b.spacing(), false);
-        kc.store(d.block(0, 0), d.spacing());
+        gemm(TypeParam {}, K, 
+            a.block(0, 0), a.spacing(), false, b.block(0, 0), b.spacing(), false,
+            c.block(0, 0), c.spacing(), d.block(0, 0), d.spacing());
         d.unpack(data(md), spacing(md));
 
         SMOKE_EXPECT_EQ(md, evaluate(mc + ma * mb));
@@ -116,10 +94,9 @@ namespace smoke :: testing
         b.pack(data(mb), spacing(mb));
         c.pack(data(mc), spacing(mc));
         
-        TypeParam kc;
-        kc.load(c.block(0, 0), c.spacing());
-        kc(K, a.block(0, 0), a.spacing(), false, b.block(0, 0), b.spacing(), true);
-        kc.store(d.block(0, 0), d.spacing());
+        gemm(TypeParam {}, K, 
+            a.block(0, 0), a.spacing(), false, b.block(0, 0), b.spacing(), true,
+            c.block(0, 0), c.spacing(), d.block(0, 0), d.spacing());
         d.unpack(data(md), spacing(md));
 
         SMOKE_EXPECT_EQ(md, evaluate(mc + ma * trans(mb)));
@@ -127,7 +104,6 @@ namespace smoke :: testing
 
 
     REGISTER_TYPED_TEST_SUITE_P(GemmKernelTest,
-        testLoadStore,
         testGemmTN,
         testGemmNN,
         testGemmNT

@@ -21,12 +21,9 @@ namespace smoke
 
         for (size_t i = 0; i < MM; ++i)
             for (size_t j = 0; j < NN; ++j)
-            {
-                GemmKernel<T, KM, KN, P> ker;
-                ker.load(C.block(KM * i, KN * j), C.spacing());
-                ker(K, A.block(KM * i, 0), A.spacing(), false, B.block(KN * j, 0), B.spacing(), true);
-                ker.store(D.block(KM * i, KN * j), D.spacing());
-            }
+                gemm(GemmKernel<T, KM, KN, P> {}, K, 
+                    A.block(KM * i, 0), A.spacing(), false, B.block(KN * j, 0), B.spacing(), true,
+                    C.block(KM * i, KN * j), C.spacing(), D.block(KM * i, KN * j), D.spacing());
     }
 
 
@@ -45,12 +42,9 @@ namespace smoke
 
         for (size_t i = 0; i < MM; ++i)
             for (size_t j = 0; j < NN; ++j)
-            {
-                GemmKernel<T, KM, KN, P> ker;
-                ker.load(C.block(KM * i, KN * j), C.spacing());
-                ker(K, A.block(0, KM * i), A.spacing(), true, B.block(0, KN * j), B.spacing(), false);
-                ker.store(D.block(i, j), D.spacing());
-            }
+                gemm(GemmKernel<T, KM, KN, P> {}, K, 
+                    A.block(0, KM * i), A.spacing(), true, B.block(0, KN * j), B.spacing(), false,
+                    C.block(KM * i, KN * j), C.spacing(), D.block(i, j), D.spacing());
     }
 
 
@@ -69,63 +63,8 @@ namespace smoke
 
         for (size_t i = 0; i < MM; ++i)
             for (size_t j = 0; j < NN; ++j)
-            {
-                GemmKernel<T, KM, KN, P> ker;
-                ker.load(C.block(KM * i, KN * j), C.spacing());
-                ker(K, A.block(KM * i, 0), A.spacing(), false, B.block(0, KN * j), B.spacing(), false);
-                ker.store(D.block(i, j), D.spacing());
-            }
-
-        /*
-        for (size_t i = 0; i < MM; ++i)
-            for (size_t j = 0; j < NN; ++j)
-                D.store(i, j, C.load(i, j));
-
-        for (size_t i = 0; i < MM; ++i)
-            for (size_t k = 0; k < KK; ++k)
-            {
-                Panel<T, P> A_ik = A.load(i, k);
-
-                for (size_t j = 0; j < NN; ++j)
-                {
-                    Panel<T, P> p = D.load(i, j);                
-                    gemm(A_ik, false, B.load(k, j), false, p);
-                    D.store(i, j, p);
-                }
-            }
-        */
+                gemm(GemmKernel<T, KM, KN, P> {}, K, 
+                    A.block(KM * i, 0), A.spacing(), false, B.block(0, KN * j), B.spacing(), false,
+                    C.block(KM * i, KN * j), C.spacing(), D.block(i, j), D.spacing());
     }
-
-
-    // template <typename T>
-    // inline void gemm_tn(
-    //     StaticMatrix<T, 8, 8, 4> const& A, StaticMatrix<T, 8, 8, 4> const& B, 
-    //     StaticMatrix<T, 8, 8, 4> const& C, StaticMatrix<T, 8, 8, 4>& D)
-    // {
-    //     size_t const MM = 2;
-    //     size_t const NN = 2;
-    //     size_t const KK = 2;
-
-    //     Panel<T, 4> p;
-        
-    //     p = C.load(0, 0);
-    //     gemm(A.load(0, 0), true, B.load(0, 0), false, p);
-    //     gemm(A.load(1, 0), true, B.load(1, 0), false, p);
-    //     D.store(0, 0, p);
-
-    //     p = C.load(0, 1);
-    //     gemm(A.load(0, 0), true, B.load(0, 1), false, p);
-    //     gemm(A.load(1, 0), true, B.load(1, 1), false, p);
-    //     D.store(0, 1, p);
-
-    //     p = C.load(1, 0);
-    //     gemm(A.load(0, 1), true, B.load(0, 0), false, p);
-    //     gemm(A.load(1, 1), true, B.load(1, 0), false, p);
-    //     D.store(1, 0, p);
-
-    //     p = C.load(1, 1);
-    //     gemm(A.load(0, 1), true, B.load(0, 1), false, p);
-    //     gemm(A.load(1, 1), true, B.load(1, 1), false, p);
-    //     D.store(1, 1, p);
-    // }
 }
