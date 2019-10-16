@@ -1,5 +1,6 @@
 #include <smoke/GemmKernel_double_1_1_4.hpp>
 #include <smoke/GemmKernel_double_2_1_4.hpp>
+#include <smoke/GemmKernel_double_3_1_4.hpp>
 #include <smoke/StaticMatrix.hpp>
 
 #include <test/Testing.hpp>
@@ -99,7 +100,7 @@ namespace smoke :: testing
     TYPED_TEST_P(GemmKernelTest, testGemmNT)
     {
         using Traits = GemmKernelTraits<TypeParam>;
-        size_t constexpr K = 3 * Traits::blockSize;
+        size_t constexpr K = 5 * Traits::blockSize;
 
         blaze::StaticMatrix<double, Traits::rows, K, blaze::columnMajor> ma;
         blaze::StaticMatrix<double, Traits::columns, K, blaze::columnMajor> mb;
@@ -135,7 +136,9 @@ namespace smoke :: testing
 
     using GemmKernel_double_1_1_4 = GemmKernel<double, 1, 1, 4>;
     using GemmKernel_double_2_1_4 = GemmKernel<double, 2, 1, 4>;
+    using GemmKernel_double_3_1_4 = GemmKernel<double, 3, 1, 4>;
 
     INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4, GemmKernelTest, GemmKernel_double_1_1_4);
     INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4, GemmKernelTest, GemmKernel_double_2_1_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_3_1_4, GemmKernelTest, GemmKernel_double_3_1_4);
 }

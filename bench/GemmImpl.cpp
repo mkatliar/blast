@@ -1,6 +1,7 @@
 #include <smoke/Gemm.hpp>
 #include <smoke/GemmKernel_double_1_1_4.hpp>
 #include <smoke/GemmKernel_double_2_1_4.hpp>
+#include <smoke/GemmKernel_double_3_1_4.hpp>
 
 #include <bench/Benchmark.hpp>
 
@@ -98,4 +99,9 @@ namespace smoke :: benchmark
     INSTANTIATE_GEMM_NT(2, 1, 24, 4);
     INSTANTIATE_GEMM_NT(2, 1, 32, 4);
     INSTANTIATE_GEMM_NT(2, 1, 40, 4);
+
+    INSTANTIATE_GEMM_NT(3, 1, 12, 4);
+    INSTANTIATE_GEMM_NT(3, 1, 24, 4);
+    INSTANTIATE_GEMM_NT(3, 1, 36, 4);
+    INSTANTIATE_GEMM_NT(3, 1, 48, 4);
 }

@@ -140,4 +140,9 @@ namespace smoke :: benchmark
     BENCHMARK_TEMPLATE(BM_gemm_nt, 2, 1, double, 24);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 2, 1, double, 32);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 2, 1, double, 40);
+
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 12);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 24);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 36);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 48);
 }

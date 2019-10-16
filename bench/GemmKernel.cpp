@@ -1,6 +1,7 @@
 #include <smoke/StaticMatrix.hpp>
 #include <smoke/GemmKernel_double_1_1_4.hpp>
 #include <smoke/GemmKernel_double_2_1_4.hpp>
+#include <smoke/GemmKernel_double_3_1_4.hpp>
 
 #include <bench/Benchmark.hpp>
 
@@ -34,7 +35,7 @@ namespace smoke :: benchmark
             DoNotOptimize(kc);
         }
 
-        state.counters["flops"] = Counter(Traits::rows * Traits::blockSize * Traits::columns, Counter::kIsIterationInvariantRate);
+        state.counters["flops"] = Counter(M * N * K, Counter::kIsIterationInvariantRate);
     }
 
 
@@ -44,4 +45,6 @@ namespace smoke :: benchmark
     
     BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 2, 1, 4>, true, false);
     BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 2, 1, 4>, false, true);
+
+    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 3, 1, 4>, false, true);
 }
