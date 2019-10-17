@@ -49,7 +49,7 @@ namespace smoke
 
         void store(double * ptr, size_t spacing, size_t m, size_t n) const
         {
-            if (m == 4)
+            if (m >= 4)
             {
                 if (n > 0)
                     _mm256_store_pd(ptr, v_[0]);
@@ -63,25 +63,13 @@ namespace smoke
                 if (n > 3)
                     _mm256_store_pd(ptr + 12, v_[3]);
             }
-            else
+            else if (m > 0)
             {
                 __m256i const mask = _mm256_set_epi64x(
                     m > 3 ? 0x8000000000000000ULL : 0, 
                     m > 2 ? 0x8000000000000000ULL : 0,
                     m > 1 ? 0x8000000000000000ULL : 0,
                     m > 0 ? 0x8000000000000000ULL : 0); 
-
-                // switch (n)
-                // {
-                //     case 4:
-                //         _mm256_maskstore_pd(ptr + 12, mask, v_[3]);
-                //     case 3:
-                //         _mm256_maskstore_pd(ptr + 8, mask, v_[2]);
-                //     case 2:
-                //         _mm256_maskstore_pd(ptr + 4, mask, v_[1]);
-                //     case 1:
-                //         _mm256_maskstore_pd(ptr, mask, v_[0]);
-                // }                    
 
                 if (n > 0)
                     _mm256_maskstore_pd(ptr, mask, v_[0]);

@@ -65,9 +65,43 @@ namespace smoke
 
         void store(double * ptr, size_t spacing, size_t m, size_t n) const
         {
-            for (size_t j = 0; j < n; ++j)
-                for (size_t i = 0; i < m; ++i)
-                    ptr[i % 4 + i / 4 * spacing + 4 * j] = v_[i / 4][j][i % 4];
+            for (size_t i = 0; i < 3; ++i)
+            {
+                if (m >= 4 * i + 4)
+                {
+                    if (n > 0)
+                        _mm256_store_pd(ptr + i * spacing, v_[i][0]);
+
+                    if (n > 1)
+                        _mm256_store_pd(ptr + i * spacing + 4, v_[i][1]);
+
+                    if (n > 2)
+                        _mm256_store_pd(ptr + i * spacing + 8, v_[i][2]);
+
+                    if (n > 3)
+                        _mm256_store_pd(ptr + i * spacing + 12, v_[i][3]);
+                }
+                else if (m > 4 * i)
+                {
+                    __m256i const mask = _mm256_set_epi64x(
+                        m > 4 * i + 3 ? 0x8000000000000000ULL : 0, 
+                        m > 4 * i + 2 ? 0x8000000000000000ULL : 0,
+                        m > 4 * i + 1 ? 0x8000000000000000ULL : 0,
+                        m > 4 * i + 0 ? 0x8000000000000000ULL : 0); 
+
+                    if (n > 0)
+                        _mm256_maskstore_pd(ptr + i * spacing, mask, v_[i][0]);
+
+                    if (n > 1)
+                        _mm256_maskstore_pd(ptr + i * spacing + 4, mask, v_[i][1]);
+
+                    if (n > 2)
+                        _mm256_maskstore_pd(ptr + i * spacing + 8, mask, v_[i][2]);
+
+                    if (n > 3)
+                        _mm256_maskstore_pd(ptr + i * spacing + 12, mask, v_[i][3]);
+                }
+            }
         }
 
 

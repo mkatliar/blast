@@ -128,6 +128,7 @@ namespace smoke :: benchmark
     BENCHMARK_TEMPLATE(BM_gemm_nt, 1, 1, double, 8);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 1, 1, double, 12);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 1, 1, double, 16);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 1, 1, double, 19);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 1, 1, double, 20);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 1, 1, double, 24);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 1, 1, double, 28);
@@ -137,12 +138,39 @@ namespace smoke :: benchmark
 
     BENCHMARK_TEMPLATE(BM_gemm_nt, 2, 1, double, 8);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 2, 1, double, 16);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 2, 1, double, 19);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 2, 1, double, 24);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 2, 1, double, 32);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 2, 1, double, 40);
 
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 1);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 2);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 3);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 4);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 5);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 6);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 7);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 8);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 9);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 10);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 11);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 12);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 13);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 14);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 15);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 16);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 17);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 18);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 19);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 20);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 21);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 22);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 23);
     BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 24);
-    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 36);
-    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 48);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 25);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 26);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 27);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 28);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 29);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, 3, 1, double, 30);
 }
