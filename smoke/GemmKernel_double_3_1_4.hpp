@@ -15,32 +15,80 @@ namespace smoke
     {
     public:
         static size_t constexpr alignment = 0x20;
+        using Traits = GemmKernelTraits<GemmKernel>;
+
+
+        GemmKernel()
+        {            
+        }
+
+
+        explicit GemmKernel(double const * ptr, size_t spacing)
+        {
+            load(ptr, spacing);
+        }
+
+
+        void load(double const * ptr, size_t spacing)
+        {
+            v00_ = _mm256_load_pd(ptr);
+            v01_ = _mm256_load_pd(ptr + 4);
+            v02_ = _mm256_load_pd(ptr + 8);
+            v03_ = _mm256_load_pd(ptr + 12);
+            v40_ = _mm256_load_pd(ptr + spacing);
+            v41_ = _mm256_load_pd(ptr + spacing + 4);
+            v42_ = _mm256_load_pd(ptr + spacing + 8);
+            v43_ = _mm256_load_pd(ptr + spacing + 12);
+            v80_ = _mm256_load_pd(ptr + 2 * spacing);
+            v81_ = _mm256_load_pd(ptr + 2 * spacing + 4);
+            v82_ = _mm256_load_pd(ptr + 2 * spacing + 8);
+            v83_ = _mm256_load_pd(ptr + 2 * spacing + 12);
+        }
+
+
+        void store(double * ptr, size_t spacing) const
+        {
+            _mm256_store_pd(ptr, v00_);
+            _mm256_store_pd(ptr + 4, v01_);
+            _mm256_store_pd(ptr + 8, v02_);
+            _mm256_store_pd(ptr + 12, v03_);
+            _mm256_store_pd(ptr + spacing, v40_);
+            _mm256_store_pd(ptr + spacing + 4, v41_);
+            _mm256_store_pd(ptr + spacing + 8, v42_);
+            _mm256_store_pd(ptr + spacing + 12, v43_);
+            _mm256_store_pd(ptr + 2 * spacing, v80_);
+            _mm256_store_pd(ptr + 2 * spacing + 4, v81_);
+            _mm256_store_pd(ptr + 2 * spacing + 8, v82_);
+            _mm256_store_pd(ptr + 2 * spacing + 12, v83_);
+        }
+
+
+        void operator()(size_t K, double const * a, size_t sa, double const * b, size_t sb);
+
+
+    private:
+        __m256d v00_;
+        __m256d v01_;
+        __m256d v02_;
+        __m256d v03_;
+        __m256d v40_;
+        __m256d v41_;
+        __m256d v42_;
+        __m256d v43_;
+        __m256d v80_;
+        __m256d v81_;
+        __m256d v82_;
+        __m256d v83_;
     };
 
 
-    inline void gemm(GemmKernel<double, 3, 1, 4, true, false>, size_t K,
-        double const * a, size_t sa, double const * b, size_t sb,
-        double const * c, size_t sc, double * d, size_t sd)
+    template <>
+    inline void GemmKernel<double, 3, 1, 4, true, false>::operator()(
+        size_t K, double const * a, size_t sa, double const * b, size_t sb)
     {
         size_t constexpr panel_size = 4;
         size_t constexpr block_element_count = panel_size * panel_size;
         
-        if (K % panel_size)
-            SMOKE_THROW_EXCEPTION(std::logic_error("k is not a multiple of panel size"));
-
-        __m256d v00_ = _mm256_load_pd(c);
-        __m256d v01_ = _mm256_load_pd(c + 4);
-        __m256d v02_ = _mm256_load_pd(c + 8);
-        __m256d v03_ = _mm256_load_pd(c + 12);
-        __m256d v40_ = _mm256_load_pd(c + sc);
-        __m256d v41_ = _mm256_load_pd(c + sc + 4);
-        __m256d v42_ = _mm256_load_pd(c + sc + 8);
-        __m256d v43_ = _mm256_load_pd(c + sc + 12);
-        __m256d v80_ = _mm256_load_pd(c + 2 * sc);
-        __m256d v81_ = _mm256_load_pd(c + 2 * sc + 4);
-        __m256d v82_ = _mm256_load_pd(c + 2 * sc + 8);
-        __m256d v83_ = _mm256_load_pd(c + 2 * sc + 12);
-
         for (size_t k = 0; k + panel_size <= K; k += panel_size, a += sa, b += sb)
         {
             __m256d a00 = _mm256_load_pd(a);
@@ -114,44 +162,15 @@ namespace smoke
                 _mm256_mul_pd(a43, b03)
             ));
         }
-
-        _mm256_store_pd(d, v00_);
-        _mm256_store_pd(d + 4, v01_);
-        _mm256_store_pd(d + 8, v02_);
-        _mm256_store_pd(d + 12, v03_);
-        _mm256_store_pd(d + sd, v40_);
-        _mm256_store_pd(d + sd + 4, v41_);
-        _mm256_store_pd(d + sd + 8, v42_);
-        _mm256_store_pd(d + sd + 12, v43_);
-        _mm256_store_pd(d + 2 * sd, v80_);
-        _mm256_store_pd(d + 2 * sd + 4, v81_);
-        _mm256_store_pd(d + 2 * sd + 8, v82_);
-        _mm256_store_pd(d + 2 * sd + 12, v83_);
     }
 
 
-    inline void gemm(GemmKernel<double, 3, 1, 4, false, false>, size_t K,
-        double const * a, size_t sa, double const * b, size_t sb,
-        double const * c, size_t sc, double * d, size_t sd)
+    template <>
+    inline void GemmKernel<double, 3, 1, 4, false, false>::operator()(
+        size_t K, double const * a, size_t sa, double const * b, size_t sb)
     {
         size_t constexpr panel_size = 4;
         size_t constexpr block_element_count = panel_size * panel_size;
-
-        if (K % panel_size)
-            SMOKE_THROW_EXCEPTION(std::logic_error("k is not a multiple of panel size"));
-
-        __m256d v00_ = _mm256_load_pd(c);
-        __m256d v01_ = _mm256_load_pd(c + 4);
-        __m256d v02_ = _mm256_load_pd(c + 8);
-        __m256d v03_ = _mm256_load_pd(c + 12);
-        __m256d v40_ = _mm256_load_pd(c + sc);
-        __m256d v41_ = _mm256_load_pd(c + sc + 4);
-        __m256d v42_ = _mm256_load_pd(c + sc + 8);
-        __m256d v43_ = _mm256_load_pd(c + sc + 12);
-        __m256d v80_ = _mm256_load_pd(c + 2 * sc);
-        __m256d v81_ = _mm256_load_pd(c + 2 * sc + 4);
-        __m256d v82_ = _mm256_load_pd(c + 2 * sc + 8);
-        __m256d v83_ = _mm256_load_pd(c + 2 * sc + 12);
 
         for (size_t k = 0; k + panel_size <= K; k += panel_size, a += block_element_count, b += sb)
         {
@@ -205,43 +224,15 @@ namespace smoke
             v43_ = _mm256_fmadd_pd(a42, _mm256_permute4x64_pd(bb, 0b10101010), v43_);
             v43_ = _mm256_fmadd_pd(a43, _mm256_permute4x64_pd(bb, 0b11111111), v43_);
         }
-
-        _mm256_store_pd(d, v00_);
-        _mm256_store_pd(d + 4, v01_);
-        _mm256_store_pd(d + 8, v02_);
-        _mm256_store_pd(d + 12, v03_);
-        _mm256_store_pd(d + sd, v40_);
-        _mm256_store_pd(d + sd + 4, v41_);
-        _mm256_store_pd(d + sd + 8, v42_);
-        _mm256_store_pd(d + sd + 12, v43_);
-        _mm256_store_pd(d + 2 * sd, v80_);
-        _mm256_store_pd(d + 2 * sd + 4, v81_);
-        _mm256_store_pd(d + 2 * sd + 8, v82_);
-        _mm256_store_pd(d + 2 * sd + 12, v83_);
     }
 
 
-    inline void gemm(GemmKernel<double, 3, 1, 4, false, true>, size_t K,
-        double const * a, size_t sa, double const * b, size_t sb,
-        double const * c, size_t sc, double * d, size_t sd)
+    template <>
+    inline void GemmKernel<double, 3, 1, 4, false, true>::operator()(
+        size_t K, double const * a, size_t sa, double const * b, size_t sb)
     {
         size_t constexpr panel_size = 4;
-        if (K % panel_size)
-            SMOKE_THROW_EXCEPTION(std::logic_error("k is not a multiple of panel size"));
-
-        __m256d v00_ = _mm256_load_pd(c);
-        __m256d v01_ = _mm256_load_pd(c + 4);
-        __m256d v02_ = _mm256_load_pd(c + 8);
-        __m256d v03_ = _mm256_load_pd(c + 12);
-        __m256d v40_ = _mm256_load_pd(c + sc);
-        __m256d v41_ = _mm256_load_pd(c + sc + 4);
-        __m256d v42_ = _mm256_load_pd(c + sc + 8);
-        __m256d v43_ = _mm256_load_pd(c + sc + 12);
-        __m256d v80_ = _mm256_load_pd(c + 2 * sc);
-        __m256d v81_ = _mm256_load_pd(c + 2 * sc + 4);
-        __m256d v82_ = _mm256_load_pd(c + 2 * sc + 8);
-        __m256d v83_ = _mm256_load_pd(c + 2 * sc + 12);
-
+        
         for (size_t k = 0; k < K; ++k, a += panel_size, b += panel_size)
         {
             __m256d const a0 = _mm256_load_pd(a);
@@ -267,19 +258,6 @@ namespace smoke
             v03_ = _mm256_fmadd_pd(a0, bx, v03_);
             v43_ = _mm256_fmadd_pd(a4, bx, v43_);
             v83_ = _mm256_fmadd_pd(a8, bx, v83_);
-        }        
-
-        _mm256_store_pd(d, v00_);
-        _mm256_store_pd(d + 4, v01_);
-        _mm256_store_pd(d + 8, v02_);
-        _mm256_store_pd(d + 12, v03_);
-        _mm256_store_pd(d + sd, v40_);
-        _mm256_store_pd(d + sd + 4, v41_);
-        _mm256_store_pd(d + sd + 8, v42_);
-        _mm256_store_pd(d + sd + 12, v43_);
-        _mm256_store_pd(d + 2 * sd, v80_);
-        _mm256_store_pd(d + 2 * sd + 4, v81_);
-        _mm256_store_pd(d + 2 * sd + 8, v82_);
-        _mm256_store_pd(d + 2 * sd + 12, v83_);
+        }
     }
 }

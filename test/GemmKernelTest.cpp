@@ -19,6 +19,24 @@ namespace smoke :: testing
     TYPED_TEST_SUITE_P(GemmKernelTest);
 
 
+    TYPED_TEST_P(GemmKernelTest, testLoadStore)
+    {
+        using Traits = GemmKernelTraits<TypeParam>;
+
+        blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
+        randomize(A_ref);
+
+        StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> A, B;
+        A.pack(data(A_ref), spacing(A_ref));
+
+        TypeParam ker;
+        ker.load(A.block(0, 0), A.spacing());
+        ker.store(B.block(0, 0), B.spacing());
+
+        for (size_t i = 0; i < Traits::rows; ++i)
+            for (size_t j = 0; j < Traits::columns; ++j)
+                EXPECT_EQ(B(i, j), A_ref(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+    }
     TYPED_TEST_P(GemmKernelTest, testGemm)
     {
         using Traits = GemmKernelTraits<TypeParam>;
@@ -54,10 +72,11 @@ namespace smoke :: testing
         a.pack(data(ma), spacing(ma));
         b.pack(data(mb), spacing(mb));
         c.pack(data(mc), spacing(mc));
+
+        TypeParam ker(c.block(0, 0), c.spacing());
+        ker(K, a.block(0, 0), a.spacing(), b.block(0, 0), b.spacing());
+        ker.store(d.block(0, 0), d.spacing());
         
-        gemm(TypeParam {}, K,
-            a.block(0, 0), a.spacing(), b.block(0, 0), b.spacing(),
-            c.block(0, 0), c.spacing(), d.block(0, 0), d.spacing());
         d.unpack(data(md), spacing(md));
 
         if (Traits::tA)
@@ -71,6 +90,7 @@ namespace smoke :: testing
 
 
     REGISTER_TYPED_TEST_SUITE_P(GemmKernelTest,
+        testLoadStore,
         testGemm
     );
 

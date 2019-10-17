@@ -28,12 +28,12 @@ namespace smoke :: benchmark
         randomize(b);
         randomize(c);
 
+        Kernel ker(c.block(0, 0), c.spacing());
+
         for (auto _ : state)
         {
-            gemm(Kernel {}, K, 
-                a.block(0, 0), a.spacing(), b.block(0, 0), b.spacing(),
-                c.block(0, 0), c.spacing(), d.block(0, 0), d.spacing());
-            DoNotOptimize(d);
+            ker(K, a.block(0, 0), a.spacing(), b.block(0, 0), b.spacing());
+            DoNotOptimize(ker);
         }
 
         state.counters["flops"] = Counter(M * N * K, Counter::kIsIterationInvariantRate);
