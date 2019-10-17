@@ -11,9 +11,20 @@ namespace smoke
     class StaticMatrix
     {
     public:
+        StaticMatrix()
+        {
+            // Initialize padding elements to 0 to prevent denorms in calculations.
+            // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
+            v_.fill(T {});
+        }
+
+
         StaticMatrix& operator=(T val)
         {
-            v_.fill(val);
+            for (size_t i = 0; i < M; ++i)
+                for (size_t j = 0; j < N; ++j)
+                    (*this)(i, j) = val;
+
             return *this;
         }
 
