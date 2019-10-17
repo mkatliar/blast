@@ -11,7 +11,7 @@
 namespace smoke :: benchmark
 {
     template <typename Kernel>
-    static void BM_GemmKernel(State& state)
+    static void BM_GemmKernel_gemm(State& state)
     {
         using Traits = GemmKernelTraits<Kernel>;
         size_t constexpr M = Traits::rows;
@@ -40,12 +40,12 @@ namespace smoke :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 1, 1, 4, true, false>);
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 1, 1, 4, false, false>);
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 1, 1, 4, false, true>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 1, 1, 4, true, false>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 1, 1, 4, false, false>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 1, 1, 4, false, true>);
     
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 2, 1, 4, true, false>);
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 2, 1, 4, false, true>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 2, 1, 4, true, false>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 2, 1, 4, false, true>);
 
-    BENCHMARK_TEMPLATE(BM_GemmKernel, GemmKernel<double, 3, 1, 4, false, true>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 3, 1, 4, false, true>);
 }

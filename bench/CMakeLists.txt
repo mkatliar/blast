@@ -5,7 +5,11 @@ find_package(Threads REQUIRED)
 #~~~~~~~~~~~~~~~~
 add_executable(bench-smoke
     Main.cpp
-    GemmKernel.cpp
+    
+    gemm_kernel/Gemm.cpp
+    gemm_kernel/Store.cpp
+    gemm_kernel/StoreVariableSize.cpp
+
     Gemm.cpp
     GemmImpl.cpp
 )
