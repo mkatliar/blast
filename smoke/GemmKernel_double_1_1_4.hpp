@@ -31,19 +31,27 @@ namespace smoke
 
         void load(double const * ptr, size_t spacing)
         {
-            v0_ = _mm256_load_pd(ptr);
-            v1_ = _mm256_load_pd(ptr + 4);
-            v2_ = _mm256_load_pd(ptr + 8);
-            v3_ = _mm256_load_pd(ptr + 12);
+            v_[0] = _mm256_load_pd(ptr);
+            v_[1] = _mm256_load_pd(ptr + 4);
+            v_[2] = _mm256_load_pd(ptr + 8);
+            v_[3] = _mm256_load_pd(ptr + 12);
         }
 
 
         void store(double * ptr, size_t spacing) const
         {
-            _mm256_store_pd(ptr, v0_);
-            _mm256_store_pd(ptr + 4, v1_);
-            _mm256_store_pd(ptr + 8, v2_);
-            _mm256_store_pd(ptr + 12, v3_);
+            _mm256_store_pd(ptr, v_[0]);
+            _mm256_store_pd(ptr + 4, v_[1]);
+            _mm256_store_pd(ptr + 8, v_[2]);
+            _mm256_store_pd(ptr + 12, v_[3]);
+        }
+
+
+        void store(double * ptr, size_t spacing, size_t m, size_t n) const
+        {
+            for (size_t j = 0; j < n; ++j)
+                for (size_t i = 0; i < m; ++i)
+                    ptr[i + 4 * j] = v_[j][i];
         }
 
 
@@ -51,10 +59,7 @@ namespace smoke
 
 
     private:
-        __m256d v0_;
-        __m256d v1_;
-        __m256d v2_;
-        __m256d v3_;
+        __m256d v_[4];
     };
 
 
@@ -76,28 +81,28 @@ namespace smoke
             __m256d b_v2 = _mm256_load_pd(b + 8);
             __m256d b_v3 = _mm256_load_pd(b + 12);
             
-            v0_ = _mm256_add_pd(v0_, hsum(
+            v_[0] = _mm256_add_pd(v_[0], hsum(
                 _mm256_mul_pd(a_v0, b_v0),
                 _mm256_mul_pd(a_v1, b_v0),
                 _mm256_mul_pd(a_v2, b_v0),
                 _mm256_mul_pd(a_v3, b_v0)
             ));
 
-            v1_ = _mm256_add_pd(v1_, hsum(
+            v_[1] = _mm256_add_pd(v_[1], hsum(
                 _mm256_mul_pd(a_v0, b_v1),
                 _mm256_mul_pd(a_v1, b_v1),
                 _mm256_mul_pd(a_v2, b_v1),
                 _mm256_mul_pd(a_v3, b_v1)
             ));
 
-            v2_ = _mm256_add_pd(v2_, hsum(
+            v_[2] = _mm256_add_pd(v_[2], hsum(
                 _mm256_mul_pd(a_v0, b_v2),
                 _mm256_mul_pd(a_v1, b_v2),
                 _mm256_mul_pd(a_v2, b_v2),
                 _mm256_mul_pd(a_v3, b_v2)
             ));
 
-            v3_ = _mm256_add_pd(v3_, hsum(
+            v_[3] = _mm256_add_pd(v_[3], hsum(
                 _mm256_mul_pd(a_v0, b_v3),
                 _mm256_mul_pd(a_v1, b_v3),
                 _mm256_mul_pd(a_v2, b_v3),
@@ -122,28 +127,28 @@ namespace smoke
             __m256d a_v3 = _mm256_load_pd(a + 12);
 
             __m256d bb = _mm256_load_pd(b);
-            v0_ = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v0_);
-            v0_ = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v0_);
-            v0_ = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v0_);
-            v0_ = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v0_);
+            v_[0] = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v_[0]);
+            v_[0] = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v_[0]);
+            v_[0] = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v_[0]);
+            v_[0] = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v_[0]);
 
             bb = _mm256_load_pd(b + 4);
-            v1_ = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v1_);
-            v1_ = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v1_);
-            v1_ = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v1_);
-            v1_ = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v1_);
+            v_[1] = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v_[1]);
+            v_[1] = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v_[1]);
+            v_[1] = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v_[1]);
+            v_[1] = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v_[1]);
 
             bb = _mm256_load_pd(b + 8);
-            v2_ = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v2_);
-            v2_ = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v2_);
-            v2_ = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v2_);
-            v2_ = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v2_);
+            v_[2] = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v_[2]);
+            v_[2] = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v_[2]);
+            v_[2] = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v_[2]);
+            v_[2] = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v_[2]);
 
             bb = _mm256_load_pd(b + 12);
-            v3_ = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v3_);
-            v3_ = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v3_);
-            v3_ = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v3_);
-            v3_ = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v3_);
+            v_[3] = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v_[3]);
+            v_[3] = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v_[3]);
+            v_[3] = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v_[3]);
+            v_[3] = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v_[3]);
         }
     }
     
@@ -157,10 +162,10 @@ namespace smoke
         for (size_t k = 0; k < K; ++k, a += panel_size, b += panel_size)
         {
             __m256d const a_v0 = _mm256_load_pd(a);
-            v0_ = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b), v0_);
-            v1_ = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 1), v1_);
-            v2_ = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 2), v2_);
-            v3_ = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 3), v3_);
+            v_[0] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b), v_[0]);
+            v_[1] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 1), v_[1]);
+            v_[2] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 2), v_[2]);
+            v_[3] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 3), v_[3]);
         }
     }
 }

@@ -3,6 +3,7 @@
 #include <smoke/SizeT.hpp>
 #include <smoke/Block.hpp>
 
+#include <array>
 
 namespace smoke
 {
@@ -10,6 +11,13 @@ namespace smoke
     class StaticMatrix
     {
     public:
+        StaticMatrix& operator=(T val)
+        {
+            v_.fill(val);
+            return *this;
+        }
+
+
         T operator()(size_t i, size_t j) const
         {
             return v_[elementIndex(i, j)];
@@ -70,13 +78,13 @@ namespace smoke
 
         T * block(size_t i, size_t j)
         {
-            return v_ + (i * panelColumns_ + j) * elementsPerPanel_;
+            return v_.data() + (i * panelColumns_ + j) * elementsPerPanel_;
         }
 
 
         T const * block(size_t i, size_t j) const
         {
-            return v_ + (i * panelColumns_ + j) * elementsPerPanel_;
+            return v_.data() + (i * panelColumns_ + j) * elementsPerPanel_;
         }
 
 
@@ -85,7 +93,7 @@ namespace smoke
         static size_t constexpr panelColumns_ = N / P + (N % P > 0);
         static size_t constexpr elementsPerPanel_ = P * P;
 
-        alignas(AL) T v_[panelRows_ * panelColumns_ * elementsPerPanel_];
+        alignas(AL) std::array<T, panelRows_ * panelColumns_ * elementsPerPanel_> v_;
 
 
         size_t elementIndex(size_t i, size_t j) const

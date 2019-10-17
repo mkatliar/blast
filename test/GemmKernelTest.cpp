@@ -37,6 +37,35 @@ namespace smoke :: testing
             for (size_t j = 0; j < Traits::columns; ++j)
                 EXPECT_EQ(B(i, j), A_ref(i, j)) << "element mismatch at (" << i << ", " << j << ")";
     }
+
+
+    TYPED_TEST_P(GemmKernelTest, testStore)
+    {
+        using Traits = GemmKernelTraits<TypeParam>;
+
+        blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
+        randomize(A_ref);
+
+        StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> A, B;
+        A.pack(data(A_ref), spacing(A_ref));
+
+        TypeParam ker;
+        ker.load(A.block(0, 0), A.spacing());
+
+        for (size_t m = 0; m <= Traits::rows; ++m)
+            for (size_t n = 0; n <= Traits::columns; ++n)
+            {
+                B = 0.;
+                ker.store(B.block(0, 0), B.spacing(), m, n);
+
+                for (size_t i = 0; i < Traits::rows; ++i)
+                    for (size_t j = 0; j < Traits::columns; ++j)
+                        ASSERT_EQ(B(i, j), i < m && j < n ? A_ref(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), " 
+                            << "store size = " << m << "x" << n;
+            }
+    }
+
+
     TYPED_TEST_P(GemmKernelTest, testGemm)
     {
         using Traits = GemmKernelTraits<TypeParam>;
@@ -91,6 +120,7 @@ namespace smoke :: testing
 
     REGISTER_TYPED_TEST_SUITE_P(GemmKernelTest,
         testLoadStore,
+        testStore,
         testGemm
     );
 
