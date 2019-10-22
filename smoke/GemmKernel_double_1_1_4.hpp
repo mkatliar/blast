@@ -86,7 +86,7 @@ namespace smoke
         }
 
 
-        void operator()(size_t K, double const * a, size_t sa, double const * b, size_t sb);
+        void operator()(double const * a, size_t sa, double const * b, size_t sb);
 
 
     private:
@@ -95,108 +95,12 @@ namespace smoke
 
 
     template <>
-    inline void GemmKernel<double, 1, 1, 4, true, false>::operator()(
-        size_t K, double const * a, size_t sa, double const * b, size_t sb)
+    inline void GemmKernel<double, 1, 1, 4, false, true>::operator()(double const * a, size_t sa, double const * b, size_t sb)
     {
-        size_t constexpr panel_size = 4;
-        
-        for (size_t k = 0; k + panel_size <= K; k += panel_size, a += sa, b += sb)
-        {
-            __m256d a_v0 = _mm256_load_pd(a);
-            __m256d a_v1 = _mm256_load_pd(a + 4);
-            __m256d a_v2 = _mm256_load_pd(a + 8);
-            __m256d a_v3 = _mm256_load_pd(a + 12);
-
-            __m256d b_v0 = _mm256_load_pd(b);
-            __m256d b_v1 = _mm256_load_pd(b + 4);
-            __m256d b_v2 = _mm256_load_pd(b + 8);
-            __m256d b_v3 = _mm256_load_pd(b + 12);
-            
-            v_[0] = _mm256_add_pd(v_[0], hsum(
-                _mm256_mul_pd(a_v0, b_v0),
-                _mm256_mul_pd(a_v1, b_v0),
-                _mm256_mul_pd(a_v2, b_v0),
-                _mm256_mul_pd(a_v3, b_v0)
-            ));
-
-            v_[1] = _mm256_add_pd(v_[1], hsum(
-                _mm256_mul_pd(a_v0, b_v1),
-                _mm256_mul_pd(a_v1, b_v1),
-                _mm256_mul_pd(a_v2, b_v1),
-                _mm256_mul_pd(a_v3, b_v1)
-            ));
-
-            v_[2] = _mm256_add_pd(v_[2], hsum(
-                _mm256_mul_pd(a_v0, b_v2),
-                _mm256_mul_pd(a_v1, b_v2),
-                _mm256_mul_pd(a_v2, b_v2),
-                _mm256_mul_pd(a_v3, b_v2)
-            ));
-
-            v_[3] = _mm256_add_pd(v_[3], hsum(
-                _mm256_mul_pd(a_v0, b_v3),
-                _mm256_mul_pd(a_v1, b_v3),
-                _mm256_mul_pd(a_v2, b_v3),
-                _mm256_mul_pd(a_v3, b_v3)
-            ));
-        }
-    }
-
-
-    template <>
-    inline void GemmKernel<double, 1, 1, 4, false, false>::operator()(
-        size_t K, double const * a, size_t sa, double const * b, size_t sb)
-    {
-        size_t constexpr panel_size = 4;
-        size_t constexpr block_element_count = panel_size * panel_size;
-
-        for (size_t k = 0; k + panel_size <= K; k += panel_size, a += block_element_count, b += sb)
-        {
-            __m256d a_v0 = _mm256_load_pd(a);
-            __m256d a_v1 = _mm256_load_pd(a + 4);
-            __m256d a_v2 = _mm256_load_pd(a + 8);
-            __m256d a_v3 = _mm256_load_pd(a + 12);
-
-            __m256d bb = _mm256_load_pd(b);
-            v_[0] = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v_[0]);
-            v_[0] = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v_[0]);
-            v_[0] = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v_[0]);
-            v_[0] = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v_[0]);
-
-            bb = _mm256_load_pd(b + 4);
-            v_[1] = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v_[1]);
-            v_[1] = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v_[1]);
-            v_[1] = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v_[1]);
-            v_[1] = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v_[1]);
-
-            bb = _mm256_load_pd(b + 8);
-            v_[2] = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v_[2]);
-            v_[2] = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v_[2]);
-            v_[2] = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v_[2]);
-            v_[2] = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v_[2]);
-
-            bb = _mm256_load_pd(b + 12);
-            v_[3] = _mm256_fmadd_pd(a_v0, _mm256_permute4x64_pd(bb, 0b00000000), v_[3]);
-            v_[3] = _mm256_fmadd_pd(a_v1, _mm256_permute4x64_pd(bb, 0b01010101), v_[3]);
-            v_[3] = _mm256_fmadd_pd(a_v2, _mm256_permute4x64_pd(bb, 0b10101010), v_[3]);
-            v_[3] = _mm256_fmadd_pd(a_v3, _mm256_permute4x64_pd(bb, 0b11111111), v_[3]);
-        }
-    }
-    
-    
-    template <>
-    inline void GemmKernel<double, 1, 1, 4, false, true>::operator()(
-        size_t K, double const * a, size_t sa, double const * b, size_t sb)
-    {
-        size_t constexpr panel_size = 4;
-        
-        for (size_t k = 0; k < K; ++k, a += panel_size, b += panel_size)
-        {
-            __m256d const a_v0 = _mm256_load_pd(a);
-            v_[0] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b), v_[0]);
-            v_[1] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 1), v_[1]);
-            v_[2] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 2), v_[2]);
-            v_[3] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 3), v_[3]);
-        }
+        __m256d const a_v0 = _mm256_load_pd(a);
+        v_[0] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b), v_[0]);
+        v_[1] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 1), v_[1]);
+        v_[2] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 2), v_[2]);
+        v_[3] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 3), v_[3]);
     }
 }

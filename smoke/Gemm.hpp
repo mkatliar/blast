@@ -2,11 +2,71 @@
 
 #include <smoke/StaticMatrix.hpp>
 #include <smoke/GemmKernel.hpp>
+#include <smoke/GemmKernel_double_3_1_4.hpp>
 
 #include <algorithm>
 
 namespace smoke
 {
+    template <typename T, size_t M, size_t N, size_t K, size_t P>
+    inline void gemm_nt(
+        StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, N, K, P> const& B, 
+        StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D)
+    {
+        size_t i = 0;
+
+        for (; (i + 3) * P <= M; i += 3)
+        {
+            GemmKernel<T, 3, 1, P, false, true> ker;
+            size_t j = 0;
+
+            for (; (j + 1) * P <= N; j += 1)
+                gemm(ker, K,
+                    A.block(i, 0), A.spacing(), B.block(j, 0), B.spacing(),
+                    C.block(i, j), C.spacing(), D.block(i, j), D.spacing());
+
+            for (; j * P < N; ++j)
+                gemm(ker, K,
+                    A.block(i, 0), A.spacing(), B.block(j, 0), B.spacing(),
+                    C.block(i, j), C.spacing(), D.block(i, j), D.spacing(), 3 * P, std::min(N - j * P, P));
+        }
+
+        for (; (i + 2) * P <= M; i += 2)
+        {
+            GemmKernel<T, 2, 1, P, false, true> ker;
+            size_t j = 0;
+
+            for (; (j + 1) * P <= N; j += 1)
+                gemm(ker, K,
+                    A.block(i, 0), A.spacing(), B.block(j, 0), B.spacing(),
+                    C.block(i, j), C.spacing(), D.block(i, j), D.spacing());
+
+            for (; j * P < N; ++j)
+                gemm(ker, K,
+                    A.block(i, 0), A.spacing(), B.block(j, 0), B.spacing(),
+                    C.block(i, j), C.spacing(), D.block(i, j), D.spacing(), 2 * P, std::min(N - j * P, P));
+        }
+
+        for (; i * P < M; ++i)
+        {
+            GemmKernel<T, 1, 1, P, false, true> ker;
+
+            size_t const rm = std::min(M - i * P, P);
+            size_t j = 0;
+
+            for (; (j + 1) * P <= N; j += 1)
+                gemm(ker, K, 
+                    A.block(i, 0), A.spacing(), B.block(j, 0), B.spacing(),
+                    C.block(i, j), C.spacing(), D.block(i, j), D.spacing(), rm, 1 * P);
+
+            for (; j * P < N; ++j)
+                gemm(ker, K, 
+                    A.block(i, 0), A.spacing(), B.block(j, 0), B.spacing(),
+                    C.block(i, j), C.spacing(), D.block(i, j), D.spacing(), rm, std::min(N - j * P, P));
+        }
+    }
+
+
     template <size_t KM, size_t KN, typename T, size_t M, size_t N, size_t K, size_t P>
     inline void gemm(GemmKernel<T, KM, KN, P, false, true> ker,
         StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, N, K, P> const& B, 
@@ -68,11 +128,9 @@ namespace smoke
         
         for (size_t i = 0; i < MM; ++i)
             for (size_t j = 0; j < NN; ++j)
-            {
-                ker.load(C.block(KM * i, KN * j), C.spacing());
-                ker(K, A.block(0, KM * i), A.spacing(), B.block(0, KN * j), B.spacing());
-                ker.store(D.block(KM * i, KN * j), D.spacing());
-            }
+                gemm(ker, K, 
+                    A.block(0, KM * i), A.spacing(), B.block(0, KN * j), B.spacing(),
+                    C.block(KM * i, KN * j), C.spacing(), D.block(KM * i, KN * j), D.spacing());
     }
 
 
@@ -90,10 +148,8 @@ namespace smoke
 
         for (size_t i = 0; i < MM; ++i)
             for (size_t j = 0; j < NN; ++j)
-            {
-                ker.load(C.block(KM * i, KN * j), C.spacing());
-                ker(K, A.block(KM * i, 0), A.spacing(), B.block(0, KN * j), B.spacing());
-                ker.store(D.block(KM * i, KN * j), D.spacing());
-            }
+                gemm(ker, K, 
+                    A.block(KM * i, 0), A.spacing(), B.block(0, KN * j), B.spacing(),
+                    C.block(KM * i, KN * j), C.spacing(), D.block(KM * i, KN * j), D.spacing());
     }
 }

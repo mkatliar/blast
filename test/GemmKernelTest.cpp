@@ -69,16 +69,15 @@ namespace smoke :: testing
     TYPED_TEST_P(GemmKernelTest, testGemm)
     {
         using Traits = GemmKernelTraits<TypeParam>;
-        size_t constexpr K = 3 * Traits::blockSize;
 
         blaze::DynamicMatrix<double, blaze::columnMajor> ma(
-            Traits::tA ? K : Traits::rows,
-            Traits::tA ? Traits::rows : K
+            Traits::tA ? 1 : Traits::rows,
+            Traits::tA ? Traits::rows : 1
         );
 
         blaze::DynamicMatrix<double, blaze::columnMajor> mb(
-            Traits::tB ? Traits::columns : K,
-            Traits::tB ? K : Traits::columns
+            Traits::tB ? Traits::columns : 1,
+            Traits::tB ? 1 : Traits::columns
         );
 
         blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
@@ -88,13 +87,13 @@ namespace smoke :: testing
         randomize(mc);
 
         StaticMatrix<double, 
-            Traits::tA ? K : Traits::rows,
-            Traits::tA ? Traits::rows : K,
+            Traits::tA ? 1 : Traits::rows,
+            Traits::tA ? Traits::rows : 1,
             Traits::blockSize, Traits::alignment> a;
 
         StaticMatrix<double, 
-            Traits::tB ? Traits::columns : K,
-            Traits::tB ? K : Traits::columns,
+            Traits::tB ? Traits::columns : 1,
+            Traits::tB ? 1 : Traits::columns,
             Traits::blockSize, Traits::alignment> b;
 
         StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> c, d;
@@ -103,7 +102,7 @@ namespace smoke :: testing
         c.pack(data(mc), spacing(mc));
 
         TypeParam ker(c.block(0, 0), c.spacing());
-        ker(K, a.block(0, 0), a.spacing(), b.block(0, 0), b.spacing());
+        ker(a.block(0, 0), a.spacing(), b.block(0, 0), b.spacing());
         ker.store(d.block(0, 0), d.spacing());
         
         d.unpack(data(md), spacing(md));
@@ -135,15 +134,15 @@ namespace smoke :: testing
     using GemmKernel_double_3_1_4_NN = GemmKernel<double, 3, 1, 4, false, false>;
     using GemmKernel_double_3_1_4_NT = GemmKernel<double, 3, 1, 4, false, true>;
 
-    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4_TN, GemmKernelTest, GemmKernel_double_1_1_4_TN);
-    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4_NN, GemmKernelTest, GemmKernel_double_1_1_4_NN);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4_TN, GemmKernelTest, GemmKernel_double_1_1_4_TN);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4_NN, GemmKernelTest, GemmKernel_double_1_1_4_NN);
     INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4_NT, GemmKernelTest, GemmKernel_double_1_1_4_NT);
     
-    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4_TN, GemmKernelTest, GemmKernel_double_2_1_4_TN);
-    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4_NN, GemmKernelTest, GemmKernel_double_2_1_4_NN);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4_TN, GemmKernelTest, GemmKernel_double_2_1_4_TN);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4_NN, GemmKernelTest, GemmKernel_double_2_1_4_NN);
     INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4_NT, GemmKernelTest, GemmKernel_double_2_1_4_NT);
 
-    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_3_1_4_TN, GemmKernelTest, GemmKernel_double_3_1_4_TN);
-    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_3_1_4_NN, GemmKernelTest, GemmKernel_double_3_1_4_NN);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_3_1_4_TN, GemmKernelTest, GemmKernel_double_3_1_4_TN);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_3_1_4_NN, GemmKernelTest, GemmKernel_double_3_1_4_NN);
     INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_3_1_4_NT, GemmKernelTest, GemmKernel_double_3_1_4_NT);
 }

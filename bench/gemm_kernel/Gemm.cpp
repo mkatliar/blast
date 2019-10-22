@@ -16,7 +16,7 @@ namespace smoke :: benchmark
         using Traits = GemmKernelTraits<Kernel>;
         size_t constexpr M = Traits::rows;
         size_t constexpr N = Traits::columns;
-        size_t constexpr K = 10 * Traits::blockSize;
+        size_t constexpr K = 1;
         bool constexpr TA = Traits::tA;
         bool constexpr TB = Traits::tB;
 
@@ -32,7 +32,7 @@ namespace smoke :: benchmark
 
         for (auto _ : state)
         {
-            ker(K, a.block(0, 0), a.spacing(), b.block(0, 0), b.spacing());
+            ker(a.block(0, 0), a.spacing(), b.block(0, 0), b.spacing());
             DoNotOptimize(ker);
         }
 
@@ -40,11 +40,11 @@ namespace smoke :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 1, 1, 4, true, false>);
-    BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 1, 1, 4, false, false>);
+    // BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 1, 1, 4, true, false>);
+    // BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 1, 1, 4, false, false>);
     BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 1, 1, 4, false, true>);
     
-    BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 2, 1, 4, true, false>);
+    // BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 2, 1, 4, true, false>);
     BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 2, 1, 4, false, true>);
 
     BENCHMARK_TEMPLATE(BM_GemmKernel_gemm, GemmKernel<double, 3, 1, 4, false, true>);
