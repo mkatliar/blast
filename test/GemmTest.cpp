@@ -1,7 +1,7 @@
-#include <smoke/StaticMatrix.hpp>
+#include <smoke/StaticPanelMatrix.hpp>
 #include <smoke/Gemm.hpp>
-#include <smoke/GemmKernel_double_1_1_4.hpp>
-#include <smoke/GemmKernel_double_2_1_4.hpp>
+#include <smoke/gemm/GemmKernel_double_1_1_4.hpp>
+#include <smoke/gemm/GemmKernel_double_2_1_4.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
@@ -23,10 +23,10 @@ namespace smoke :: testing
 
         // Init Smoke matrices
         //
-        StaticMatrix<double, K, M> A;
-        StaticMatrix<double, K, N> B;
-        StaticMatrix<double, M, N> C;
-        StaticMatrix<double, M, N> D;
+        StaticPanelMatrix<double, K, M> A;
+        StaticPanelMatrix<double, K, N> B;
+        StaticPanelMatrix<double, M, N> C;
+        StaticPanelMatrix<double, M, N> D;
 
         A.pack(data(blaze_A), spacing(blaze_A));
         B.pack(data(blaze_B), spacing(blaze_B));
@@ -58,10 +58,10 @@ namespace smoke :: testing
 
         // Init Smoke matrices
         //
-        StaticMatrix<double, M, K> A;
-        StaticMatrix<double, K, N> B;
-        StaticMatrix<double, M, N> C;
-        StaticMatrix<double, M, N> D;
+        StaticPanelMatrix<double, M, K> A;
+        StaticPanelMatrix<double, K, N> B;
+        StaticPanelMatrix<double, M, N> C;
+        StaticPanelMatrix<double, M, N> D;
 
         A.pack(data(blaze_A), spacing(blaze_A));
         B.pack(data(blaze_B), spacing(blaze_B));
@@ -94,10 +94,10 @@ namespace smoke :: testing
 
         // Init Smoke matrices
         //
-        StaticMatrix<double, M, K> A;
-        StaticMatrix<double, N, K> B;
-        StaticMatrix<double, M, N> C;
-        StaticMatrix<double, M, N> D;
+        StaticPanelMatrix<double, M, K> A;
+        StaticPanelMatrix<double, N, K> B;
+        StaticPanelMatrix<double, M, N> C;
+        StaticPanelMatrix<double, M, N> D;
 
         A.pack(data(blaze_A), spacing(blaze_A));
         B.pack(data(blaze_B), spacing(blaze_B));
@@ -129,10 +129,10 @@ namespace smoke :: testing
 
         // Init Smoke matrices
         //
-        StaticMatrix<double, M, K> A;
-        StaticMatrix<double, N, K> B;
-        StaticMatrix<double, M, N> C;
-        StaticMatrix<double, M, N> D;
+        StaticPanelMatrix<double, M, K> A;
+        StaticPanelMatrix<double, N, K> B;
+        StaticPanelMatrix<double, M, N> C;
+        StaticPanelMatrix<double, M, N> D;
 
         A.pack(data(blaze_A), spacing(blaze_A));
         B.pack(data(blaze_B), spacing(blaze_B));
@@ -164,10 +164,10 @@ namespace smoke :: testing
 
         // Init Smoke matrices
         //
-        StaticMatrix<double, M, K> A;
-        StaticMatrix<double, N, K> B;
-        StaticMatrix<double, M, N> C;
-        StaticMatrix<double, M, N> D;
+        StaticPanelMatrix<double, M, K> A;
+        StaticPanelMatrix<double, N, K> B;
+        StaticPanelMatrix<double, M, N> C;
+        StaticPanelMatrix<double, M, N> D;
 
         A.pack(data(blaze_A), spacing(blaze_A));
         B.pack(data(blaze_B), spacing(blaze_B));
@@ -199,10 +199,10 @@ namespace smoke :: testing
 
         // Init Smoke matrices
         //
-        StaticMatrix<double, M, K> A;
-        StaticMatrix<double, N, K> B;
-        StaticMatrix<double, M, N> C;
-        StaticMatrix<double, M, N> D;
+        StaticPanelMatrix<double, M, K> A;
+        StaticPanelMatrix<double, N, K> B;
+        StaticPanelMatrix<double, M, N> C;
+        StaticPanelMatrix<double, M, N> D;
 
         A.pack(data(blaze_A), spacing(blaze_A));
         B.pack(data(blaze_B), spacing(blaze_B));
@@ -234,10 +234,10 @@ namespace smoke :: testing
 
         // Init Smoke matrices
         //
-        StaticMatrix<double, M, K> A;
-        StaticMatrix<double, N, K> B;
-        StaticMatrix<double, M, N> C;
-        StaticMatrix<double, M, N> D;
+        StaticPanelMatrix<double, M, K> A;
+        StaticPanelMatrix<double, N, K> B;
+        StaticPanelMatrix<double, M, N> C;
+        StaticPanelMatrix<double, M, N> D;
 
         A.pack(data(blaze_A), spacing(blaze_A));
         B.pack(data(blaze_B), spacing(blaze_B));
@@ -269,10 +269,10 @@ namespace smoke :: testing
 
         // Init Smoke matrices
         //
-        StaticMatrix<double, M, K> A;
-        StaticMatrix<double, N, K> B;
-        StaticMatrix<double, M, N> C;
-        StaticMatrix<double, M, N> D;
+        StaticPanelMatrix<double, M, K> A;
+        StaticPanelMatrix<double, N, K> B;
+        StaticPanelMatrix<double, M, N> C;
+        StaticPanelMatrix<double, M, N> D;
 
         A.pack(data(blaze_A), spacing(blaze_A));
         B.pack(data(blaze_B), spacing(blaze_B));

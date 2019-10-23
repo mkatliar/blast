@@ -8,10 +8,10 @@
 namespace smoke
 {
     template <typename T, size_t M, size_t N, size_t P = blockSize, size_t AL = blockAlignment>
-    class StaticMatrix
+    class StaticPanelMatrix
     {
     public:
-        StaticMatrix()
+        StaticPanelMatrix()
         {
             // Initialize padding elements to 0 to prevent denorms in calculations.
             // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
@@ -19,7 +19,7 @@ namespace smoke
         }
 
 
-        StaticMatrix& operator=(T val)
+        StaticPanelMatrix& operator=(T val)
         {
             for (size_t i = 0; i < M; ++i)
                 for (size_t j = 0; j < N; ++j)

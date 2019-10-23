@@ -1,7 +1,7 @@
-#include <smoke/StaticMatrix.hpp>
-#include <smoke/GemmKernel_double_1_1_4.hpp>
-#include <smoke/GemmKernel_double_2_1_4.hpp>
-#include <smoke/GemmKernel_double_3_1_4.hpp>
+#include <smoke/StaticPanelMatrix.hpp>
+#include <smoke/gemm/GemmKernel_double_1_1_4.hpp>
+#include <smoke/gemm/GemmKernel_double_2_1_4.hpp>
+#include <smoke/gemm/GemmKernel_double_3_1_4.hpp>
 
 #include <bench/Benchmark.hpp>
 
@@ -21,7 +21,7 @@ namespace smoke :: benchmark
         size_t const m = state.range(0);
         size_t const n = state.range(1);
 
-        StaticMatrix<double, M, N, Traits::blockSize, Traits::alignment> c, d;
+        StaticPanelMatrix<double, M, N, Traits::blockSize, Traits::alignment> c, d;
         randomize(c);
 
         Kernel ker(c.block(0, 0), c.spacing());

@@ -1,7 +1,7 @@
 #include <smoke/Gemm.hpp>
-#include <smoke/GemmKernel_double_1_1_4.hpp>
-#include <smoke/GemmKernel_double_2_1_4.hpp>
-#include <smoke/GemmKernel_double_3_1_4.hpp>
+#include <smoke/gemm/GemmKernel_double_1_1_4.hpp>
+#include <smoke/gemm/GemmKernel_double_2_1_4.hpp>
+#include <smoke/gemm/GemmKernel_double_3_1_4.hpp>
 
 #include <bench/Benchmark.hpp>
 
@@ -10,28 +10,28 @@
 
 #define INSTANTIATE_GEMM_TN(KM, KN, M, P) \
     template void gemm_tn_impl<KM, KN, double, M, M, M, P>(\
-    StaticMatrix<double, M, M, P> const& A, StaticMatrix<double, M, M, P> const& B, \
-    StaticMatrix<double, M, M, P> const& C, StaticMatrix<double, M, M, P>& D)
+    StaticPanelMatrix<double, M, M, P> const& A, StaticPanelMatrix<double, M, M, P> const& B, \
+    StaticPanelMatrix<double, M, M, P> const& C, StaticPanelMatrix<double, M, M, P>& D)
 
 
 #define INSTANTIATE_GEMM_NN(KM, KN, M, P) \
     template void gemm_nn_impl<KM, KN, double, M, M, M, P>(\
-    StaticMatrix<double, M, M, P> const& A, StaticMatrix<double, M, M, P> const& B, \
-    StaticMatrix<double, M, M, P> const& C, StaticMatrix<double, M, M, P>& D)
+    StaticPanelMatrix<double, M, M, P> const& A, StaticPanelMatrix<double, M, M, P> const& B, \
+    StaticPanelMatrix<double, M, M, P> const& C, StaticPanelMatrix<double, M, M, P>& D)
 
 
 #define INSTANTIATE_GEMM_NT(M, P) \
     template void gemm_nt_impl<double, M, M, M, P>(\
-    StaticMatrix<double, M, M, P> const& A, StaticMatrix<double, M, M, P> const& B, \
-    StaticMatrix<double, M, M, P> const& C, StaticMatrix<double, M, M, P>& D)
+    StaticPanelMatrix<double, M, M, P> const& A, StaticPanelMatrix<double, M, M, P> const& B, \
+    StaticPanelMatrix<double, M, M, P> const& C, StaticPanelMatrix<double, M, M, P>& D)
 
 
 namespace smoke :: benchmark
 {
     template <size_t KM, size_t KN, typename T, size_t M, size_t N, size_t K, size_t P>
     void gemm_tn_impl(
-        StaticMatrix<T, K, M, P> const& A, StaticMatrix<T, K, N, P> const& B, 
-        StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D)
+        StaticPanelMatrix<T, K, M, P> const& A, StaticPanelMatrix<T, K, N, P> const& B, 
+        StaticPanelMatrix<T, M, N, P> const& C, StaticPanelMatrix<T, M, N, P>& D)
     {
         gemm(GemmKernel<T, KM, KN, P, true, false> {}, A, B, C, D);
     }
@@ -39,8 +39,8 @@ namespace smoke :: benchmark
 
     template <size_t KM, size_t KN, typename T, size_t M, size_t N, size_t K, size_t P>
     void gemm_nn_impl(
-        StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, K, N, P> const& B, 
-        StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D)
+        StaticPanelMatrix<T, M, K, P> const& A, StaticPanelMatrix<T, K, N, P> const& B, 
+        StaticPanelMatrix<T, M, N, P> const& C, StaticPanelMatrix<T, M, N, P>& D)
     {
         gemm(GemmKernel<T, KM, KN, P, false, false> {}, A, B, C, D);
     }
@@ -48,8 +48,8 @@ namespace smoke :: benchmark
 
     template <typename T, size_t M, size_t N, size_t K, size_t P>
     void gemm_nt_impl(
-        StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, N, K, P> const& B, 
-        StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D)
+        StaticPanelMatrix<T, M, K, P> const& A, StaticPanelMatrix<T, N, K, P> const& B, 
+        StaticPanelMatrix<T, M, N, P> const& C, StaticPanelMatrix<T, M, N, P>& D)
     {
         gemm_nt(A, B, C, D);
     }
@@ -123,4 +123,14 @@ namespace smoke :: benchmark
     INSTANTIATE_GEMM_NT(38, 4);
     INSTANTIATE_GEMM_NT(39, 4);
     INSTANTIATE_GEMM_NT(40, 4);
+    INSTANTIATE_GEMM_NT(41, 4);
+    INSTANTIATE_GEMM_NT(42, 4);
+    INSTANTIATE_GEMM_NT(43, 4);
+    INSTANTIATE_GEMM_NT(44, 4);
+    INSTANTIATE_GEMM_NT(45, 4);
+    INSTANTIATE_GEMM_NT(46, 4);
+    INSTANTIATE_GEMM_NT(47, 4);
+    INSTANTIATE_GEMM_NT(48, 4);
+    INSTANTIATE_GEMM_NT(49, 4);
+    INSTANTIATE_GEMM_NT(50, 4);
 }

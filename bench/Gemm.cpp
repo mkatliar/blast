@@ -1,4 +1,4 @@
-#include <smoke/StaticMatrix.hpp>
+#include <smoke/StaticPanelMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
 #include <test/Randomize.hpp>
@@ -11,20 +11,20 @@ namespace smoke :: benchmark
 {
     template <size_t KM, size_t KN, typename T, size_t M, size_t N, size_t K, size_t P>
     void gemm_tn_impl(
-        StaticMatrix<T, K, M, P> const& A, StaticMatrix<T, K, N, P> const& B, 
-        StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D);
+        StaticPanelMatrix<T, K, M, P> const& A, StaticPanelMatrix<T, K, N, P> const& B, 
+        StaticPanelMatrix<T, M, N, P> const& C, StaticPanelMatrix<T, M, N, P>& D);
 
     
     template <size_t KM, size_t KN, typename T, size_t M, size_t N, size_t K, size_t P>
     void gemm_nn_impl(
-        StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, K, N, P> const& B, 
-        StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D);
+        StaticPanelMatrix<T, M, K, P> const& A, StaticPanelMatrix<T, K, N, P> const& B, 
+        StaticPanelMatrix<T, M, N, P> const& C, StaticPanelMatrix<T, M, N, P>& D);
 
     
     template <typename T, size_t M, size_t N, size_t K, size_t P>
     void gemm_nt_impl(
-        StaticMatrix<T, M, K, P> const& A, StaticMatrix<T, N, K, P> const& B, 
-        StaticMatrix<T, M, N, P> const& C, StaticMatrix<T, M, N, P>& D);
+        StaticPanelMatrix<T, M, K, P> const& A, StaticPanelMatrix<T, N, K, P> const& B, 
+        StaticPanelMatrix<T, M, N, P> const& C, StaticPanelMatrix<T, M, N, P>& D);
 
 
     template <size_t KM, size_t KN, typename Real, size_t M>
@@ -33,10 +33,10 @@ namespace smoke :: benchmark
         size_t constexpr N = M;
         size_t constexpr K = M;
 
-        StaticMatrix<Real, K, M> A;
-        StaticMatrix<Real, K, N> B;
-        StaticMatrix<Real, M, N> C;
-        StaticMatrix<Real, M, N> D;
+        StaticPanelMatrix<Real, K, M> A;
+        StaticPanelMatrix<Real, K, N> B;
+        StaticPanelMatrix<Real, M, N> C;
+        StaticPanelMatrix<Real, M, N> D;
 
         randomize(A);
         randomize(B);
@@ -56,10 +56,10 @@ namespace smoke :: benchmark
         size_t constexpr N = M;
         size_t constexpr K = M;
 
-        StaticMatrix<Real, K, M> A;
-        StaticMatrix<Real, K, N> B;
-        StaticMatrix<Real, M, N> C;
-        StaticMatrix<Real, M, N> D;
+        StaticPanelMatrix<Real, K, M> A;
+        StaticPanelMatrix<Real, K, N> B;
+        StaticPanelMatrix<Real, M, N> C;
+        StaticPanelMatrix<Real, M, N> D;
 
         randomize(A);
         randomize(B);
@@ -79,10 +79,10 @@ namespace smoke :: benchmark
         size_t constexpr N = M;
         size_t constexpr K = M;
 
-        StaticMatrix<Real, M, K> A;
-        StaticMatrix<Real, N, K> B;
-        StaticMatrix<Real, M, N> C;
-        StaticMatrix<Real, M, N> D;
+        StaticPanelMatrix<Real, M, K> A;
+        StaticPanelMatrix<Real, N, K> B;
+        StaticPanelMatrix<Real, M, N> C;
+        StaticPanelMatrix<Real, M, N> D;
 
         randomize(A);
         randomize(B);
@@ -164,4 +164,14 @@ namespace smoke :: benchmark
     BENCHMARK_TEMPLATE(BM_gemm_nt, double, 38);
     BENCHMARK_TEMPLATE(BM_gemm_nt, double, 39);
     BENCHMARK_TEMPLATE(BM_gemm_nt, double, 40);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double, 41);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double, 42);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double, 43);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double, 44);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double, 45);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double, 46);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double, 47);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double, 48);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double, 49);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double, 50);
 }

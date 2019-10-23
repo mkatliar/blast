@@ -1,7 +1,7 @@
-#include <smoke/StaticMatrix.hpp>
-#include <smoke/GemmKernel_double_1_1_4.hpp>
-#include <smoke/GemmKernel_double_2_1_4.hpp>
-#include <smoke/GemmKernel_double_3_1_4.hpp>
+#include <smoke/StaticPanelMatrix.hpp>
+#include <smoke/gemm/GemmKernel_double_1_1_4.hpp>
+#include <smoke/gemm/GemmKernel_double_2_1_4.hpp>
+#include <smoke/gemm/GemmKernel_double_3_1_4.hpp>
 
 #include <bench/Benchmark.hpp>
 
@@ -20,9 +20,9 @@ namespace smoke :: benchmark
         bool constexpr TA = Traits::tA;
         bool constexpr TB = Traits::tB;
 
-        StaticMatrix<double, !TA ? M : K, !TA ? K : M, Traits::blockSize, Traits::alignment> a;
-        StaticMatrix<double, !TB ? K : N, !TB ? N : K, Traits::blockSize, Traits::alignment> b;
-        StaticMatrix<double, M, N, Traits::blockSize, Traits::alignment> c, d;
+        StaticPanelMatrix<double, !TA ? M : K, !TA ? K : M, Traits::blockSize, Traits::alignment> a;
+        StaticPanelMatrix<double, !TB ? K : N, !TB ? N : K, Traits::blockSize, Traits::alignment> b;
+        StaticPanelMatrix<double, M, N, Traits::blockSize, Traits::alignment> c, d;
 
         randomize(a);
         randomize(b);

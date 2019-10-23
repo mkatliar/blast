@@ -1,7 +1,7 @@
-#include <smoke/GemmKernel_double_1_1_4.hpp>
-#include <smoke/GemmKernel_double_2_1_4.hpp>
-#include <smoke/GemmKernel_double_3_1_4.hpp>
-#include <smoke/StaticMatrix.hpp>
+#include <smoke/gemm/GemmKernel_double_1_1_4.hpp>
+#include <smoke/gemm/GemmKernel_double_2_1_4.hpp>
+#include <smoke/gemm/GemmKernel_double_3_1_4.hpp>
+#include <smoke/StaticPanelMatrix.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
@@ -26,7 +26,7 @@ namespace smoke :: testing
         blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
         randomize(A_ref);
 
-        StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> A, B;
+        StaticPanelMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> A, B;
         A.pack(data(A_ref), spacing(A_ref));
 
         TypeParam ker;
@@ -46,7 +46,7 @@ namespace smoke :: testing
         blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
         randomize(A_ref);
 
-        StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> A, B;
+        StaticPanelMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> A, B;
         A.pack(data(A_ref), spacing(A_ref));
 
         TypeParam ker;
@@ -86,17 +86,17 @@ namespace smoke :: testing
         randomize(mb);
         randomize(mc);
 
-        StaticMatrix<double, 
+        StaticPanelMatrix<double, 
             Traits::tA ? 1 : Traits::rows,
             Traits::tA ? Traits::rows : 1,
             Traits::blockSize, Traits::alignment> a;
 
-        StaticMatrix<double, 
+        StaticPanelMatrix<double, 
             Traits::tB ? Traits::columns : 1,
             Traits::tB ? 1 : Traits::columns,
             Traits::blockSize, Traits::alignment> b;
 
-        StaticMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> c, d;
+        StaticPanelMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> c, d;
         a.pack(data(ma), spacing(ma));
         b.pack(data(mb), spacing(mb));
         c.pack(data(mc), spacing(mc));

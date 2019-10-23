@@ -1,6 +1,6 @@
 #pragma once
 
-#include <smoke/GemmKernel.hpp>
+#include <smoke/gemm/GemmKernel.hpp>
 
 #include <smoke/simd/Hsum.hpp>
 #include <smoke/Exception.hpp>
