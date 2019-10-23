@@ -10,6 +10,7 @@ add_executable(test-smoke
     GemmKernelTest.cpp
     PaddedSizeTest.cpp
     StaticPanelMatrixTest.cpp
+    DynamicPanelMatrixTest.cpp
     GemmTest.cpp
 
     simd/HsumTest.cpp

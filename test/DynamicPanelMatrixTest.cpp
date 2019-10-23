@@ -1,4 +1,4 @@
-#include <smoke/StaticPanelMatrix.hpp>
+#include <smoke/DynamicPanelMatrix.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
@@ -6,31 +6,35 @@
 
 namespace smoke :: testing
 {
-    TEST(StaticPanelMatrixTest, testPanelRows)
+    TEST(DynamicPanelMatrixTest, testSpacing)
     {
-        EXPECT_EQ((StaticPanelMatrix<double, 5, 7, 4>().panelRows()), 2);
-        EXPECT_EQ((StaticPanelMatrix<double, 8, 7, 4>().panelRows()), 2);
+        {
+            DynamicPanelMatrix<double, 4> m(5, 2);
+            EXPECT_EQ(m.spacing(), 4 * 4);
+        }
+
+        {
+            DynamicPanelMatrix<double, 4> m(5, 4);
+            EXPECT_EQ(m.spacing(), 4 * 4);
+        }
+
+        {
+            DynamicPanelMatrix<double, 4> m(5, 7);
+            EXPECT_EQ(m.spacing(), 4 * 8);
+        }
     }
 
 
-    TEST(StaticPanelMatrixTest, testPanelColumns)
-    {
-        EXPECT_EQ((StaticPanelMatrix<double, 5, 2, 4>().panelColumns()), 1);
-        EXPECT_EQ((StaticPanelMatrix<double, 5, 7, 4>().panelColumns()), 2);
-        EXPECT_EQ((StaticPanelMatrix<double, 5, 8, 4>().panelRows()), 2);
-    }
-
-
-    TEST(StaticPanelMatrixTest, testElementAccess)
+    TEST(DynamicPanelMatrixTest, testElementAccess)
     {
         size_t constexpr M = 5;
         size_t constexpr N = 7;
         size_t constexpr P = 4;
 
-        blaze::StaticMatrix<double, M, N> A_ref;
+        blaze::DynamicMatrix<double> A_ref(M, N);
         randomize(A_ref);
 
-        StaticPanelMatrix<double, M, N, P> A;
+        DynamicPanelMatrix<double, P> A(M, N);
         for (size_t i = 0; i < M; ++i)
             for (size_t j = 0; j < N; ++j)
                 A(i, j) = A_ref(i, j);
@@ -46,16 +50,16 @@ namespace smoke :: testing
     }
 
 
-    TEST(StaticPanelMatrixTest, testPack)
+    TEST(DynamicPanelMatrixTest, testPack)
     {
         size_t constexpr M = 5;
         size_t constexpr N = 7;
         size_t constexpr P = 4;
 
-        blaze::StaticMatrix<double, M, N, blaze::columnMajor> A_ref;
+        blaze::DynamicMatrix<double, blaze::columnMajor> A_ref(M, N);
         randomize(A_ref);
 
-        StaticPanelMatrix<double, M, N, P> A;
+        DynamicPanelMatrix<double, P> A(M, N);
         A.pack(data(A_ref), spacing(A_ref));
 
         auto const& A_cref = A;
@@ -66,18 +70,18 @@ namespace smoke :: testing
     }
 
 
-    TEST(StaticPanelMatrixTest, testUnpack)
+    TEST(DynamicPanelMatrixTest, testUnpack)
     {
         size_t constexpr M = 5;
         size_t constexpr N = 7;
         size_t constexpr P = 4;        
 
-        StaticPanelMatrix<double, M, N, P> A;
+        DynamicPanelMatrix<double, P> A(M, N);
         for (size_t i = 0; i < M; ++i)
             for (size_t j = 0; j < N; ++j)
                 blaze::randomize(A(i, j));
 
-        blaze::StaticMatrix<double, M, N, blaze::columnMajor> A1;
+        blaze::DynamicMatrix<double, blaze::columnMajor> A1(M, N);
         A.unpack(data(A1), spacing(A1));
 
         for (size_t i = 0; i < M; ++i)

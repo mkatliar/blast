@@ -10,8 +10,8 @@ add_executable(bench-smoke
     gemm_kernel/Store.cpp
     gemm_kernel/StoreVariableSize.cpp
 
-    Gemm.cpp
-    GemmImpl.cpp
+    GemmStatic.cpp
+    GemmDynamic.cpp
 )
 
 

@@ -1,7 +1,6 @@
 #include <smoke/StaticPanelMatrix.hpp>
+#include <smoke/DynamicPanelMatrix.hpp>
 #include <smoke/Gemm.hpp>
-#include <smoke/gemm/GemmKernel_double_1_1_4.hpp>
-#include <smoke/gemm/GemmKernel_double_2_1_4.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
@@ -288,5 +287,45 @@ namespace smoke :: testing
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
         SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
+    }
+
+
+    TEST(GemmTest, testNT_dynamic)
+    {
+        size_t const M_max = 20, N_max = 20, K_max = 20;
+
+        for (size_t M = 1; M <= M_max; ++M)
+            for (size_t N = 1; N <= N_max; ++N)
+                for (size_t K = 1; K <= K_max; ++K)
+                {
+                    // Init Blaze matrices
+                    //
+                    blaze::DynamicMatrix<double, blaze::columnMajor> blaze_A(M, K), blaze_B(N, K), blaze_C(M, N), blaze_D(M, N);
+                    randomize(blaze_A);
+                    randomize(blaze_B);
+                    randomize(blaze_C);
+
+                    // Init Smoke matrices
+                    //
+                    DynamicPanelMatrix<double> A(M, K);
+                    DynamicPanelMatrix<double> B(N, K);
+                    DynamicPanelMatrix<double> C(M, N);
+                    DynamicPanelMatrix<double> D(M, N);
+
+                    A.pack(data(blaze_A), spacing(blaze_A));
+                    B.pack(data(blaze_B), spacing(blaze_B));
+                    C.pack(data(blaze_C), spacing(blaze_C));
+                    
+                    // Do gemm with Smoke
+                    gemm_nt(A, B, C, D);
+
+                    // Copy the resulting D matrix from BLASFEO to Blaze
+                    D.unpack(data(blaze_D), spacing(blaze_D));
+
+                    // Print the result from BLASFEO
+                    // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
+
+                    SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
+                }
     }
 }

@@ -2,33 +2,41 @@
 
 #include <smoke/SizeT.hpp>
 #include <smoke/Block.hpp>
+#include <smoke/PaddedSize.hpp>
 #include <smoke/PanelMatrix.hpp>
 
-#include <array>
+#include <memory>
+#include <cstdlib>
+#include <algorithm>
 
 
 namespace smoke
 {
-    template <typename T, size_t M, size_t N, size_t P = blockSize, size_t AL = blockAlignment>
-    class StaticPanelMatrix
-    :   public PanelMatrix<StaticPanelMatrix<T, M, N, P, AL>, P>
+    template <typename T, size_t P = blockSize, size_t AL = blockAlignment>
+    class DynamicPanelMatrix
+    :   public PanelMatrix<DynamicPanelMatrix<T, P, AL>, P>
     {
     public:
         using ElementType = T;
 
         
-        StaticPanelMatrix()
+        DynamicPanelMatrix(size_t m, size_t n)
+        :   m_(m)
+        ,   n_(n)
+        ,   spacing_(P * paddedSize(n, P))
+        ,   capacity_(paddedSize(m, P) * paddedSize(n, P))
+        ,   v_(reinterpret_cast<T *>(std::aligned_alloc(AL, capacity_ * sizeof(T))), &std::free)
         {
             // Initialize padding elements to 0 to prevent denorms in calculations.
             // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
-            v_.fill(T {});
+            std::fill_n(v_.get(), capacity_, T {});
         }
 
 
-        StaticPanelMatrix& operator=(T val)
+        DynamicPanelMatrix& operator=(T val)
         {
-            for (size_t i = 0; i < M; ++i)
-                for (size_t j = 0; j < N; ++j)
+            for (size_t i = 0; i < m_; ++i)
+                for (size_t j = 0; j < n_; ++j)
                     (*this)(i, j) = val;
 
             return *this;
@@ -47,70 +55,61 @@ namespace smoke
         }
 
 
-        size_t constexpr rows() const
+        size_t rows() const
         {
-            return M;
+            return m_;
         }
 
 
-        size_t constexpr columns() const
+        size_t columns() const
         {
-            return N;
+            return n_;
         }
 
 
-        size_t constexpr spacing() const
+        size_t spacing() const
         {
-            return panelColumns_ * elementsPerPanel_;
-        }
-
-
-        size_t constexpr panelRows() const
-        {
-            return panelRows_;
-        }
-
-
-        size_t constexpr panelColumns() const
-        {
-            return panelColumns_;
+            return spacing_;
         }
 
 
         void pack(T const * data, size_t lda)
         {
-            for (size_t i = 0; i < M; ++i)
-                for (size_t j = 0; j < N; ++j)
+            for (size_t i = 0; i < m_; ++i)
+                for (size_t j = 0; j < n_; ++j)
                     (*this)(i, j) = data[i + lda * j];
         }
 
 
         void unpack(T * data, size_t lda) const
         {
-            for (size_t i = 0; i < M; ++i)
-                for (size_t j = 0; j < N; ++j)
+            for (size_t i = 0; i < m_; ++i)
+                for (size_t j = 0; j < n_; ++j)
                     data[i + lda * j] = (*this)(i, j);
         }
 
 
         T * block(size_t i, size_t j)
         {
-            return v_.data() + (i * panelColumns_ + j) * elementsPerPanel_;
+            return v_.get() + i * spacing_ + j * elementsPerPanel_;
         }
 
 
         T const * block(size_t i, size_t j) const
         {
-            return v_.data() + (i * panelColumns_ + j) * elementsPerPanel_;
+            return v_.get() + i * spacing_ + j * elementsPerPanel_;
         }
 
 
     private:
-        static size_t constexpr panelRows_ = M / P + (M % P > 0);
-        static size_t constexpr panelColumns_ = N / P + (N % P > 0);
         static size_t constexpr elementsPerPanel_ = P * P;
 
-        alignas(AL) std::array<T, panelRows_ * panelColumns_ * elementsPerPanel_> v_;
+        size_t m_;
+        size_t n_;
+        size_t spacing_;
+        size_t capacity_;
+        
+        std::unique_ptr<T[], decltype(&std::free)> v_;
 
 
         size_t elementIndex(size_t i, size_t j) const
@@ -120,7 +119,7 @@ namespace smoke
             size_t const subpanel_i = i % P;
             size_t const subpanel_j = j % P;
 
-            return (panel_i * panelColumns_ + panel_j) * elementsPerPanel_ + subpanel_i + subpanel_j * P;
+            return panel_i * spacing_ + panel_j * elementsPerPanel_ + subpanel_i + subpanel_j * P;
         }
     };
 }
