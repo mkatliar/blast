@@ -54,11 +54,11 @@ namespace smoke
         T const * a, size_t sa, T const * b, size_t sb, T const * c, size_t sc, T * d, size_t sd,
         size_t md, size_t nd)
     {
-        ker.load(c, sc);
+        ker.load(c, sc, md, nd);
         
         for (size_t k = 0; k < K; ++k)
         {
-            ker(a, sa, b, sb);
+            ker(a, sa, b, sb, md, nd);
 
             a += TA ? M * sa : BS;
             b += TB ? BS : N * sb;

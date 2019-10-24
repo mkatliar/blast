@@ -38,6 +38,22 @@ namespace smoke
         }
 
 
+        void load(double const * ptr, size_t spacing, size_t m, size_t n)
+        {
+            if (n > 0)
+                v_[0] = _mm256_load_pd(ptr);
+
+            if (n > 1)
+                v_[1] = _mm256_load_pd(ptr + 4);
+
+            if (n > 2)
+                v_[2] = _mm256_load_pd(ptr + 8);
+
+            if (n > 3)
+                v_[3] = _mm256_load_pd(ptr + 12);
+        }
+
+
         void store(double * ptr, size_t spacing) const
         {
             _mm256_store_pd(ptr, v_[0]);
@@ -87,6 +103,7 @@ namespace smoke
 
 
         void operator()(double const * a, size_t sa, double const * b, size_t sb);
+        void operator()(double const * a, size_t sa, double const * b, size_t sb, size_t m, size_t n);
 
 
     private:
@@ -102,5 +119,24 @@ namespace smoke
         v_[1] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 1), v_[1]);
         v_[2] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 2), v_[2]);
         v_[3] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 3), v_[3]);
+    }
+
+
+    template <>
+    inline void GemmKernel<double, 1, 1, 4, false, true>::operator()(double const * a, size_t sa, double const * b, size_t sb, size_t m, size_t n)
+    {
+        __m256d const a_v0 = _mm256_load_pd(a);
+
+        if (n > 0)
+            v_[0] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b), v_[0]);
+
+        if (n > 1)
+            v_[1] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 1), v_[1]);
+
+        if (n > 2)
+            v_[2] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 2), v_[2]);
+
+        if (n > 3)
+            v_[3] = _mm256_fmadd_pd(a_v0, _mm256_broadcast_sd(b + 3), v_[3]);
     }
 }

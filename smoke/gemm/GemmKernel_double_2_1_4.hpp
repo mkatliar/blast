@@ -42,6 +42,34 @@ namespace smoke
         }
 
 
+        void load(double const * ptr, size_t spacing, size_t m, size_t n)
+        {
+            if (n > 0)
+            {
+                v_[0][0] = _mm256_load_pd(ptr);
+                v_[1][0] = _mm256_load_pd(ptr + spacing);
+            }
+
+            if (n > 1)
+            {
+                v_[0][1] = _mm256_load_pd(ptr + 4);
+                v_[1][1] = _mm256_load_pd(ptr + spacing + 4);
+            }
+
+            if (n > 2)
+            {
+                v_[0][2] = _mm256_load_pd(ptr + 8);
+                v_[1][2] = _mm256_load_pd(ptr + spacing + 8);
+            }
+
+            if (n > 3)
+            {
+                v_[0][3] = _mm256_load_pd(ptr + 12);
+                v_[1][3] = _mm256_load_pd(ptr + spacing + 12);
+            }
+        }
+
+
         void store(double * ptr, size_t spacing) const
         {
             _mm256_store_pd(ptr, v_[0][0]);
@@ -98,6 +126,7 @@ namespace smoke
 
 
         void operator()(double const * a, size_t sa, double const * b, size_t sb);
+        void operator()(double const * a, size_t sa, double const * b, size_t sb, size_t m, size_t n);
 
 
     private:
@@ -127,5 +156,43 @@ namespace smoke
         bx = _mm256_broadcast_sd(b + 3);
         v_[0][3] = _mm256_fmadd_pd(a0, bx, v_[0][3]);
         v_[1][3] = _mm256_fmadd_pd(a4, bx, v_[1][3]);
+    }
+
+
+    template <>
+    inline void GemmKernel<double, 2, 1, 4, false, true>::operator()(
+        double const * a, size_t sa, double const * b, size_t sb, size_t m, size_t n)
+    {
+        __m256d const a0 = _mm256_load_pd(a);
+        __m256d const a4 = _mm256_load_pd(a + sa);        
+        __m256d bx;
+
+        if (n > 0)
+        {
+            bx = _mm256_broadcast_sd(b);
+            v_[0][0] = _mm256_fmadd_pd(a0, bx, v_[0][0]);
+            v_[1][0] = _mm256_fmadd_pd(a4, bx, v_[1][0]);
+        }
+
+        if (n > 1)
+        {
+            bx = _mm256_broadcast_sd(b + 1);        
+            v_[0][1] = _mm256_fmadd_pd(a0, bx, v_[0][1]);
+            v_[1][1] = _mm256_fmadd_pd(a4, bx, v_[1][1]);
+        }
+
+        if (n > 2)
+        {
+            bx = _mm256_broadcast_sd(b + 2);
+            v_[0][2] = _mm256_fmadd_pd(a0, bx, v_[0][2]);
+            v_[1][2] = _mm256_fmadd_pd(a4, bx, v_[1][2]);
+        }
+
+        if (n > 3)
+        {
+            bx = _mm256_broadcast_sd(b + 3);
+            v_[0][3] = _mm256_fmadd_pd(a0, bx, v_[0][3]);
+            v_[1][3] = _mm256_fmadd_pd(a4, bx, v_[1][3]);
+        }
     }
 }
