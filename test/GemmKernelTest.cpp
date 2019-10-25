@@ -30,8 +30,8 @@ namespace blazefeo :: testing
         A.pack(data(A_ref), spacing(A_ref));
 
         TypeParam ker;
-        ker.load(A.block(0, 0), A.spacing());
-        ker.store(B.block(0, 0), B.spacing());
+        ker.load(A.tile(0, 0), A.spacing());
+        ker.store(B.tile(0, 0), B.spacing());
 
         for (size_t i = 0; i < Traits::rows; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)
@@ -50,13 +50,13 @@ namespace blazefeo :: testing
         A.pack(data(A_ref), spacing(A_ref));
 
         TypeParam ker;
-        ker.load(A.block(0, 0), A.spacing());
+        ker.load(A.tile(0, 0), A.spacing());
 
         for (size_t m = 0; m <= Traits::rows; ++m)
             for (size_t n = 0; n <= Traits::columns; ++n)
             {
                 B = 0.;
-                ker.store(B.block(0, 0), B.spacing(), m, n);
+                ker.store(B.tile(0, 0), B.spacing(), m, n);
 
                 for (size_t i = 0; i < Traits::rows; ++i)
                     for (size_t j = 0; j < Traits::columns; ++j)
@@ -101,9 +101,9 @@ namespace blazefeo :: testing
         b.pack(data(mb), spacing(mb));
         c.pack(data(mc), spacing(mc));
 
-        TypeParam ker(c.block(0, 0), c.spacing());
-        ker(a.block(0, 0), a.spacing(), b.block(0, 0), b.spacing());
-        ker.store(d.block(0, 0), d.spacing());
+        TypeParam ker(c.tile(0, 0), c.spacing());
+        ker(a.tile(0, 0), a.spacing(), b.tile(0, 0), b.spacing());
+        ker.store(d.tile(0, 0), d.spacing());
         
         d.unpack(data(md), spacing(md));
 

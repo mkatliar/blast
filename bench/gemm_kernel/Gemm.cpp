@@ -28,11 +28,11 @@ namespace blazefeo :: benchmark
         randomize(b);
         randomize(c);
 
-        Kernel ker(c.block(0, 0), c.spacing());
+        Kernel ker(c.tile(0, 0), c.spacing());
 
         for (auto _ : state)
         {
-            ker(a.block(0, 0), a.spacing(), b.block(0, 0), b.spacing());
+            ker(a.tile(0, 0), a.spacing(), b.tile(0, 0), b.spacing());
             DoNotOptimize(ker);
         }
 

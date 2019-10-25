@@ -21,16 +21,16 @@ namespace blazefeo
 
 
     template <typename MT, bool SO>
-    inline typename MT::ElementType * block(PanelMatrix<MT, SO>& m, size_t i, size_t j)
+    inline typename MT::ElementType * tile(PanelMatrix<MT, SO>& m, size_t i, size_t j)
     {
-        return (~m).block(i, j);
+        return (~m).tile(i, j);
     }
 
 
     template <typename MT, bool SO>
-    inline typename MT::ElementType const * block(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
+    inline typename MT::ElementType const * tile(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
     {
-        return (~m).block(i, j);
+        return (~m).tile(i, j);
     }
 
 

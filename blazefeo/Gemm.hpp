@@ -43,7 +43,7 @@ namespace blazefeo
             BLAZE_THROW_INVALID_ARGUMENT("Matrix sizes do not match");
 
         size_t i = 0;
-        ET const * a = block(A, 0, 0);
+        ET const * a = tile(A, 0, 0);
 
         for (; (i + 3) * TILE_SIZE <= M; i += 3, a += 3 * spacing(A))
         {
@@ -52,13 +52,13 @@ namespace blazefeo
 
             for (; (j + 1) * TILE_SIZE <= N; ++j)
                 gemm(ker, K,
-                    a, spacing(A), block(B, j, 0), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D));
+                    a, spacing(A), tile(B, j, 0), spacing(B),
+                    tile(C, i, j), spacing(C), tile(D, i, j), spacing(D));
 
             for (; j * TILE_SIZE < N; ++j)
                 gemm(ker, K,
-                    a, spacing(A), block(B, j, 0), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), 3 * TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
+                    a, spacing(A), tile(B, j, 0), spacing(B),
+                    tile(C, i, j), spacing(C), tile(D, i, j), spacing(D), 3 * TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }
 
         for (; (i + 2) * TILE_SIZE <= M; i += 2, a += 2 * spacing(A))
@@ -68,13 +68,13 @@ namespace blazefeo
 
             for (; (j + 1) * TILE_SIZE <= N; ++j)
                 gemm(ker, K,
-                    a, spacing(A), block(B, j, 0), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D));
+                    a, spacing(A), tile(B, j, 0), spacing(B),
+                    tile(C, i, j), spacing(C), tile(D, i, j), spacing(D));
 
             for (; j * TILE_SIZE < N; ++j)
                 gemm(ker, K,
-                    a, spacing(A), block(B, j, 0), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), 2 * TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
+                    a, spacing(A), tile(B, j, 0), spacing(B),
+                    tile(C, i, j), spacing(C), tile(D, i, j), spacing(D), 2 * TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }
 
         for (; (i + 1) * TILE_SIZE <= M; ++i, a += spacing(A))
@@ -82,17 +82,17 @@ namespace blazefeo
             GemmKernel<ET, 1, 1, TILE_SIZE, false, true> ker;
 
             size_t j = 0;
-            ET const * b = block(B, 0, 0);
+            ET const * b = tile(B, 0, 0);
 
             for (; (j + 1) * TILE_SIZE <= N; ++j)
                 gemm(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D));
+                    tile(C, i, j), spacing(C), tile(D, i, j), spacing(D));
 
             for (; j * TILE_SIZE < N; ++j)
                 gemm(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
+                    tile(C, i, j), spacing(C), tile(D, i, j), spacing(D), TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }
 
         for (; i * TILE_SIZE < M; ++i, a += spacing(A))
@@ -101,17 +101,17 @@ namespace blazefeo
 
             size_t const rm = std::min(M - i * TILE_SIZE, TILE_SIZE);
             size_t j = 0;
-            ET const * b = block(B, 0, 0);
+            ET const * b = tile(B, 0, 0);
 
             for (; (j + 1) * TILE_SIZE <= N; ++j)
                 gemm(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), rm, TILE_SIZE);
+                    tile(C, i, j), spacing(C), tile(D, i, j), spacing(D), rm, TILE_SIZE);
 
             for (; j * TILE_SIZE < N; ++j)
                 gemm(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), rm, std::min(N - j * TILE_SIZE, TILE_SIZE));
+                    tile(C, i, j), spacing(C), tile(D, i, j), spacing(D), rm, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }
     }
 }

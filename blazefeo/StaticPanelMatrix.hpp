@@ -120,13 +120,13 @@ namespace blazefeo
         }
 
 
-        Type * block(size_t i, size_t j)
+        Type * tile(size_t i, size_t j)
         {
             return v_.data() + (i * tileColumns_ + j) * ELEMENTS_PER_TILE;
         }
 
 
-        Type const * block(size_t i, size_t j) const
+        Type const * tile(size_t i, size_t j) const
         {
             return v_.data() + (i * tileColumns_ + j) * ELEMENTS_PER_TILE;
         }
