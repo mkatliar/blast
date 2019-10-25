@@ -84,4 +84,26 @@ namespace smoke :: testing
             for (size_t j = 0; j < N; ++j)
                 EXPECT_EQ(A(i, j), A1(i, j)) << "element mismatch at (" << i << ", " << j << ")";
     }
+
+
+    TEST(StaticPanelMatrixTest, testPMatPMatMulAssign)
+    {
+        size_t constexpr M = 5;
+        size_t constexpr N = 7;
+        size_t constexpr K = 10;
+        size_t constexpr P = 4;        
+
+        StaticPanelMatrix<double, M, K, P> A;
+        StaticPanelMatrix<double, K, N, P> B;
+        StaticPanelMatrix<double, M, N, P> D;
+
+        randomize(A);
+        randomize(B);
+
+        D = A * B;
+
+        // for (size_t i = 0; i < M; ++i)
+        //     for (size_t j = 0; j < N; ++j)
+        //         EXPECT_EQ(A(i, j), A1(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+    }
 }

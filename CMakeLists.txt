@@ -24,6 +24,9 @@ set(CMAKE_DEBUG_POSTFIX d)
 # Find boost.
 find_package(Boost REQUIRED COMPONENTS exception)
 
+# Find Blaze.
+find_package(blaze REQUIRED)
+
 # add_subdirectory(src)
 # add_subdirectory(examples)
 
@@ -31,6 +34,10 @@ add_library(smoke INTERFACE)
 
 target_include_directories(smoke
     INTERFACE ${PROJECT_INCLUDE_DIR}
+)
+
+target_link_libraries(smoke
+    INTERFACE blaze::blaze
 )
 
 # SMOKE_WITH_TEST
