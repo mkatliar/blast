@@ -3,6 +3,8 @@
 #include <blazefeo/math/panel/StaticPanelMatrix.hpp>
 
 #include <blaze/util/Random.h>
+#include <blaze/util/constraints/Numeric.h>
+#include <blaze/math/typetraits/UnderlyingBuiltin.h>
 
 
 namespace blaze

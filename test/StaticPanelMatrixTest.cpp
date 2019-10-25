@@ -99,7 +99,7 @@ namespace blazefeo :: testing
         randomize(A);
         randomize(B);
 
-        D = A * B;
+        // D = A * B;
 
         // for (size_t i = 0; i < M; ++i)
         //     for (size_t j = 0; j < N; ++j)

@@ -3,9 +3,10 @@
 #include <blazefeo/SizeT.hpp>
 #include <blazefeo/math/typetraits/IsPanelMatrix.hpp>
 
-#include <blaze/math/DenseMatrix.h>
-
-#include <random>
+#include <blaze/math/ReductionFlag.h>
+#include <blaze/math/Matrix.h>
+#include <blaze/math/StorageOrder.h>
+#include <blaze/math/typetraits/IsRowMajorMatrix.h>
 
 
 namespace blazefeo
@@ -15,7 +16,7 @@ namespace blazefeo
 
     template <typename Derived, bool SO = rowMajor>
     struct PanelMatrix
-    :   public DenseMatrix<Derived, SO>
+    :   public Matrix<Derived, SO>
     {
     };
 
