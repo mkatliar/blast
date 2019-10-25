@@ -86,7 +86,7 @@ namespace smoke :: testing
     }
 
 
-    TEST(StaticPanelMatrixTest, testPMatPMatMulAssign)
+    TEST(StaticPanelMatrixTest, DISABLED_testPMatPMatMulAssign)
     {
         size_t constexpr M = 5;
         size_t constexpr N = 7;
@@ -101,6 +101,39 @@ namespace smoke :: testing
         randomize(B);
 
         D = A * B;
+
+        // for (size_t i = 0; i < M; ++i)
+        //     for (size_t j = 0; j < N; ++j)
+        //         EXPECT_EQ(A(i, j), A1(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+    }
+
+
+    TEST(StaticPanelMatrixTest, testPMatTPMatMulAssign)
+    {
+        size_t constexpr M = 5;
+        size_t constexpr N = 7;
+        size_t constexpr K = 10;
+        size_t constexpr P = 4;        
+
+        StaticPanelMatrix<double, M, K, P> A;
+        StaticPanelMatrix<double, N, K, P> B;
+        StaticPanelMatrix<double, M, N, P> D;
+
+        randomize(A);
+        randomize(B);
+
+        // D = A * trans(B);
+
+        // using E = decltype(A * trans(B));
+
+        // E e(0);
+
+        // using MT2 = decltype(A);
+        // using MT3 = decltype(trans(B));
+        // static_assert(IsPanelMatrix_v<MT2>);
+        // static_assert(IsRowMajorMatrix_v<MT2>);
+        // static_assert(IsPanelMatrix_v<MT3>);
+        // static_assert(IsRowMajorMatrix_v<MT3>);
 
         // for (size_t i = 0; i < M; ++i)
         //     for (size_t j = 0; j < N; ++j)

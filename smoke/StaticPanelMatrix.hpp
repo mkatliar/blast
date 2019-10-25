@@ -3,6 +3,7 @@
 #include <smoke/SizeT.hpp>
 #include <smoke/Block.hpp>
 #include <smoke/PanelMatrix.hpp>
+#include <smoke/Gemm.hpp>
 
 #include <blaze/util/Random.h>
 
@@ -11,17 +12,20 @@
 
 namespace smoke
 {
-    template <typename Type, size_t M, size_t N, size_t P = blockSize, size_t AL = blockAlignment>
+    using namespace blaze;
+
+
+    template <typename Type, size_t M, size_t N, size_t P = blockSize, bool SO = rowMajor, size_t AL = blockAlignment>
     class StaticPanelMatrix
-    :   public PanelMatrix<StaticPanelMatrix<Type, M, N, P, AL>, P>
+    :   public PanelMatrix<StaticPanelMatrix<Type, M, N, P, SO, AL>, P, SO>
     {
     public:
         //**Type definitions****************************************************************************
-        using This          = StaticPanelMatrix<Type, M, N, P>;   //!< Type of this StaticPanelMatrix instance.
+        using This          = StaticPanelMatrix<Type, M, N, P, SO, AL>;   //!< Type of this StaticPanelMatrix instance.
         using BaseType      = PanelMatrix<This, P>;        //!< Base type of this StaticPanelMatrix instance.
         using ResultType    = This;                        //!< Result type for expression template evaluations.
-        // using OppositeType  = StaticPanelMatrix<Type,M,N,!SO>;  //!< Result type with opposite storage order for expression template evaluations.
-        // using TransposeType = StaticPanelMatrix<Type,N,M,!SO>;  //!< Transpose type for expression template evaluations.
+        using OppositeType  = StaticPanelMatrix<Type, M, N, P, !SO, AL>;  //!< Result type with opposite storage order for expression template evaluations.
+        using TransposeType = StaticPanelMatrix<Type, N, M, P, !SO, AL>;  //!< Transpose type for expression template evaluations.
         using ElementType   = Type;                        //!< Type of the matrix elements.
         // using SIMDType      = SIMDTrait_t<ElementType>;    //!< SIMD type of the matrix elements.
         using ReturnType    = const Type&;                 //!< Return type for expression template evaluations.
@@ -52,8 +56,8 @@ namespace smoke
 
 
         template< typename MT    // Type of the right-hand side matrix
-                , bool SO >      // Storage order of the right-hand side matrix
-        StaticPanelMatrix& operator=(blaze::Matrix<MT,SO> const& rhs);
+                , bool SO2 >      // Storage order of the right-hand side matrix
+        StaticPanelMatrix& operator=(blaze::Matrix<MT, SO2> const& rhs);
 
 
         Type operator()(size_t i, size_t j) const
@@ -146,18 +150,10 @@ namespace smoke
     };
 
 
-    template <typename Type, size_t M, size_t N, size_t K, size_t P = blockSize, size_t AL = blockAlignment>
-    inline void assign( StaticPanelMatrix<Type, M, N, P, AL>& lhs, 
-        blaze::DMatDMatMultExpr<StaticPanelMatrix<Type, M, K, P, AL>, StaticPanelMatrix<Type, K, N, P, AL>, false, false, false, false> const& rhs )
-    {
-
-    }
-
-
-    template <typename Type, size_t M, size_t N, size_t P, size_t AL>
+    template <typename Type, size_t M, size_t N, size_t P, bool SO, size_t AL>
     template< typename MT    // Type of the right-hand side matrix
-            , bool SO >      // Storage order of the right-hand side matrix
-    inline StaticPanelMatrix<Type, M, N, P, AL>& StaticPanelMatrix<Type, M, N, P, AL>::operator=(blaze::Matrix<MT,SO> const& rhs)
+            , bool SO2 >      // Storage order of the right-hand side matrix
+    inline StaticPanelMatrix<Type, M, N, P, SO, AL>& StaticPanelMatrix<Type, M, N, P, SO, AL>::operator=(blaze::Matrix<MT, SO2> const& rhs)
     {
         // using blaze::assign;
 
@@ -187,7 +183,7 @@ namespace smoke
 
         // BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 
-        smoke::assign(*this, ~rhs);
+        assign(*this, ~rhs);
 
         return *this;
     }
@@ -216,27 +212,28 @@ namespace blaze
             , size_t M       // Number of rows
             , size_t N       // Number of columns
             , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    class Rand<StaticPanelMatrix<Type, M, N, P, AL>>
+    class Rand<StaticPanelMatrix<Type, M, N, P, SO, AL>>
     {
     public:
         //**Generate functions**************************************************************************
         /*!\name Generate functions */
         //@{
-        inline const StaticPanelMatrix<Type, M, N, P, AL> generate() const;
+        inline const StaticPanelMatrix<Type, M, N, P, SO, AL> generate() const;
 
         template< typename Arg >
-        inline const StaticPanelMatrix<Type, M, N, P, AL> generate( const Arg& min, const Arg& max ) const;
+        inline const StaticPanelMatrix<Type, M, N, P, SO, AL> generate( const Arg& min, const Arg& max ) const;
         //@}
         //**********************************************************************************************
 
         //**Randomize functions*************************************************************************
         /*!\name Randomize functions */
         //@{
-        inline void randomize( StaticPanelMatrix<Type, M, N, P, AL>& matrix ) const;
+        inline void randomize( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix ) const;
 
         template< typename Arg >
-        inline void randomize( StaticPanelMatrix<Type, M, N, P, AL>& matrix, const Arg& min, const Arg& max ) const;
+        inline void randomize( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix, const Arg& min, const Arg& max ) const;
         //@}
         //**********************************************************************************************
     };
@@ -254,10 +251,11 @@ namespace blaze
             , size_t M       // Number of rows
             , size_t N       // Number of columns
             , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    inline const StaticPanelMatrix<Type, M, N, P, AL> Rand<StaticPanelMatrix<Type, M, N, P, AL>>::generate() const
+    inline const StaticPanelMatrix<Type, M, N, P, SO, AL> Rand<StaticPanelMatrix<Type, M, N, P, SO, AL>>::generate() const
     {
-        StaticPanelMatrix<Type, M, N, P, AL> matrix;
+        StaticPanelMatrix<Type, M, N, P, SO, AL> matrix;
         randomize( matrix );
         return matrix;
     }
@@ -277,12 +275,13 @@ namespace blaze
             , size_t M       // Number of rows
             , size_t N       // Number of columns
             , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
     template< typename Arg >  // Min/max argument type
-    inline const StaticPanelMatrix<Type, M, N, P, AL>
-    Rand<StaticPanelMatrix<Type, M, N, P, AL>>::generate( const Arg& min, const Arg& max ) const
+    inline const StaticPanelMatrix<Type, M, N, P, SO, AL>
+    Rand<StaticPanelMatrix<Type, M, N, P, SO, AL>>::generate( const Arg& min, const Arg& max ) const
     {
-        StaticPanelMatrix<Type, M, N, P, AL> matrix;
+        StaticPanelMatrix<Type, M, N, P, SO, AL> matrix;
         randomize( matrix, min, max );
         return matrix;
     }
@@ -301,8 +300,9 @@ namespace blaze
             , size_t M       // Number of rows
             , size_t N       // Number of columns
             , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    inline void Rand< StaticPanelMatrix<Type, M, N, P, AL> >::randomize( StaticPanelMatrix<Type, M, N, P, AL>& matrix ) const
+    inline void Rand< StaticPanelMatrix<Type, M, N, P, SO, AL> >::randomize( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix ) const
     {
         using blaze::randomize;
 
@@ -329,9 +329,10 @@ namespace blaze
             , size_t M       // Number of rows
             , size_t N       // Number of columns
             , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
     template< typename Arg >  // Min/max argument type
-    inline void Rand< StaticPanelMatrix<Type, M, N, P, AL> >::randomize( StaticPanelMatrix<Type, M, N, P, AL>& matrix,
+    inline void Rand< StaticPanelMatrix<Type, M, N, P, SO, AL> >::randomize( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix,
                                                             const Arg& min, const Arg& max ) const
     {
         using blaze::randomize;
@@ -366,8 +367,9 @@ namespace blaze
             , size_t M       // Number of rows
             , size_t N       // Number of columns
             , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    void makeSymmetric( StaticPanelMatrix<Type, M, N, P, AL>& matrix )
+    void makeSymmetric( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix )
     {
         using blaze::randomize;
 
@@ -401,9 +403,10 @@ namespace blaze
             , size_t M       // Number of rows
             , size_t N       // Number of columns
             , size_t P  // Panel size
+            , bool SO
             , size_t AL      // Alignment
             , typename Arg >  // Min/max argument type
-    void makeSymmetric( StaticPanelMatrix<Type, M, N, P, AL>& matrix, const Arg& min, const Arg& max )
+    void makeSymmetric( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix, const Arg& min, const Arg& max )
     {
         using blaze::randomize;
 
@@ -435,8 +438,9 @@ namespace blaze
             , size_t M       // Number of rows
             , size_t N       // Number of columns
             , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    void makeHermitian( StaticPanelMatrix<Type, M, N, P, AL>& matrix )
+    void makeHermitian( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix )
     {
         using blaze::randomize;
 
@@ -473,9 +477,10 @@ namespace blaze
             , size_t M       // Number of rows
             , size_t N       // Number of columns
             , size_t P  // Panel size
+            , bool SO
             , size_t AL      // Alignment
             , typename Arg >  // Min/max argument type
-    void makeHermitian( StaticPanelMatrix<Type, M, N, P, AL>& matrix, const Arg& min, const Arg& max )
+    void makeHermitian( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix, const Arg& min, const Arg& max )
     {
         using blaze::randomize;
 
@@ -510,8 +515,9 @@ namespace blaze
             , size_t M       // Number of rows
             , size_t N       // Number of columns
             , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    void makePositiveDefinite( StaticPanelMatrix<Type, M, N, P, AL>& matrix )
+    void makePositiveDefinite( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix )
     {
         using blaze::randomize;
 

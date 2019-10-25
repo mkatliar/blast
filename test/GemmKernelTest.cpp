@@ -26,7 +26,7 @@ namespace smoke :: testing
         blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
         randomize(A_ref);
 
-        StaticPanelMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> A, B;
+        StaticPanelMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, rowMajor, Traits::alignment> A, B;
         A.pack(data(A_ref), spacing(A_ref));
 
         TypeParam ker;
@@ -46,7 +46,7 @@ namespace smoke :: testing
         blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
         randomize(A_ref);
 
-        StaticPanelMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> A, B;
+        StaticPanelMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, rowMajor, Traits::alignment> A, B;
         A.pack(data(A_ref), spacing(A_ref));
 
         TypeParam ker;
@@ -89,14 +89,14 @@ namespace smoke :: testing
         StaticPanelMatrix<double, 
             Traits::tA ? 1 : Traits::rows,
             Traits::tA ? Traits::rows : 1,
-            Traits::blockSize, Traits::alignment> a;
+            Traits::blockSize, rowMajor, Traits::alignment> a;
 
         StaticPanelMatrix<double, 
             Traits::tB ? Traits::columns : 1,
             Traits::tB ? 1 : Traits::columns,
-            Traits::blockSize, Traits::alignment> b;
+            Traits::blockSize, rowMajor, Traits::alignment> b;
 
-        StaticPanelMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, Traits::alignment> c, d;
+        StaticPanelMatrix<double, Traits::rows, Traits::columns, Traits::blockSize, rowMajor, Traits::alignment> c, d;
         a.pack(data(ma), spacing(ma));
         b.pack(data(mb), spacing(mb));
         c.pack(data(mc), spacing(mc));

@@ -14,16 +14,19 @@
 
 namespace smoke
 {
+    using namespace blaze;
+
+
     template <typename MT1, typename MT2, typename MT3, typename MT4, size_t P>
     BLAZE_ALWAYS_INLINE void gemm_nt(
         PanelMatrix<MT1, P> const& A, PanelMatrix<MT2, P> const& B, 
         PanelMatrix<MT3, P> const& C, PanelMatrix<MT4, P>& D)
     {
-        using ET = typename MT1::ElementType;
+        using ET = ElementType_t<MT1>;
 
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(typename MT2::ElementType, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(typename MT3::ElementType, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(typename MT4::ElementType, ET);
+        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT2>, ET);
+        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT3>, ET);
+        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT4>, ET);
 
         size_t const M = rows(A);
         size_t const N = rows(B);
@@ -31,6 +34,12 @@ namespace smoke
         size_t constexpr block_element_count = P * P;
 
         if (columns(B) != K)
+            BLAZE_THROW_INVALID_ARGUMENT("Matrix sizes do not match");
+
+        if (rows(C) != M || columns(C) != N)
+            BLAZE_THROW_INVALID_ARGUMENT("Matrix sizes do not match");
+
+        if (rows(D) != M || columns(D) != N)
             BLAZE_THROW_INVALID_ARGUMENT("Matrix sizes do not match");
 
         size_t const j1 = N / P;

@@ -17,7 +17,7 @@ namespace smoke :: benchmark
         size_t constexpr M = Traits::rows;
         size_t constexpr N = Traits::columns;
 
-        StaticPanelMatrix<double, M, N, Traits::blockSize, Traits::alignment> c, d;
+        StaticPanelMatrix<double, M, N, Traits::blockSize, rowMajor, Traits::alignment> c, d;
         randomize(c);
 
         Kernel ker(c.block(0, 0), c.spacing());

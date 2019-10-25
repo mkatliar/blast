@@ -24,6 +24,7 @@ target_link_libraries(bench-smoke
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(libxsmm REQUIRED IMPORTED_TARGET libxsmm)
+pkg_check_modules(openblas REQUIRED IMPORTED_TARGET openblas)
 
 add_executable(bench-libxsmm
     Main.cpp
@@ -33,7 +34,7 @@ add_executable(bench-libxsmm
 target_link_libraries(bench-libxsmm
     smoke
     benchmark
-    openblas
-    ${libxsmm_LINK_LIBRARIES}
+    PkgConfig::openblas
+    PkgConfig::libxsmm
     ${CMAKE_THREAD_LIBS_INIT}
 )
