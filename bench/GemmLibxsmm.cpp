@@ -1,6 +1,3 @@
-#include <blazefeo/DynamicPanelMatrix.hpp>
-#include <blazefeo/Gemm.hpp>
-
 #include <bench/Benchmark.hpp>
 #include <test/Randomize.hpp>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <blazefeo/gemm/GemmKernel.hpp>
+#include <blazefeo/math/panel/gemm/GemmKernel.hpp>
 
 #include <blazefeo/simd/Hsum.hpp>
 #include <blazefeo/Exception.hpp>

@@ -1,4 +1,4 @@
-#include <blazefeo/DynamicPanelMatrix.hpp>
+#include <blazefeo/math/DynamicPanelMatrix.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>

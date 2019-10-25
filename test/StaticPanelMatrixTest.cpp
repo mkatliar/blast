@@ -1,4 +1,4 @@
-#include <blazefeo/StaticPanelMatrix.hpp>
+#include <blazefeo/math/StaticPanelMatrix.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>

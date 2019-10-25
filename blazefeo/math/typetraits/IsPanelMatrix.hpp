@@ -5,7 +5,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blazefeo/math/expressions/Forward.hpp>
+#include <blazefeo/math/panel/Forward.hpp>
 
 #include <blaze/util/IntegralConstant.h>
 

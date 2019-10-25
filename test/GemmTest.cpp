@@ -1,10 +1,9 @@
-#include <blazefeo/StaticPanelMatrix.hpp>
-#include <blazefeo/DynamicPanelMatrix.hpp>
-#include <blazefeo/Gemm.hpp>
+#include <blazefeo/math/StaticPanelMatrix.hpp>
+#include <blazefeo/math/DynamicPanelMatrix.hpp>
+#include <blazefeo/math/panel/Gemm.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
-
 
 namespace blazefeo :: testing
 {

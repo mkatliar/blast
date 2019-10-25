@@ -1,7 +1,4 @@
-#include <blazefeo/StaticPanelMatrix.hpp>
-#include <blazefeo/gemm/GemmKernel_double_1_1_4.hpp>
-#include <blazefeo/gemm/GemmKernel_double_2_1_4.hpp>
-#include <blazefeo/gemm/GemmKernel_double_3_1_4.hpp>
+#include <blazefeo/math/StaticPanelMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
 

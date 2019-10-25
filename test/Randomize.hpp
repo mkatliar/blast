@@ -1,6 +1,6 @@
 #pragma once
 
-#include <blazefeo/StaticPanelMatrix.hpp>
+#include <blazefeo/math/StaticPanelMatrix.hpp>
 #include <blaze/Math.h>
 
 #include <array>

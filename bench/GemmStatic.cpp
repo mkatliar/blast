@@ -1,5 +1,5 @@
-#include <blazefeo/StaticPanelMatrix.hpp>
-#include <blazefeo/Gemm.hpp>
+#include <blazefeo/math/StaticPanelMatrix.hpp>
+#include <blazefeo/math/panel/Gemm.hpp>
 
 #include <bench/Benchmark.hpp>
 #include <test/Randomize.hpp>

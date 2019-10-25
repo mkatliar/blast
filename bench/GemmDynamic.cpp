@@ -1,5 +1,5 @@
-#include <blazefeo/DynamicPanelMatrix.hpp>
-#include <blazefeo/Gemm.hpp>
+#include <blazefeo/math/DynamicPanelMatrix.hpp>
+#include <blazefeo/math/panel/Gemm.hpp>
 
 #include <bench/Benchmark.hpp>
 #include <test/Randomize.hpp>
