@@ -70,7 +70,7 @@ namespace smoke :: benchmark
         for (auto _ : state)
             kernel(a.data(), b.data(), c.data());
 
-        state.counters["flops"] = Counter(m * n * k, Counter::kIsIterationInvariantRate);
+        state.counters["flops"] = Counter(2 * m * n * k, Counter::kIsIterationInvariantRate);
         state.counters["m"] = m;
     }
     

@@ -28,10 +28,13 @@ namespace smoke :: benchmark
         for (auto _ : state)
         {
             gemm_nt(A, B, C, D);
+            DoNotOptimize(A);
+            DoNotOptimize(B);
+            DoNotOptimize(C);
             DoNotOptimize(D);
         }
 
-        state.counters["flops"] = Counter(M * N * K, Counter::kIsIterationInvariantRate);
+        state.counters["flops"] = Counter(2 * M * N * K, Counter::kIsIterationInvariantRate);
         state.counters["m"] = M;
     }
 
