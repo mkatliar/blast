@@ -15,5 +15,5 @@ namespace blazefeo
     //
     //=================================================================================================
 
-    template <typename, size_t, bool> struct PanelMatrix;
+    template <typename, bool> struct PanelMatrix;
 }

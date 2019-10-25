@@ -8,7 +8,6 @@ find_package(blaze 3.5 REQUIRED)
 # ~~~~~~~~~~ Our tests ~~~~~~~~~~~~~~
 add_executable(test-blazefeo
     GemmKernelTest.cpp
-    PaddedSizeTest.cpp
     StaticPanelMatrixTest.cpp
     DynamicPanelMatrixTest.cpp
     GemmTest.cpp

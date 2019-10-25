@@ -32,11 +32,11 @@ namespace blazefeo
         //**********************************************************************************************
         static T* create();
 
-        template <typename MT, size_t P, bool SO>
-        static TrueType test( const PanelMatrix<MT, P, SO>* );
+        template <typename MT, bool SO>
+        static TrueType test( const PanelMatrix<MT, SO>* );
 
-        template <typename MT, size_t P, bool SO>
-        static TrueType test( const volatile PanelMatrix<MT, P, SO>* );
+        template <typename MT, bool SO>
+        static TrueType test( const volatile PanelMatrix<MT, SO>* );
 
         static FalseType test( ... );
         //**********************************************************************************************

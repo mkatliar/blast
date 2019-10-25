@@ -21,7 +21,7 @@ namespace blazefeo :: benchmark
         size_t const m = state.range(0);
         size_t const n = state.range(1);
 
-        StaticPanelMatrix<double, M, N, Traits::blockSize, rowMajor, Traits::alignment> c, d;
+        StaticPanelMatrix<double, M, N, rowMajor, Traits::alignment> c, d;
         randomize(c);
 
         Kernel ker(c.block(0, 0), c.spacing());

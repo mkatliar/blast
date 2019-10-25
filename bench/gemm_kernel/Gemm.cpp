@@ -20,9 +20,9 @@ namespace blazefeo :: benchmark
         bool constexpr TA = Traits::tA;
         bool constexpr TB = Traits::tB;
 
-        StaticPanelMatrix<double, !TA ? M : K, !TA ? K : M, Traits::blockSize, rowMajor, Traits::alignment> a;
-        StaticPanelMatrix<double, !TB ? K : N, !TB ? N : K, Traits::blockSize, rowMajor, Traits::alignment> b;
-        StaticPanelMatrix<double, M, N, Traits::blockSize, rowMajor, Traits::alignment> c, d;
+        StaticPanelMatrix<double, !TA ? M : K, !TA ? K : M, rowMajor, Traits::alignment> a;
+        StaticPanelMatrix<double, !TB ? K : N, !TB ? N : K, rowMajor, Traits::alignment> b;
+        StaticPanelMatrix<double, M, N, rowMajor, Traits::alignment> c, d;
 
         randomize(a);
         randomize(b);

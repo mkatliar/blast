@@ -5,6 +5,7 @@
 #include <blazefeo/gemm/GemmKernel_double_1_1_4.hpp>
 #include <blazefeo/gemm/GemmKernel_double_2_1_4.hpp>
 #include <blazefeo/gemm/GemmKernel_double_3_1_4.hpp>
+#include <blazefeo/system/Tile.hpp>
 
 #include <blaze/util/Exception.h>
 #include <blaze/util/constraints/SameType.h>
@@ -17,10 +18,10 @@ namespace blazefeo
     using namespace blaze;
 
 
-    template <typename MT1, typename MT2, typename MT3, typename MT4, size_t P>
+    template <typename MT1, typename MT2, typename MT3, typename MT4>
     BLAZE_ALWAYS_INLINE void gemm_nt(
-        PanelMatrix<MT1, P> const& A, PanelMatrix<MT2, P> const& B, 
-        PanelMatrix<MT3, P> const& C, PanelMatrix<MT4, P>& D)
+        PanelMatrix<MT1, rowMajor> const& A, PanelMatrix<MT2, rowMajor> const& B, 
+        PanelMatrix<MT3, rowMajor> const& C, PanelMatrix<MT4, rowMajor>& D)
     {
         using ET = ElementType_t<MT1>;
 
@@ -31,7 +32,6 @@ namespace blazefeo
         size_t const M = rows(A);
         size_t const N = rows(B);
         size_t const K = columns(A);
-        size_t constexpr block_element_count = P * P;
 
         if (columns(B) != K)
             BLAZE_THROW_INVALID_ARGUMENT("Matrix sizes do not match");
@@ -42,79 +42,76 @@ namespace blazefeo
         if (rows(D) != M || columns(D) != N)
             BLAZE_THROW_INVALID_ARGUMENT("Matrix sizes do not match");
 
-        size_t const j1 = N / P;
-        size_t const rn = N % P;
-
         size_t i = 0;
         ET const * a = block(A, 0, 0);
 
-        for (; (i + 3) * P <= M; i += 3, a += 3 * spacing(A))
+        for (; (i + 3) * TILE_SIZE <= M; i += 3, a += 3 * spacing(A))
         {
-            GemmKernel<ET, 3, 1, P, false, true> ker;
+            GemmKernel<ET, 3, 1, TILE_SIZE, false, true> ker;
             size_t j = 0;
 
-            for (; (j + 1) * P <= N; ++j)
+            for (; (j + 1) * TILE_SIZE <= N; ++j)
                 gemm(ker, K,
                     a, spacing(A), block(B, j, 0), spacing(B),
                     block(C, i, j), spacing(C), block(D, i, j), spacing(D));
 
-            for (; j * P < N; ++j)
+            for (; j * TILE_SIZE < N; ++j)
                 gemm(ker, K,
                     a, spacing(A), block(B, j, 0), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), 3 * P, std::min(N - j * P, P));
+                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), 3 * TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }
 
-        for (; (i + 2) * P <= M; i += 2, a += 2 * spacing(A))
+        for (; (i + 2) * TILE_SIZE <= M; i += 2, a += 2 * spacing(A))
         {
-            GemmKernel<ET, 2, 1, P, false, true> ker;
+            GemmKernel<ET, 2, 1, TILE_SIZE, false, true> ker;
             size_t j = 0;
 
-            for (; (j + 1) * P <= N; ++j)
+            for (; (j + 1) * TILE_SIZE <= N; ++j)
                 gemm(ker, K,
                     a, spacing(A), block(B, j, 0), spacing(B),
                     block(C, i, j), spacing(C), block(D, i, j), spacing(D));
 
-            for (; j * P < N; ++j)
+            for (; j * TILE_SIZE < N; ++j)
                 gemm(ker, K,
                     a, spacing(A), block(B, j, 0), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), 2 * P, std::min(N - j * P, P));
+                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), 2 * TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }
 
-        for (; (i + 1) * P <= M; ++i, a += spacing(A))
+        for (; (i + 1) * TILE_SIZE <= M; ++i, a += spacing(A))
         {
-            GemmKernel<ET, 1, 1, P, false, true> ker;
+            GemmKernel<ET, 1, 1, TILE_SIZE, false, true> ker;
 
             size_t j = 0;
             ET const * b = block(B, 0, 0);
 
-            for (; (j + 1) * P <= N; ++j)
+            for (; (j + 1) * TILE_SIZE <= N; ++j)
                 gemm(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
                     block(C, i, j), spacing(C), block(D, i, j), spacing(D));
 
-            for (; j * P < N; ++j)
+            for (; j * TILE_SIZE < N; ++j)
                 gemm(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), P, std::min(N - j * P, P));
+                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }
 
-        for (; i * P < M; ++i, a += spacing(A))
+        for (; i * TILE_SIZE < M; ++i, a += spacing(A))
         {
-            GemmKernel<ET, 1, 1, P, false, true> ker;
+            GemmKernel<ET, 1, 1, TILE_SIZE, false, true> ker;
 
-            size_t const rm = std::min(M - i * P, P);
+            size_t const rm = std::min(M - i * TILE_SIZE, TILE_SIZE);
             size_t j = 0;
             ET const * b = block(B, 0, 0);
 
-            for (; (j + 1) * P <= N; ++j)
+            for (; (j + 1) * TILE_SIZE <= N; ++j)
                 gemm(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), rm, P);
+                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), rm, TILE_SIZE);
 
-            for (; j * P < N; ++j)
+            for (; j * TILE_SIZE < N; ++j)
                 gemm(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
-                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), rm, std::min(N - j * P, P));
+                    block(C, i, j), spacing(C), block(D, i, j), spacing(D), rm, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }
     }
 }
