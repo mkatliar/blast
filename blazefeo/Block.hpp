@@ -1,9 +1,9 @@
 #pragma once
 
-#include <smoke/SizeT.hpp>
+#include <blazefeo/SizeT.hpp>
 
 
-namespace smoke
+namespace blazefeo
 {
     size_t constexpr blockSize = 4;
     size_t constexpr blockAlignment = 0x20;

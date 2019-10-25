@@ -1,7 +1,7 @@
-#include <smoke/StaticPanelMatrix.hpp>
-#include <smoke/gemm/GemmKernel_double_1_1_4.hpp>
-#include <smoke/gemm/GemmKernel_double_2_1_4.hpp>
-#include <smoke/gemm/GemmKernel_double_3_1_4.hpp>
+#include <blazefeo/StaticPanelMatrix.hpp>
+#include <blazefeo/gemm/GemmKernel_double_1_1_4.hpp>
+#include <blazefeo/gemm/GemmKernel_double_2_1_4.hpp>
+#include <blazefeo/gemm/GemmKernel_double_3_1_4.hpp>
 
 #include <bench/Benchmark.hpp>
 
@@ -10,7 +10,7 @@
 #include <functional> 
 
 
-namespace smoke :: benchmark
+namespace blazefeo :: benchmark
 {
     template <typename Kernel>
     static void BM_GemmKernel_storeVariableSize(State& state)

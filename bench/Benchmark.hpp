@@ -3,7 +3,7 @@
 #include <benchmark/benchmark.h>
 
 
-namespace smoke :: benchmark
+namespace blazefeo :: benchmark
 {
     using namespace ::benchmark;
 }

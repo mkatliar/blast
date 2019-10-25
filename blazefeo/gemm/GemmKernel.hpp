@@ -1,11 +1,11 @@
 #pragma once
 
-#include <smoke/SizeT.hpp>
+#include <blazefeo/SizeT.hpp>
 
 #include <blaze/system/Inline.h>
 
 
-namespace smoke
+namespace blazefeo
 {
     template <typename T, size_t M, size_t N, size_t BS, bool TA, bool TB>
     class GemmKernel;

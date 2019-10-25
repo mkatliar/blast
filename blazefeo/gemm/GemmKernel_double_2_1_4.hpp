@@ -1,14 +1,14 @@
 #pragma once
 
-#include <smoke/gemm/GemmKernel.hpp>
+#include <blazefeo/gemm/GemmKernel.hpp>
 
-#include <smoke/simd/Hsum.hpp>
-#include <smoke/Exception.hpp>
+#include <blazefeo/simd/Hsum.hpp>
+#include <blazefeo/Exception.hpp>
 
 #include <immintrin.h>
 
 
-namespace smoke
+namespace blazefeo
 {
     template <bool TA, bool TB>
     class GemmKernel<double, 2, 1, 4, TA, TB>

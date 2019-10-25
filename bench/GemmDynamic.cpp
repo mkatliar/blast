@@ -1,5 +1,5 @@
-#include <smoke/DynamicPanelMatrix.hpp>
-#include <smoke/Gemm.hpp>
+#include <blazefeo/DynamicPanelMatrix.hpp>
+#include <blazefeo/Gemm.hpp>
 
 #include <bench/Benchmark.hpp>
 #include <test/Randomize.hpp>
@@ -8,7 +8,7 @@
 #include <memory>
 
 
-namespace smoke :: benchmark
+namespace blazefeo :: benchmark
 {
     template <typename Real>
     static void BM_gemm_nt_dynamic(::benchmark::State& state)

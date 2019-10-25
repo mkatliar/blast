@@ -7,11 +7,11 @@
 #include <blaze/util/Types.h>
 
 
-namespace smoke 
+namespace blazefeo 
 {
     //=================================================================================================
     //
-    //  ::smoke NAMESPACE FORWARD DECLARATIONS
+    //  ::blazefeo NAMESPACE FORWARD DECLARATIONS
     //
     //=================================================================================================
 

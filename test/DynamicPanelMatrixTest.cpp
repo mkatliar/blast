@@ -1,10 +1,10 @@
-#include <smoke/DynamicPanelMatrix.hpp>
+#include <blazefeo/DynamicPanelMatrix.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 
 
-namespace smoke :: testing
+namespace blazefeo :: testing
 {
     TEST(DynamicPanelMatrixTest, testSpacing)
     {

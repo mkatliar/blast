@@ -10,7 +10,7 @@
 #include <cmath>
 
 
-namespace smoke :: testing
+namespace blazefeo :: testing
 {
 	using namespace ::testing;
 	
@@ -168,13 +168,13 @@ namespace smoke :: testing
 
 
 #define SMOKE_EXPECT_APPROX_EQ(val, expected, abs_tol, rel_tol) \
-	EXPECT_TRUE(::smoke::testing::approxEqual(val, expected, abs_tol, rel_tol))
+	EXPECT_TRUE(::blazefeo::testing::approxEqual(val, expected, abs_tol, rel_tol))
 
 #define SMOKE_ASSERT_APPROX_EQ(val, expected, abs_tol, rel_tol) \
-	ASSERT_TRUE(::smoke::testing::approxEqual(val, expected, abs_tol, rel_tol))
+	ASSERT_TRUE(::blazefeo::testing::approxEqual(val, expected, abs_tol, rel_tol))
 
 #define SMOKE_EXPECT_EQ(val, expected) \
-	EXPECT_EQ(::smoke::testing::forcePrint(val), ::smoke::testing::forcePrint(expected))
+	EXPECT_EQ(::blazefeo::testing::forcePrint(val), ::blazefeo::testing::forcePrint(expected))
 
 #define SMOKE_ASSERT_EQ(val, expected) \
-	ASSERT_EQ(::smoke::testing::forcePrint(val), ::smoke::testing::forcePrint(expected))
+	ASSERT_EQ(::blazefeo::testing::forcePrint(val), ::blazefeo::testing::forcePrint(expected))

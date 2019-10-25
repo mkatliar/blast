@@ -1,12 +1,12 @@
-#include <smoke/StaticPanelMatrix.hpp>
-#include <smoke/DynamicPanelMatrix.hpp>
-#include <smoke/Gemm.hpp>
+#include <blazefeo/StaticPanelMatrix.hpp>
+#include <blazefeo/DynamicPanelMatrix.hpp>
+#include <blazefeo/Gemm.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 
 
-namespace smoke :: testing
+namespace blazefeo :: testing
 {
 #if 0
     TEST(GemmTest, testTN_8_8_24)

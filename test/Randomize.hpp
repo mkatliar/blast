@@ -1,12 +1,12 @@
 #pragma once
 
-#include <smoke/StaticPanelMatrix.hpp>
+#include <blazefeo/StaticPanelMatrix.hpp>
 #include <blaze/Math.h>
 
 #include <array>
 
 
-namespace smoke
+namespace blazefeo
 {
     template <typename T, std::size_t N>
     inline void randomize(std::array<T, N>& a)

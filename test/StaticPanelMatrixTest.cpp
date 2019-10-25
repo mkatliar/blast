@@ -1,10 +1,10 @@
-#include <smoke/StaticPanelMatrix.hpp>
+#include <blazefeo/StaticPanelMatrix.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 
 
-namespace smoke :: testing
+namespace blazefeo :: testing
 {
     TEST(StaticPanelMatrixTest, testPanelRows)
     {

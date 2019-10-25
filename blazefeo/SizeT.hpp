@@ -3,7 +3,7 @@
 #include <cstddef>
 
 
-namespace smoke
+namespace blazefeo
 {
     using std::size_t;
 }

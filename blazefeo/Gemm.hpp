@@ -1,10 +1,10 @@
 #pragma once
 
-#include <smoke/PanelMatrix.hpp>
-#include <smoke/gemm/GemmKernel.hpp>
-#include <smoke/gemm/GemmKernel_double_1_1_4.hpp>
-#include <smoke/gemm/GemmKernel_double_2_1_4.hpp>
-#include <smoke/gemm/GemmKernel_double_3_1_4.hpp>
+#include <blazefeo/PanelMatrix.hpp>
+#include <blazefeo/gemm/GemmKernel.hpp>
+#include <blazefeo/gemm/GemmKernel_double_1_1_4.hpp>
+#include <blazefeo/gemm/GemmKernel_double_2_1_4.hpp>
+#include <blazefeo/gemm/GemmKernel_double_3_1_4.hpp>
 
 #include <blaze/util/Exception.h>
 #include <blaze/util/constraints/SameType.h>
@@ -12,7 +12,7 @@
 #include <algorithm>
 
 
-namespace smoke
+namespace blazefeo
 {
     using namespace blaze;
 

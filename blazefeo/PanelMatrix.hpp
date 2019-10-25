@@ -1,14 +1,14 @@
 #pragma once
 
-#include <smoke/SizeT.hpp>
-#include <smoke/math/typetraits/IsPanelMatrix.hpp>
+#include <blazefeo/SizeT.hpp>
+#include <blazefeo/math/typetraits/IsPanelMatrix.hpp>
 
 #include <blaze/math/DenseMatrix.h>
 
 #include <random>
 
 
-namespace smoke
+namespace blazefeo
 {
     template <typename Derived, size_t P, bool SO = blaze::rowMajor>
     struct PanelMatrix

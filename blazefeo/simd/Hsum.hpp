@@ -3,7 +3,7 @@
 #include <immintrin.h>
 
 
-namespace smoke
+namespace blazefeo
 {
     /// dst[127:64] = sum(v1)
     /// dst[63:0] = sum(v0)

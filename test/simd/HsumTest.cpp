@@ -1,4 +1,4 @@
-#include <smoke/simd/Hsum.hpp>
+#include <blazefeo/simd/Hsum.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
@@ -8,7 +8,7 @@
 using namespace blaze;
 
 
-namespace smoke :: testing
+namespace blazefeo :: testing
 {
     TEST(HsumTest, test4x256d)
     {

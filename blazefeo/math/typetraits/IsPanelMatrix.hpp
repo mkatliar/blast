@@ -5,12 +5,12 @@
 // Includes
 //*************************************************************************************************
 
-#include <smoke/math/expressions/Forward.hpp>
+#include <blazefeo/math/expressions/Forward.hpp>
 
 #include <blaze/util/IntegralConstant.h>
 
 
-namespace smoke
+namespace blazefeo
 {
     using namespace blaze;
 

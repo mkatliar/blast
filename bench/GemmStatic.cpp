@@ -1,5 +1,5 @@
-#include <smoke/StaticPanelMatrix.hpp>
-#include <smoke/Gemm.hpp>
+#include <blazefeo/StaticPanelMatrix.hpp>
+#include <blazefeo/Gemm.hpp>
 
 #include <bench/Benchmark.hpp>
 #include <test/Randomize.hpp>
@@ -8,7 +8,7 @@
 #include <memory>
 
 
-namespace smoke :: benchmark
+namespace blazefeo :: benchmark
 {
     template <typename Real, size_t M>
     static void BM_gemm_nt_static(::benchmark::State& state)

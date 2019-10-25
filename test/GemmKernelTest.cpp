@@ -1,13 +1,13 @@
-#include <smoke/gemm/GemmKernel_double_1_1_4.hpp>
-#include <smoke/gemm/GemmKernel_double_2_1_4.hpp>
-#include <smoke/gemm/GemmKernel_double_3_1_4.hpp>
-#include <smoke/StaticPanelMatrix.hpp>
+#include <blazefeo/gemm/GemmKernel_double_1_1_4.hpp>
+#include <blazefeo/gemm/GemmKernel_double_2_1_4.hpp>
+#include <blazefeo/gemm/GemmKernel_double_3_1_4.hpp>
+#include <blazefeo/StaticPanelMatrix.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 
 
-namespace smoke :: testing
+namespace blazefeo :: testing
 {
     template <typename Ker>
     class GemmKernelTest

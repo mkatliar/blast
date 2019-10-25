@@ -1,9 +1,9 @@
-#include <smoke/PaddedSize.hpp>
+#include <blazefeo/PaddedSize.hpp>
 
 #include <test/Testing.hpp>
 
 
-namespace smoke :: testing
+namespace blazefeo :: testing
 {
     TEST(PaddedSizeTest, testZeroRemainder)
     {

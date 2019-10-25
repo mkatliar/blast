@@ -1,48 +1,63 @@
 #pragma once
 
-#include <smoke/SizeT.hpp>
-#include <smoke/Block.hpp>
-#include <smoke/PaddedSize.hpp>
-#include <smoke/PanelMatrix.hpp>
+#include <blazefeo/SizeT.hpp>
+#include <blazefeo/Block.hpp>
+#include <blazefeo/PanelMatrix.hpp>
+#include <blazefeo/Gemm.hpp>
 
 #include <blaze/util/Random.h>
 
-#include <memory>
-#include <cstdlib>
-#include <algorithm>
+#include <array>
 
 
-namespace smoke
+namespace blazefeo
 {
-    template <typename Type, size_t P = blockSize, size_t AL = blockAlignment>
-    class DynamicPanelMatrix
-    :   public PanelMatrix<DynamicPanelMatrix<Type, P, AL>, P>
+    using namespace blaze;
+
+
+    template <typename Type, size_t M, size_t N, size_t P = blockSize, bool SO = rowMajor, size_t AL = blockAlignment>
+    class StaticPanelMatrix
+    :   public PanelMatrix<StaticPanelMatrix<Type, M, N, P, SO, AL>, P, SO>
     {
     public:
-        using ElementType = Type;
+        //**Type definitions****************************************************************************
+        using This          = StaticPanelMatrix<Type, M, N, P, SO, AL>;   //!< Type of this StaticPanelMatrix instance.
+        using BaseType      = PanelMatrix<This, P>;        //!< Base type of this StaticPanelMatrix instance.
+        using ResultType    = This;                        //!< Result type for expression template evaluations.
+        using OppositeType  = StaticPanelMatrix<Type, M, N, P, !SO, AL>;  //!< Result type with opposite storage order for expression template evaluations.
+        using TransposeType = StaticPanelMatrix<Type, N, M, P, !SO, AL>;  //!< Transpose type for expression template evaluations.
+        using ElementType   = Type;                        //!< Type of the matrix elements.
+        // using SIMDType      = SIMDTrait_t<ElementType>;    //!< SIMD type of the matrix elements.
+        using ReturnType    = const Type&;                 //!< Return type for expression template evaluations.
+        using CompositeType = const This&;                 //!< Data type for composite expression templates.
+
+        using Reference      = Type&;        //!< Reference to a non-constant matrix value.
+        using ConstReference = const Type&;  //!< Reference to a constant matrix value.
+        using Pointer        = Type*;        //!< Pointer to a non-constant matrix value.
+        using ConstPointer   = const Type*;  //!< Pointer to a constant matrix value.
 
         
-        DynamicPanelMatrix(size_t m, size_t n)
-        :   m_(m)
-        ,   n_(n)
-        ,   spacing_(P * paddedSize(n, P))
-        ,   capacity_(paddedSize(m, P) * paddedSize(n, P))
-        ,   v_(reinterpret_cast<Type *>(std::aligned_alloc(AL, capacity_ * sizeof(Type))), &std::free)
+        StaticPanelMatrix()
         {
             // Initialize padding elements to 0 to prevent denorms in calculations.
             // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
-            std::fill_n(v_.get(), capacity_, Type {});
+            v_.fill(Type {});
         }
 
 
-        DynamicPanelMatrix& operator=(Type val)
+        StaticPanelMatrix& operator=(Type val)
         {
-            for (size_t i = 0; i < m_; ++i)
-                for (size_t j = 0; j < n_; ++j)
+            for (size_t i = 0; i < M; ++i)
+                for (size_t j = 0; j < N; ++j)
                     (*this)(i, j) = val;
 
             return *this;
         }
+
+
+        template< typename MT    // Type of the right-hand side matrix
+                , bool SO2 >      // Storage order of the right-hand side matrix
+        StaticPanelMatrix& operator=(blaze::Matrix<MT, SO2> const& rhs);
 
 
         Type operator()(size_t i, size_t j) const
@@ -57,61 +72,70 @@ namespace smoke
         }
 
 
-        size_t rows() const
+        size_t constexpr rows() const
         {
-            return m_;
+            return M;
         }
 
 
-        size_t columns() const
+        size_t constexpr columns() const
         {
-            return n_;
+            return N;
         }
 
 
-        size_t spacing() const
+        size_t constexpr spacing() const
         {
-            return spacing_;
+            return panelColumns_ * elementsPerPanel_;
+        }
+
+
+        size_t constexpr panelRows() const
+        {
+            return panelRows_;
+        }
+
+
+        size_t constexpr panelColumns() const
+        {
+            return panelColumns_;
         }
 
 
         void pack(Type const * data, size_t lda)
         {
-            for (size_t i = 0; i < m_; ++i)
-                for (size_t j = 0; j < n_; ++j)
+            for (size_t i = 0; i < M; ++i)
+                for (size_t j = 0; j < N; ++j)
                     (*this)(i, j) = data[i + lda * j];
         }
 
 
         void unpack(Type * data, size_t lda) const
         {
-            for (size_t i = 0; i < m_; ++i)
-                for (size_t j = 0; j < n_; ++j)
+            for (size_t i = 0; i < M; ++i)
+                for (size_t j = 0; j < N; ++j)
                     data[i + lda * j] = (*this)(i, j);
         }
 
 
         Type * block(size_t i, size_t j)
         {
-            return v_.get() + i * spacing_ + j * elementsPerPanel_;
+            return v_.data() + (i * panelColumns_ + j) * elementsPerPanel_;
         }
 
 
         Type const * block(size_t i, size_t j) const
         {
-            return v_.get() + i * spacing_ + j * elementsPerPanel_;
+            return v_.data() + (i * panelColumns_ + j) * elementsPerPanel_;
         }
 
 
     private:
+        static size_t constexpr panelRows_ = M / P + (M % P > 0);
+        static size_t constexpr panelColumns_ = N / P + (N % P > 0);
         static size_t constexpr elementsPerPanel_ = P * P;
 
-        size_t m_;
-        size_t n_;
-        size_t spacing_;
-        size_t capacity_;
-        
-        std::unique_ptr<Type[], decltype(&std::free)> v_;
+        alignas(AL) std::array<Type, panelRows_ * panelColumns_ * elementsPerPanel_> v_;
 
 
         size_t elementIndex(size_t i, size_t j) const
@@ -121,15 +145,54 @@ namespace smoke
             size_t const subpanel_i = i % P;
             size_t const subpanel_j = j % P;
 
-            return panel_i * spacing_ + panel_j * elementsPerPanel_ + subpanel_i + subpanel_j * P;
+            return (panel_i * panelColumns_ + panel_j) * elementsPerPanel_ + subpanel_i + subpanel_j * P;
         }
     };
+
+
+    template <typename Type, size_t M, size_t N, size_t P, bool SO, size_t AL>
+    template< typename MT    // Type of the right-hand side matrix
+            , bool SO2 >      // Storage order of the right-hand side matrix
+    inline StaticPanelMatrix<Type, M, N, P, SO, AL>& StaticPanelMatrix<Type, M, N, P, SO, AL>::operator=(blaze::Matrix<MT, SO2> const& rhs)
+    {
+        // using blaze::assign;
+
+        // using TT = decltype( trans( *this ) );
+        // using CT = decltype( ctrans( *this ) );
+        // using IT = decltype( inv( *this ) );
+
+        // if( (~rhs).rows() != M || (~rhs).columns() != N ) {
+        //     BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to static matrix" );
+        // }
+
+        // if( IsSame_v<MT,TT> && (~rhs).isAliased( this ) ) {
+        //     transpose( typename IsSquare<This>::Type() );
+        // }
+        // else if( IsSame_v<MT,CT> && (~rhs).isAliased( this ) ) {
+        //     ctranspose( typename IsSquare<This>::Type() );
+        // }
+        // else if( !IsSame_v<MT,IT> && (~rhs).canAlias( this ) ) {
+        //     StaticPanelMatrix tmp( ~rhs );
+        //     assign( *this, tmp );
+        // }
+        // else {
+        //     if( IsSparseMatrix_v<MT> )
+        //         reset();
+        //     assign( *this, ~rhs );
+        // }
+
+        // BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
+
+        assign(*this, ~rhs);
+
+        return *this;
+    }
 }
 
 
 namespace blaze
 {
-    using smoke::DynamicPanelMatrix;
+    using blazefeo::StaticPanelMatrix;
 
 
     //=================================================================================================
@@ -140,34 +203,37 @@ namespace blaze
 
     //*************************************************************************************************
     /*! \cond BLAZE_INTERNAL */
-    /*!\brief Specialization of the Rand class template for DynamicPanelMatrix.
+    /*!\brief Specialization of the Rand class template for StaticPanelMatrix.
     // \ingroup random
     //
-    // This specialization of the Rand class creates random instances of DynamicPanelMatrix.
+    // This specialization of the Rand class creates random instances of StaticPanelMatrix.
     */
     template< typename Type  // Data type of the matrix
-            , size_t P  // Block size
+            , size_t M       // Number of rows
+            , size_t N       // Number of columns
+            , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    class Rand< DynamicPanelMatrix<Type, P, AL> >
+    class Rand<StaticPanelMatrix<Type, M, N, P, SO, AL>>
     {
     public:
         //**Generate functions**************************************************************************
         /*!\name Generate functions */
         //@{
-        inline const DynamicPanelMatrix<Type, P, AL> generate( size_t m, size_t n ) const;
+        inline const StaticPanelMatrix<Type, M, N, P, SO, AL> generate() const;
 
         template< typename Arg >
-        inline const DynamicPanelMatrix<Type, P, AL> generate( size_t m, size_t n, const Arg& min, const Arg& max ) const;
+        inline const StaticPanelMatrix<Type, M, N, P, SO, AL> generate( const Arg& min, const Arg& max ) const;
         //@}
         //**********************************************************************************************
 
         //**Randomize functions*************************************************************************
         /*!\name Randomize functions */
         //@{
-        inline void randomize( DynamicPanelMatrix<Type, P, AL>& matrix ) const;
+        inline void randomize( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix ) const;
 
         template< typename Arg >
-        inline void randomize( DynamicPanelMatrix<Type, P, AL>& matrix, const Arg& min, const Arg& max ) const;
+        inline void randomize( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix, const Arg& min, const Arg& max ) const;
         //@}
         //**********************************************************************************************
     };
@@ -177,19 +243,19 @@ namespace blaze
 
     //*************************************************************************************************
     /*! \cond BLAZE_INTERNAL */
-    /*!\brief Generation of a random DynamicPanelMatrix.
+    /*!\brief Generation of a random StaticPanelMatrix.
     //
-    // \param m The number of rows of the random matrix.
-    // \param n The number of columns of the random matrix.
     // \return The generated random matrix.
     */
     template< typename Type  // Data type of the matrix
-            , size_t P  // Block size
+            , size_t M       // Number of rows
+            , size_t N       // Number of columns
+            , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    inline const DynamicPanelMatrix<Type, P, AL>
-    Rand< DynamicPanelMatrix<Type, P, AL> >::generate( size_t m, size_t n ) const
+    inline const StaticPanelMatrix<Type, M, N, P, SO, AL> Rand<StaticPanelMatrix<Type, M, N, P, SO, AL>>::generate() const
     {
-        DynamicPanelMatrix<Type, P, AL> matrix( m, n );
+        StaticPanelMatrix<Type, M, N, P, SO, AL> matrix;
         randomize( matrix );
         return matrix;
     }
@@ -199,22 +265,23 @@ namespace blaze
 
     //*************************************************************************************************
     /*! \cond BLAZE_INTERNAL */
-    /*!\brief Generation of a random DynamicPanelMatrix.
+    /*!\brief Generation of a random StaticPanelMatrix.
     //
-    // \param m The number of rows of the random matrix.
-    // \param n The number of columns of the random matrix.
     // \param min The smallest possible value for a matrix element.
     // \param max The largest possible value for a matrix element.
     // \return The generated random matrix.
     */
     template< typename Type  // Data type of the matrix
-            , size_t P  // Block size
+            , size_t M       // Number of rows
+            , size_t N       // Number of columns
+            , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
     template< typename Arg >  // Min/max argument type
-    inline const DynamicPanelMatrix<Type, P, AL>
-    Rand< DynamicPanelMatrix<Type, P, AL> >::generate( size_t m, size_t n, const Arg& min, const Arg& max ) const
+    inline const StaticPanelMatrix<Type, M, N, P, SO, AL>
+    Rand<StaticPanelMatrix<Type, M, N, P, SO, AL>>::generate( const Arg& min, const Arg& max ) const
     {
-        DynamicPanelMatrix<Type, P, AL> matrix( m, n );
+        StaticPanelMatrix<Type, M, N, P, SO, AL> matrix;
         randomize( matrix, min, max );
         return matrix;
     }
@@ -224,23 +291,23 @@ namespace blaze
 
     //*************************************************************************************************
     /*! \cond BLAZE_INTERNAL */
-    /*!\brief Randomization of a DynamicPanelMatrix.
+    /*!\brief Randomization of a StaticPanelMatrix.
     //
     // \param matrix The matrix to be randomized.
     // \return void
     */
     template< typename Type  // Data type of the matrix
-            , size_t P  // Block size
+            , size_t M       // Number of rows
+            , size_t N       // Number of columns
+            , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    inline void Rand< DynamicPanelMatrix<Type, P, AL> >::randomize( DynamicPanelMatrix<Type, P, AL>& matrix ) const
+    inline void Rand< StaticPanelMatrix<Type, M, N, P, SO, AL> >::randomize( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix ) const
     {
         using blaze::randomize;
 
-        const size_t m( matrix.rows()    );
-        const size_t n( matrix.columns() );
-
-        for( size_t i=0UL; i<m; ++i ) {
-            for( size_t j=0UL; j<n; ++j ) {
+        for( size_t i=0UL; i<M; ++i ) {
+            for( size_t j=0UL; j<N; ++j ) {
                 randomize( matrix(i,j) );
             }
         }
@@ -251,7 +318,7 @@ namespace blaze
 
     //*************************************************************************************************
     /*! \cond BLAZE_INTERNAL */
-    /*!\brief Randomization of a DynamicPanelMatrix.
+    /*!\brief Randomization of a StaticPanelMatrix.
     //
     // \param matrix The matrix to be randomized.
     // \param min The smallest possible value for a matrix element.
@@ -259,19 +326,19 @@ namespace blaze
     // \return void
     */
     template< typename Type  // Data type of the matrix
-            , size_t P  // Block size
+            , size_t M       // Number of rows
+            , size_t N       // Number of columns
+            , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
     template< typename Arg >  // Min/max argument type
-    inline void Rand< DynamicPanelMatrix<Type, P, AL> >::randomize( DynamicPanelMatrix<Type, P, AL>& matrix,
-                                                        const Arg& min, const Arg& max ) const
+    inline void Rand< StaticPanelMatrix<Type, M, N, P, SO, AL> >::randomize( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix,
+                                                            const Arg& min, const Arg& max ) const
     {
         using blaze::randomize;
 
-        const size_t m( matrix.rows()    );
-        const size_t n( matrix.columns() );
-
-        for( size_t i=0UL; i<m; ++i ) {
-            for( size_t j=0UL; j<n; ++j ) {
+        for( size_t i=0UL; i<M; ++i ) {
+            for( size_t j=0UL; j<N; ++j ) {
                 randomize( matrix(i,j), min, max );
             }
         }
@@ -290,26 +357,25 @@ namespace blaze
 
     //*************************************************************************************************
     /*! \cond BLAZE_INTERNAL */
-    /*!\brief Setup of a random symmetric DynamicPanelMatrix.
+    /*!\brief Setup of a random symmetric StaticPanelMatrix.
     //
     // \param matrix The matrix to be randomized.
     // \return void
     // \exception std::invalid_argument Invalid non-square matrix provided.
     */
     template< typename Type  // Data type of the matrix
-            , size_t P  // Block size
+            , size_t M       // Number of rows
+            , size_t N       // Number of columns
+            , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    void makeSymmetric( DynamicPanelMatrix<Type, P, AL>& matrix )
+    void makeSymmetric( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix )
     {
         using blaze::randomize;
 
-        if( !isSquare( ~matrix ) ) {
-            BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
-        }
+        BLAZE_STATIC_ASSERT( M == N );
 
-        const size_t n( matrix.rows() );
-
-        for( size_t i=0UL; i<n; ++i ) {
+        for( size_t i=0UL; i<N; ++i ) {
             for( size_t j=0UL; j<i; ++j ) {
                 randomize( matrix(i,j) );
                 matrix(j,i) = matrix(i,j);
@@ -325,7 +391,7 @@ namespace blaze
 
     //*************************************************************************************************
     /*! \cond BLAZE_INTERNAL */
-    /*!\brief Setup of a random symmetric DynamicPanelMatrix.
+    /*!\brief Setup of a random symmetric StaticPanelMatrix.
     //
     // \param matrix The matrix to be randomized.
     // \param min The smallest possible value for a matrix element.
@@ -334,20 +400,19 @@ namespace blaze
     // \exception std::invalid_argument Invalid non-square matrix provided.
     */
     template< typename Type  // Data type of the matrix
-            , size_t P  // Block size
+            , size_t M       // Number of rows
+            , size_t N       // Number of columns
+            , size_t P  // Panel size
+            , bool SO
             , size_t AL      // Alignment
             , typename Arg >  // Min/max argument type
-    void makeSymmetric( DynamicPanelMatrix<Type, P, AL>& matrix, const Arg& min, const Arg& max )
+    void makeSymmetric( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix, const Arg& min, const Arg& max )
     {
         using blaze::randomize;
 
-        if( !isSquare( ~matrix ) ) {
-            BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
-        }
+        BLAZE_STATIC_ASSERT( M == N );
 
-        const size_t n( matrix.rows() );
-
-        for( size_t i=0UL; i<n; ++i ) {
+        for( size_t i=0UL; i<N; ++i ) {
             for( size_t j=0UL; j<i; ++j ) {
                 randomize( matrix(i,j), min, max );
                 matrix(j,i) = matrix(i,j);
@@ -363,30 +428,28 @@ namespace blaze
 
     //*************************************************************************************************
     /*! \cond BLAZE_INTERNAL */
-    /*!\brief Setup of a random Hermitian DynamicPanelMatrix.
+    /*!\brief Setup of a random Hermitian StaticPanelMatrix.
     //
     // \param matrix The matrix to be randomized.
     // \return void
     // \exception std::invalid_argument Invalid non-square matrix provided.
     */
     template< typename Type  // Data type of the matrix
-            , size_t P  // Block size
+            , size_t M       // Number of rows
+            , size_t N       // Number of columns
+            , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    void makeHermitian( DynamicPanelMatrix<Type, P, AL>& matrix )
+    void makeHermitian( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix )
     {
         using blaze::randomize;
 
+        BLAZE_STATIC_ASSERT( M == N );
         BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( Type );
 
         using BT = UnderlyingBuiltin_t<Type>;
 
-        if( !isSquare( ~matrix ) ) {
-            BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
-        }
-
-        const size_t n( matrix.rows() );
-
-        for( size_t i=0UL; i<n; ++i ) {
+        for( size_t i=0UL; i<N; ++i ) {
             for( size_t j=0UL; j<i; ++j ) {
                 randomize( matrix(i,j) );
                 matrix(j,i) = conj( matrix(i,j) );
@@ -402,7 +465,7 @@ namespace blaze
 
     //*************************************************************************************************
     /*! \cond BLAZE_INTERNAL */
-    /*!\brief Setup of a random Hermitian DynamicPanelMatrix.
+    /*!\brief Setup of a random Hermitian StaticPanelMatrix.
     //
     // \param matrix The matrix to be randomized.
     // \param min The smallest possible value for a matrix element.
@@ -411,24 +474,22 @@ namespace blaze
     // \exception std::invalid_argument Invalid non-square matrix provided.
     */
     template< typename Type  // Data type of the matrix
-            , size_t P  // Block size
+            , size_t M       // Number of rows
+            , size_t N       // Number of columns
+            , size_t P  // Panel size
+            , bool SO
             , size_t AL      // Alignment
             , typename Arg >  // Min/max argument type
-    void makeHermitian( DynamicPanelMatrix<Type, P, AL>& matrix, const Arg& min, const Arg& max )
+    void makeHermitian( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix, const Arg& min, const Arg& max )
     {
         using blaze::randomize;
 
+        BLAZE_STATIC_ASSERT( M == N );
         BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( Type );
 
         using BT = UnderlyingBuiltin_t<Type>;
 
-        if( !isSquare( ~matrix ) ) {
-            BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
-        }
-
-        const size_t n( matrix.rows() );
-
-        for( size_t i=0UL; i<n; ++i ) {
+        for( size_t i=0UL; i<N; ++i ) {
             for( size_t j=0UL; j<i; ++j ) {
                 randomize( matrix(i,j), min, max );
                 matrix(j,i) = conj( matrix(i,j) );
@@ -444,37 +505,34 @@ namespace blaze
 
     //*************************************************************************************************
     /*! \cond BLAZE_INTERNAL */
-    /*!\brief Setup of a random (Hermitian) positive definite DynamicPanelMatrix.
+    /*!\brief Setup of a random (Hermitian) positive definite StaticPanelMatrix.
     //
     // \param matrix The matrix to be randomized.
     // \return void
     // \exception std::invalid_argument Invalid non-square matrix provided.
     */
     template< typename Type  // Data type of the matrix
-            , size_t P  // Block size
+            , size_t M       // Number of rows
+            , size_t N       // Number of columns
+            , size_t P  // Panel size
+            , bool SO
             , size_t AL >      // Alignment
-    void makePositiveDefinite( DynamicPanelMatrix<Type, P, AL>& matrix )
+    void makePositiveDefinite( StaticPanelMatrix<Type, M, N, P, SO, AL>& matrix )
     {
         using blaze::randomize;
 
+        BLAZE_STATIC_ASSERT( M == N );
         BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( Type );
-
-        if( !isSquare( ~matrix ) ) {
-            BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
-        }
-
-        const size_t n( matrix.rows() );
 
         randomize( matrix );
         matrix *= ctrans( matrix );
 
-        for( size_t i=0UL; i<n; ++i ) {
-            matrix(i,i) += Type(n);
+        for( size_t i=0UL; i<N; ++i ) {
+            matrix(i,i) += Type(N);
         }
 
         BLAZE_INTERNAL_ASSERT( isHermitian( matrix ), "Non-symmetric matrix detected" );
     }
     /*! \endcond */
     //*************************************************************************************************
-
 }

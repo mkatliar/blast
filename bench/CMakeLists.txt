@@ -3,7 +3,7 @@ find_package(Threads REQUIRED)
 
 
 #~~~~~~~~~~~~~~~~
-add_executable(bench-smoke
+add_executable(bench-blazefeo
     Main.cpp
     
     gemm_kernel/Gemm.cpp
@@ -15,8 +15,8 @@ add_executable(bench-smoke
 )
 
 
-target_link_libraries(bench-smoke
-    smoke
+target_link_libraries(bench-blazefeo
+    blazefeo
     benchmark
     ${CMAKE_THREAD_LIBS_INIT}
 )
@@ -32,7 +32,7 @@ add_executable(bench-libxsmm
 )
 
 target_link_libraries(bench-libxsmm
-    smoke
+    blazefeo
     benchmark
     PkgConfig::openblas
     PkgConfig::libxsmm

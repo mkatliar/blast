@@ -1,9 +1,9 @@
 #pragma once
 
-#include <smoke/SizeT.hpp>
+#include <blazefeo/SizeT.hpp>
 
 
-namespace smoke
+namespace blazefeo
 {
     inline size_t constexpr paddedSize(size_t m, size_t block_size)
     {
