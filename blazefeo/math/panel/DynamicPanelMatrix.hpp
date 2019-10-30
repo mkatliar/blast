@@ -6,9 +6,8 @@
 
 #include <blaze/util/Memory.h>
 #include <blaze/math/shims/NextMultiple.h>
+#include <blaze/system/Restrict.h>
 
-#include <memory>
-#include <cstdlib>
 #include <algorithm>
 
 
@@ -25,20 +24,38 @@ namespace blazefeo
         using ElementType = Type;
 
         
-        DynamicPanelMatrix(size_t m, size_t n)
+        explicit DynamicPanelMatrix(size_t m, size_t n)
         :   m_(m)
         ,   n_(n)
         ,   spacing_(TILE_SIZE * nextMultiple(n, TILE_SIZE))
         ,   capacity_(nextMultiple(m, TILE_SIZE) * nextMultiple(n, TILE_SIZE))
-        ,   v_(allocate<Type>(capacity_), &deallocate<Type>)
+        ,   v_(allocate<Type>(capacity_))
         {
             // Initialize padding elements to 0 to prevent denorms in calculations.
             // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
-            std::fill_n(v_.get(), capacity_, Type {});
+            std::fill_n(v_, capacity_, Type {});
         }
 
 
-        DynamicPanelMatrix& operator=(Type val)
+        DynamicPanelMatrix(DynamicPanelMatrix const& rhs)
+        {
+            BLAZE_THROW_LOGIC_ERROR("Not implemented");
+        }
+
+
+        DynamicPanelMatrix(DynamicPanelMatrix&& rhs) noexcept
+        {
+            BLAZE_THROW_LOGIC_ERROR("Not implemented");
+        }
+
+
+        ~DynamicPanelMatrix()
+        {
+            deallocate(v_);
+        }
+
+
+        DynamicPanelMatrix& operator=(Type val) noexcept
         {
             for (size_t i = 0; i < m_; ++i)
                 for (size_t j = 0; j < n_; ++j)
@@ -48,25 +65,39 @@ namespace blazefeo
         }
 
 
-        Type operator()(size_t i, size_t j) const
+        DynamicPanelMatrix& operator=(DynamicPanelMatrix const& val)
+        {
+            BLAZE_THROW_LOGIC_ERROR("Not implemented");
+            return *this;
+        }
+
+
+        DynamicPanelMatrix& operator=(DynamicPanelMatrix&& val) noexcept
+        {
+            BLAZE_THROW_LOGIC_ERROR("Not implemented");
+            return *this;
+        }
+
+
+        Type operator()(size_t i, size_t j) const noexcept
         {
             return v_[elementIndex(i, j)];
         }
 
 
-        Type& operator()(size_t i, size_t j)
+        Type& operator()(size_t i, size_t j) noexcept
         {
             return v_[elementIndex(i, j)];
         }
 
 
-        size_t rows() const
+        size_t rows() const noexcept
         {
             return m_;
         }
 
 
-        size_t columns() const
+        size_t columns() const noexcept
         {
             return n_;
         }
@@ -94,15 +125,15 @@ namespace blazefeo
         }
 
 
-        Type * tile(size_t i, size_t j)
+        Type * tile(size_t i, size_t j) noexcept
         {
-            return v_.get() + i * spacing_ + j * ELEMENTS_PER_TILE;
+            return v_ + i * spacing_ + j * ELEMENTS_PER_TILE;
         }
 
 
-        Type const * tile(size_t i, size_t j) const
+        Type const * tile(size_t i, size_t j) const noexcept
         {
-            return v_.get() + i * spacing_ + j * ELEMENTS_PER_TILE;
+            return v_ + i * spacing_ + j * ELEMENTS_PER_TILE;
         }
 
 
@@ -112,10 +143,10 @@ namespace blazefeo
         size_t spacing_;
         size_t capacity_;
         
-        std::unique_ptr<Type[], decltype(&deallocate<Type>)> v_;
+        Type * BLAZE_RESTRICT v_;
 
 
-        size_t elementIndex(size_t i, size_t j) const
+        size_t elementIndex(size_t i, size_t j) const noexcept
         {
             size_t const panel_i = i / TILE_SIZE;
             size_t const panel_j = j / TILE_SIZE;
