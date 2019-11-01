@@ -2,13 +2,14 @@
 
 #include <blazefeo/math/PanelMatrix.hpp>
 #include <blazefeo/system/Tile.hpp>
+#include <blazefeo/system/CacheLine.hpp>
 
 #include <blaze/util/Memory.h>
 #include <blaze/util/Types.h>
 #include <blaze/math/shims/NextMultiple.h>
 #include <blaze/system/Restrict.h>
 
-#include <algorithm>
+#include <new>
 
 
 namespace blazefeo
@@ -29,11 +30,10 @@ namespace blazefeo
         ,   n_(n)
         ,   spacing_(tileSize_ * nextMultiple(n, tileSize_))
         ,   capacity_(nextMultiple(m, tileSize_) * nextMultiple(n, tileSize_))
-        ,   v_(allocate<Type>(capacity_))
+        // Initialize padding elements to 0 to prevent denorms in calculations.
+        // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
+        ,   v_(new(std::align_val_t {alignment_}) Type[capacity_] {})
         {
-            // Initialize padding elements to 0 to prevent denorms in calculations.
-            // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
-            std::fill_n(v_, capacity_, Type {});
         }
 
 
@@ -51,7 +51,7 @@ namespace blazefeo
 
         ~DynamicPanelMatrix()
         {
-            deallocate(v_);
+            delete[] v_;
         }
 
 
@@ -138,6 +138,7 @@ namespace blazefeo
 
 
     private:
+        static size_t constexpr alignment_ = CACHE_LINE_SIZE;
         static size_t constexpr tileSize_ = TileSize_v<Type>;
         static size_t constexpr elementsPerTile_ = tileSize_ * tileSize_;
 

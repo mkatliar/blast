@@ -3,6 +3,7 @@
 #include <blazefeo/math/Forward.hpp>
 #include <blazefeo/math/panel/Gemm.hpp>
 #include <blazefeo/system/Tile.hpp>
+#include <blazefeo/system/CacheLine.hpp>
 
 #include <blaze/math/shims/NextMultiple.h>
 #include <blaze/util/typetraits/AlignmentOf.h>
@@ -137,7 +138,7 @@ namespace blazefeo
         static size_t constexpr tileColumns_ = N / tileSize_ + (N % tileSize_ > 0);
 
         // Alignment of the data elements.
-        static size_t constexpr alignment_ = AlignmentOf_v<Type>;
+        static size_t constexpr alignment_ = CACHE_LINE_SIZE;
 
         // Aligned element storage.
         alignas(alignment_) std::array<Type, tileRows_ * tileColumns_ * elementsPerTile_> v_;
