@@ -46,7 +46,9 @@ namespace blazefeo
         size_t i = 0;
         ET const * a = tile(A, 0, 0);
 
-        for (; (i + 3) * TILE_SIZE <= M; i += 3, a += 3 * spacing(A))
+        // (i + 4) * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
+        // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
+        for (; (i + 3) * TILE_SIZE <= M && (i + 4) * TILE_SIZE != M; i += 3, a += 3 * spacing(A))
         {
             GemmKernel<ET, 3, 1, TILE_SIZE, false, true> ker;
             size_t j = 0;
