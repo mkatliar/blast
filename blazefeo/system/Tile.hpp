@@ -1,41 +1,63 @@
 #pragma once
 
-
 //*************************************************************************************************
 // Includes
 //*************************************************************************************************
 
-#include <blaze/system/Debugging.h>
-#include <blaze/util/StaticAssert.h>
-#include <blaze/util/Types.h>
+#include <blaze/system/Vectorization.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blazefeo
 {
-    //=================================================================================================
-    //
-    //  TILE SETTINGS
-    //
-    //=================================================================================================
-
-    //*************************************************************************************************
-    /*! \cond BLAZE_INTERNAL */
-    size_t constexpr DEFAULT_TILE_SIZE = 4UL;
-    /*! \endcond */
-    //*************************************************************************************************
+    using namespace blaze;
 
 
-    //*************************************************************************************************
-    /*! \cond BLAZE_INTERNAL */
-    constexpr size_t DEBUG_TILE_SIZE = 4UL;
-    /*! \endcond */
-    //*************************************************************************************************
+    template <typename T>
+    struct TileSizeHelper
+    {
+    public:
+        static constexpr size_t value = 1;
+    };
 
 
-    //*************************************************************************************************
-    /*! \cond BLAZE_INTERNAL */
-    constexpr size_t TILE_SIZE = ( BLAZE_DEBUG_MODE ? DEBUG_TILE_SIZE : DEFAULT_TILE_SIZE );
-    constexpr size_t ELEMENTS_PER_TILE = TILE_SIZE * TILE_SIZE;
-    /*! \endcond */
-    //*************************************************************************************************
+    template <>
+    struct TileSizeHelper<double>
+    {
+    public:
+        static constexpr size_t value =
+        #if BLAZE_AVX2_MODE
+            4;
+        #else
+            1;
+        #endif
+    };
+    
+
+    template <typename T>
+    struct TileSize
+    :   public IntegralConstant<size_t, TileSizeHelper<T>::value>
+    {};
+    
+    
+    template <typename T>
+    struct TileSize<const T>
+    :   public IntegralConstant<size_t, TileSizeHelper<T>::value>
+    {};
+    
+    
+    template <typename T>
+    struct TileSize<volatile T>
+    :   public IntegralConstant<size_t, TileSizeHelper<T>::value>
+    {};
+    
+
+    template <typename T>
+    struct TileSize<volatile const T>
+    :   public IntegralConstant<size_t, TileSizeHelper<T>::value>
+    {};
+    
+    
+    template <typename T>
+    size_t constexpr TileSize_v = TileSize<T>::value;
 }

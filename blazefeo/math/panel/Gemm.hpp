@@ -24,6 +24,7 @@ namespace blazefeo
         PanelMatrix<MT3, rowMajor> const& C, PanelMatrix<MT4, rowMajor>& D)
     {
         using ET = ElementType_t<MT1>;
+        size_t constexpr TILE_SIZE = TileSize_v<ET>;
 
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT2>, ET);
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT3>, ET);

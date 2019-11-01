@@ -1,12 +1,12 @@
 #pragma once
 
-#include <blazefeo/SizeT.hpp>
 #include <blazefeo/math/typetraits/IsPanelMatrix.hpp>
 
 #include <blaze/math/ReductionFlag.h>
 #include <blaze/math/Matrix.h>
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/typetraits/IsRowMajorMatrix.h>
+#include <blaze/util/Types.h>
 
 
 namespace blazefeo

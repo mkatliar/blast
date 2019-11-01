@@ -1,10 +1,10 @@
 #pragma once
 
-#include <blazefeo/SizeT.hpp>
 #include <blazefeo/math/PanelMatrix.hpp>
 #include <blazefeo/system/Tile.hpp>
 
 #include <blaze/util/Memory.h>
+#include <blaze/util/Types.h>
 #include <blaze/math/shims/NextMultiple.h>
 #include <blaze/system/Restrict.h>
 
@@ -27,8 +27,8 @@ namespace blazefeo
         explicit DynamicPanelMatrix(size_t m, size_t n)
         :   m_(m)
         ,   n_(n)
-        ,   spacing_(TILE_SIZE * nextMultiple(n, TILE_SIZE))
-        ,   capacity_(nextMultiple(m, TILE_SIZE) * nextMultiple(n, TILE_SIZE))
+        ,   spacing_(tileSize_ * nextMultiple(n, tileSize_))
+        ,   capacity_(nextMultiple(m, tileSize_) * nextMultiple(n, tileSize_))
         ,   v_(allocate<Type>(capacity_))
         {
             // Initialize padding elements to 0 to prevent denorms in calculations.
@@ -127,17 +127,20 @@ namespace blazefeo
 
         Type * tile(size_t i, size_t j) noexcept
         {
-            return v_ + i * spacing_ + j * ELEMENTS_PER_TILE;
+            return v_ + i * spacing_ + j * elementsPerTile_;
         }
 
 
         Type const * tile(size_t i, size_t j) const noexcept
         {
-            return v_ + i * spacing_ + j * ELEMENTS_PER_TILE;
+            return v_ + i * spacing_ + j * elementsPerTile_;
         }
 
 
     private:
+        static size_t constexpr tileSize_ = TileSize_v<Type>;
+        static size_t constexpr elementsPerTile_ = tileSize_ * tileSize_;
+
         size_t m_;
         size_t n_;
         size_t spacing_;
@@ -148,12 +151,12 @@ namespace blazefeo
 
         size_t elementIndex(size_t i, size_t j) const noexcept
         {
-            size_t const panel_i = i / TILE_SIZE;
-            size_t const panel_j = j / TILE_SIZE;
-            size_t const subpanel_i = i % TILE_SIZE;
-            size_t const subpanel_j = j % TILE_SIZE;
+            size_t const panel_i = i / tileSize_;
+            size_t const panel_j = j / tileSize_;
+            size_t const subpanel_i = i % tileSize_;
+            size_t const subpanel_j = j % tileSize_;
 
-            return panel_i * spacing_ + panel_j * ELEMENTS_PER_TILE + subpanel_i + subpanel_j * TILE_SIZE;
+            return panel_i * spacing_ + panel_j * elementsPerTile_ + subpanel_i + subpanel_j * tileSize_;
         }
     };
 }

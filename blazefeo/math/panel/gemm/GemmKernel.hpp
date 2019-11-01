@@ -1,12 +1,14 @@
 #pragma once
 
-#include <blazefeo/SizeT.hpp>
-
+#include <blaze/util/Types.h>
 #include <blaze/system/Inline.h>
 
 
 namespace blazefeo
 {
+    using namespace blaze;
+
+    
     template <typename T, size_t M, size_t N, size_t BS, bool TA, bool TB>
     class GemmKernel;
 

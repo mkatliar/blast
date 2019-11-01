@@ -1,6 +1,5 @@
 #pragma once
 
-#include <blazefeo/SizeT.hpp>
 #include <blazefeo/math/Forward.hpp>
 #include <blazefeo/math/panel/Gemm.hpp>
 #include <blazefeo/system/Tile.hpp>
@@ -87,7 +86,7 @@ namespace blazefeo
 
         size_t constexpr spacing() const
         {
-            return tileColumns_ * ELEMENTS_PER_TILE;
+            return tileColumns_ * elementsPerTile_;
         }
 
 
@@ -121,35 +120,37 @@ namespace blazefeo
 
         Type * tile(size_t i, size_t j)
         {
-            return v_.data() + (i * tileColumns_ + j) * ELEMENTS_PER_TILE;
+            return v_.data() + (i * tileColumns_ + j) * elementsPerTile_;
         }
 
 
         Type const * tile(size_t i, size_t j) const
         {
-            return v_.data() + (i * tileColumns_ + j) * ELEMENTS_PER_TILE;
+            return v_.data() + (i * tileColumns_ + j) * elementsPerTile_;
         }
 
 
     private:
-        static size_t constexpr tileRows_ = M / TILE_SIZE + (M % TILE_SIZE > 0);
-        static size_t constexpr tileColumns_ = N / TILE_SIZE + (N % TILE_SIZE > 0);
+        static size_t constexpr tileSize_ = TileSize_v<Type>;
+        static size_t constexpr elementsPerTile_ = tileSize_ * tileSize_;
+        static size_t constexpr tileRows_ = M / tileSize_ + (M % tileSize_ > 0);
+        static size_t constexpr tileColumns_ = N / tileSize_ + (N % tileSize_ > 0);
 
         // Alignment of the data elements.
         static size_t constexpr alignment_ = AlignmentOf_v<Type>;
 
         // Aligned element storage.
-        alignas(alignment_) std::array<Type, tileRows_ * tileColumns_ * ELEMENTS_PER_TILE> v_;
+        alignas(alignment_) std::array<Type, tileRows_ * tileColumns_ * elementsPerTile_> v_;
 
 
         size_t elementIndex(size_t i, size_t j) const
         {
-            size_t const tile_i = i / TILE_SIZE;
-            size_t const tile_j = j / TILE_SIZE;
-            size_t const subtile_i = i % TILE_SIZE;
-            size_t const subtile_j = j % TILE_SIZE;
+            size_t const tile_i = i / tileSize_;
+            size_t const tile_j = j / tileSize_;
+            size_t const subtile_i = i % tileSize_;
+            size_t const subtile_j = j % tileSize_;
 
-            return (tile_i * tileColumns_ + tile_j) * ELEMENTS_PER_TILE + subtile_i + subtile_j * TILE_SIZE;
+            return (tile_i * tileColumns_ + tile_j) * elementsPerTile_ + subtile_i + subtile_j * tileSize_;
         }
     };
 
