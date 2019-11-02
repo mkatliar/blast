@@ -39,7 +39,7 @@ namespace blazefeo :: testing
         // Print the result from BLASFEO
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
-        SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + trans(blaze_A) * blaze_B), 1e-10, 1e-10);
+        BLAZEFEO_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + trans(blaze_A) * blaze_B), 1e-10, 1e-10);
     }
 
 
@@ -74,7 +74,7 @@ namespace blazefeo :: testing
         // Print the result from BLASFEO
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
-        SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * blaze_B), 1e-10, 1e-10);
+        BLAZEFEO_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * blaze_B), 1e-10, 1e-10);
     }
 #endif
 
@@ -110,7 +110,7 @@ namespace blazefeo :: testing
         // Print the result from BLASFEO
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
-        SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
+        BLAZEFEO_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
     }
 
 
@@ -145,7 +145,7 @@ namespace blazefeo :: testing
         // Print the result from BLASFEO
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
-        SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
+        BLAZEFEO_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
     }
 
 
@@ -180,7 +180,7 @@ namespace blazefeo :: testing
         // Print the result from BLASFEO
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
-        SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
+        BLAZEFEO_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
     }
 
 
@@ -215,7 +215,7 @@ namespace blazefeo :: testing
         // Print the result from BLASFEO
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
-        SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
+        BLAZEFEO_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
     }
 
 
@@ -250,7 +250,7 @@ namespace blazefeo :: testing
         // Print the result from BLASFEO
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
-        SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
+        BLAZEFEO_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
     }
 
 
@@ -285,7 +285,7 @@ namespace blazefeo :: testing
         // Print the result from BLASFEO
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
-        SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
+        BLAZEFEO_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
     }
 
 
@@ -324,7 +324,7 @@ namespace blazefeo :: testing
                     // Print the result from BLASFEO
                     // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
-                    SMOKE_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
+                    BLAZEFEO_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), 1e-10, 1e-10);
                 }
     }
 }

@@ -29,7 +29,7 @@ namespace blazefeo :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_GemmKernel_store, GemmKernel<double, 1, 1, 4, false, true>);
-    BENCHMARK_TEMPLATE(BM_GemmKernel_store, GemmKernel<double, 2, 1, 4, false, true>);
-    BENCHMARK_TEMPLATE(BM_GemmKernel_store, GemmKernel<double, 3, 1, 4, false, true>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_store, GemmKernel<double, 1, 1, 4>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_store, GemmKernel<double, 2, 1, 4>);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_store, GemmKernel<double, 3, 1, 4>);
 }

@@ -50,69 +50,69 @@ namespace blazefeo
         // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
         for (; (i + 3) * TILE_SIZE <= M && (i + 4) * TILE_SIZE != M; i += 3, a += 3 * spacing(A))
         {
-            GemmKernel<ET, 3, 1, TILE_SIZE, false, true> ker;
+            GemmKernel<ET, 3, 1, TILE_SIZE> ker;
             size_t j = 0;
 
             for (; (j + 1) * TILE_SIZE <= N; ++j)
-                gemm(ker, K,
+                gemm<false, true>(ker, K,
                     a, spacing(A), tile(B, j, 0), spacing(B),
                     tile(C, i, j), spacing(C), tile(D, i, j), spacing(D));
 
             for (; j * TILE_SIZE < N; ++j)
-                gemm(ker, K,
+                gemm<false, true>(ker, K,
                     a, spacing(A), tile(B, j, 0), spacing(B),
                     tile(C, i, j), spacing(C), tile(D, i, j), spacing(D), 3 * TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }
 
         for (; (i + 2) * TILE_SIZE <= M; i += 2, a += 2 * spacing(A))
         {
-            GemmKernel<ET, 2, 1, TILE_SIZE, false, true> ker;
+            GemmKernel<ET, 2, 1, TILE_SIZE> ker;
             size_t j = 0;
 
             for (; (j + 1) * TILE_SIZE <= N; ++j)
-                gemm(ker, K,
+                gemm<false, true>(ker, K,
                     a, spacing(A), tile(B, j, 0), spacing(B),
                     tile(C, i, j), spacing(C), tile(D, i, j), spacing(D));
 
             for (; j * TILE_SIZE < N; ++j)
-                gemm(ker, K,
+                gemm<false, true>(ker, K,
                     a, spacing(A), tile(B, j, 0), spacing(B),
                     tile(C, i, j), spacing(C), tile(D, i, j), spacing(D), 2 * TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }
 
         for (; (i + 1) * TILE_SIZE <= M; ++i, a += spacing(A))
         {
-            GemmKernel<ET, 1, 1, TILE_SIZE, false, true> ker;
+            GemmKernel<ET, 1, 1, TILE_SIZE> ker;
 
             size_t j = 0;
             ET const * b = tile(B, 0, 0);
 
             for (; (j + 1) * TILE_SIZE <= N; ++j)
-                gemm(ker, K,
+                gemm<false, true>(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
                     tile(C, i, j), spacing(C), tile(D, i, j), spacing(D));
 
             for (; j * TILE_SIZE < N; ++j)
-                gemm(ker, K,
+                gemm<false, true>(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
                     tile(C, i, j), spacing(C), tile(D, i, j), spacing(D), TILE_SIZE, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }
 
         for (; i * TILE_SIZE < M; ++i, a += spacing(A))
         {
-            GemmKernel<ET, 1, 1, TILE_SIZE, false, true> ker;
+            GemmKernel<ET, 1, 1, TILE_SIZE> ker;
 
             size_t const rm = std::min(M - i * TILE_SIZE, TILE_SIZE);
             size_t j = 0;
             ET const * b = tile(B, 0, 0);
 
             for (; (j + 1) * TILE_SIZE <= N; ++j)
-                gemm(ker, K,
+                gemm<false, true>(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
                     tile(C, i, j), spacing(C), tile(D, i, j), spacing(D), rm, TILE_SIZE);
 
             for (; j * TILE_SIZE < N; ++j)
-                gemm(ker, K,
+                gemm<false, true>(ker, K,
                     a, spacing(A), b + j * spacing(B), spacing(B),
                     tile(C, i, j), spacing(C), tile(D, i, j), spacing(D), rm, std::min(N - j * TILE_SIZE, TILE_SIZE));
         }

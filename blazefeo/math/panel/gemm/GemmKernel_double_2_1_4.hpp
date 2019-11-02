@@ -10,8 +10,8 @@
 
 namespace blazefeo
 {
-    template <bool TA, bool TB>
-    class GemmKernel<double, 2, 1, 4, TA, TB>
+    template <>
+    class GemmKernel<double, 2, 1, 4>
     {
     public:
         GemmKernel()
@@ -121,8 +121,12 @@ namespace blazefeo
         }
 
 
-        void operator()(double const * a, size_t sa, double const * b, size_t sb);
-        void operator()(double const * a, size_t sa, double const * b, size_t sb, size_t m, size_t n);
+        template <bool TA, bool TB>
+        void gemm(double const * a, size_t sa, double const * b, size_t sb);
+
+
+        template <bool TA, bool TB>
+        void gemm(double const * a, size_t sa, double const * b, size_t sb, size_t m, size_t n);
 
 
     private:
@@ -131,7 +135,7 @@ namespace blazefeo
 
 
     template <>
-    inline void GemmKernel<double, 2, 1, 4, false, true>::operator()(
+    inline void GemmKernel<double, 2, 1, 4>::gemm<false, true>(
         double const * a, size_t sa, double const * b, size_t sb)
     {
         __m256d const a0 = _mm256_load_pd(a);
@@ -156,7 +160,7 @@ namespace blazefeo
 
 
     template <>
-    inline void GemmKernel<double, 2, 1, 4, false, true>::operator()(
+    inline void GemmKernel<double, 2, 1, 4>::gemm<false, true>(
         double const * a, size_t sa, double const * b, size_t sb, size_t m, size_t n)
     {
         __m256d const a0 = _mm256_load_pd(a);

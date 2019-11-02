@@ -167,14 +167,14 @@ namespace blazefeo :: testing
 }
 
 
-#define SMOKE_EXPECT_APPROX_EQ(val, expected, abs_tol, rel_tol) \
+#define BLAZEFEO_EXPECT_APPROX_EQ(val, expected, abs_tol, rel_tol) \
 	EXPECT_TRUE(::blazefeo::testing::approxEqual(val, expected, abs_tol, rel_tol))
 
-#define SMOKE_ASSERT_APPROX_EQ(val, expected, abs_tol, rel_tol) \
+#define BLAZEFEO_ASSERT_APPROX_EQ(val, expected, abs_tol, rel_tol) \
 	ASSERT_TRUE(::blazefeo::testing::approxEqual(val, expected, abs_tol, rel_tol))
 
-#define SMOKE_EXPECT_EQ(val, expected) \
+#define BLAZEFEO_EXPECT_EQ(val, expected) \
 	EXPECT_EQ(::blazefeo::testing::forcePrint(val), ::blazefeo::testing::forcePrint(expected))
 
-#define SMOKE_ASSERT_EQ(val, expected) \
+#define BLAZEFEO_ASSERT_EQ(val, expected) \
 	ASSERT_EQ(::blazefeo::testing::forcePrint(val), ::blazefeo::testing::forcePrint(expected))

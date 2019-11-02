@@ -66,83 +66,48 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(GemmKernelTest, testGemm)
+    TYPED_TEST_P(GemmKernelTest, testGemmNT)
     {
         using Traits = GemmKernelTraits<TypeParam>;
 
-        blaze::DynamicMatrix<double, blaze::columnMajor> ma(
-            Traits::tA ? 1 : Traits::rows,
-            Traits::tA ? Traits::rows : 1
-        );
-
-        blaze::DynamicMatrix<double, blaze::columnMajor> mb(
-            Traits::tB ? Traits::columns : 1,
-            Traits::tB ? 1 : Traits::columns
-        );
-
+        blaze::DynamicMatrix<double, blaze::columnMajor> ma(Traits::rows, 1);
+        blaze::DynamicMatrix<double, blaze::columnMajor> mb(Traits::columns, 1);
         blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
 
         randomize(ma);
         randomize(mb);
         randomize(mc);
 
-        StaticPanelMatrix<double, 
-            Traits::tA ? 1 : Traits::rows,
-            Traits::tA ? Traits::rows : 1,
-            rowMajor> a;
-
-        StaticPanelMatrix<double, 
-            Traits::tB ? Traits::columns : 1,
-            Traits::tB ? 1 : Traits::columns,
-            rowMajor> b;
-
+        StaticPanelMatrix<double, Traits::rows, 1, rowMajor> a;
+        StaticPanelMatrix<double, Traits::columns, 1, rowMajor> b;
         StaticPanelMatrix<double, Traits::rows, Traits::columns, rowMajor> c, d;
+
         a.pack(data(ma), spacing(ma));
         b.pack(data(mb), spacing(mb));
         c.pack(data(mc), spacing(mc));
 
         TypeParam ker(c.tile(0, 0), c.spacing());
-        ker(a.tile(0, 0), a.spacing(), b.tile(0, 0), b.spacing());
+        ker.template gemm<false, true>(a.tile(0, 0), a.spacing(), b.tile(0, 0), b.spacing());
         ker.store(d.tile(0, 0), d.spacing());
         
         d.unpack(data(md), spacing(md));
 
-        if (Traits::tA)
-            ma = trans(ma);
-
-        if (Traits::tB)
-            mb = trans(mb);
-
-        SMOKE_EXPECT_EQ(md, evaluate(mc + ma * mb));
+        BLAZEFEO_EXPECT_EQ(md, evaluate(mc + ma * trans(mb)));
     }
 
 
     REGISTER_TYPED_TEST_SUITE_P(GemmKernelTest,
         testLoadStore,
         testStore,
-        testGemm
+        testGemmNT
     );
 
 
-    using GemmKernel_double_1_1_4_TN = GemmKernel<double, 1, 1, 4, true, false>;
-    using GemmKernel_double_1_1_4_NN = GemmKernel<double, 1, 1, 4, false, false>;
-    using GemmKernel_double_1_1_4_NT = GemmKernel<double, 1, 1, 4, false, true>;
-    using GemmKernel_double_2_1_4_TN = GemmKernel<double, 2, 1, 4, true, false>;
-    using GemmKernel_double_2_1_4_NN = GemmKernel<double, 2, 1, 4, false, false>;
-    using GemmKernel_double_2_1_4_NT = GemmKernel<double, 2, 1, 4, false, true>;
-    using GemmKernel_double_3_1_4_TN = GemmKernel<double, 3, 1, 4, true, false>;
-    using GemmKernel_double_3_1_4_NN = GemmKernel<double, 3, 1, 4, false, false>;
-    using GemmKernel_double_3_1_4_NT = GemmKernel<double, 3, 1, 4, false, true>;
+    using GemmKernel_double_1_1_4 = GemmKernel<double, 1, 1, 4>;
+    using GemmKernel_double_2_1_4 = GemmKernel<double, 2, 1, 4>;
+    using GemmKernel_double_3_1_4 = GemmKernel<double, 3, 1, 4>;
 
-    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4_TN, GemmKernelTest, GemmKernel_double_1_1_4_TN);
-    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4_NN, GemmKernelTest, GemmKernel_double_1_1_4_NN);
-    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4_NT, GemmKernelTest, GemmKernel_double_1_1_4_NT);
-    
-    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4_TN, GemmKernelTest, GemmKernel_double_2_1_4_TN);
-    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4_NN, GemmKernelTest, GemmKernel_double_2_1_4_NN);
-    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4_NT, GemmKernelTest, GemmKernel_double_2_1_4_NT);
-
-    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_3_1_4_TN, GemmKernelTest, GemmKernel_double_3_1_4_TN);
-    // INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_3_1_4_NN, GemmKernelTest, GemmKernel_double_3_1_4_NN);
-    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_3_1_4_NT, GemmKernelTest, GemmKernel_double_3_1_4_NT);
+    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_1_1_4, GemmKernelTest, GemmKernel_double_1_1_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_2_1_4, GemmKernelTest, GemmKernel_double_2_1_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(GemmKernel_double_3_1_4, GemmKernelTest, GemmKernel_double_3_1_4);
 }

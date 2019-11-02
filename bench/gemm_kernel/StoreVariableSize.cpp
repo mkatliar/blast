@@ -64,7 +64,7 @@ namespace blazefeo :: benchmark
 
     using std::placeholders::_1;
 
-    BENCHMARK_TEMPLATE(BM_GemmKernel_storeVariableSize, GemmKernel<double, 1, 1, 4, false, true>)->Apply(args_4_4);
-    BENCHMARK_TEMPLATE(BM_GemmKernel_storeVariableSize, GemmKernel<double, 2, 1, 4, false, true>)->Apply(args_8_4);
-    BENCHMARK_TEMPLATE(BM_GemmKernel_storeVariableSize, GemmKernel<double, 3, 1, 4, false, true>)->Apply(args_12_4);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_storeVariableSize, GemmKernel<double, 1, 1, 4>)->Apply(args_4_4);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_storeVariableSize, GemmKernel<double, 2, 1, 4>)->Apply(args_8_4);
+    BENCHMARK_TEMPLATE(BM_GemmKernel_storeVariableSize, GemmKernel<double, 3, 1, 4>)->Apply(args_12_4);
 }
