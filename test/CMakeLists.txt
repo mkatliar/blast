@@ -6,16 +6,17 @@ find_package(Threads REQUIRED)    # required for gtest
 find_package(blaze 3.5 REQUIRED)
 
 # ~~~~~~~~~~ Our tests ~~~~~~~~~~~~~~
-add_executable(test-smoke
-    PanelTest.cpp
-    PaddedSizeTest.cpp
-    StaticMatrixTest.cpp
+add_executable(test-blazefeo
+    GemmKernelTest.cpp
+    StaticPanelMatrixTest.cpp
+    DynamicPanelMatrixTest.cpp
+    GemmTest.cpp
 
     simd/HsumTest.cpp
 )
 
-target_link_libraries(test-smoke PRIVATE
-    smoke
+target_link_libraries(test-blazefeo PRIVATE
+    blazefeo
     blaze::blaze
     GTest::GTest
     GTest::Main
@@ -23,4 +24,4 @@ target_link_libraries(test-smoke PRIVATE
     ${CMAKE_THREAD_LIBS_INIT}    # Needed for gtest
 )
 
-gtest_discover_tests(test-smoke)
+gtest_discover_tests(test-blazefeo)

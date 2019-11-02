@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)   # Need at least 3.10 for gtest_discover_tests()
-project (smoke)
+project (blazefeo)
 
 # Enable modern C++
 set(CMAKE_CXX_STANDARD 17)
@@ -24,17 +24,24 @@ set(CMAKE_DEBUG_POSTFIX d)
 # Find boost.
 find_package(Boost REQUIRED COMPONENTS exception)
 
+# Find Blaze.
+find_package(blaze REQUIRED)
+
 # add_subdirectory(src)
 # add_subdirectory(examples)
 
-add_library(smoke INTERFACE)
+add_library(blazefeo INTERFACE)
 
-target_include_directories(smoke
+target_include_directories(blazefeo
     INTERFACE ${PROJECT_INCLUDE_DIR}
 )
 
+target_link_libraries(blazefeo
+    INTERFACE blaze::blaze
+)
+
 # SMOKE_WITH_TEST
-set(SMOKE_WITH_TEST ON CACHE BOOL "Build smoke tests")
+set(SMOKE_WITH_TEST ON CACHE BOOL "Build blazefeo tests")
 
 if (SMOKE_WITH_TEST)
     enable_testing()
@@ -42,7 +49,7 @@ if (SMOKE_WITH_TEST)
 endif()
 
 # SMOKE_WITH_BENCHMARK
-set(SMOKE_WITH_BENCHMARK ON CACHE BOOL "Build smoke benchmarks")
+set(SMOKE_WITH_BENCHMARK ON CACHE BOOL "Build blazefeo benchmarks")
 
 if (SMOKE_WITH_BENCHMARK)
     add_subdirectory(bench)
