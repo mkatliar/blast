@@ -46,7 +46,7 @@ namespace blazefeo
 
 
     template <bool TA, bool TB, typename T, size_t M, size_t N, size_t BS>
-    BLAZE_ALWAYS_INLINE void gemm(GemmKernel<T, M, N, BS> ker, size_t K,
+    BLAZE_ALWAYS_INLINE void gemm(GemmKernel<T, M, N, BS>& ker, size_t K,
         T const * a, size_t sa, T const * b, size_t sb, T const * c, size_t sc, T * d, size_t sd)
     {
         ker.load(c, sc);
@@ -64,7 +64,7 @@ namespace blazefeo
 
 
     template <bool TA, bool TB, typename T, size_t M, size_t N, size_t BS>
-    BLAZE_ALWAYS_INLINE void gemm(GemmKernel<T, M, N, BS> ker, size_t K,
+    BLAZE_ALWAYS_INLINE void gemm(GemmKernel<T, M, N, BS>& ker, size_t K,
         T const * a, size_t sa, T const * b, size_t sb, T const * c, size_t sc, T * d, size_t sd,
         size_t md, size_t nd)
     {
