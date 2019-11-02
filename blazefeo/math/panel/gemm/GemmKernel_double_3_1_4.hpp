@@ -14,10 +14,6 @@ namespace blazefeo
     class GemmKernel<double, 3, 1, 4, TA, TB>
     {
     public:
-        static size_t constexpr alignment = 0x20;
-        using Traits = GemmKernelTraits<GemmKernel>;
-
-
         GemmKernel()
         {            
         }
