@@ -4,6 +4,7 @@
 
 #include <blaze/util/Types.h>
 #include <blaze/util/Exception.h>
+#include <blaze/util/StaticAssert.h>
 #include <blaze/system/Inline.h>
 
 #include <cmath>
@@ -67,11 +68,15 @@ namespace blazefeo
 
 
         /// @brief Rank-1 update
+        ///
+        /// a, b must be aligned on panel boundary
         template <bool TA, bool TB>
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb);
 
 
         /// @brief Rank-1 update of specified size
+        ///
+        /// a, b must be aligned on panel boundary
         template <bool TA, bool TB>
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n);
 
@@ -87,6 +92,7 @@ namespace blazefeo
 
     private:
         using IntrinsicType = typename Simd<T, SS>::IntrinsicType;
+        using MaskType = typename Simd<T, SS>::MaskType;
         
         IntrinsicType v_[M][N];
     };
@@ -137,13 +143,13 @@ namespace blazefeo
 
         if (long long const rem = m % SS)
         {
-            static_assert(SS == 4, "Partial store of RegisterMatrix for SIMD size is not implemented");
+            static_assert(SS == 4, "Partial store of RegisterMatrix for SIMD size other than 4 is not implemented");
 
-            __m256i const mask = set(rem, rem, rem, rem) > set(3LL, 2LL, 1LL, 0LL);
+            MaskType const mask = MaskType {rem, rem, rem, rem} > MaskType {0, 1, 2, 3};
             size_t const i = m / SS;
 
             for (size_t j = 0; j < n && j < columns(); ++j)
-                _mm256_maskstore_pd(ptr + spacing * i + SS * j, mask, v_[i][j]);
+                maskstore(ptr + spacing * i + SS * j, mask, v_[i][j]);
         }
     }
 
@@ -176,9 +182,59 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, size_t SS>
     template <bool TA, bool TB>
-    inline void RegisterMatrix<T, M, N, SS>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb)
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb)
     {
-        BLAZE_THROW_LOGIC_ERROR("Not implemented");
+        if (!TA && TB)
+        {
+            IntrinsicType ax[M];
+
+            #pragma unroll
+            for (size_t i = 0; i < M; ++i)
+                ax[i] = alpha * blazefeo::load<SS>(a + i * sa);
+            
+            #pragma unroll
+            for (size_t j = 0; j < N; ++j)
+            {
+                IntrinsicType bx = broadcast<SS>(b + (j / SS) * sb + (j % SS));
+
+                #pragma unroll
+                for (size_t i = 0; i < M; ++i)
+                    v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
+            }
+        }
+        else
+        {
+            BLAZE_THROW_LOGIC_ERROR("Not implemented");
+        }        
+    }
+
+
+    template <typename T, size_t M, size_t N, size_t SS>
+    template <bool TA, bool TB>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
+    {
+        if (!TA && TB)
+        {
+            IntrinsicType ax[M];
+
+            #pragma unroll
+            for (size_t i = 0; i < M; ++i)
+                ax[i] = alpha * blazefeo::load<SS>(a + i * sa);
+            
+            #pragma unroll
+            for (size_t j = 0; j < N; ++j) if (j < n)
+            {
+                IntrinsicType bx = broadcast<SS>(b + (j / SS) * sb + (j % SS));
+
+                #pragma unroll
+                for (size_t i = 0; i < M; ++i)
+                    v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
+            }
+        }
+        else
+        {
+            BLAZE_THROW_LOGIC_ERROR("Not implemented");
+        }        
     }
 
 

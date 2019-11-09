@@ -21,6 +21,7 @@ namespace blazefeo
     struct Simd<double, 4>
     {
         using IntrinsicType = __m256d;
+        using MaskType = __m256i;
     };
 
 
@@ -64,6 +65,12 @@ namespace blazefeo
     }
 
 
+    inline void maskstore(double * ptr, __m256i m, __m256d a)
+    {
+        _mm256_maskstore_pd(ptr, m, a);
+    }
+
+
     //*******************************************************
     //
     // SET
@@ -98,6 +105,12 @@ namespace blazefeo
     // ARITHMETIC
     //
     //*******************************************************
+
+    inline auto fmadd(__m256d a, __m256d b, __m256d c)
+    {
+        return _mm256_fmadd_pd(a, b, c);
+    }
+
 
     inline auto fnmadd(__m256d a, __m256d b, __m256d c)
     {

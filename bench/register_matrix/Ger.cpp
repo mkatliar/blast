@@ -1,4 +1,4 @@
-#include <blazefeo/math/StaticPanelMatrix.hpp>
+#include <blazefeo/math/DynamicPanelMatrix.hpp>
 #include <blazefeo/math/simd/RegisterMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
@@ -13,11 +13,11 @@ namespace blazefeo :: benchmark
     {
         using Kernel = RegisterMatrix<T, M, N, P>;
         using Traits = RegisterMatrixTraits<Kernel>;
-        size_t constexpr K = 10000;
+        size_t constexpr K = 100;
         
-        DynamicMatrix<double, columnMajor> a(Traits::rows, K);
-        DynamicMatrix<double, columnMajor> b(Traits::columns, K);
-        StaticPanelMatrix<double, Traits::rows, Traits::columns, rowMajor> c;
+        DynamicPanelMatrix<double, rowMajor> a(Traits::rows, K);
+        DynamicPanelMatrix<double, rowMajor> b(Traits::columns, K);
+        DynamicPanelMatrix<double, rowMajor> c(Traits::rows, Traits::columns);
 
         randomize(a);
         randomize(b);
@@ -29,7 +29,7 @@ namespace blazefeo :: benchmark
         for (auto _ : state)
         {
             for (size_t i = 0; i < K; ++i)
-                ger<false, true>(ker, 0.1, data(a) + Traits::rows * i, spacing(a), data(b) + Traits::columns * i, spacing(b));
+                ger<false, true>(ker, 0.1, ptr(a, 0, i), spacing(a), ptr(b, 0, i), spacing(b));
 
             DoNotOptimize(ker);
         }
@@ -39,6 +39,7 @@ namespace blazefeo :: benchmark
 
 
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 1, 4, 4);
-    // BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 2, 4, 4);
-    // BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 3, 4, 4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 2, 4, 4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 3, 4, 4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 2, 8, 4);
 }
