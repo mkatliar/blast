@@ -2,13 +2,17 @@
 
 #include <blazefeo/math/Forward.hpp>
 #include <blazefeo/math/panel/Gemm.hpp>
+#include <blazefeo/math/views/submatrix/BaseTemplate.hpp>
 #include <blazefeo/system/Tile.hpp>
 #include <blazefeo/system/CacheLine.hpp>
 
 #include <blaze/math/shims/NextMultiple.h>
+#include <blaze/math/dense/DenseIterator.h>
 #include <blaze/util/typetraits/AlignmentOf.h>
+#include <blaze/math/typetraits/HasMutableDataAccess.h>
+#include <blaze/math/traits/SubmatrixTrait.h>
 
-#include <array>
+#include <initializer_list>
 
 
 namespace blazefeo
@@ -37,12 +41,39 @@ namespace blazefeo
         using Pointer        = Type*;        //!< Pointer to a non-constant matrix value.
         using ConstPointer   = const Type*;  //!< Pointer to a constant matrix value.
 
+        using Iterator      = DenseIterator<Type, true>;        //!< Iterator over non-constant elements.
+        using ConstIterator = DenseIterator<const Type, true>;  //!< Iterator over constant elements.
+   
         
         StaticPanelMatrix()
         {
             // Initialize padding elements to 0 to prevent denorms in calculations.
             // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
-            v_.fill(Type {});
+            std::fill_n(v_, capacity_, Type {});
+        }
+
+
+        constexpr StaticPanelMatrix(std::initializer_list<std::initializer_list<Type>> list)
+        {
+            std::fill_n(v_, capacity_, Type {});
+            
+            if (list.size() != M || determineColumns(list) > N)
+                BLAZE_THROW_INVALID_ARGUMENT("Invalid setup of static panel matrix");
+
+            size_t i = 0;
+
+            for (auto const& row : list)
+            {
+                size_t j = 0;
+                
+                for (const auto& element : row)
+                {
+                    v_[elementIndex(i, j)] = element;
+                    ++j;
+                }
+
+                ++i;
+            }
         }
 
 
@@ -61,13 +92,13 @@ namespace blazefeo
         StaticPanelMatrix& operator=(blaze::Matrix<MT, SO2> const& rhs);
 
 
-        Type operator()(size_t i, size_t j) const
+        constexpr ConstReference operator()(size_t i, size_t j) const
         {
             return v_[elementIndex(i, j)];
         }
 
 
-        Type& operator()(size_t i, size_t j)
+        constexpr Reference operator()(size_t i, size_t j)
         {
             return v_[elementIndex(i, j)];
         }
@@ -121,13 +152,27 @@ namespace blazefeo
 
         Type * tile(size_t i, size_t j)
         {
-            return v_.data() + (i * tileColumns_ + j) * elementsPerTile_;
+            return v_ + (i * tileColumns_ + j) * elementsPerTile_;
         }
 
 
         Type const * tile(size_t i, size_t j) const
         {
-            return v_.data() + (i * tileColumns_ + j) * elementsPerTile_;
+            return v_ + (i * tileColumns_ + j) * elementsPerTile_;
+        }
+
+
+        Type * ptr(size_t i, size_t j)
+        {
+            BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to tile boundary");
+            return v_ + tileColumns_ * tileSize_ * i + tileSize_ * j;
+        }
+
+
+        Type const * ptr(size_t i, size_t j) const
+        {
+            BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to tile boundary");
+            return v_ + tileColumns_ * tileSize_ * i + tileSize_ * j;
         }
 
 
@@ -136,12 +181,13 @@ namespace blazefeo
         static size_t constexpr elementsPerTile_ = tileSize_ * tileSize_;
         static size_t constexpr tileRows_ = M / tileSize_ + (M % tileSize_ > 0);
         static size_t constexpr tileColumns_ = N / tileSize_ + (N % tileSize_ > 0);
+        static size_t constexpr capacity_ = tileRows_ * tileColumns_ * elementsPerTile_;
 
         // Alignment of the data elements.
         static size_t constexpr alignment_ = CACHE_LINE_SIZE;
 
         // Aligned element storage.
-        alignas(alignment_) std::array<Type, tileRows_ * tileColumns_ * elementsPerTile_> v_;
+        alignas(alignment_) Type v_[capacity_];
 
 
         size_t elementIndex(size_t i, size_t j) const
@@ -193,4 +239,65 @@ namespace blazefeo
 
         return *this;
     }
+}
+
+namespace blaze
+{
+    //=================================================================================================
+    //
+    //  SUBMATRIXTRAIT SPECIALIZATIONS
+    //
+    //=================================================================================================
+
+    template< typename T
+        , size_t M
+        , size_t N
+        , bool SO
+        , AlignmentFlag AF  // Alignment flag
+        , size_t... CSAs >              // Compile time submatrix arguments
+    struct SubmatrixType<blazefeo::StaticPanelMatrix<T, M, N, SO>, AF, CSAs...>
+    {
+        using Type = blazefeo::PanelSubmatrix< blazefeo::StaticPanelMatrix<T, M, N, SO>
+            , SO
+            , CSAs... >;
+    };
+
+
+    template< typename T
+        , size_t M
+        , size_t N
+        , bool SO
+        , AlignmentFlag AF  // Alignment flag
+        , size_t... CSAs >              // Compile time submatrix arguments
+    struct SubmatrixType<blazefeo::StaticPanelMatrix<T, M, N, SO> const, AF, CSAs...>
+    {
+        using Type = blazefeo::PanelSubmatrix< blazefeo::StaticPanelMatrix<T, M, N, SO> const
+            , SO
+            , CSAs... >;
+    };
+
+
+    // @brief Define the type of result expression for panel submatrices.
+    template <typename T, size_t M, size_t N>
+    struct SubmatrixTrait<blazefeo::StaticPanelMatrix<T, M, N, rowMajor>>
+    {
+        // using Type = PanelSubmatrix<blazefeo::StaticPanelMatrix<T, M, N, rowMajor>, rowMajor>;
+        using Type = DynamicMatrix<T, rowMajor>;
+    };
+
+
+    //=================================================================================================
+    //
+    //  HASMUTABLEDATAACCESS SPECIALIZATIONS
+    //
+    //=================================================================================================
+
+    //*************************************************************************************************
+    /*! \cond BLAZE_INTERNAL */
+    template <typename T, size_t M, size_t N, bool SO>
+    struct HasMutableDataAccess<blazefeo::StaticPanelMatrix<T, M, N, SO>>
+    :   public TrueType
+    {};
+    /*! \endcond */
+    //*************************************************************************************************
 }

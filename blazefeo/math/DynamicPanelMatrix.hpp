@@ -335,12 +335,24 @@ namespace blaze
 
         const size_t n( matrix.rows() );
 
-        randomize( matrix );
-        matrix *= ctrans( matrix );
+        matrix = Type {};
 
-        for( size_t i=0UL; i<n; ++i ) {
-            matrix(i,i) += Type(n);
-        }
+        for (size_t i = 0; i < n; ++i)
+            matrix(i, i) = Type(n);
+
+        DynamicPanelMatrix<Type, SO> A(n, n);
+        randomize(A);
+
+        gemm_nt(A, A, matrix, matrix);
+
+        // TODO: implement it as below after the matrix *= ctrans( matrix ) expression works.
+
+        // randomize( matrix );
+        // matrix *= ctrans( matrix );
+
+        // for( size_t i=0UL; i<n; ++i ) {
+        //     matrix(i,i) += Type(n);
+        // }
 
         BLAZE_INTERNAL_ASSERT( isHermitian( matrix ), "Non-symmetric matrix detected" );
     }

@@ -22,16 +22,30 @@ namespace blazefeo
 
 
     template <typename MT, bool SO>
-    inline typename MT::ElementType * tile(PanelMatrix<MT, SO>& m, size_t i, size_t j)
+    inline decltype(auto) tile(PanelMatrix<MT, SO>& m, size_t i, size_t j)
     {
         return (~m).tile(i, j);
     }
 
 
     template <typename MT, bool SO>
-    inline typename MT::ElementType const * tile(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
+    inline decltype(auto) tile(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
     {
         return (~m).tile(i, j);
+    }
+
+
+    template <typename MT, bool SO>
+    inline auto * ptr(PanelMatrix<MT, SO>& m, size_t i, size_t j)
+    {
+        return (~m).ptr(i, j);
+    }
+
+
+    template <typename MT, bool SO>
+    inline auto const * ptr(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
+    {
+        return (~m).ptr(i, j);
     }
 
 

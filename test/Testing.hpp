@@ -59,7 +59,8 @@ namespace blazefeo :: testing
 
 		for (size_t i = 0; i < M; ++i)
 			for (size_t j = 0; j < N; ++j)
-				if (abs((~lhs)(i, j) - (~rhs)(i, j)) > abs_tol + rel_tol * abs((~rhs)(i, j)))
+				if (std::isnan((~lhs)(i, j)) != std::isnan((~rhs)(i, j)) 
+					|| std::abs((~lhs)(i, j) - (~rhs)(i, j)) > abs_tol + rel_tol * std::abs((~rhs)(i, j)))
 					return AssertionFailure() 
 						<< "Actual value:\n" << lhs 
 						<< "Expected value:\n" << rhs

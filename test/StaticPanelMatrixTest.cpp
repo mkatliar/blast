@@ -6,6 +6,13 @@
 
 namespace blazefeo :: testing
 {
+    TEST(StaticPanelMatrixTest, testIsPanelMatrix)
+    {
+        using MatrixType = StaticPanelMatrix<double, 5, 7, rowMajor>;
+        EXPECT_TRUE(IsPanelMatrix_v<MatrixType>);
+    }
+
+
     TEST(StaticPanelMatrixTest, testPanelRows)
     {
         EXPECT_EQ((StaticPanelMatrix<double, 5, 7, rowMajor>().tileRows()), 2);

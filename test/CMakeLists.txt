@@ -7,10 +7,12 @@ find_package(blaze 3.5 REQUIRED)
 
 # ~~~~~~~~~~ Our tests ~~~~~~~~~~~~~~
 add_executable(test-blazefeo
-    GemmKernelTest.cpp
+    RegisterMatrixTest.cpp
     StaticPanelMatrixTest.cpp
+    SubmatrixTest.cpp
     DynamicPanelMatrixTest.cpp
     GemmTest.cpp
+    PotrfTest.cpp
 
     simd/HsumTest.cpp
 )
@@ -21,6 +23,7 @@ target_link_libraries(test-blazefeo PRIVATE
     GTest::GTest
     GTest::Main
     gmock
+    openblas
     ${CMAKE_THREAD_LIBS_INIT}    # Needed for gtest
 )
 

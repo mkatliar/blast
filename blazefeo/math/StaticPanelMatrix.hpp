@@ -321,12 +321,24 @@ namespace blaze
         BLAZE_STATIC_ASSERT( M == N );
         BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( Type );
 
-        randomize( matrix );
-        matrix *= ctrans( matrix );
+        matrix = Type {};
 
-        for( size_t i=0UL; i<N; ++i ) {
-            matrix(i,i) += Type(N);
-        }
+        for (size_t i = 0; i < N; ++i)
+            matrix(i, i) = Type(N);
+
+        StaticPanelMatrix<Type, N, N, SO> A;
+        randomize(A);
+
+        gemm_nt(A, A, matrix, matrix);
+
+        // TODO: implement it as below after the matrix *= ctrans( matrix ) expression works.
+        
+        // randomize( matrix );
+        // matrix *= ctrans( matrix );
+
+        // for( size_t i=0UL; i<N; ++i ) {
+        //     matrix(i,i) += Type(N);
+        // }
 
         BLAZE_INTERNAL_ASSERT( isHermitian( matrix ), "Non-symmetric matrix detected" );
     }

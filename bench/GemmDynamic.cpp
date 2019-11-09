@@ -79,6 +79,6 @@ namespace blazefeo :: benchmark
     }
     
 
-    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_inline, double)->DenseRange(1, 50);
-    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_noinline, double)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_inline, double)->DenseRange(1, 300);
+    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_noinline, double)->DenseRange(1, 300);
 }

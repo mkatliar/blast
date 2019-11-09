@@ -2,3 +2,4 @@ build
 .vscode
 perf.data
 perf.data.old
+bench/data
