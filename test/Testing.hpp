@@ -59,12 +59,18 @@ namespace blazefeo :: testing
 
 		for (size_t i = 0; i < M; ++i)
 			for (size_t j = 0; j < N; ++j)
-				if (std::isnan((~lhs)(i, j)) != std::isnan((~rhs)(i, j)) 
-					|| std::abs((~lhs)(i, j) - (~rhs)(i, j)) > abs_tol + rel_tol * std::abs((~rhs)(i, j)))
+			{
+				auto const a = (~lhs)(i, j);
+				auto const b = (~rhs)(i, j);
+				auto delta = a - b;
+
+				if (std::isnan(a) != std::isnan(b) 
+					|| std::abs(delta) > abs_tol + rel_tol * std::abs(b))
 					return AssertionFailure() 
 						<< "Actual value:\n" << lhs 
 						<< "Expected value:\n" << rhs
 						<< "First mismatch at index (" << i << ", " << j << ")";
+			}
 
 		return AssertionSuccess();
 	}

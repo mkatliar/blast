@@ -118,6 +118,7 @@ namespace blazefeo
     private:
         using IntrinsicType = typename Simd<T, SS>::IntrinsicType;
         using MaskType = typename Simd<T, SS>::MaskType;
+        using IntType = typename Simd<T, SS>::IntType;
 
         BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
 
@@ -168,6 +169,17 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
+    inline void RegisterMatrix<T, M, N, SS>::load(T beta, T const * ptr, size_t spacing, size_t m, size_t n)
+    {
+        #pragma unroll
+        for (size_t i = 0; i < RM; ++i)
+            #pragma unroll
+            for (size_t j = 0; j < N; ++j) if (i < n)
+                v_[i][j] = blazefeo::load<SS>(ptr + spacing * i + SS * j);
+    }
+
+
+    template <typename T, size_t M, size_t N, size_t SS>
     inline void RegisterMatrix<T, M, N, SS>::store(T * ptr, size_t spacing) const
     {
         for (size_t i = 0; i < RM; ++i)
@@ -185,11 +197,9 @@ namespace blazefeo
             for (size_t j = 0; j < N; ++j) if (j < n)
                 blazefeo::store(ptr + spacing * i + SS * j, v_[i][j]);
 
-        if (long long const rem = m % SS)
+        if (IntType const rem = m % SS)
         {
-            static_assert(SS == 4, "Partial store of RegisterMatrix for SIMD size other than 4 is not implemented");
-
-            MaskType const mask = MaskType {rem, rem, rem, rem} > MaskType {0, 1, 2, 3};
+            MaskType const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType, SS>());
             size_t const i = m / SS;
 
             for (size_t j = 0; j < n && j < columns(); ++j)
@@ -304,7 +314,7 @@ namespace blazefeo
 
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i) if (i >= k / SS)
-                    v_[i][k] = fnmadd(set(a_kj, a_kj, a_kj, a_kj), v_[i][j], v_[i][k]);
+                    v_[i][k] = fnmadd(set1<SS>(a_kj), v_[i][j], v_[i][k]);
             }
 
             T const sqrt_a_kk = std::sqrt(v_[k / SS][k][k % SS]);
