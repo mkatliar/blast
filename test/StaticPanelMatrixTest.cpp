@@ -8,25 +8,16 @@ namespace blazefeo :: testing
 {
     TEST(StaticPanelMatrixTest, testIsPanelMatrix)
     {
-        using MatrixType = StaticPanelMatrix<double, 5, 7, rowMajor>;
+        using MatrixType = StaticPanelMatrix<double, 5, 7>;
         EXPECT_TRUE(IsPanelMatrix_v<MatrixType>);
     }
 
 
-    TEST(StaticPanelMatrixTest, testPanelRows)
+    TEST(StaticPanelMatrixTest, testPanels)
     {
-        EXPECT_EQ((StaticPanelMatrix<double, 5, 7, rowMajor>().tileRows()), 2);
-        EXPECT_EQ((StaticPanelMatrix<double, 8, 7, rowMajor>().tileRows()), 2);
+        EXPECT_EQ((StaticPanelMatrix<double, 5, 7, columnMajor>().panels()), 2);
+        EXPECT_EQ((StaticPanelMatrix<double, 8, 7, columnMajor>().panels()), 2);
     }
-
-
-    TEST(StaticPanelMatrixTest, testPanelColumns)
-    {
-        EXPECT_EQ((StaticPanelMatrix<double, 5, 2, rowMajor>().tileColumns()), 1);
-        EXPECT_EQ((StaticPanelMatrix<double, 5, 7, rowMajor>().tileColumns()), 2);
-        EXPECT_EQ((StaticPanelMatrix<double, 5, 8, rowMajor>().tileRows()), 2);
-    }
-
 
     TEST(StaticPanelMatrixTest, testElementAccess)
     {
@@ -36,7 +27,7 @@ namespace blazefeo :: testing
         blaze::StaticMatrix<double, M, N> A_ref;
         randomize(A_ref);
 
-        StaticPanelMatrix<double, M, N, rowMajor> A;
+        StaticPanelMatrix<double, M, N, columnMajor> A;
         for (size_t i = 0; i < M; ++i)
             for (size_t j = 0; j < N; ++j)
                 A(i, j) = A_ref(i, j);
@@ -61,7 +52,7 @@ namespace blazefeo :: testing
         blaze::StaticMatrix<double, M, N, blaze::columnMajor> A_ref;
         randomize(A_ref);
 
-        StaticPanelMatrix<double, M, N, rowMajor> A;
+        StaticPanelMatrix<double, M, N, columnMajor> A;
         A.pack(data(A_ref), spacing(A_ref));
 
         auto const& A_cref = A;
@@ -78,7 +69,7 @@ namespace blazefeo :: testing
         size_t constexpr N = 7;
         size_t constexpr P = 4;        
 
-        StaticPanelMatrix<double, M, N, rowMajor> A;
+        StaticPanelMatrix<double, M, N, columnMajor> A;
         for (size_t i = 0; i < M; ++i)
             for (size_t j = 0; j < N; ++j)
                 blaze::randomize(A(i, j));
@@ -99,9 +90,9 @@ namespace blazefeo :: testing
         size_t constexpr K = 10;
         size_t constexpr P = 4;        
 
-        StaticPanelMatrix<double, M, K, rowMajor> A;
-        StaticPanelMatrix<double, K, N, rowMajor> B;
-        StaticPanelMatrix<double, M, N, rowMajor> D;
+        StaticPanelMatrix<double, M, K, columnMajor> A;
+        StaticPanelMatrix<double, K, N, columnMajor> B;
+        StaticPanelMatrix<double, M, N, columnMajor> D;
 
         randomize(A);
         randomize(B);
@@ -121,9 +112,9 @@ namespace blazefeo :: testing
         size_t constexpr K = 10;
         size_t constexpr P = 4;        
 
-        StaticPanelMatrix<double, M, K, rowMajor> A;
-        StaticPanelMatrix<double, N, K, rowMajor> B;
-        StaticPanelMatrix<double, M, N, rowMajor> D;
+        StaticPanelMatrix<double, M, K, columnMajor> A;
+        StaticPanelMatrix<double, N, K, columnMajor> B;
+        StaticPanelMatrix<double, M, N, columnMajor> D;
 
         randomize(A);
         randomize(B);

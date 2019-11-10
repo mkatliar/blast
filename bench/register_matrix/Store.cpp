@@ -15,7 +15,7 @@ namespace blazefeo :: benchmark
 
         Kernel ker;
         
-        DynamicPanelMatrix<double, rowMajor> c(ker.rows(), ker.columns()), d(ker.rows(), ker.columns());
+        DynamicPanelMatrix<double> c(ker.rows(), ker.columns()), d(ker.rows(), ker.columns());
         randomize(c);
 
         load(ker, c.tile(0, 0), c.spacing());

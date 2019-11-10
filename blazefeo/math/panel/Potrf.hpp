@@ -18,7 +18,7 @@ namespace blazefeo
 
     template <size_t KM, size_t KN, typename MT1, typename MT2>
     BLAZE_ALWAYS_INLINE void potrf_backend(size_t k, size_t i,
-        PanelMatrix<MT1, rowMajor> const& A, PanelMatrix<MT2, rowMajor>& L)
+        PanelMatrix<MT1, columnMajor> const& A, PanelMatrix<MT2, columnMajor>& L)
     {
         using ET = ElementType_t<MT1>;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;
@@ -37,7 +37,7 @@ namespace blazefeo
         ET const * b = ptr(L, k, 0);
 
         for (size_t l = 0; l < k; ++l)
-            ger<false, true>(ker, ET(-1.), a + TILE_SIZE * l, spacing(L), b + TILE_SIZE * l, spacing(L));
+            ger<MT1::storageOrder, !MT2::storageOrder>(ker, ET(-1.), a + TILE_SIZE * l, spacing(L), b + TILE_SIZE * l, spacing(L));
 
         if (i == k)
             ker.potrf();
@@ -53,7 +53,7 @@ namespace blazefeo
 
     template <typename MT1, typename MT2>
     BLAZE_ALWAYS_INLINE void potrf(
-        PanelMatrix<MT1, rowMajor> const& A, PanelMatrix<MT2, rowMajor>& L)
+        PanelMatrix<MT1, columnMajor> const& A, PanelMatrix<MT2, columnMajor>& L)
     {
         using ET = ElementType_t<MT1>;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;

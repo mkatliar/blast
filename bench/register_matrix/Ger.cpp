@@ -15,9 +15,9 @@ namespace blazefeo :: benchmark
         using Traits = RegisterMatrixTraits<Kernel>;
         size_t constexpr K = 100;
         
-        DynamicPanelMatrix<double, rowMajor> a(Traits::rows, K);
-        DynamicPanelMatrix<double, rowMajor> b(Traits::columns, K);
-        DynamicPanelMatrix<double, rowMajor> c(Traits::rows, Traits::columns);
+        DynamicPanelMatrix<double> a(Traits::rows, K);
+        DynamicPanelMatrix<double> b(Traits::columns, K);
+        DynamicPanelMatrix<double> c(Traits::rows, Traits::columns);
 
         randomize(a);
         randomize(b);
@@ -29,7 +29,7 @@ namespace blazefeo :: benchmark
         for (auto _ : state)
         {
             for (size_t i = 0; i < K; ++i)
-                ger<false, true>(ker, 0.1, ptr(a, 0, i), spacing(a), ptr(b, 0, i), spacing(b));
+                ger<a.storageOrder, !decltype(b)::storageOrder>(ker, 0.1, ptr(a, 0, i), spacing(a), ptr(b, 0, i), spacing(b));
 
             DoNotOptimize(ker);
         }

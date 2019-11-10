@@ -15,7 +15,7 @@ namespace blazefeo
     using namespace blaze;
 
 
-    template <bool TA, bool TB, typename T, size_t M, size_t N, size_t BS>
+    template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t BS>
     BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, BS>& ker, size_t K, T alpha, T beta,
         T const * a, size_t sa, T const * b, size_t sb, T const * c, size_t sc, T * d, size_t sd)
     {
@@ -23,17 +23,17 @@ namespace blazefeo
 
         for (size_t k = 0; k < K; ++k)
         {
-            ger<TA, TB>(ker, alpha, a, sa, b, sb);
+            ger<SOA, SOB>(ker, alpha, a, sa, b, sb);
 
-            a += TA ? ker.panels() * sa : BS;
-            b += TB ? BS : N * sb;
+            a += SOA == rowMajor ? ker.panels() * sa : BS;
+            b += SOB == rowMajor ? BS : N * sb;
         }
 
         store(ker, d, sd);
     }
 
 
-    template <bool TA, bool TB, typename T, size_t M, size_t N, size_t BS>
+    template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t BS>
     BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, BS>& ker, size_t K, T alpha, T beta,
         T const * a, size_t sa, T const * b, size_t sb, T const * c, size_t sc, T * d, size_t sd,
         size_t md, size_t nd)
@@ -42,10 +42,10 @@ namespace blazefeo
         
         for (size_t k = 0; k < K; ++k)
         {
-            ger<TA, TB>(ker, alpha, a, sa, b, sb, md, nd);
+            ger<SOA, SOB>(ker, alpha, a, sa, b, sb, md, nd);
 
-            a += TA ? ker.panels() * sa : BS;
-            b += TB ? BS : N * sb;
+            a += SOA == rowMajor ? ker.panels() * sa : BS;
+            b += SOB == rowMajor ? BS : N * sb;
         }
 
         store(ker, d, sd, md, nd);
@@ -54,8 +54,8 @@ namespace blazefeo
 
     template <typename MT1, typename MT2, typename MT3, typename MT4>
     BLAZE_ALWAYS_INLINE void gemm_nt(
-        PanelMatrix<MT1, rowMajor> const& A, PanelMatrix<MT2, rowMajor> const& B, 
-        PanelMatrix<MT3, rowMajor> const& C, PanelMatrix<MT4, rowMajor>& D)
+        PanelMatrix<MT1, columnMajor> const& A, PanelMatrix<MT2, columnMajor> const& B, 
+        PanelMatrix<MT3, columnMajor> const& C, PanelMatrix<MT4, columnMajor>& D)
     {
         using ET = ElementType_t<MT1>;
         
@@ -78,8 +78,8 @@ namespace blazefeo
     template <typename ST1, typename ST2, typename MT1, typename MT2, typename MT3, typename MT4>
     BLAZE_ALWAYS_INLINE void gemm_nt(
         ST1 alpha, ST2 beta,
-        PanelMatrix<MT1, rowMajor> const& A, PanelMatrix<MT2, rowMajor> const& B, 
-        PanelMatrix<MT3, rowMajor> const& C, PanelMatrix<MT4, rowMajor>& D)
+        PanelMatrix<MT1, columnMajor> const& A, PanelMatrix<MT2, columnMajor> const& B, 
+        PanelMatrix<MT3, columnMajor> const& C, PanelMatrix<MT4, columnMajor>& D)
     {
         using ET = ElementType_t<MT1>;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;
@@ -119,8 +119,8 @@ namespace blazefeo
     template <size_t KM, size_t KN, typename ST1, typename ST2, typename MT1, typename MT2, typename MT3, typename MT4>
     BLAZE_ALWAYS_INLINE void gemm_nt_backend(
         size_t i, ST1 alpha, ST2 beta,
-        PanelMatrix<MT1, rowMajor> const& A, PanelMatrix<MT2, rowMajor> const& B, 
-        PanelMatrix<MT3, rowMajor> const& C, PanelMatrix<MT4, rowMajor>& D)
+        PanelMatrix<MT1, columnMajor> const& A, PanelMatrix<MT2, columnMajor> const& B, 
+        PanelMatrix<MT3, columnMajor> const& C, PanelMatrix<MT4, columnMajor>& D)
     {
         using ET = ElementType_t<MT1>;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;
@@ -147,12 +147,12 @@ namespace blazefeo
             ET const * a = ptr(A, i, 0);
 
             for (; j + KN <= N; j += KN)
-                gemm_backend<false, true>(ker, K, alpha, beta,
+                gemm_backend<columnMajor, rowMajor>(ker, K, alpha, beta,
                     a, spacing(A), ptr(B, j, 0), spacing(B),
                     ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D));
 
             if (j < N)
-                gemm_backend<false, true>(ker, K, alpha, beta,
+                gemm_backend<columnMajor, rowMajor>(ker, K, alpha, beta,
                     a, spacing(A), ptr(B, j, 0), spacing(B),
                     ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D), KM, N - j);
         }
@@ -163,12 +163,12 @@ namespace blazefeo
             ET const * b = tile(B, 0, 0);
 
             for (; j + KN <= N; j += KN)
-                gemm_backend<false, true>(ker, K, alpha, beta,
+                gemm_backend<columnMajor, rowMajor>(ker, K, alpha, beta,
                     ptr(A, i, 0), spacing(A), ptr(B, j, 0), spacing(B),
                     ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D), M - i, KN);
 
             if (j < N)
-                gemm_backend<false, true>(ker, K, alpha, beta,
+                gemm_backend<columnMajor, rowMajor>(ker, K, alpha, beta,
                     ptr(A, i, 0), spacing(A), ptr(B, j, 0), spacing(B),
                     ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D), M - i, N - j);
         }

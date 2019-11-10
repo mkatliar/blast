@@ -25,7 +25,7 @@ namespace blazefeo :: testing
         blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
         randomize(A_ref);
 
-        StaticPanelMatrix<double, Traits::rows, Traits::columns, rowMajor> A, B;
+        StaticPanelMatrix<double, Traits::rows, Traits::columns, columnMajor> A, B;
         A.pack(data(A_ref), spacing(A_ref));
 
         TypeParam ker;
@@ -45,7 +45,7 @@ namespace blazefeo :: testing
         blaze::StaticMatrix<double, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
         randomize(A_ref);
 
-        StaticPanelMatrix<double, Traits::rows, Traits::columns, rowMajor> A, B;
+        StaticPanelMatrix<double, Traits::rows, Traits::columns, columnMajor> A, B;
         A.pack(data(A_ref), spacing(A_ref));
 
         TypeParam ker;
@@ -77,9 +77,9 @@ namespace blazefeo :: testing
         randomize(mb);
         randomize(mc);
 
-        StaticPanelMatrix<double, Traits::rows, 1, rowMajor> a;
-        StaticPanelMatrix<double, Traits::columns, 1, rowMajor> b;
-        StaticPanelMatrix<double, Traits::rows, Traits::columns, rowMajor> c, d;
+        StaticPanelMatrix<double, Traits::rows, 1, columnMajor> a;
+        StaticPanelMatrix<double, Traits::columns, 1, columnMajor> b;
+        StaticPanelMatrix<double, Traits::rows, Traits::columns, columnMajor> c, d;
 
         a.pack(data(ma), spacing(ma));
         b.pack(data(mb), spacing(mb));
@@ -87,7 +87,7 @@ namespace blazefeo :: testing
 
         TypeParam ker;
         load(ker, c.tile(0, 0), c.spacing());
-        ger<false, true>(ker, 1.0, a.tile(0, 0), a.spacing(), b.tile(0, 0), b.spacing());
+        ger<a.storageOrder, !b.storageOrder>(ker, 1.0, a.tile(0, 0), a.spacing(), b.tile(0, 0), b.spacing());
         store(ker, d.tile(0, 0), d.spacing());
         
         d.unpack(data(md), spacing(md));
@@ -107,8 +107,8 @@ namespace blazefeo :: testing
 
         if constexpr (m >= n)
         {
-            StaticPanelMatrix<ET, m, n, rowMajor> A, L;
-            StaticPanelMatrix<ET, m, m, rowMajor> A1;
+            StaticPanelMatrix<ET, m, n, columnMajor> A, L;
+            StaticPanelMatrix<ET, m, m, columnMajor> A1;
 
             {
                 blaze::StaticMatrix<ET, n, n, columnMajor> C0;
@@ -147,8 +147,8 @@ namespace blazefeo :: testing
         TypeParam ker;
 
         using blaze::randomize;
-        StaticPanelMatrix<typename Traits::ElementType, Traits::columns, Traits::columns, rowMajor> L;
-        StaticPanelMatrix<typename Traits::ElementType, Traits::rows, Traits::columns, rowMajor> B, X, B1;            
+        StaticPanelMatrix<typename Traits::ElementType, Traits::columns, Traits::columns, columnMajor> L;
+        StaticPanelMatrix<typename Traits::ElementType, Traits::rows, Traits::columns, columnMajor> B, X, B1;            
         
         for (size_t i = 0; i < Traits::rows; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)

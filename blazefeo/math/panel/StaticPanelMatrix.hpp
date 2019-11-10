@@ -20,10 +20,18 @@ namespace blazefeo
     using namespace blaze;
 
 
-    template <typename Type, size_t M, size_t N, bool SO = rowMajor>
+    /// @brief Panel matrix with statically defined size.
+    ///
+    /// @tparam Type element type of the matrix
+    /// @tparam M number of rows
+    /// @tparam N number of columns
+    /// @tparam SO storage order of panel elements
+    template <typename Type, size_t M, size_t N, bool SO = columnMajor>
     class StaticPanelMatrix
     :   public PanelMatrix<StaticPanelMatrix<Type, M, N, SO>, SO>
     {
+        BLAZE_STATIC_ASSERT_MSG((SO == columnMajor), "Row-major panel matrices are not implemented");
+
     public:
         //**Type definitions****************************************************************************
         using This          = StaticPanelMatrix<Type, M, N, SO>;   //!< Type of this StaticPanelMatrix instance.
@@ -122,15 +130,9 @@ namespace blazefeo
         }
 
 
-        size_t constexpr tileRows() const
+        size_t constexpr panels() const
         {
-            return tileRows_;
-        }
-
-
-        size_t constexpr tileColumns() const
-        {
-            return tileColumns_;
+            return panels_;
         }
 
 
@@ -179,9 +181,9 @@ namespace blazefeo
     private:
         static size_t constexpr tileSize_ = TileSize_v<Type>;
         static size_t constexpr elementsPerTile_ = tileSize_ * tileSize_;
-        static size_t constexpr tileRows_ = M / tileSize_ + (M % tileSize_ > 0);
+        static size_t constexpr panels_ = M / tileSize_ + (M % tileSize_ > 0);
         static size_t constexpr tileColumns_ = N / tileSize_ + (N % tileSize_ > 0);
-        static size_t constexpr capacity_ = tileRows_ * tileColumns_ * elementsPerTile_;
+        static size_t constexpr capacity_ = panels_ * tileColumns_ * elementsPerTile_;
 
         // Alignment of the data elements.
         static size_t constexpr alignment_ = CACHE_LINE_SIZE;

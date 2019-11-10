@@ -10,53 +10,53 @@ namespace blazefeo :: testing
 {
     TEST(SubmatrixTest, testSubmatrixOfStaticPanelMatrix)
     {
-        StaticPanelMatrix<double, 12, 12, rowMajor> A;
+        StaticPanelMatrix<double, 12, 12, columnMajor> A;
         auto B = submatrix(A, 4, 0, 8, 8);
         
-        // PanelSubmatrix<decltype(A), rowMajor> B(A, 4, 0, 8, 8);
+        // PanelSubmatrix<decltype(A), columnMajor> B(A, 4, 0, 8, 8);
         std::cout << B << std::endl;
     }
 
 
     TEST(SubmatrixTest, testSubmatrixOfConstStaticPanelMatrix)
     {
-        StaticPanelMatrix<double, 12, 12, rowMajor> const A;
+        StaticPanelMatrix<double, 12, 12, columnMajor> const A;
         auto B = submatrix(A, 4, 0, 8, 8);
         
-        // PanelSubmatrix<decltype(A), rowMajor> B(A, 4, 0, 8, 8);
+        // PanelSubmatrix<decltype(A), columnMajor> B(A, 4, 0, 8, 8);
         std::cout << B << std::endl;
     }
 
 
     TEST(SubmatrixTest, testSubmatrixOfDynamicPanelMatrix)
     {
-        DynamicPanelMatrix<double, rowMajor> A(12, 12);
+        DynamicPanelMatrix<double, columnMajor> A(12, 12);
         auto B = submatrix(A, 4, 0, 8, 8);
 
         static_assert(std::is_same_v<decltype(tile(B, 0, 0)), double *>);
         tile(B, 0, 0);
         
-        // PanelSubmatrix<decltype(A), rowMajor> B(A, 4, 0, 8, 8);
+        // PanelSubmatrix<decltype(A), columnMajor> B(A, 4, 0, 8, 8);
         std::cout << B << std::endl;
     }
 
 
     TEST(SubmatrixTest, testSubmatrixOfConstDynamicPanelMatrix)
     {
-        DynamicPanelMatrix<double, rowMajor> const A(12, 12);
+        DynamicPanelMatrix<double, columnMajor> const A(12, 12);
         auto B = submatrix(A, 4, 0, 8, 8);
 
         static_assert(std::is_same_v<decltype(tile(B, 0, 0)), double const *>);
         tile(B, 0, 0);
         
-        // PanelSubmatrix<decltype(A), rowMajor> B(A, 4, 0, 8, 8);
+        // PanelSubmatrix<decltype(A), columnMajor> B(A, 4, 0, 8, 8);
         std::cout << B << std::endl;
     }
 
 
     TEST(SubmatrixTest, testSubmatrixOfSubmatrix)
     {
-        DynamicPanelMatrix<double, rowMajor> A(12, 12);
+        DynamicPanelMatrix<double, columnMajor> A(12, 12);
         for (size_t i = 0; i < rows(A); ++i)
             for (size_t j = 0; j < columns(A); ++j)
                 A(i, j) = -(100. * i + j);
@@ -87,7 +87,7 @@ namespace blazefeo :: testing
 
     TEST(SubmatrixTest, testTile)
     {
-        DynamicPanelMatrix<double, rowMajor> A(12, 12);
+        DynamicPanelMatrix<double, columnMajor> A(12, 12);
         A = 0.;
         auto B = submatrix(A, 4, 0, 8, 8);
 

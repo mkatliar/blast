@@ -14,7 +14,7 @@ namespace blazefeo
     using namespace blaze;
 
 
-    template <typename Derived, bool SO = rowMajor>
+    template <typename Derived, bool SO>
     struct PanelMatrix
     :   public Matrix<Derived, SO>
     {

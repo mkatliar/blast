@@ -9,17 +9,17 @@ namespace blazefeo :: testing
     TEST(DynamicPanelMatrixTest, testSpacing)
     {
         {
-            DynamicPanelMatrix<double, rowMajor> m(5, 2);
+            DynamicPanelMatrix<double> m(5, 2);
             EXPECT_EQ(m.spacing(), 4 * 4);
         }
 
         {
-            DynamicPanelMatrix<double, rowMajor> m(5, 4);
+            DynamicPanelMatrix<double> m(5, 4);
             EXPECT_EQ(m.spacing(), 4 * 4);
         }
 
         {
-            DynamicPanelMatrix<double, rowMajor> m(5, 7);
+            DynamicPanelMatrix<double> m(5, 7);
             EXPECT_EQ(m.spacing(), 4 * 8);
         }
     }
@@ -33,7 +33,7 @@ namespace blazefeo :: testing
         blaze::DynamicMatrix<double> A_ref(M, N);
         randomize(A_ref);
 
-        DynamicPanelMatrix<double, rowMajor> A(M, N);
+        DynamicPanelMatrix<double> A(M, N);
         for (size_t i = 0; i < M; ++i)
             for (size_t j = 0; j < N; ++j)
                 A(i, j) = A_ref(i, j);
@@ -57,7 +57,7 @@ namespace blazefeo :: testing
         blaze::DynamicMatrix<double, blaze::columnMajor> A_ref(M, N);
         randomize(A_ref);
 
-        DynamicPanelMatrix<double, rowMajor> A(M, N);
+        DynamicPanelMatrix<double> A(M, N);
         A.pack(data(A_ref), spacing(A_ref));
 
         auto const& A_cref = A;
@@ -73,7 +73,7 @@ namespace blazefeo :: testing
         size_t constexpr M = 5;
         size_t constexpr N = 7;
         
-        DynamicPanelMatrix<double, rowMajor> A(M, N);
+        DynamicPanelMatrix<double> A(M, N);
         for (size_t i = 0; i < M; ++i)
             for (size_t j = 0; j < N; ++j)
                 blaze::randomize(A(i, j));

@@ -18,7 +18,7 @@ namespace blazefeo :: benchmark
         size_t constexpr m = Traits::rows;
         size_t constexpr n = Traits::columns;
         
-        DynamicPanelMatrix<double, rowMajor> a(m, n);
+        DynamicPanelMatrix<double> a(m, n);
         randomize(a);
 
         Kernel ker;

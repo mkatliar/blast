@@ -20,10 +20,16 @@ namespace blazefeo
     using namespace blaze;
 
 
-    template <typename Type, bool SO = rowMajor>
+    /// @brief Panel matrix with dynamically defined size.
+    ///
+    /// @tparam Type element type of the matrix
+    /// @tparam SO storage order of panel elements
+    template <typename Type, bool SO = columnMajor>
     class DynamicPanelMatrix
     :   public PanelMatrix<DynamicPanelMatrix<Type, SO>, SO>
     {
+        BLAZE_STATIC_ASSERT_MSG((SO == columnMajor), "Row-major panel matrices are not implemented");
+        
     public:
         //**Type definitions****************************************************************************
         using This          = DynamicPanelMatrix<Type, SO>;   //!< Type of this StaticPanelMatrix instance.

@@ -17,7 +17,7 @@ namespace blazefeo :: benchmark
     {
         size_t const M = state.range(0);
 
-        DynamicPanelMatrix<Real, rowMajor> A(M, M), L(M, M);
+        DynamicPanelMatrix<Real, columnMajor> A(M, M), L(M, M);
         makePositiveDefinite(A);
 
         for (auto _ : state)

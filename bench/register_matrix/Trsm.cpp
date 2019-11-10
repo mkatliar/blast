@@ -16,10 +16,10 @@ namespace blazefeo :: benchmark
         size_t constexpr m = Traits::rows;
         size_t constexpr n = Traits::columns;
         
-        StaticPanelMatrix<double, m, n, rowMajor> L;
+        StaticPanelMatrix<double, m, n, columnMajor> L;
         randomize(L);
 
-        StaticPanelMatrix<double, n, n, rowMajor> A;
+        StaticPanelMatrix<double, n, n, columnMajor> A;
         randomize(A);
 
         Kernel ker;

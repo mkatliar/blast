@@ -2,14 +2,13 @@
 
 #include <blazefeo/math/simd/Simd.hpp>
 
+#include <blaze/math/StorageOrder.h>
+#include <blaze/system/Inline.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/Exception.h>
 #include <blaze/util/StaticAssert.h>
-#include <blaze/system/Inline.h>
 
 #include <cmath>
-
-#include <immintrin.h>
 
 
 namespace blazefeo
@@ -83,15 +82,27 @@ namespace blazefeo
 
         /// @brief Rank-1 update
         ///
-        /// a, b must be aligned on panel boundary
-        template <bool TA, bool TB>
+        /// @tparam SOA storage order of the panels of the first matrix
+        /// @tparam SOB storage order of the panels of the second matrix
+        ///
+        /// @param a pointer to the first element of the column of the first matrix. Must be aligned on panel boundary.
+        /// @param sa pointer distance between the consecutive panels of the first matrix.
+        /// @param b pointer to the first element of the row of the second matrix. Must be aligned on panel boundary.
+        /// @param sb pointer distance between the consecutive panels of the second matrix.
+        template <bool SOA, bool SOB>
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb);
 
 
         /// @brief Rank-1 update of specified size
         ///
-        /// a, b must be aligned on panel boundary
-        template <bool TA, bool TB>
+        /// @tparam SOA storage order of the panels of the first matrix
+        /// @tparam SOB storage order of the panels of the second matrix
+        ///
+        /// @param a pointer to the first element of the column of the first matrix. Must be aligned on panel boundary.
+        /// @param sa pointer distance between the consecutive panels of the first matrix.
+        /// @param b pointer to the first element of the row of the second matrix. Must be aligned on panel boundary.
+        /// @param sb pointer distance between the consecutive panels of the second matrix.
+        template <bool SOA, bool SOB>
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n);
 
 
@@ -214,10 +225,10 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    template <bool TA, bool TB>
+    template <bool SOA, bool SOB>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb)
     {
-        if (!TA && TB)
+        if (SOA == columnMajor && SOB == rowMajor)
         {
             IntrinsicType ax[RM];
 
@@ -243,10 +254,10 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    template <bool TA, bool TB>
+    template <bool SOA, bool SOB>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
     {
-        if (!TA && TB)
+        if (SOA == columnMajor && SOB == rowMajor)
         {
             IntrinsicType ax[RM];
 
@@ -311,18 +322,18 @@ namespace blazefeo
 
 
     /// @brief Rank-1 update
-    template <bool TA, bool TB, typename T, size_t M, size_t N, size_t SS>
+    template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t SS>
     BLAZE_ALWAYS_INLINE void ger(RegisterMatrix<T, M, N, SS>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb)
     {
-        ker.template ger<TA, TB>(alpha, a, sa, b, sb);
+        ker.template ger<SOA, SOB>(alpha, a, sa, b, sb);
     }
 
 
     /// @brief Rank-1 update of specified size
-    template <bool TA, bool TB, typename T, size_t M, size_t N, size_t SS>
+    template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t SS>
     BLAZE_ALWAYS_INLINE void ger(RegisterMatrix<T, M, N, SS>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
     {
-        ker.template ger<TA, TB>(alpha, a, sa, b, sb, m, n);
+        ker.template ger<SOA, SOB>(alpha, a, sa, b, sb, m, n);
     }
 
 

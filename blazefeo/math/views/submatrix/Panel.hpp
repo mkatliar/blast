@@ -86,12 +86,12 @@ namespace blazefeo
                     BLAZE_THROW_INVALID_ARGUMENT( "Invalid submatrix specification" );
                 }
 
-                if (IsRowMajorMatrix_v<MT> && row() % tileSize_ > 0)
-                    BLAZE_THROW_LOGIC_ERROR("Submatrices of a row-major panel matrix which are not vertically aligned on a tile boundary "
+                if (IsRowMajorMatrix_v<MT> && column() % tileSize_ > 0)
+                    BLAZE_THROW_LOGIC_ERROR("Submatrices of a row-major panel matrix which are not horizontally aligned on a tile boundary "
                         "are currently not supported");
 
-                if (IsColumnMajorMatrix_v<MT> && column() % tileSize_ > 0)
-                    BLAZE_THROW_LOGIC_ERROR("Submatrices of a column-major panel matrix which are not horizontally aligned on a tile boundary "
+                if (IsColumnMajorMatrix_v<MT> && row() % tileSize_ > 0)
+                    BLAZE_THROW_LOGIC_ERROR("Submatrices of a column-major panel matrix which are not vertically aligned on a tile boundary "
                         "are currently not supported");
             }
             else
