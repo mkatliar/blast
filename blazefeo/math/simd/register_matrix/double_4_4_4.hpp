@@ -9,7 +9,7 @@
 namespace blazefeo
 {
     template <>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<double, 1, 4, 4>::load(double beta, double const * ptr, size_t spacing, size_t m, size_t n)
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<double, 4, 4, 4>::load(double beta, double const * ptr, size_t spacing, size_t m, size_t n)
     {
         if (n > 0)
             v_[0][0] = beta * _mm256_load_pd(ptr);
@@ -28,7 +28,7 @@ namespace blazefeo
 #if 1
     /// Magically, this function specialization is slightly faster than the default implementation of RegisterMatrix<>::store.
     template <>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<double, 1, 4, 4>::store(double * ptr, size_t spacing, size_t m, size_t n) const
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<double, 4, 4, 4>::store(double * ptr, size_t spacing, size_t m, size_t n) const
     {
         if (m >= 4)
         {

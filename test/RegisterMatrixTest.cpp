@@ -184,13 +184,13 @@ namespace blazefeo :: testing
     );
 
 
-    using RegisterMatrix_double_1_4_4 = RegisterMatrix<double, 1, 4, 4>;
-    using RegisterMatrix_double_2_4_4 = RegisterMatrix<double, 2, 4, 4>;
-    using RegisterMatrix_double_3_4_4 = RegisterMatrix<double, 3, 4, 4>;
-    using RegisterMatrix_double_2_8_4 = RegisterMatrix<double, 2, 8, 4>;
+    using RegisterMatrix_double_4_4_4 = RegisterMatrix<double, 4, 4, 4>;
+    using RegisterMatrix_double_8_4_4 = RegisterMatrix<double, 8, 4, 4>;
+    using RegisterMatrix_double_12_4_4 = RegisterMatrix<double, 12, 4, 4>;
+    using RegisterMatrix_double_8_8_4 = RegisterMatrix<double, 8, 8, 4>;
 
-    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_1_4_4, RegisterMatrixTest, RegisterMatrix_double_1_4_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_2_4_4, RegisterMatrixTest, RegisterMatrix_double_2_4_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_3_4_4, RegisterMatrixTest, RegisterMatrix_double_3_4_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_2_8_4, RegisterMatrixTest, RegisterMatrix_double_2_8_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_4_4_4, RegisterMatrixTest, RegisterMatrix_double_4_4_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_8_4_4, RegisterMatrixTest, RegisterMatrix_double_8_4_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_12_4_4, RegisterMatrixTest, RegisterMatrix_double_12_4_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_8_8_4, RegisterMatrixTest, RegisterMatrix_double_8_8_4);
 }

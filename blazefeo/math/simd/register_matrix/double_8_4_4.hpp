@@ -10,43 +10,40 @@
 
 namespace blazefeo
 {
-    template <>
-    inline void RegisterMatrix<double, 3, 4, 4>::load(double beta, double const * ptr, size_t spacing, size_t m, size_t n)
+    template<>
+    inline void RegisterMatrix<double, 8, 4, 4>::load(double beta, double const * ptr, size_t spacing, size_t m, size_t n)
     {
         if (n > 0)
         {
             v_[0][0] = beta * _mm256_load_pd(ptr);
             v_[1][0] = beta * _mm256_load_pd(ptr + spacing);
-            v_[2][0] = beta * _mm256_load_pd(ptr + 2 * spacing);
         }
 
         if (n > 1)
         {
             v_[0][1] = beta * _mm256_load_pd(ptr + 4);
             v_[1][1] = beta * _mm256_load_pd(ptr + spacing + 4);
-            v_[2][1] = beta * _mm256_load_pd(ptr + 2 * spacing + 4);
         }
 
         if (n > 2)
         {
             v_[0][2] = beta * _mm256_load_pd(ptr + 8);
             v_[1][2] = beta * _mm256_load_pd(ptr + spacing + 8);
-            v_[2][2] = beta * _mm256_load_pd(ptr + 2 * spacing + 8);
         }
 
         if (n > 3)
         {
             v_[0][3] = beta * _mm256_load_pd(ptr + 12);
             v_[1][3] = beta * _mm256_load_pd(ptr + spacing + 12);
-            v_[2][3] = beta * _mm256_load_pd(ptr + 2 * spacing + 12);
         }
     }
 
 
-    template <>
-    inline void RegisterMatrix<double, 3, 4, 4>::store(double * ptr, size_t spacing, size_t m, size_t n) const
+#if 1
+    template<>
+    inline void RegisterMatrix<double, 8, 4, 4>::store(double * ptr, size_t spacing, size_t m, size_t n) const
     {
-        for (size_t i = 0; i < 3; ++i)
+        for (size_t i = 0; i < 2; ++i)
         {
             if (m >= 4 * i + 4)
             {
@@ -84,4 +81,5 @@ namespace blazefeo
             }
         }
     }
+#endif
 }

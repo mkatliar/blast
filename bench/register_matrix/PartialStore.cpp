@@ -92,8 +92,8 @@ namespace blazefeo :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 1, 4, 4)->Apply(args_4_4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 2, 4, 4)->Apply(args_8_4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 3, 4, 4)->Apply(args_12_4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 2, 8, 4)->Apply(args_8_8);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 4, 4, 4)->Apply(args_4_4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 8, 4, 4)->Apply(args_8_4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 12, 4, 4)->Apply(args_12_4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 8, 8, 4)->Apply(args_8_8);
 }

@@ -30,8 +30,8 @@ namespace blazefeo :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 1, 4, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 2, 4, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 3, 4, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 2, 8, 4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 4, 4, 4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 8, 4, 4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 12, 4, 4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 8, 8, 4);
 }

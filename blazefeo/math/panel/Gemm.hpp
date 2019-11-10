@@ -25,7 +25,7 @@ namespace blazefeo
         {
             ger<TA, TB>(ker, alpha, a, sa, b, sb);
 
-            a += TA ? M * sa : BS;
+            a += TA ? ker.panels() * sa : BS;
             b += TB ? BS : N * sb;
         }
 
@@ -44,7 +44,7 @@ namespace blazefeo
         {
             ger<TA, TB>(ker, alpha, a, sa, b, sb, md, nd);
 
-            a += TA ? M * sa : BS;
+            a += TA ? ker.panels() * sa : BS;
             b += TB ? BS : N * sb;
         }
 
@@ -139,7 +139,7 @@ namespace blazefeo
         BLAZE_USER_ASSERT(rows(C) == M && columns(C) == N, "Matrix sizes do not match");
         BLAZE_USER_ASSERT(rows(D) == M && columns(D) == N, "Matrix sizes do not match");
 
-        RegisterMatrix<ET, KM / TILE_SIZE, KN, TILE_SIZE> ker;
+        RegisterMatrix<ET, KM, KN, TILE_SIZE> ker;
 
         if (i + KM <= M)
         {

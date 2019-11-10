@@ -17,34 +17,55 @@ namespace blazefeo
     using namespace blaze;
 
 
+    /// @brief Regiter-resident matrix
+    ///
+    /// @tparam T type of matrix elements
+    /// @tparam M number of rows of the matrix. Must be a multiple of SS.
+    /// @tparam N number of columns of the matrix.
+    /// @tparam SS number of T elements that can be stored in a SIMD register.
     template <typename T, size_t M, size_t N, size_t SS>
     class RegisterMatrix
     {
     public:
+        /// @brief Type of matrix elements
+        using ElementType = T;
+
+
         /// @brief Default ctor
         RegisterMatrix()
         {
         }
 
 
+        /// @brief Number of matrix rows
         static size_t constexpr rows()
         {
-            return M * SS;
+            return M;
         }
 
 
+        /// @brief Number of matrix columns
         static size_t constexpr columns()
         {
             return N;
         }
 
 
+        /// @brief Number of matrix panels
+        static size_t constexpr panels()
+        {
+            return RM;
+        }
+
+
+        /// @brief Reference to the matrix element at row \a i and column \a j
         T& at(size_t i, size_t j)
         {
             return v_[i / SS][j][i % SS];
         }
 
 
+        /// @brief Value of the matrix element at row \a i and column \a j
         T at(size_t i, size_t j) const
         {
             return v_[i / SS][j][i % SS];
@@ -93,8 +114,13 @@ namespace blazefeo
     private:
         using IntrinsicType = typename Simd<T, SS>::IntrinsicType;
         using MaskType = typename Simd<T, SS>::MaskType;
+
+        BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
+
+        // Numberf of SIMD registers required to store a single column of the matrix.
+        static size_t constexpr RM = M / SS;
         
-        IntrinsicType v_[M][N];
+        IntrinsicType v_[RM][N];
     };
 
 
@@ -106,7 +132,7 @@ namespace blazefeo
     struct RegisterMatrixTraits<RegisterMatrix<T, M, N, SS>>
     {
         static size_t constexpr simdSize = SS;
-        static size_t constexpr rows = M * SS;
+        static size_t constexpr rows = M;
         static size_t constexpr columns = N;
         static size_t constexpr elementCount = rows * columns;
         
@@ -117,7 +143,7 @@ namespace blazefeo
     template <typename T, size_t M, size_t N, size_t SS>
     inline void RegisterMatrix<T, M, N, SS>::load(T beta, T const * ptr, size_t spacing)
     {
-        for (size_t i = 0; i < M; ++i)
+        for (size_t i = 0; i < RM; ++i)
             for (size_t j = 0; j < N; ++j)
                 v_[i][j] = blazefeo::load<SS>(ptr + spacing * i + SS * j);
     }
@@ -126,7 +152,7 @@ namespace blazefeo
     template <typename T, size_t M, size_t N, size_t SS>
     inline void RegisterMatrix<T, M, N, SS>::store(T * ptr, size_t spacing) const
     {
-        for (size_t i = 0; i < M; ++i)
+        for (size_t i = 0; i < RM; ++i)
             for (size_t j = 0; j < N; ++j)
                 blazefeo::store(ptr + spacing * i + SS * j, v_[i][j]);
     }
@@ -135,7 +161,7 @@ namespace blazefeo
     template <typename T, size_t M, size_t N, size_t SS>
     inline void RegisterMatrix<T, M, N, SS>::store(T * ptr, size_t spacing, size_t m, size_t n) const
     {
-        for (size_t i = 0; i < M; ++i) if (SS * (i + 1) <= m)
+        for (size_t i = 0; i < RM; ++i) if (SS * (i + 1) <= m)
             // The compile-time constant size of the j loop in combination with the if() expression
             // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
             for (size_t j = 0; j < N; ++j) if (j < n)
@@ -167,14 +193,14 @@ namespace blazefeo
                 IntrinsicType const l_jk = broadcast<SS>(l + (j / SS) * sl + j % SS + k * SS);
 
                 #pragma unroll
-                for (size_t i = 0; i < M; ++i)
+                for (size_t i = 0; i < RM; ++i)
                     v_[i][j] = fnmadd(l_jk, v_[i][k], v_[i][j]);
             }
 
             IntrinsicType const l_jj = broadcast<SS>(l + (j / SS) * sl + j % SS + j * SS);
             
             #pragma unroll
-            for (size_t i = 0; i < M; ++i)
+            for (size_t i = 0; i < RM; ++i)
                 v_[i][j] /= l_jj;
         }
     }
@@ -186,10 +212,10 @@ namespace blazefeo
     {
         if (!TA && TB)
         {
-            IntrinsicType ax[M];
+            IntrinsicType ax[RM];
 
             #pragma unroll
-            for (size_t i = 0; i < M; ++i)
+            for (size_t i = 0; i < RM; ++i)
                 ax[i] = alpha * blazefeo::load<SS>(a + i * sa);
             
             #pragma unroll
@@ -198,7 +224,7 @@ namespace blazefeo
                 IntrinsicType bx = broadcast<SS>(b + (j / SS) * sb + (j % SS));
 
                 #pragma unroll
-                for (size_t i = 0; i < M; ++i)
+                for (size_t i = 0; i < RM; ++i)
                     v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
             }
         }
@@ -215,10 +241,10 @@ namespace blazefeo
     {
         if (!TA && TB)
         {
-            IntrinsicType ax[M];
+            IntrinsicType ax[RM];
 
             #pragma unroll
-            for (size_t i = 0; i < M; ++i)
+            for (size_t i = 0; i < RM; ++i)
                 ax[i] = alpha * blazefeo::load<SS>(a + i * sa);
             
             #pragma unroll
@@ -227,7 +253,7 @@ namespace blazefeo
                 IntrinsicType bx = broadcast<SS>(b + (j / SS) * sb + (j % SS));
 
                 #pragma unroll
-                for (size_t i = 0; i < M; ++i)
+                for (size_t i = 0; i < RM; ++i)
                     v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
             }
         }
@@ -248,7 +274,7 @@ namespace blazefeo
     template <typename T, size_t M, size_t N, size_t SS>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::potrf()
     {
-        static_assert(M * SS >= N, "potrf() not implemented for register matrices with columns more than rows");
+        static_assert(M >= N, "potrf() not implemented for register matrices with columns more than rows");
         
         #pragma unroll
         for (size_t k = 0; k < N; ++k)
@@ -259,14 +285,14 @@ namespace blazefeo
                 T const a_kj = v_[k / SS][j][k % SS];
 
                 #pragma unroll
-                for (size_t i = 0; i < M; ++i) if (i >= k / SS)
+                for (size_t i = 0; i < RM; ++i) if (i >= k / SS)
                     v_[i][k] = fnmadd(set(a_kj, a_kj, a_kj, a_kj), v_[i][j], v_[i][k]);
             }
 
             T const sqrt_a_kk = std::sqrt(v_[k / SS][k][k % SS]);
             
             #pragma unroll
-            for (size_t i = 0; i < M; ++i) 
+            for (size_t i = 0; i < RM; ++i) 
             {
                 if (i < k / SS)
                     v_[i][k] = setzero<T, SS>();
