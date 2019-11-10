@@ -174,7 +174,7 @@ namespace blazefeo
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
             #pragma unroll
-            for (size_t j = 0; j < N; ++j) if (i < n)
+            for (size_t j = 0; j < N; ++j) if (j < n)
                 v_[i][j] = blazefeo::load<SS>(ptr + spacing * i + SS * j);
     }
 
