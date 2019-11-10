@@ -12,6 +12,7 @@ add_executable(test-blazefeo
     SubmatrixTest.cpp
     DynamicPanelMatrixTest.cpp
     GemmTest.cpp
+    Gemm2Test.cpp
     PotrfTest.cpp
 
     simd/HsumTest.cpp

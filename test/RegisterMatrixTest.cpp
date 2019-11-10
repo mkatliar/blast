@@ -60,7 +60,7 @@ namespace blazefeo :: testing
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        blaze::StaticMatrix<ET, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A_ref;
         randomize(A_ref);
 
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
@@ -76,13 +76,32 @@ namespace blazefeo :: testing
     }
 
 
+    TYPED_TEST_P(RegisterMatrixTest, testLoadStore2)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B(0.);
+        randomize(A);
+
+        RM ker;
+        load2(ker, A.data(), A.spacing());
+        store2(ker, B.data(), B.spacing());
+
+        for (size_t i = 0; i < Traits::rows; ++i)
+            for (size_t j = 0; j < Traits::columns; ++j)
+                EXPECT_EQ(B(i, j), A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+    }
+
+
     TYPED_TEST_P(RegisterMatrixTest, testPartialStore)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        blaze::StaticMatrix<ET, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A_ref;
         randomize(A_ref);
 
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
@@ -105,15 +124,41 @@ namespace blazefeo :: testing
     }
 
 
+    TYPED_TEST_P(RegisterMatrixTest, testPartialStore2)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
+        randomize(A);
+
+        RM ker;
+        load2(ker, A.data(), A.spacing());
+
+        for (size_t m = 0; m <= Traits::rows; ++m)
+            for (size_t n = 0; n <= Traits::columns; ++n)
+            {
+                B = 0.;
+                store2(ker, B.data(), B.spacing(), m, n);
+
+                for (size_t i = 0; i < Traits::rows; ++i)
+                    for (size_t j = 0; j < Traits::columns; ++j)
+                        ASSERT_EQ(B(i, j), i < m && j < n ? A(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), " 
+                            << "store size = " << m << "x" << n;
+            }
+    }
+
+
     TYPED_TEST_P(RegisterMatrixTest, testGerNT)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        blaze::DynamicMatrix<ET, blaze::columnMajor> ma(Traits::rows, 1);
-        blaze::DynamicMatrix<ET, blaze::columnMajor> mb(Traits::columns, 1);
-        blaze::StaticMatrix<ET, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
+        DynamicMatrix<ET, columnMajor> ma(Traits::rows, 1);
+        DynamicMatrix<ET, columnMajor> mb(Traits::columns, 1);
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> mc, md;
 
         randomize(ma);
         randomize(mb);
@@ -142,6 +187,115 @@ namespace blazefeo :: testing
     }
 
 
+    TYPED_TEST_P(RegisterMatrixTest, testPartialGerNT)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        DynamicMatrix<ET, columnMajor> ma(Traits::rows, 1);
+        DynamicMatrix<ET, columnMajor> mb(Traits::columns, 1);
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> mc;
+
+        randomize(ma);
+        randomize(mb);
+        randomize(mc);
+        
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> const D_ref = ma * trans(mb) + mc;
+
+        StaticPanelMatrix<ET, Traits::rows, 1, columnMajor> A;
+        StaticPanelMatrix<ET, Traits::columns, 1, columnMajor> B;
+        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
+
+        A.pack(data(ma), spacing(ma));
+        B.pack(data(mb), spacing(mb));
+        C.pack(data(mc), spacing(mc));
+
+        // std::cout << "A=\n" << A << std::endl;
+        // std::cout << "B=\n" << B << std::endl;
+        // std::cout << "C=\n" << C << std::endl;
+
+        for (size_t m = 0; m <= rows(C); ++m)
+        {
+            for (size_t n = 0; n <= columns(C); ++n)
+            {
+                TypeParam ker;
+                load(ker, C.ptr(0, 0), C.spacing());
+                ger<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.ptr(0, 0), A.spacing(), B.ptr(0, 0), B.spacing(), m, n);
+
+                for (size_t i = 0; i < m; ++i)
+                    for (size_t j = 0; j < n; ++j)
+                        ASSERT_EQ(ker(i, j), i < m && j < n ? D_ref(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), " 
+                            << "store size = " << m << "x" << n;
+            }
+        }
+    }
+
+
+    TYPED_TEST_P(RegisterMatrixTest, testPartialGerNT2)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        DynamicMatrix<ET, columnMajor> A(Traits::rows, 1);
+        DynamicMatrix<ET, columnMajor> B(Traits::columns, 1);
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
+
+        randomize(A);
+        randomize(B);
+        randomize(C);
+
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> const D_ref = A * trans(B) + C;
+        
+        // std::cout << "A=\n" << A << std::endl;
+        // std::cout << "B=\n" << B << std::endl;
+        // std::cout << "C=\n" << C << std::endl;
+
+        for (size_t m = 0; m <= rows(C); ++m)
+        {
+            for (size_t n = 0; n <= columns(C); ++n)
+            {
+                TypeParam ker;
+                load2(ker, C.data(), C.spacing());
+                ger2<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.data(), A.spacing(), B.data(), B.spacing(), m, n);
+
+                for (size_t i = 0; i < m; ++i)
+                    for (size_t j = 0; j < n; ++j)
+                        ASSERT_EQ(ker(i, j), i < m && j < n ? D_ref(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), " 
+                            << "store size = " << m << "x" << n;
+            }
+        }
+    }
+
+
+    TYPED_TEST_P(RegisterMatrixTest, testGerNT2)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        DynamicMatrix<ET, columnMajor> A(Traits::rows, 1);
+        DynamicMatrix<ET, columnMajor> B(Traits::columns, 1);
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
+
+        randomize(A);
+        randomize(B);
+        randomize(C);
+
+        // std::cout << "A=\n" << A << std::endl;
+        // std::cout << "B=\n" << B << std::endl;
+        // std::cout << "C=\n" << C << std::endl;
+
+        TypeParam ker;
+        load2(ker, C.data(), C.spacing());
+        ger2<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.data(), A.spacing(), B.data(), B.spacing());
+        store2(ker, D.data(), D.spacing());
+
+        BLAZEFEO_EXPECT_EQ(D, evaluate(C + A * trans(B)));
+    }
+
+
     TYPED_TEST_P(RegisterMatrixTest, testPotrf)
     {
         using Traits = RegisterMatrixTraits<TypeParam>;
@@ -157,10 +311,10 @@ namespace blazefeo :: testing
             StaticPanelMatrix<ET, m, m, columnMajor> A1;
 
             {
-                blaze::StaticMatrix<ET, n, n, columnMajor> C0;
+                StaticMatrix<ET, n, n, columnMajor> C0;
                 makePositiveDefinite(C0);
 
-                blaze::StaticMatrix<ET, m, n, columnMajor> C;
+                StaticMatrix<ET, m, n, columnMajor> C;
                 submatrix(C, 0, 0, n, n) = C0;
                 randomize(submatrix(C, n, 0, m - n, n));
 
@@ -226,8 +380,13 @@ namespace blazefeo :: testing
 
     REGISTER_TYPED_TEST_SUITE_P(RegisterMatrixTest,
         testLoadStore,
+        testLoadStore2,
         testPartialStore,
+        testPartialStore2,
         testGerNT,
+        testPartialGerNT,
+        testPartialGerNT2,
+        testGerNT2,
         testPotrf,
         testTrsmRLT
     );
@@ -251,7 +410,7 @@ namespace blazefeo :: testing
     INSTANTIATE_TYPED_TEST_SUITE_P(double_12_4_4, RegisterMatrixTest, RM_double_12_4_4);
     INSTANTIATE_TYPED_TEST_SUITE_P(double_8_8_4, RegisterMatrixTest, RM_double_8_8_4);
 
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_8_8_8, RegisterMatrixTest, RM_float_8_8_8);
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_16_8_8, RegisterMatrixTest, RM_float_16_8_8);
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_24_8_8, RegisterMatrixTest, RM_float_24_8_8);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(float_8_8_8, RegisterMatrixTest, RM_float_8_8_8);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(float_16_8_8, RegisterMatrixTest, RM_float_16_8_8);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(float_24_8_8, RegisterMatrixTest, RM_float_24_8_8);
 }

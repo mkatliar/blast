@@ -13,7 +13,9 @@ add_executable(bench-blazefeo
     register_matrix/Trsm.cpp
 
     GemmStatic.cpp
+    Gemm2Static.cpp
     GemmDynamic.cpp
+    Gemm2Dynamic.cpp
     PotrfStatic.cpp
     PotrfDynamic.cpp
 )

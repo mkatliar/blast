@@ -132,4 +132,5 @@ namespace blazefeo :: benchmark
     BENCHMARK_GEMM_NT_STATIC(double, 48);
     BENCHMARK_GEMM_NT_STATIC(double, 49);
     BENCHMARK_GEMM_NT_STATIC(double, 50);
+    BENCHMARK_GEMM_NT_STATIC(double, 300);
 }
