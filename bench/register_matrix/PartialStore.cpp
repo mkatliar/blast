@@ -22,10 +22,10 @@ namespace blazefeo :: benchmark
         DynamicPanelMatrix<double> c(ker.rows(), ker.columns()), d(ker.rows(), ker.columns());
         randomize(c);        
 
-        load(ker, c.tile(0, 0), c.spacing());
+        load(ker, c.ptr(0, 0), c.spacing());
         for (auto _ : state)
         {
-            store(ker, d.tile(0, 0), d.spacing(), m, n);
+            store(ker, d.ptr(0, 0), d.spacing(), m, n);
             DoNotOptimize(d);   
         }
 
@@ -46,13 +46,13 @@ namespace blazefeo :: benchmark
     //     DynamicPanelMatrix<double, rowMajor> c(ker.rows(), ker.columns()), d(ker.rows(), ker.columns());
     //     randomize(c);        
 
-    //     load(ker, c.tile(0, 0), c.spacing());
+    //     load(ker, c.ptr(0, 0), c.spacing());
 
     //     for (int m = 1; m <= ker.rows(); ++m)
     //         for (int n = 1; n <= ker.columns(); ++n)
     //             for (auto _ : state)
     //             {                    
-    //                 store(ker, d.tile(0, 0), d.spacing(), m, n);
+    //                 store(ker, d.ptr(0, 0), d.spacing(), m, n);
     //                 DoNotOptimize(d);
     //             }
 

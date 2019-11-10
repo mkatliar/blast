@@ -160,7 +160,7 @@ namespace blazefeo
         {
             // Use partial save to calculate the bottom of the resulting matrix.
             size_t j = 0;
-            ET const * b = tile(B, 0, 0);
+            ET const * b = ptr(B, 0, 0);
 
             for (; j + KN <= N; j += KN)
                 gemm_backend<columnMajor, rowMajor>(ker, K, alpha, beta,

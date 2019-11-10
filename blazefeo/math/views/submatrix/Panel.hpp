@@ -78,7 +78,7 @@ namespace blazefeo
         ,   j_(j)
         ,   m_(m)
         ,   n_(n)
-        ,   data_(matrix_.tile(row() / tileSize_, 0) + column() * tileSize_)
+        ,   data_(matrix_.ptr(row(), column()))
         {
             if( !Contains_v< TypeList<RSAs...>, Unchecked > )
             {
@@ -87,11 +87,11 @@ namespace blazefeo
                 }
 
                 if (IsRowMajorMatrix_v<MT> && column() % tileSize_ > 0)
-                    BLAZE_THROW_LOGIC_ERROR("Submatrices of a row-major panel matrix which are not horizontally aligned on a tile boundary "
+                    BLAZE_THROW_LOGIC_ERROR("Submatrices of a row-major panel matrix which are not horizontally aligned on panel boundary "
                         "are currently not supported");
 
                 if (IsColumnMajorMatrix_v<MT> && row() % tileSize_ > 0)
-                    BLAZE_THROW_LOGIC_ERROR("Submatrices of a column-major panel matrix which are not vertically aligned on a tile boundary "
+                    BLAZE_THROW_LOGIC_ERROR("Submatrices of a column-major panel matrix which are not vertically aligned on panel boundary "
                         "are currently not supported");
             }
             else
@@ -214,18 +214,6 @@ namespace blazefeo
         ConstPointer data() const noexcept
         {
             return data_;
-        }
-
-
-        Pointer tile(size_t i, size_t j) noexcept
-        {
-            return data_ + spacing() * i + tileSize_ * tileSize_ * j;
-        }
-        
-
-        ConstPointer tile(size_t i, size_t j) const noexcept
-        {
-            return data_ + spacing() * i + tileSize_ * tileSize_ * j;
         }
 
 

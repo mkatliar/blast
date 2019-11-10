@@ -29,8 +29,8 @@ namespace blazefeo :: testing
         A.pack(data(A_ref), spacing(A_ref));
 
         TypeParam ker;
-        load(ker, A.tile(0, 0), A.spacing());
-        store(ker, B.tile(0, 0), B.spacing());
+        load(ker, A.ptr(0, 0), A.spacing());
+        store(ker, B.ptr(0, 0), B.spacing());
 
         for (size_t i = 0; i < Traits::rows; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)
@@ -49,13 +49,13 @@ namespace blazefeo :: testing
         A.pack(data(A_ref), spacing(A_ref));
 
         TypeParam ker;
-        load(ker, A.tile(0, 0), A.spacing());
+        load(ker, A.ptr(0, 0), A.spacing());
 
         for (size_t m = 0; m <= Traits::rows; ++m)
             for (size_t n = 0; n <= Traits::columns; ++n)
             {
                 B = 0.;
-                store(ker, B.tile(0, 0), B.spacing(), m, n);
+                store(ker, B.ptr(0, 0), B.spacing(), m, n);
 
                 for (size_t i = 0; i < Traits::rows; ++i)
                     for (size_t j = 0; j < Traits::columns; ++j)
@@ -86,9 +86,9 @@ namespace blazefeo :: testing
         c.pack(data(mc), spacing(mc));
 
         TypeParam ker;
-        load(ker, c.tile(0, 0), c.spacing());
-        ger<a.storageOrder, !b.storageOrder>(ker, 1.0, a.tile(0, 0), a.spacing(), b.tile(0, 0), b.spacing());
-        store(ker, d.tile(0, 0), d.spacing());
+        load(ker, c.ptr(0, 0), c.spacing());
+        ger<a.storageOrder, !b.storageOrder>(ker, 1.0, a.ptr(0, 0), a.spacing(), b.ptr(0, 0), b.spacing());
+        store(ker, d.ptr(0, 0), d.spacing());
         
         d.unpack(data(md), spacing(md));
 
@@ -121,9 +121,9 @@ namespace blazefeo :: testing
                 A.pack(data(C), spacing(C));
             }
 
-            load(ker, A.tile(0, 0), A.spacing());
+            load(ker, A.ptr(0, 0), A.spacing());
             ker.potrf();
-            store(ker, L.tile(0, 0), L.spacing());
+            store(ker, L.ptr(0, 0), L.spacing());
 
             A1 = 0.;
             gemm_nt(L, L, A1, A1);
@@ -162,9 +162,9 @@ namespace blazefeo :: testing
         // std::cout << "B=" << B << std::endl;
         // std::cout << "L=" << L << std::endl;
 
-        load(ker, B.tile(0, 0), B.spacing());
-        trsm<false, false, true>(ker, L.tile(0, 0), spacing(L));
-        store(ker, X.tile(0, 0), X.spacing());
+        load(ker, B.ptr(0, 0), B.spacing());
+        trsm<false, false, true>(ker, L.ptr(0, 0), spacing(L));
+        store(ker, X.ptr(0, 0), X.spacing());
 
         B1 = 0.;
         gemm_nt(X, L, B1, B1);
@@ -184,13 +184,17 @@ namespace blazefeo :: testing
     );
 
 
-    using RegisterMatrix_double_4_4_4 = RegisterMatrix<double, 4, 4, 4>;
-    using RegisterMatrix_double_8_4_4 = RegisterMatrix<double, 8, 4, 4>;
-    using RegisterMatrix_double_12_4_4 = RegisterMatrix<double, 12, 4, 4>;
-    using RegisterMatrix_double_8_8_4 = RegisterMatrix<double, 8, 8, 4>;
+    using RM_double_4_4_4 = RegisterMatrix<double, 4, 4, 4>;
+    using RM_double_4_2_4 = RegisterMatrix<double, 4, 2, 4>;
+    using RM_double_4_1_4 = RegisterMatrix<double, 4, 1, 4>;
+    using RM_double_8_4_4 = RegisterMatrix<double, 8, 4, 4>;
+    using RM_double_12_4_4 = RegisterMatrix<double, 12, 4, 4>;
+    using RM_double_8_8_4 = RegisterMatrix<double, 8, 8, 4>;
 
-    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_4_4_4, RegisterMatrixTest, RegisterMatrix_double_4_4_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_8_4_4, RegisterMatrixTest, RegisterMatrix_double_8_4_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_12_4_4, RegisterMatrixTest, RegisterMatrix_double_12_4_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(RegisterMatrix_double_8_8_4, RegisterMatrixTest, RegisterMatrix_double_8_8_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(double_4_4_4, RegisterMatrixTest, RM_double_4_4_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(double_4_2_4, RegisterMatrixTest, RM_double_4_2_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(double_4_1_4, RegisterMatrixTest, RM_double_4_1_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(double_8_4_4, RegisterMatrixTest, RM_double_8_4_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(double_12_4_4, RegisterMatrixTest, RM_double_12_4_4);
+    INSTANTIATE_TYPED_TEST_SUITE_P(double_8_8_4, RegisterMatrixTest, RM_double_8_8_4);
 }

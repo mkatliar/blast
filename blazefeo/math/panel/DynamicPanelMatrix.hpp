@@ -149,28 +149,16 @@ namespace blazefeo
         }
 
 
-        Type * tile(size_t i, size_t j) noexcept
-        {
-            return v_ + i * spacing_ + j * elementsPerTile_;
-        }
-
-
-        Type const * tile(size_t i, size_t j) const noexcept
-        {
-            return v_ + i * spacing_ + j * elementsPerTile_;
-        }
-
-
         Type * ptr(size_t i, size_t j)
         {
-            BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to tile boundary");
+            BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
             return v_ + spacing_ / tileSize_ * i + tileSize_ * j;
         }
 
 
         Type const * ptr(size_t i, size_t j) const
         {
-            BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to tile boundary");
+            BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
             return v_ + spacing_ / tileSize_ * i + tileSize_ * j;
         }
 
@@ -190,12 +178,7 @@ namespace blazefeo
 
         size_t elementIndex(size_t i, size_t j) const noexcept
         {
-            size_t const panel_i = i / tileSize_;
-            size_t const panel_j = j / tileSize_;
-            size_t const subpanel_i = i % tileSize_;
-            size_t const subpanel_j = j % tileSize_;
-
-            return panel_i * spacing_ + panel_j * elementsPerTile_ + subpanel_i + subpanel_j * tileSize_;
+            return i / tileSize_ * spacing_ + i % tileSize_ + j * tileSize_;
         }
     };
 }

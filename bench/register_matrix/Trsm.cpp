@@ -23,11 +23,11 @@ namespace blazefeo :: benchmark
         randomize(A);
 
         Kernel ker;
-        load(ker, A.tile(0, 0), A.spacing());
+        load(ker, A.ptr(0, 0), A.spacing());
 
         for (auto _ : state)
         {
-            trsm<false, false, true>(ker, L.tile(0, 0), spacing(L));
+            trsm<false, false, true>(ker, L.ptr(0, 0), spacing(L));
             DoNotOptimize(ker);
         }
 

@@ -24,7 +24,7 @@ namespace blazefeo :: benchmark
         randomize(c);
 
         Kernel ker;
-        load(ker, c.tile(0, 0), c.spacing());
+        load(ker, c.ptr(0, 0), c.spacing());
 
         for (auto _ : state)
         {
