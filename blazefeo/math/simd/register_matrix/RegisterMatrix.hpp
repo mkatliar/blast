@@ -58,17 +58,10 @@ namespace blazefeo
         }
 
 
-        /// @brief Reference to the matrix element at row \a i and column \a j
-        T& at(size_t i, size_t j)
+        /// @brief Number of registers used
+        static size_t constexpr registers()
         {
-            return v_[i / SS][j][i % SS];
-        }
-
-
-        /// @brief Value of the matrix element at row \a i and column \a j
-        T at(size_t i, size_t j) const
-        {
-            return v_[i / SS][j][i % SS];
+            return RM * N;
         }
 
 
@@ -121,6 +114,20 @@ namespace blazefeo
         static size_t constexpr RM = M / SS;
         
         IntrinsicType v_[RM][N];
+
+
+        /// @brief Reference to the matrix element at row \a i and column \a j
+        T& at(size_t i, size_t j)
+        {
+            return v_[i / SS][j][i % SS];
+        }
+
+
+        /// @brief Value of the matrix element at row \a i and column \a j
+        T at(size_t i, size_t j) const
+        {
+            return v_[i / SS][j][i % SS];
+        }
     };
 
 
