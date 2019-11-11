@@ -4,6 +4,7 @@
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
+#include <test/Tolerance.hpp>
 
 
 namespace blazefeo :: testing
@@ -13,42 +14,6 @@ namespace blazefeo :: testing
     :   public Test
     {
     };
-
-
-    template <typename ET>
-    static ET absTol();
-
-
-    template <typename ET>
-    static ET relTol();
-
-
-    template <>
-    double absTol<double>()
-    {
-        return 1e-11;
-    }
-
-
-    template <>
-    double relTol<double>()
-    {
-        return 1e-11;
-    }
-
-
-    template <>
-    float absTol<float>()
-    {
-        return 1e-5f;
-    }
-
-
-    template <>
-    float relTol<float>()
-    {
-        return 1e-4f;
-    }
 
 
     TYPED_TEST_SUITE_P(RegisterMatrixTest);
@@ -202,25 +167,41 @@ namespace blazefeo :: testing
         for (size_t i = 0; i < Traits::rows; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)
                 if (j <= i)
+                {
                     randomize(L(i, j));
+                    if (i == j)
+                        L(i, j) += ET(1.);  // Improve conditioning
+                }
                 else
                     reset(L(i, j));
 
         randomize(B);
 
-        // std::cout << "B=" << B << std::endl;
-        // std::cout << "L=" << L << std::endl;
+        // std::cout << "B=\n" << B << std::endl;
+        // std::cout << "L=\n" << L << std::endl;
 
+        StaticMatrix<ET, Traits::columns, Traits::columns, columnMajor> LL;
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> BB, XX;
+
+        L.unpack(LL.data(), LL.spacing());
+        B.unpack(BB.data(), BB.spacing());
+
+        // std::cout << "BB=\n" << BB << std::endl;
+        // std::cout << "LL=\n" << LL << std::endl;
+
+        // Workaround the bug:
+        // https://bitbucket.org/blaze-lib/blaze/issues/301/error-in-evaluation-of-a-inv-trans-b
+        XX = evaluate(BB * evaluate(inv(evaluate(trans(LL)))));
+        
         load(ker, B.ptr(0, 0), B.spacing());
         trsm<false, false, true>(ker, L.ptr(0, 0), spacing(L));
         store(ker, X.ptr(0, 0), X.spacing());
 
-        B1 = 0.;
-        gemm_nt(X, L, B1, B1);
-
-        // std::cout << B1 << std::endl;
-
-        BLAZEFEO_ASSERT_APPROX_EQ(B1, B, absTol<ET>(), relTol<ET>());
+        // std::cout << "X=\n" << X << std::endl;
+        // std::cout << "XX=\n" << XX << std::endl;
+        
+        // TODO: should be strictly equal?
+        BLAZEFEO_ASSERT_APPROX_EQ(X, XX, absTol<ET>(), relTol<ET>());
     }
 
 
