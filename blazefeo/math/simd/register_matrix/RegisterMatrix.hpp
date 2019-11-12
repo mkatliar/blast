@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blazefeo/math/simd/Simd.hpp>
+#include <blazefeo/math/views/submatrix/Panel.hpp>
 
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/Matrix.h>
@@ -34,6 +35,7 @@ namespace blazefeo
         /// @brief Default ctor
         RegisterMatrix()
         {
+            reset();
         }
 
 
@@ -65,15 +67,57 @@ namespace blazefeo
         }
 
 
+        /// @brief Value of the matrix element at row \a i and column \a j
+        T operator()(size_t i, size_t j) const
+        {
+            return at(i, j);
+        }
+
+
+        /// @brief Set all elements to 0.
+        void reset()
+        {
+            for (size_t i = 0; i < RM; ++i)
+                for (size_t j = 0; j < N; ++j)
+                    v_[i][j] = setzero<T, SS>();
+        }
+
+
         /// @brief load from memory
+        [[deprecated("Use load with a matrix argument instead")]]
         void load(T beta, T const * ptr, size_t spacing);
 
+        /// @brief Load register matrix from a memory matrix and multiply it by a constant;
+        ///
+        /// The size of the memory matrix \a A must be not bigger than the size of the register matrix.
+        /// If the memory matrix is smaller than the register matrix, the register matrix is partially loaded,
+        /// and the remaining elements are undefined.
+        ///
+        /// @param beta multiplication constant
+        /// @param A memory matrix
         template <typename MT>
-        void load(T beta, Matrix<MT, columnMajor> const& A)
+        void load(T beta, PanelMatrix<MT, columnMajor> const& A)
         {
-            for (size_t i = 0; i < RM && i * SS < rows(A); ++i)
-                for (size_t j = 0; j < N && j < columns(A); ++j)
-                    v_[i][j] = beta * (~A).load(SS * i, j);
+            BLAZE_INTERNAL_ASSERT((~A).rows() <= rows(), "Invalid matrix size");
+            BLAZE_INTERNAL_ASSERT((~A).columns() <= columns(), "Invalid matrix size");
+
+            for (size_t i = 0; i < RM && i * SS < (~A).rows(); ++i)
+                for (size_t j = 0; j < N && j < (~A).columns(); ++j)
+                    v_[i][j] = beta * (~A).template load<SS>(SS * i, j);
+        }
+
+
+        /// @brief Load register matrix from a memory matrix;
+        ///
+        /// The size of the memory matrix \a A must be not bigger than the size of the register matrix.
+        /// If the memory matrix is smaller than the register matrix, the register matrix is partially loaded,
+        /// and the remaining elements are undefined.
+        ///
+        /// @param A memory matrix
+        template <typename MT>
+        void load(PanelMatrix<MT, columnMajor> const& A)
+        {
+            load(T(1.), A);
         }
 
 
@@ -86,31 +130,53 @@ namespace blazefeo
 
 
         /// @brief store to memory with specified size
+        [[deprecated("Use load with a matrix argument instead")]]
         void store(T * ptr, size_t spacing, size_t m, size_t n) const;
 
 
+        /// @brief Store register matrix to a memory matrix;
+        ///
+        /// The size of the memory matrix \a A must be not bigger than the size of the register matrix.
+        /// If the memory matrix is smaller than the register matrix, the register matrix is partially stored,
+        /// and the remaining elements of \a A are unchanged.
+        ///
+        /// @param A memory matrix
         template <typename MT>
-        void store(Matrix<MT, columnMajor>& A) const
+        void store(PanelMatrix<MT, columnMajor>& A) const
         {
-            size_t const m = rows(A);
-            size_t const n = columns(A);
+            BLAZE_INTERNAL_ASSERT((~A).rows() <= rows(), "Invalid matrix size");
+            BLAZE_INTERNAL_ASSERT((~A).columns() <= columns(), "Invalid matrix size");
+
+            size_t const m = (~A).rows();
+            size_t const n = (~A).columns();
 
             for (size_t i = 0; i < RM; ++i) if (SS * i < m)
                 // The compile-time constant size of the j loop in combination with the if() expression
                 // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
                 for (size_t j = 0; j < N; ++j) if (j < n)
-                    (~A).store(v_[i][j], SS * i, j);
+                    (~A).store(SS * i, j, v_[i][j]);
+        }
 
-            // **** TODO: this goes to PanelMatrix::store()! ****
-            //
-            // if (IntType const rem = m % SS)
-            // {
-            //     MaskType const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType, SS>());
-            //     size_t const i = m / SS;
 
-            //     for (size_t j = 0; j < n && j < columns(); ++j)
-            //         maskstore(ptr + spacing * i + SS * j, mask, v_[i][j]);
-            // }
+        /// @brief Store register matrix to a submatrix of a memory matrix;
+        ///
+        /// The size (m, n) of the submatrix be not bigger than the size of the register matrix.
+        /// If (m, n) is smaller than the register matrix, the register matrix is partially stored,
+        /// and the remaining elements of \a A are unchanged.
+        ///
+        /// @param A memory matrix
+        /// @param i first row of A to store the register matrix to
+        /// @param j first column of A to store the register matrix to
+        /// @param m number of rows to store
+        /// @param n number of columns to store
+        template <typename MT>
+        void store(PanelMatrix<MT, columnMajor>& A, size_t i, size_t j, size_t m, size_t n) const
+        {
+            BLAZE_INTERNAL_ASSERT((~A).rows() <= rows(), "Invalid matrix size");
+            BLAZE_INTERNAL_ASSERT((~A).columns() <= columns(), "Invalid matrix size");
+
+            auto sub_A = submatrix(~A, i, j, m, n);
+            store(sub_A);
         }
 
 
@@ -382,9 +448,10 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
+    [[deprecated("Use load with a matrix argument instead")]]
     BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T const * a, size_t sa)
     {
-        ker.load(1.0, a, sa);
+        ker.load(1., a, sa);
     }
 
 
@@ -396,6 +463,7 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
+    [[deprecated("Use load with a matrix argument instead")]]
     BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T beta, T const * a, size_t sa)
     {
         ker.load(beta, a, sa);
@@ -417,6 +485,7 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
+    [[deprecated("Use store with a matrix argument instead")]]
     BLAZE_ALWAYS_INLINE void store(RegisterMatrix<T, M, N, SS> const& ker, T * a, size_t sa, size_t m, size_t n)
     {
         ker.store(a, sa, m, n);

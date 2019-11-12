@@ -162,6 +162,18 @@ namespace blazefeo
         }
 
 
+        template <typename T>
+        void store(size_t i, size_t j, T val)
+        {
+            BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
+            BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
+            BLAZE_INTERNAL_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+
+            // We never use maskstore here because we have padding
+            blazefeo::store(v_ + elementIndex(i, j), val);
+        }
+
+
     private:
         static size_t constexpr tileSize_ = TileSize_v<Type>;
         static size_t constexpr elementsPerTile_ = tileSize_ * tileSize_;

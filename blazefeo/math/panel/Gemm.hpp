@@ -33,6 +33,23 @@ namespace blazefeo
     }
 
 
+    template <
+        typename T, size_t M, size_t N, size_t BS, 
+        typename MT1, bool SO1, typename MT2, bool SO2,
+        typename MT3, bool SO3, typename MT4, bool SO4
+        >
+    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, BS>& ker, size_t K, T alpha, T beta,
+        Matrix<MT1, SO1> const& A, Matrix<MT2, SO2> const& B, Matrix<MT3, SO3> const& C, Matrix<MT4, SO4>& D)
+    {
+        ker.load(beta, ~C);
+
+        for (size_t k = 0; k < K; ++k)
+            ker.ger(alpha, column(~A, k), row(~B, k));
+
+        ker.store(~D);
+    }
+
+
     template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t BS>
     BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, BS>& ker, size_t K, T alpha, T beta,
         T const * a, size_t sa, T const * b, size_t sb, T const * c, size_t sc, T * d, size_t sd,
@@ -106,13 +123,13 @@ namespace blazefeo
         // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
         // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
         for (; i + 2 * TILE_SIZE < M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
-            gemm_nt_backend<3 * TILE_SIZE, TILE_SIZE>(i, alpha, beta, ~A, ~B, ~C, ~D);
+            gemm_nt_backend<3 * TILE_SIZE, 4>(i, alpha, beta, ~A, ~B, ~C, ~D);
 
         for (; i + 1 * TILE_SIZE < M; i += 2 * TILE_SIZE)
-            gemm_nt_backend<2 * TILE_SIZE, TILE_SIZE>(i, alpha, beta, ~A, ~B, ~C, ~D);
+            gemm_nt_backend<2 * TILE_SIZE, 4>(i, alpha, beta, ~A, ~B, ~C, ~D);
 
         for (; i + 0 * TILE_SIZE < M; i += 1 * TILE_SIZE)
-            gemm_nt_backend<1 * TILE_SIZE, TILE_SIZE>(i, alpha, beta, ~A, ~B, ~C, ~D);
+            gemm_nt_backend<1 * TILE_SIZE, 4>(i, alpha, beta, ~A, ~B, ~C, ~D);
     }
 
 

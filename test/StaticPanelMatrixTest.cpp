@@ -76,6 +76,30 @@ namespace blazefeo :: testing
     }
 
 
+    TYPED_TEST_P(StaticPanelMatrixTest, testStore)
+    {
+        size_t constexpr SS = TileSize_v<TypeParam>;
+        size_t constexpr M = 2 * SS + 1;
+        size_t constexpr N = 3 * SS + 2;
+
+        StaticPanelMatrix<TypeParam, M, N, columnMajor> A;
+        IntrinsicType_t<TypeParam, SS> val;
+
+        for (size_t i = 0; i < SS; ++i)
+            val[i] = TypeParam(i + 1);
+
+        for (size_t i = 0; i < M; i += SS)
+            for (size_t j = 0; j < N; ++j)
+            {
+                A = TypeParam(0.);
+                A.store(i, j, val);
+
+                for (size_t k = 0; k < SS && i + k < rows(A); ++k)
+                    ASSERT_EQ(A(i + k, j), val[k]) << "element mismatch at i,j,k=" << i << "," << j << "," << k;
+            }
+    }
+
+
     TYPED_TEST_P(StaticPanelMatrixTest, testPack)
     {
         size_t constexpr SS = TileSize_v<TypeParam>;
@@ -176,6 +200,7 @@ namespace blazefeo :: testing
         testPanels,
         testElementAccess,
         testLoad,
+        testStore,
         testPack,
         testUnpack,
         testPMatPMatMulAssign,

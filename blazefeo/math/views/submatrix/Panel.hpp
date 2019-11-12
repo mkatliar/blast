@@ -3,6 +3,7 @@
 #include <blazefeo/math/PanelMatrix.hpp>
 #include <blazefeo/math/views/submatrix/BaseTemplate.hpp>
 #include <blazefeo/math/constraints/Submatrix.hpp>
+#include <blazefeo/math/simd/Simd.hpp>
 #include <blazefeo/system/Tile.hpp>
 
 #include <blaze/math/constraints/Submatrix.h>
@@ -178,6 +179,45 @@ namespace blazefeo
             BLAZE_USER_ASSERT( j < columns(), "Invalid column access index" );
 
             return const_cast<const MT&>( matrix_ )(row()+i, column()+j);
+        }
+
+
+        template <size_t SS>
+        auto load(size_t i, size_t j) const
+        {
+            if( i >= rows() ) {
+                BLAZE_THROW_OUT_OF_RANGE( "Invalid row access index" );
+            }
+            if( j >= columns() ) {
+                BLAZE_THROW_OUT_OF_RANGE( "Invalid column access index" );
+            }
+            return matrix_.template load<SS>(row() + i, column() + j);
+        }
+
+
+        template <typename T>
+        void store(size_t i, size_t j, T val)
+        {
+            if( i >= rows() ) {
+                BLAZE_THROW_OUT_OF_RANGE( "Invalid row access index" );
+            }
+            if( j >= columns() ) {
+                BLAZE_THROW_OUT_OF_RANGE( "Invalid column access index" );
+            }
+
+            size_t constexpr SS = SimdSize_v<T>;
+
+            if (i + SS <= rows())
+            {
+                matrix_.store(row() + i, column() + j, val);
+            }
+            else
+            {
+                IntType_t<T> const rem = rows() % SS;
+                MaskType_t<T> const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType_t<T>, SS>());
+
+                maskstore(&matrix_(row() + i, column() + j), mask, val);
+            }
         }
 
 
