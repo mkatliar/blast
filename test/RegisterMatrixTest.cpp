@@ -29,7 +29,7 @@ namespace blazefeo :: testing
         randomize(A_ref);
 
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
-        A.pack(data(A_ref), spacing(A_ref));
+        A = A_ref;
 
         RM ker;
         load(ker, A.ptr(0, 0), A.spacing());
@@ -51,7 +51,7 @@ namespace blazefeo :: testing
         randomize(A_ref);
 
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
-        A.pack(data(A_ref), spacing(A_ref));
+        A = A_ref;
 
         RM ker;
         load(ker, A.ptr(0, 0), A.spacing());
@@ -88,9 +88,9 @@ namespace blazefeo :: testing
         StaticPanelMatrix<ET, Traits::columns, 1, columnMajor> B;
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
 
-        A.pack(data(ma), spacing(ma));
-        B.pack(data(mb), spacing(mb));
-        C.pack(data(mc), spacing(mc));
+        A = ma;
+        B = mb;
+        C = mc;
 
         // std::cout << "A=\n" << A << std::endl;
         // std::cout << "B=\n" << B << std::endl;
@@ -101,7 +101,7 @@ namespace blazefeo :: testing
         ger<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.ptr(0, 0), A.spacing(), B.ptr(0, 0), B.spacing());
         store(ker, D.ptr(0, 0), D.spacing());
         
-        D.unpack(data(md), spacing(md));
+        md = D;
 
         BLAZEFEO_EXPECT_EQ(md, evaluate(mc + ma * trans(mb)));
     }
@@ -119,7 +119,6 @@ namespace blazefeo :: testing
         if constexpr (m >= n)
         {
             StaticPanelMatrix<ET, m, n, columnMajor> A, L;
-            StaticPanelMatrix<ET, m, m, columnMajor> A1;
 
             {
                 blaze::StaticMatrix<ET, n, n, columnMajor> C0;
@@ -129,15 +128,18 @@ namespace blazefeo :: testing
                 submatrix(C, 0, 0, n, n) = C0;
                 randomize(submatrix(C, n, 0, m - n, n));
 
-                A.pack(data(C), spacing(C));
+                A = C;
             }
 
             load(ker, A.ptr(0, 0), A.spacing());
             ker.potrf();
             store(ker, L.ptr(0, 0), L.spacing());
 
-            A1 = 0.;
-            gemm_nt(L, L, A1, A1);
+            StaticMatrix<ET, m, n, columnMajor> LL;
+            LL = L;
+            // L.unpack(LL.data(), LL.spacing());
+
+            StaticMatrix<ET, m, m, columnMajor> A1 = LL * trans(LL);
 
             // std::cout << "A=\n" << A << std::endl;
             // std::cout << "L=\n" << L << std::endl;
@@ -183,8 +185,8 @@ namespace blazefeo :: testing
         StaticMatrix<ET, Traits::columns, Traits::columns, columnMajor> LL;
         StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> BB, XX;
 
-        L.unpack(LL.data(), LL.spacing());
-        B.unpack(BB.data(), BB.spacing());
+        LL = L;
+        BB = B;
 
         // std::cout << "BB=\n" << BB << std::endl;
         // std::cout << "LL=\n" << LL << std::endl;

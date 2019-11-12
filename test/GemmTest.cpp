@@ -47,15 +47,15 @@ namespace blazefeo :: testing
                     DynamicPanelMatrix<Real> C(M, N);
                     DynamicPanelMatrix<Real> D(M, N);
 
-                    A.pack(data(blaze_A), spacing(blaze_A));
-                    B.pack(data(blaze_B), spacing(blaze_B));
-                    C.pack(data(blaze_C), spacing(blaze_C));
+                    A = blaze_A;
+                    B = blaze_B;
+                    C = blaze_C;
                     
                     // Do gemm with Smoke
                     gemm_nt(A, B, C, D);
 
                     // Copy the resulting D matrix from BLASFEO to Blaze
-                    D.unpack(data(blaze_D), spacing(blaze_D));
+                    blaze_D = D;
 
                     // Print the result from BLASFEO
                     // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
@@ -87,16 +87,16 @@ namespace blazefeo :: testing
         StaticPanelMatrix<Real, M, N> C;
         StaticPanelMatrix<Real, M, N> D;
 
-        A.pack(data(blaze_A), spacing(blaze_A));
-        B.pack(data(blaze_B), spacing(blaze_B));
-        C.pack(data(blaze_C), spacing(blaze_C));
+        A = blaze_A;
+        B = blaze_B;
+        C = blaze_C;
         
         // Do gemm with Smoke
         auto D1 = submatrix(D, 0, 0, M, N);
         gemm_nt(submatrix(A, 0, 0, M, K), submatrix(B, 0, 0, N, K), submatrix(C, 0, 0, M, N), D1);
 
         // Copy the resulting D matrix from BLASFEO to Blaze
-        D.unpack(data(blaze_D), spacing(blaze_D));
+        blaze_D = D;
 
         // Print the result from BLASFEO
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;

@@ -103,6 +103,44 @@ namespace blazefeo
         }
 
 
+        template< typename MT    // Type of the right-hand side matrix
+            , bool SO2 >      // Storage order of the right-hand side matrix
+        DynamicPanelMatrix& operator=(Matrix<MT, SO2> const& rhs)
+        {
+            // using blaze::assign;
+
+            // using TT = decltype( trans( *this ) );
+            // using CT = decltype( ctrans( *this ) );
+            // using IT = decltype( inv( *this ) );
+
+            // if( (~rhs).rows() != M || (~rhs).columns() != N ) {
+            //     BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to static matrix" );
+            // }
+
+            // if( IsSame_v<MT,TT> && (~rhs).isAliased( this ) ) {
+            //     transpose( typename IsSquare<This>::Type() );
+            // }
+            // else if( IsSame_v<MT,CT> && (~rhs).isAliased( this ) ) {
+            //     ctranspose( typename IsSquare<This>::Type() );
+            // }
+            // else if( !IsSame_v<MT,IT> && (~rhs).canAlias( this ) ) {
+            //     StaticPanelMatrix tmp( ~rhs );
+            //     assign( *this, tmp );
+            // }
+            // else {
+            //     if( IsSparseMatrix_v<MT> )
+            //         reset();
+            //     assign( *this, ~rhs );
+            // }
+
+            // BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
+
+            assign(*this, ~rhs);
+
+            return *this;
+        }
+
+
         ConstReference operator()(size_t i, size_t j) const noexcept
         {
             return v_[elementIndex(i, j)];
@@ -130,22 +168,6 @@ namespace blazefeo
         size_t spacing() const
         {
             return spacing_;
-        }
-
-
-        void pack(Type const * data, size_t lda)
-        {
-            for (size_t i = 0; i < m_; ++i)
-                for (size_t j = 0; j < n_; ++j)
-                    (*this)(i, j) = data[i + lda * j];
-        }
-
-
-        void unpack(Type * data, size_t lda) const
-        {
-            for (size_t i = 0; i < m_; ++i)
-                for (size_t j = 0; j < n_; ++j)
-                    data[i + lda * j] = (*this)(i, j);
         }
 
 

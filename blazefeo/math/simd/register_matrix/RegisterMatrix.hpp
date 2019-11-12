@@ -3,6 +3,7 @@
 #include <blazefeo/math/simd/Simd.hpp>
 
 #include <blaze/math/StorageOrder.h>
+#include <blaze/math/Matrix.h>
 #include <blaze/system/Inline.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/Exception.h>
@@ -67,6 +68,14 @@ namespace blazefeo
         /// @brief load from memory
         void load(T beta, T const * ptr, size_t spacing);
 
+        template <typename MT>
+        void load(T beta, Matrix<MT, columnMajor> const& A)
+        {
+            for (size_t i = 0; i < RM && i * SS < rows(A); ++i)
+                for (size_t j = 0; j < N && j < columns(A); ++j)
+                    v_[i][j] = beta * (~A).load(SS * i, j);
+        }
+
 
         /// @brief load from memory with specified size
         void load(T beta, T const * ptr, size_t spacing, size_t m, size_t n);
@@ -78,6 +87,31 @@ namespace blazefeo
 
         /// @brief store to memory with specified size
         void store(T * ptr, size_t spacing, size_t m, size_t n) const;
+
+
+        template <typename MT>
+        void store(Matrix<MT, columnMajor>& A) const
+        {
+            size_t const m = rows(A);
+            size_t const n = columns(A);
+
+            for (size_t i = 0; i < RM; ++i) if (SS * i < m)
+                // The compile-time constant size of the j loop in combination with the if() expression
+                // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
+                for (size_t j = 0; j < N; ++j) if (j < n)
+                    (~A).store(v_[i][j], SS * i, j);
+
+            // **** TODO: this goes to PanelMatrix::store()! ****
+            //
+            // if (IntType const rem = m % SS)
+            // {
+            //     MaskType const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType, SS>());
+            //     size_t const i = m / SS;
+
+            //     for (size_t j = 0; j < n && j < columns(); ++j)
+            //         maskstore(ptr + spacing * i + SS * j, mask, v_[i][j]);
+            // }
+        }
 
 
         /// @brief Rank-1 update
@@ -164,7 +198,7 @@ namespace blazefeo
     {
         for (size_t i = 0; i < RM; ++i)
             for (size_t j = 0; j < N; ++j)
-                v_[i][j] = blazefeo::load<SS>(ptr + spacing * i + SS * j);
+                v_[i][j] = beta * blazefeo::load<SS>(ptr + spacing * i + SS * j);
     }
 
 
@@ -175,7 +209,7 @@ namespace blazefeo
         for (size_t i = 0; i < RM; ++i)
             #pragma unroll
             for (size_t j = 0; j < N; ++j) if (j < n)
-                v_[i][j] = blazefeo::load<SS>(ptr + spacing * i + SS * j);
+                v_[i][j] = beta * blazefeo::load<SS>(ptr + spacing * i + SS * j);
     }
 
 

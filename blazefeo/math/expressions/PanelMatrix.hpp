@@ -18,6 +18,19 @@ namespace blazefeo
     struct PanelMatrix
     :   public Matrix<Derived, SO>
     {
+    public:
+        template< typename Other >  // Data type of the foreign expression
+        bool isAliased( const Other* alias ) const noexcept
+        {
+            return static_cast<const void*>( this ) == static_cast<const void*>( alias );
+        }
+
+
+        template< typename Other >  // Data type of the foreign expression
+        bool canAlias( const Other* alias ) const noexcept
+        {
+            return static_cast<const void*>( this ) == static_cast<const void*>( alias );
+        }
     };
 
 
@@ -57,5 +70,29 @@ namespace blazefeo
         -> blaze::EnableIf_t<IsPanelMatrix_v<MT2> && IsRowMajorMatrix_v<MT2> && IsPanelMatrix_v<MT3> && IsRowMajorMatrix_v<MT3>>
     {
         BLAZE_THROW_LOGIC_ERROR("Not implemented 2");
+    }
+
+
+    template <typename MT1, bool SO1, typename MT2, bool SO2>
+    inline void assign(DenseMatrix<MT1, SO1>& lhs, PanelMatrix<MT2, SO2> const& rhs)
+    {
+        BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == (~rhs).rows()   , "Invalid number of rows"    );
+        BLAZE_INTERNAL_ASSERT( (~lhs).columns() == (~rhs).columns(), "Invalid number of columns" );
+
+        for (size_t i = 0; i < (~rhs).rows(); ++i)
+            for (size_t j = 0; j < (~rhs).columns(); ++j)
+                (~lhs)(i, j) = (~rhs)(i, j);
+    }
+
+
+    template <typename MT1, bool SO1, typename MT2, bool SO2>
+    inline void assign(PanelMatrix<MT1, SO1>& lhs, DenseMatrix<MT2, SO2> const& rhs)
+    {
+        BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == (~rhs).rows()   , "Invalid number of rows"    );
+        BLAZE_INTERNAL_ASSERT( (~lhs).columns() == (~rhs).columns(), "Invalid number of columns" );
+
+        for (size_t i = 0; i < (~rhs).rows(); ++i)
+            for (size_t j = 0; j < (~rhs).columns(); ++j)
+                (~lhs)(i, j) = (~rhs)(i, j);
     }
 }

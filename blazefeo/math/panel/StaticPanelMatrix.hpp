@@ -3,6 +3,7 @@
 #include <blazefeo/math/Forward.hpp>
 #include <blazefeo/math/panel/Gemm.hpp>
 #include <blazefeo/math/views/submatrix/BaseTemplate.hpp>
+#include <blazefeo/math/simd/Simd.hpp>
 #include <blazefeo/system/Tile.hpp>
 #include <blazefeo/system/CacheLine.hpp>
 
@@ -10,7 +11,7 @@
 #include <blaze/math/dense/DenseIterator.h>
 #include <blaze/util/typetraits/AlignmentOf.h>
 #include <blaze/math/typetraits/HasMutableDataAccess.h>
-#include <blaze/math/traits/SubmatrixTrait.h>
+#include <blaze/util/constraints/Vectorizable.h>
 
 #include <initializer_list>
 
@@ -136,22 +137,6 @@ namespace blazefeo
         }
 
 
-        void pack(Type const * data, size_t lda)
-        {
-            for (size_t i = 0; i < M; ++i)
-                for (size_t j = 0; j < N; ++j)
-                    (*this)(i, j) = data[i + lda * j];
-        }
-
-
-        void unpack(Type * data, size_t lda) const
-        {
-            for (size_t i = 0; i < M; ++i)
-                for (size_t j = 0; j < N; ++j)
-                    data[i + lda * j] = (*this)(i, j);
-        }
-
-
         Type * ptr(size_t i, size_t j)
         {
             BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
@@ -163,6 +148,17 @@ namespace blazefeo
         {
             BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
             return v_ + tileColumns_ * tileSize_ * i + tileSize_ * j;
+        }
+
+
+        template <size_t SS>
+        auto load(size_t i, size_t j) const
+        {
+            BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
+            BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
+            BLAZE_INTERNAL_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+
+            return blazefeo::load<SS>(v_ + elementIndex(i, j));
         }
 
 
@@ -185,6 +181,8 @@ namespace blazefeo
         {
             return i / tileSize_ * spacing_ + i % tileSize_ + j * tileSize_;
         }
+
+        BLAZE_CONSTRAINT_MUST_BE_VECTORIZABLE_TYPE(Type);
     };
 
 

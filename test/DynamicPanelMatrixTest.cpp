@@ -58,7 +58,7 @@ namespace blazefeo :: testing
         randomize(A_ref);
 
         DynamicPanelMatrix<double> A(M, N);
-        A.pack(data(A_ref), spacing(A_ref));
+        A = A_ref;
 
         auto const& A_cref = A;
 
@@ -79,7 +79,7 @@ namespace blazefeo :: testing
                 blaze::randomize(A(i, j));
 
         blaze::DynamicMatrix<double, blaze::columnMajor> A1(M, N);
-        A.unpack(data(A1), spacing(A1));
+        A1 = A;
 
         for (size_t i = 0; i < M; ++i)
             for (size_t j = 0; j < N; ++j)
