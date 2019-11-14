@@ -165,7 +165,7 @@ namespace blazefeo
         }
 
 
-        size_t spacing() const
+        size_t spacing() const noexcept
         {
             return spacing_;
         }
