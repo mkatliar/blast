@@ -23,6 +23,8 @@ namespace blazefeo
         using IntrinsicType = __m256d;
         using MaskType = __m256i;
         using IntType = long long;
+        
+        static size_t constexpr registerCapacity = 16;
     };
 
 
@@ -32,7 +34,13 @@ namespace blazefeo
         using IntrinsicType = __m256;
         using MaskType = __m256i;
         using IntType = int;
+
+        static size_t constexpr registerCapacity = 16;
     };
+
+
+    template <typename T, size_t SIMD_SIZE>
+    size_t constexpr RegisterCapacity_v = Simd<T, SIMD_SIZE>::registerCapacity;
 
 
     //*******************************************************

@@ -120,12 +120,14 @@ namespace blazefeo
         using MaskType = typename Simd<T, SS>::MaskType;
         using IntType = typename Simd<T, SS>::IntType;
 
-        BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
-
         // Numberf of SIMD registers required to store a single column of the matrix.
         static size_t constexpr RM = M / SS;
+        static size_t constexpr RN = N;
+
+        BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN <= RegisterCapacity_v<T, SS>), "Not enough registers for a RegisterMatrix");
         
-        IntrinsicType v_[RM][N];
+        IntrinsicType v_[RM][RN];
 
 
         /// @brief Reference to the matrix element at row \a i and column \a j
@@ -240,6 +242,8 @@ namespace blazefeo
     {
         if (SOA == columnMajor && SOB == rowMajor)
         {
+            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T, SS>), "Not enough registers for ger()");
+
             IntrinsicType ax[RM];
 
             #pragma unroll
@@ -269,6 +273,8 @@ namespace blazefeo
     {
         if (SOA == columnMajor && SOB == rowMajor)
         {
+            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T, SS>), "Not enough registers for ger()");
+
             IntrinsicType ax[RM];
 
             #pragma unroll

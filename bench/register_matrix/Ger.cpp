@@ -43,13 +43,10 @@ namespace blazefeo :: benchmark
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 4, 8, 4);
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 8, 4, 4);
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 12, 4, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 8, 8, 4);
 
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 8, 4, 8);
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 16, 4, 8);
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 24, 4, 8);
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 16, 5, 8);
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 16, 6, 8);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 16, 7, 8);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 16, 8, 8);
 }

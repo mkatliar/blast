@@ -151,15 +151,15 @@ namespace blazefeo
 
         Type * ptr(size_t i, size_t j)
         {
-            BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
-            return v_ + spacing_ / tileSize_ * i + tileSize_ * j;
+            // BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            return v_ + elementIndex(i, j);
         }
 
 
         Type const * ptr(size_t i, size_t j) const
         {
-            BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
-            return v_ + spacing_ / tileSize_ * i + tileSize_ * j;
+            // BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            return v_ + elementIndex(i, j);
         }
 
 

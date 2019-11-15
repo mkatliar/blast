@@ -219,20 +219,18 @@ namespace blazefeo :: testing
     using RM_double_4_1_4 = RegisterMatrix<double, 4, 1, 4>;
     using RM_double_8_4_4 = RegisterMatrix<double, 8, 4, 4>;
     using RM_double_12_4_4 = RegisterMatrix<double, 12, 4, 4>;
-    using RM_double_8_8_4 = RegisterMatrix<double, 8, 8, 4>;
 
-    using RM_float_8_8_8 = RegisterMatrix<float, 8, 8, 8>;
-    using RM_float_16_8_8 = RegisterMatrix<float, 16, 8, 8>;
-    using RM_float_24_8_8 = RegisterMatrix<float, 24, 8, 8>;
+    using RM_float_8_4_8 = RegisterMatrix<float, 8, 4, 8>;
+    using RM_float_16_4_8 = RegisterMatrix<float, 16, 4, 8>;
+    using RM_float_24_4_8 = RegisterMatrix<float, 24, 4, 8>;
 
     INSTANTIATE_TYPED_TEST_SUITE_P(double_4_4_4, RegisterMatrixTest, RM_double_4_4_4);
     INSTANTIATE_TYPED_TEST_SUITE_P(double_4_2_4, RegisterMatrixTest, RM_double_4_2_4);
     INSTANTIATE_TYPED_TEST_SUITE_P(double_4_1_4, RegisterMatrixTest, RM_double_4_1_4);
     INSTANTIATE_TYPED_TEST_SUITE_P(double_8_4_4, RegisterMatrixTest, RM_double_8_4_4);
     INSTANTIATE_TYPED_TEST_SUITE_P(double_12_4_4, RegisterMatrixTest, RM_double_12_4_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(double_8_8_4, RegisterMatrixTest, RM_double_8_8_4);
 
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_8_8_8, RegisterMatrixTest, RM_float_8_8_8);
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_16_8_8, RegisterMatrixTest, RM_float_16_8_8);
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_24_8_8, RegisterMatrixTest, RM_float_24_8_8);
+    INSTANTIATE_TYPED_TEST_SUITE_P(float_8_4_8, RegisterMatrixTest, RM_float_8_4_8);
+    INSTANTIATE_TYPED_TEST_SUITE_P(float_16_4_8, RegisterMatrixTest, RM_float_16_4_8);
+    INSTANTIATE_TYPED_TEST_SUITE_P(float_24_4_8, RegisterMatrixTest, RM_float_24_4_8);
 }

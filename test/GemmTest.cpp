@@ -29,7 +29,7 @@ namespace blazefeo :: testing
 
         for (size_t M = 1; M <= M_max; ++M)
         {
-            for (size_t N = 1; N <= N_max; ++N)
+            for (size_t N = 5; N <= N_max; ++N)
             {
                 for (size_t K = 1; K <= K_max; ++K)
                 {
@@ -40,7 +40,7 @@ namespace blazefeo :: testing
                     randomize(blaze_B);
                     randomize(blaze_C);
 
-                    // Init Smoke matrices
+                    // Init BlazeFEO matrices
                     //
                     DynamicPanelMatrix<Real> A(M, K);
                     DynamicPanelMatrix<Real> B(N, K);
@@ -50,14 +50,18 @@ namespace blazefeo :: testing
                     A.pack(data(blaze_A), spacing(blaze_A));
                     B.pack(data(blaze_B), spacing(blaze_B));
                     C.pack(data(blaze_C), spacing(blaze_C));
+
+                    // std::cout << "A=\n" << A << std::endl;
+                    // std::cout << "B=\n" << B << std::endl;
+                    // std::cout << "C=\n" << C << std::endl;
                     
-                    // Do gemm with Smoke
+                    // Do gemm with BlazeFEO
                     gemm_nt(A, B, C, D);
 
-                    // Copy the resulting D matrix from BLASFEO to Blaze
+                    // Copy the resulting D matrix from BlazeFEO to Blaze
                     D.unpack(data(blaze_D), spacing(blaze_D));
 
-                    // Print the result from BLASFEO
+                    // Print the result from BlazeFEO
                     // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
                     BLAZEFEO_ASSERT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), absTol<Real>(), relTol<Real>())
@@ -80,7 +84,7 @@ namespace blazefeo :: testing
         randomize(blaze_B);
         randomize(blaze_C);
 
-        // Init Smoke matrices
+        // Init BlazeFEO matrices
         //
         StaticPanelMatrix<Real, M, K> A;
         StaticPanelMatrix<Real, N, K> B;
@@ -91,14 +95,14 @@ namespace blazefeo :: testing
         B.pack(data(blaze_B), spacing(blaze_B));
         C.pack(data(blaze_C), spacing(blaze_C));
         
-        // Do gemm with Smoke
+        // Do gemm with BlazeFEO
         auto D1 = submatrix(D, 0, 0, M, N);
         gemm_nt(submatrix(A, 0, 0, M, K), submatrix(B, 0, 0, N, K), submatrix(C, 0, 0, M, N), D1);
 
-        // Copy the resulting D matrix from BLASFEO to Blaze
+        // Copy the resulting D matrix from BlazeFEO to Blaze
         D.unpack(data(blaze_D), spacing(blaze_D));
 
-        // Print the result from BLASFEO
+        // Print the result from BlazeFEO
         // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
         BLAZEFEO_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), absTol<Real>(), relTol<Real>());
