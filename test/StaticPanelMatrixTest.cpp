@@ -25,7 +25,7 @@ namespace blazefeo :: testing
 
     TYPED_TEST_P(StaticPanelMatrixTest, testPanels)
     {
-        size_t constexpr SS = TileSize_v<TypeParam>;
+        size_t constexpr SS = PanelSize_v<TypeParam>;
         EXPECT_EQ((StaticPanelMatrix<TypeParam, 2 * SS, 1, columnMajor>().panels()), 2);
         EXPECT_EQ((StaticPanelMatrix<TypeParam, 2 * SS + 1, 1, columnMajor>().panels()), 3);
     }
@@ -33,7 +33,7 @@ namespace blazefeo :: testing
     
     TYPED_TEST_P(StaticPanelMatrixTest, testElementAccess)
     {
-        size_t constexpr SS = TileSize_v<TypeParam>;
+        size_t constexpr SS = PanelSize_v<TypeParam>;
         size_t constexpr M = 2 * SS + 1;
         size_t constexpr N = 3 * SS + 2;
 
@@ -58,7 +58,7 @@ namespace blazefeo :: testing
 
     TYPED_TEST_P(StaticPanelMatrixTest, testLoad)
     {
-        size_t constexpr SS = TileSize_v<TypeParam>;
+        size_t constexpr SS = PanelSize_v<TypeParam>;
         size_t constexpr M = 2 * SS + 1;
         size_t constexpr N = 3 * SS + 2;
 
@@ -78,7 +78,7 @@ namespace blazefeo :: testing
 
     TYPED_TEST_P(StaticPanelMatrixTest, testStore)
     {
-        size_t constexpr SS = TileSize_v<TypeParam>;
+        size_t constexpr SS = PanelSize_v<TypeParam>;
         size_t constexpr M = 2 * SS + 1;
         size_t constexpr N = 3 * SS + 2;
 
@@ -102,7 +102,7 @@ namespace blazefeo :: testing
 
     TYPED_TEST_P(StaticPanelMatrixTest, testPack)
     {
-        size_t constexpr SS = TileSize_v<TypeParam>;
+        size_t constexpr SS = PanelSize_v<TypeParam>;
         size_t constexpr M = 2 * SS + 1;
         size_t constexpr N = 3 * SS + 2;
 

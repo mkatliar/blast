@@ -3,7 +3,7 @@
 #include <blazefeo/math/PanelMatrix.hpp>
 #include <blazefeo/math/views/submatrix/Panel.hpp>
 #include <blazefeo/math/panel/Gemm.hpp>
-#include <blazefeo/system/Tile.hpp>
+#include <blazefeo/math/panel/PanelSize.hpp>
 
 #include <blaze/util/Exception.h>
 #include <blaze/util/constraints/SameType.h>
@@ -21,7 +21,7 @@ namespace blazefeo
         PanelMatrix<MT1, columnMajor> const& A, PanelMatrix<MT2, columnMajor>& L)
     {
         using ET = ElementType_t<MT1>;
-        size_t constexpr TILE_SIZE = TileSize_v<ET>;
+        size_t constexpr PANEL_SIZE = PanelSize_v<ET>;
         
         size_t const M = rows(A);
         size_t const N = columns(A);
@@ -29,7 +29,7 @@ namespace blazefeo
         BLAZE_USER_ASSERT(i < M, "Index too big");
         BLAZE_USER_ASSERT(k < N, "Index too big");
 
-        RegisterMatrix<ET, KM, KN, TILE_SIZE> ker;
+        RegisterMatrix<ET, KM, KN, PANEL_SIZE> ker;
 
         load(ker, ptr(A, i, k), spacing(A));
 
@@ -37,7 +37,7 @@ namespace blazefeo
         ET const * b = ptr(L, k, 0);
 
         for (size_t l = 0; l < k; ++l)
-            ger<MT1::storageOrder, !MT2::storageOrder>(ker, ET(-1.), a + TILE_SIZE * l, spacing(L), b + TILE_SIZE * l, spacing(L));
+            ger<MT1::storageOrder, !MT2::storageOrder>(ker, ET(-1.), a + PANEL_SIZE * l, spacing(L), b + PANEL_SIZE * l, spacing(L));
 
         if (i == k)
             ker.potrf();
@@ -56,7 +56,7 @@ namespace blazefeo
         PanelMatrix<MT1, columnMajor> const& A, PanelMatrix<MT2, columnMajor>& L)
     {
         using ET = ElementType_t<MT1>;
-        size_t constexpr TILE_SIZE = TileSize_v<ET>;
+        size_t constexpr PANEL_SIZE = PanelSize_v<ET>;
 
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT2>, ET);
 
@@ -82,14 +82,14 @@ namespace blazefeo
         {
             size_t i = k;
 
-            for (; i + 2 * TILE_SIZE < M; i += 3 * TILE_SIZE)
-                potrf_backend<3 * TILE_SIZE, KN>(k, i, ~A, ~L);
+            for (; i + 2 * PANEL_SIZE < M; i += 3 * PANEL_SIZE)
+                potrf_backend<3 * PANEL_SIZE, KN>(k, i, ~A, ~L);
 
-            for (; i + 1 * TILE_SIZE < M; i += 2 * TILE_SIZE)
-                potrf_backend<2 * TILE_SIZE, KN>(k, i, ~A, ~L);
+            for (; i + 1 * PANEL_SIZE < M; i += 2 * PANEL_SIZE)
+                potrf_backend<2 * PANEL_SIZE, KN>(k, i, ~A, ~L);
 
-            for (; i + 0 * TILE_SIZE < M; i += 1 * TILE_SIZE)
-                potrf_backend<1 * TILE_SIZE, KN>(k, i, ~A, ~L);
+            for (; i + 0 * PANEL_SIZE < M; i += 1 * PANEL_SIZE)
+                potrf_backend<1 * PANEL_SIZE, KN>(k, i, ~A, ~L);
         }
     }
 }

@@ -13,5 +13,5 @@ namespace blazefeo
 
 
     template <typename T>
-    size_t constexpr TileSize_v = SIMDTrait<T>::size;
+    size_t constexpr PanelSize_v = SIMDTrait<T>::size;
 }

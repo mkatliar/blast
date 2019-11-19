@@ -2,7 +2,7 @@
 
 #include <blazefeo/math/PanelMatrix.hpp>
 #include <blazefeo/math/views/submatrix/BaseTemplate.hpp>
-#include <blazefeo/system/Tile.hpp>
+#include <blazefeo/math/panel/PanelSize.hpp>
 #include <blazefeo/system/CacheLine.hpp>
 
 #include <blaze/util/Memory.h>
@@ -52,8 +52,8 @@ namespace blazefeo
         explicit DynamicPanelMatrix(size_t m, size_t n)
         :   m_(m)
         ,   n_(n)
-        ,   spacing_(tileSize_ * nextMultiple(n, tileSize_))
-        ,   capacity_(nextMultiple(m, tileSize_) * nextMultiple(n, tileSize_))
+        ,   spacing_(panelSize_ * nextMultiple(n, panelSize_))
+        ,   capacity_(nextMultiple(m, panelSize_) * nextMultiple(n, panelSize_))
         // Initialize padding elements to 0 to prevent denorms in calculations.
         // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
         ,   v_(new(std::align_val_t {alignment_}) Type[capacity_] {})
@@ -171,24 +171,32 @@ namespace blazefeo
         }
 
 
+        /// @brief Offset of the first matrix element from the start of the panel.
+        ///
+        /// In rows for column-major matrices, in columns for row-major matrices.
+        size_t constexpr offset() const
+        {
+            return 0;
+        }
+
+
         Type * ptr(size_t i, size_t j)
         {
-            // BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            // BLAZE_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
             return v_ + elementIndex(i, j);
         }
 
 
         Type const * ptr(size_t i, size_t j) const
         {
-            // BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            // BLAZE_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
             return v_ + elementIndex(i, j);
         }
 
 
     private:
         static size_t constexpr alignment_ = CACHE_LINE_SIZE;
-        static size_t constexpr tileSize_ = TileSize_v<Type>;
-        static size_t constexpr elementsPerTile_ = tileSize_ * tileSize_;
+        static size_t constexpr panelSize_ = PanelSize_v<Type>;
 
         size_t m_;
         size_t n_;
@@ -200,7 +208,7 @@ namespace blazefeo
 
         size_t elementIndex(size_t i, size_t j) const noexcept
         {
-            return i / tileSize_ * spacing_ + i % tileSize_ + j * tileSize_;
+            return i / panelSize_ * spacing_ + i % panelSize_ + j * panelSize_;
         }
     };
 }

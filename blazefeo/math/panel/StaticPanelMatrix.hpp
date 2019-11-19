@@ -4,7 +4,7 @@
 #include <blazefeo/math/panel/Gemm.hpp>
 #include <blazefeo/math/views/submatrix/BaseTemplate.hpp>
 #include <blazefeo/math/simd/Simd.hpp>
-#include <blazefeo/system/Tile.hpp>
+#include <blazefeo/math/panel/PanelSize.hpp>
 #include <blazefeo/system/CacheLine.hpp>
 
 #include <blaze/math/shims/NextMultiple.h>
@@ -137,16 +137,25 @@ namespace blazefeo
         }
 
 
+        /// @brief Offset of the first matrix element from the start of the panel.
+        ///
+        /// In rows for column-major matrices, in columns for row-major matrices.
+        size_t constexpr offset() const
+        {
+            return 0;
+        }
+
+
         Type * ptr(size_t i, size_t j)
         {
-            // BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            // BLAZE_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
             return v_ + elementIndex(i, j);
         }
 
 
         Type const * ptr(size_t i, size_t j) const
         {
-            // BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            // BLAZE_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
             return v_ + elementIndex(i, j);
         }
 
@@ -156,7 +165,7 @@ namespace blazefeo
         {
             BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
             BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
-            BLAZE_INTERNAL_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
 
             return blazefeo::load<SS>(v_ + elementIndex(i, j));
         }
@@ -167,7 +176,7 @@ namespace blazefeo
         {
             BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
             BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
-            BLAZE_INTERNAL_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
 
             // We never use maskstore here because we have padding
             blazefeo::store(v_ + elementIndex(i, j), val);
@@ -175,10 +184,10 @@ namespace blazefeo
 
 
     private:
-        static size_t constexpr tileSize_ = TileSize_v<Type>;
-        static size_t constexpr elementsPerTile_ = tileSize_ * tileSize_;
-        static size_t constexpr panels_ = M / tileSize_ + (M % tileSize_ > 0);
-        static size_t constexpr tileColumns_ = N / tileSize_ + (N % tileSize_ > 0);
+        static size_t constexpr panelSize_ = PanelSize_v<Type>;
+        static size_t constexpr elementsPerTile_ = panelSize_ * panelSize_;
+        static size_t constexpr panels_ = M / panelSize_ + (M % panelSize_ > 0);
+        static size_t constexpr tileColumns_ = N / panelSize_ + (N % panelSize_ > 0);
         static size_t constexpr spacing_ = tileColumns_ * elementsPerTile_;
         static size_t constexpr capacity_ = panels_ * spacing_;
 
@@ -191,7 +200,7 @@ namespace blazefeo
 
         size_t elementIndex(size_t i, size_t j) const
         {
-            return i / tileSize_ * spacing_ + i % tileSize_ + j * tileSize_;
+            return i / panelSize_ * spacing_ + i % panelSize_ + j * panelSize_;
         }
 
         BLAZE_CONSTRAINT_MUST_BE_VECTORIZABLE_TYPE(Type);

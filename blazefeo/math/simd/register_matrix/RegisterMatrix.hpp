@@ -95,6 +95,7 @@ namespace blazefeo
         [[deprecated("Use load with a matrix argument instead")]]
         void load(T beta, T const * ptr, size_t spacing);
 
+        
         /// @brief Load register matrix from a memory matrix and multiply it by a constant;
         ///
         /// The size of the memory matrix \a A must be not bigger than the size of the register matrix.
@@ -112,6 +113,33 @@ namespace blazefeo
             for (size_t i = 0; i < RM && i * SS < (~A).rows(); ++i)
                 for (size_t j = 0; j < N && j < (~A).columns(); ++j)
                     v_[i][j] = beta * (~A).template load<SS>(SS * i, j);
+        }
+
+
+        /// @brief Load register matrix from a submatrix of a memory matrix and multiply it by a constant;
+        ///
+        /// The requested size size (\a m,\a n) must be exceed the size of the register matrix.
+        /// If the requested size is smaller than the register matrix, the register matrix is partially loaded,
+        /// and the remaining elements are undefined.
+        ///
+        /// @param beta multiplication constant
+        /// @param A memory matrix
+        /// @param i0 index of the first row of the submatrix to be loaded
+        /// @param j0 index of the first column of the submatrix to be loaded
+        /// @param m number of rows to be loaded
+        /// @param n number of columns to be loaded
+        template <typename MT>
+        void load(T beta, PanelMatrix<MT, columnMajor> const& A, size_t i, size_t j, size_t m, size_t n)
+        {
+            BLAZE_INTERNAL_ASSERT(i + m <= (~A).rows(), "Invalid submatrix specification");
+            BLAZE_INTERNAL_ASSERT(j + n <= (~A).columns(), "Invalid submatrix specification");
+            BLAZE_INTERNAL_ASSERT((i + (~A).offset()) % SS == 0, "Invalid submatrix specification");
+            BLAZE_INTERNAL_ASSERT(m <= rows(), "Invalid number of rows");
+            BLAZE_INTERNAL_ASSERT(n <= columns(), "Invalid number of columns");
+
+            for (size_t ri = 0; ri * SS < m; ++ri)
+                for (size_t rj = 0; rj < n; ++rj)
+                    v_[i][j] = beta * (~A).template load<SS>(i + SS * ri, j + rj);
         }
 
 

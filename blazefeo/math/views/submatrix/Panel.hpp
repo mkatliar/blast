@@ -4,7 +4,7 @@
 #include <blazefeo/math/views/submatrix/BaseTemplate.hpp>
 #include <blazefeo/math/constraints/Submatrix.hpp>
 #include <blazefeo/math/simd/Simd.hpp>
-#include <blazefeo/system/Tile.hpp>
+#include <blazefeo/math/panel/PanelSize.hpp>
 
 #include <blaze/math/constraints/Submatrix.h>
 #include <blaze/math/constraints/Symmetric.h>
@@ -87,11 +87,11 @@ namespace blazefeo
                     BLAZE_THROW_INVALID_ARGUMENT( "Invalid submatrix specification" );
                 }
 
-                if (IsRowMajorMatrix_v<MT> && column() % tileSize_ > 0)
+                if (IsRowMajorMatrix_v<MT> && column() % panelSize_ > 0)
                     BLAZE_THROW_LOGIC_ERROR("Submatrices of a row-major panel matrix which are not horizontally aligned on panel boundary "
                         "are currently not supported");
 
-                if (IsColumnMajorMatrix_v<MT> && row() % tileSize_ > 0)
+                if (IsColumnMajorMatrix_v<MT> && row() % panelSize_ > 0)
                     BLAZE_THROW_LOGIC_ERROR("Submatrices of a column-major panel matrix which are not vertically aligned on panel boundary "
                         "are currently not supported");
             }
@@ -133,6 +133,16 @@ namespace blazefeo
         {
             return n_;
         };
+
+
+        /// @brief Offset of the first matrix element from the start of the panel.
+        ///
+        /// In rows for column-major matrices, in columns for row-major matrices.
+        size_t constexpr offset() const
+        {
+            return SO == (columnMajor ? i_ : j_) % panelSize_;
+        }
+
 
         MT& operand() noexcept
         {
@@ -270,7 +280,7 @@ namespace blazefeo
         
 
     private:
-        static size_t constexpr tileSize_ = TileSize_v<ElementType>;
+        static size_t constexpr panelSize_ = PanelSize_v<ElementType>;
 
         Operand matrix_;        //!< The matrix containing the submatrix.
         
