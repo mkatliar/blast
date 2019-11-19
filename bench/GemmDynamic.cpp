@@ -7,6 +7,9 @@
 #include <random>
 #include <memory>
 
+#ifndef BENCH_GEMM_DYNAMIC_MAX_N
+    #define BENCH_GEMM_DYNAMIC_MAX_N 300
+#endif
 
 namespace blazefeo :: benchmark
 {
@@ -78,10 +81,9 @@ namespace blazefeo :: benchmark
         state.counters["m"] = M;
     }
     
+    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_inline, double)->DenseRange(1, BENCH_GEMM_DYNAMIC_MAX_N);
+    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_noinline, double)->DenseRange(1, BENCH_GEMM_DYNAMIC_MAX_N);
 
-    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_inline, double)->DenseRange(1, 300);
-    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_noinline, double)->DenseRange(1, 300);
-
-    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_inline, float)->DenseRange(1, 300);
-    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_noinline, float)->DenseRange(1, 300);
+    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_inline, float)->DenseRange(1, BENCH_GEMM_DYNAMIC_MAX_N);
+    BENCHMARK_TEMPLATE(BM_gemm_nt_dynamic_noinline, float)->DenseRange(1, BENCH_GEMM_DYNAMIC_MAX_N);
 }

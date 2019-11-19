@@ -27,4 +27,8 @@ target_link_libraries(test-blazefeo PRIVATE
     ${CMAKE_THREAD_LIBS_INIT}    # Needed for gtest
 )
 
+target_compile_definitions(test-blazefeo 
+    PRIVATE "BLAZE_USER_ASSERTION=1;BLAZE_INTERNAL_ASSERTION=1"
+)
+
 gtest_discover_tests(test-blazefeo)

@@ -12,7 +12,7 @@
 
 namespace blazefeo :: testing
 {
-    template <typename Ker>
+    template <typename T>
     class GemmTest
     :   public Test
     {

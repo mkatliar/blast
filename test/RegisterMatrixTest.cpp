@@ -56,8 +56,8 @@ namespace blazefeo :: testing
         RM ker;
         load(ker, A.ptr(0, 0), A.spacing());
 
-        for (size_t m = 0; m <= Traits::rows; ++m)
-            for (size_t n = 0; n <= Traits::columns; ++n)
+        for (size_t m = ker.rows() + 1 - ker.simdSize(); m <= Traits::rows; ++m)
+            for (size_t n = 1; n <= Traits::columns; ++n)
             {
                 B = 0.;
                 store(ker, B.ptr(0, 0), B.spacing(), m, n);
