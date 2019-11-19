@@ -15,6 +15,8 @@ add_executable(test-blazefeo
     PotrfTest.cpp
 
     simd/HsumTest.cpp
+
+    math/expressions/PMatTransExprTest.cpp
 )
 
 target_link_libraries(test-blazefeo PRIVATE

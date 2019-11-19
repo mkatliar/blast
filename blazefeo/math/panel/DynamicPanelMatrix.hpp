@@ -28,8 +28,6 @@ namespace blazefeo
     class DynamicPanelMatrix
     :   public PanelMatrix<DynamicPanelMatrix<Type, SO>, SO>
     {
-        BLAZE_STATIC_ASSERT_MSG((SO == columnMajor), "Row-major panel matrices are not implemented");
-        
     public:
         //**Type definitions****************************************************************************
         using This          = DynamicPanelMatrix<Type, SO>;   //!< Type of this StaticPanelMatrix instance.
@@ -52,7 +50,11 @@ namespace blazefeo
         explicit DynamicPanelMatrix(size_t m, size_t n)
         :   m_(m)
         ,   n_(n)
-        ,   spacing_(panelSize_ * nextMultiple(n, panelSize_))
+        ,   spacing_(
+                SO == columnMajor 
+                ? panelSize_ * nextMultiple(n, panelSize_)
+                : nextMultiple(m, panelSize_) * panelSize_
+            )
         ,   capacity_(nextMultiple(m, panelSize_) * nextMultiple(n, panelSize_))
         // Initialize padding elements to 0 to prevent denorms in calculations.
         // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
@@ -208,7 +210,9 @@ namespace blazefeo
 
         size_t elementIndex(size_t i, size_t j) const noexcept
         {
-            return i / panelSize_ * spacing_ + i % panelSize_ + j * panelSize_;
+            return SO == columnMajor 
+                ? i / panelSize_ * spacing_ + i % panelSize_ + j * panelSize_
+                : j / panelSize_ * spacing_ + j % panelSize_ + i * panelSize_;
         }
     };
 }

@@ -5,6 +5,7 @@
 #include <blazefeo/math/constraints/Submatrix.hpp>
 #include <blazefeo/math/simd/Simd.hpp>
 #include <blazefeo/math/panel/PanelSize.hpp>
+#include <blazefeo/math/constraints/PanelMatrix.hpp>
 
 #include <blaze/math/constraints/Submatrix.h>
 #include <blaze/math/constraints/Symmetric.h>
@@ -298,7 +299,7 @@ namespace blazefeo
         //**********************************************************************************************
 
         //**Compile time checks*************************************************************************
-        // BLAZE_CONSTRAINT_MUST_BE_DENSE_MATRIX_TYPE    ( MT );
+        BLAZEFEO_CONSTRAINT_MUST_BE_PANEL_MATRIX_TYPE    ( MT );
         BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE ( MT );
         BLAZE_CONSTRAINT_MUST_NOT_BE_TRANSEXPR_TYPE   ( MT );
         BLAZE_CONSTRAINT_MUST_NOT_BE_SUBMATRIX_TYPE   ( MT );

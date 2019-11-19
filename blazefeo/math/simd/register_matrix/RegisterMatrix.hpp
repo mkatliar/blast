@@ -27,10 +27,12 @@ namespace blazefeo
     /// @tparam SS number of T elements that can be stored in a SIMD register.
     template <typename T, size_t M, size_t N, size_t SS>
     class RegisterMatrix
+    :   public Matrix<RegisterMatrix<T, M, N, SS>, columnMajor>
     {
     public:
         /// @brief Type of matrix elements
         using ElementType = T;
+        using CompositeType = RegisterMatrix const&;              //!< Data type for composite expression templates.
 
 
         /// @brief Default ctor
@@ -96,26 +98,6 @@ namespace blazefeo
         void load(T beta, T const * ptr, size_t spacing);
 
         
-        /// @brief Load register matrix from a memory matrix and multiply it by a constant;
-        ///
-        /// The size of the memory matrix \a A must be not bigger than the size of the register matrix.
-        /// If the memory matrix is smaller than the register matrix, the register matrix is partially loaded,
-        /// and the remaining elements are undefined.
-        ///
-        /// @param beta multiplication constant
-        /// @param A memory matrix
-        template <typename MT>
-        void load(T beta, PanelMatrix<MT, columnMajor> const& A)
-        {
-            BLAZE_INTERNAL_ASSERT((~A).rows() <= rows(), "Invalid matrix size");
-            BLAZE_INTERNAL_ASSERT((~A).columns() <= columns(), "Invalid matrix size");
-
-            for (size_t i = 0; i < RM && i * SS < (~A).rows(); ++i)
-                for (size_t j = 0; j < N && j < (~A).columns(); ++j)
-                    v_[i][j] = beta * (~A).template load<SS>(SS * i, j);
-        }
-
-
         /// @brief Load register matrix from a submatrix of a memory matrix and multiply it by a constant;
         ///
         /// The requested size size (\a m,\a n) must be exceed the size of the register matrix.
@@ -139,21 +121,7 @@ namespace blazefeo
 
             for (size_t ri = 0; ri * SS < m; ++ri)
                 for (size_t rj = 0; rj < n; ++rj)
-                    v_[i][j] = beta * (~A).template load<SS>(i + SS * ri, j + rj);
-        }
-
-
-        /// @brief Load register matrix from a memory matrix;
-        ///
-        /// The size of the memory matrix \a A must be not bigger than the size of the register matrix.
-        /// If the memory matrix is smaller than the register matrix, the register matrix is partially loaded,
-        /// and the remaining elements are undefined.
-        ///
-        /// @param A memory matrix
-        template <typename MT>
-        void load(PanelMatrix<MT, columnMajor> const& A)
-        {
-            load(T(1.), A);
+                    v_[ri][rj] = beta * (~A).template load<SS>(i + SS * ri, j + rj);
         }
 
 
@@ -172,7 +140,7 @@ namespace blazefeo
 
         /// @brief Store register matrix to a memory matrix;
         ///
-        /// The size of the memory matrix \a A must be not bigger than the size of the register matrix.
+        /// The size of the memory matrix \a A must be not smaller than the size of the register matrix.
         /// If the memory matrix is smaller than the register matrix, the register matrix is partially stored,
         /// and the remaining elements of \a A are unchanged.
         ///

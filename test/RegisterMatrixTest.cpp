@@ -44,7 +44,7 @@ namespace blazefeo :: testing
 
         RM ker;
         ET const beta = 0.1;
-        ker.load(beta, A);
+        ker.load(beta, A, 0, 0, rows(A), columns(A));
 
         for (size_t i = 0; i < ker.rows(); ++i)
             for (size_t j = 0; j < ker.columns(); ++j)
@@ -68,7 +68,7 @@ namespace blazefeo :: testing
 
         RM ker;
         ET const beta = 0.1;
-        ker.load(beta, A);
+        ker.load(beta, A, 0, 0, rows(A), columns(A));
 
         for (size_t i = 0; i < Traits::rows; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)
@@ -91,11 +91,13 @@ namespace blazefeo :: testing
             {
                 RM ker;
                 ET const beta = 0.1;
-                ker.load(beta, submatrix(A, 0, 0, m, n));
+                ker.load(beta, A, 0, 0, m, n);
 
                 for (size_t i = 0; i < m; ++i)
                     for (size_t j = 0; j < n; ++j)
-                        EXPECT_EQ(ker(i, j), beta * A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+                        ASSERT_EQ(ker(i, j), beta * A(i, j)) 
+                        << "load error for size (" << m << ", " << n << "); "
+                        << "element mismatch at (" << i << ", " << j << ")" ;
             }
         }
     }
@@ -107,19 +109,22 @@ namespace blazefeo :: testing
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        blaze::StaticMatrix<ET, Traits::rows, Traits::columns, blaze::columnMajor> A_ref;
-        randomize(A_ref);
-
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
-        A = A_ref;
+        randomize(A);
 
         RM ker;
-        ker.load(A);
+        ker.load(1., A, 0, 0, rows(A), columns(A));
+
+        // std::cout << "A_ref=\n" << A_ref << std::endl;
+        // std::cout << "A=\n" << A << std::endl;
+        // std::cout << "ker=\n" << ker << std::endl;
+
         ker.store(B);
+        // std::cout << "B=\n" << B << std::endl;
 
         for (size_t i = 0; i < Traits::rows; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)
-                EXPECT_EQ(B(i, j), A_ref(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+                EXPECT_EQ(B(i, j), A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
     }
 
 
@@ -136,7 +141,7 @@ namespace blazefeo :: testing
         A = A_ref;
 
         RM ker;
-        ker.load(A);
+        ker.load(1., A, 0, 0, rows(A), columns(A));
 
         for (size_t m = ker.rows() + 1 - ker.simdSize(); m <= Traits::rows; ++m)
             for (size_t n = 1; n <= Traits::columns; ++n)
@@ -179,7 +184,7 @@ namespace blazefeo :: testing
         // std::cout << "C=\n" << C << std::endl;
 
         TypeParam ker;
-        ker.load(C);
+        ker.load(1., C, 0, 0, rows(C), columns(C));
         ger<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.ptr(0, 0), A.spacing(), B.ptr(0, 0), B.spacing());
         ker.store(D);
         
@@ -213,7 +218,7 @@ namespace blazefeo :: testing
                 A = C;
             }
 
-            ker.load(A);
+            ker.load(1., A, 0, 0, rows(A), columns(A));
             ker.potrf();
             ker.store(L);
 
@@ -277,7 +282,7 @@ namespace blazefeo :: testing
         // https://bitbucket.org/blaze-lib/blaze/issues/301/error-in-evaluation-of-a-inv-trans-b
         XX = evaluate(BB * evaluate(inv(evaluate(trans(LL)))));
         
-        ker.load(B);
+        ker.load(1., B, 0, 0, rows(B), columns(B));
         trsm<false, false, true>(ker, L.ptr(0, 0), spacing(L));
         ker.store(X);
 

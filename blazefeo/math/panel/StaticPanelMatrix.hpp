@@ -31,8 +31,6 @@ namespace blazefeo
     class StaticPanelMatrix
     :   public PanelMatrix<StaticPanelMatrix<Type, M, N, SO>, SO>
     {
-        BLAZE_STATIC_ASSERT_MSG((SO == columnMajor), "Row-major panel matrices are not implemented");
-
     public:
         //**Type definitions****************************************************************************
         using This          = StaticPanelMatrix<Type, M, N, SO>;   //!< Type of this StaticPanelMatrix instance.
@@ -165,7 +163,8 @@ namespace blazefeo
         {
             BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
             BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
-            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
+            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
+            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
 
             return blazefeo::load<SS>(v_ + elementIndex(i, j));
         }
@@ -176,7 +175,8 @@ namespace blazefeo
         {
             BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
             BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
-            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
+            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
+            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
 
             // We never use maskstore here because we have padding
             blazefeo::store(v_ + elementIndex(i, j), val);
@@ -186,9 +186,10 @@ namespace blazefeo
     private:
         static size_t constexpr panelSize_ = PanelSize_v<Type>;
         static size_t constexpr elementsPerTile_ = panelSize_ * panelSize_;
-        static size_t constexpr panels_ = M / panelSize_ + (M % panelSize_ > 0);
+        static size_t constexpr tileRows_ = M / panelSize_ + (M % panelSize_ > 0);
         static size_t constexpr tileColumns_ = N / panelSize_ + (N % panelSize_ > 0);
-        static size_t constexpr spacing_ = tileColumns_ * elementsPerTile_;
+        static size_t constexpr panels_ = SO == columnMajor ? tileRows_ : tileColumns_;
+        static size_t constexpr spacing_ = (SO == columnMajor ? tileColumns_ : tileRows_) * elementsPerTile_;
         static size_t constexpr capacity_ = panels_ * spacing_;
 
         // Alignment of the data elements.
@@ -200,8 +201,11 @@ namespace blazefeo
 
         size_t elementIndex(size_t i, size_t j) const
         {
-            return i / panelSize_ * spacing_ + i % panelSize_ + j * panelSize_;
+            return SO == columnMajor 
+                ? i / panelSize_ * spacing_ + i % panelSize_ + j * panelSize_
+                : j / panelSize_ * spacing_ + j % panelSize_ + i * panelSize_;
         }
+
 
         BLAZE_CONSTRAINT_MUST_BE_VECTORIZABLE_TYPE(Type);
     };
