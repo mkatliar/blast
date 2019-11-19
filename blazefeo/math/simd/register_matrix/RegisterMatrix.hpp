@@ -8,6 +8,7 @@
 #include <blaze/system/Inline.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/Exception.h>
+#include <blaze/util/Assert.h>
 #include <blaze/util/StaticAssert.h>
 
 #include <cmath>
@@ -64,6 +65,13 @@ namespace blazefeo
         static size_t constexpr registers()
         {
             return RM * N;
+        }
+
+
+        /// @brief SIMD size
+        static size_t constexpr simdSize()
+        {
+            return SS;
         }
 
 
@@ -220,12 +228,16 @@ namespace blazefeo
         using MaskType = typename Simd<T, SS>::MaskType;
         using IntType = typename Simd<T, SS>::IntType;
 
-        BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
-
         // Numberf of SIMD registers required to store a single column of the matrix.
         static size_t constexpr RM = M / SS;
+        static size_t constexpr RN = N;
+
+        BLAZE_STATIC_ASSERT_MSG((RM > 0), "Number of rows must be not less than SIMD size");
+        BLAZE_STATIC_ASSERT_MSG((RN > 0), "Number of columns must be positive");
+        BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN <= RegisterCapacity_v<T, SS>), "Not enough registers for a RegisterMatrix");
         
-        IntrinsicType v_[RM][N];
+        IntrinsicType v_[RM][RN];
 
 
         /// @brief Reference to the matrix element at row \a i and column \a j
@@ -262,7 +274,9 @@ namespace blazefeo
     template <typename T, size_t M, size_t N, size_t SS>
     inline void RegisterMatrix<T, M, N, SS>::load(T beta, T const * ptr, size_t spacing)
     {
+        #pragma unroll
         for (size_t i = 0; i < RM; ++i)
+            #pragma unroll
             for (size_t j = 0; j < N; ++j)
                 v_[i][j] = beta * blazefeo::load<SS>(ptr + spacing * i + SS * j);
     }
@@ -282,7 +296,9 @@ namespace blazefeo
     template <typename T, size_t M, size_t N, size_t SS>
     inline void RegisterMatrix<T, M, N, SS>::store(T * ptr, size_t spacing) const
     {
+        #pragma unroll
         for (size_t i = 0; i < RM; ++i)
+            #pragma unroll
             for (size_t j = 0; j < N; ++j)
                 blazefeo::store(ptr + spacing * i + SS * j, v_[i][j]);
     }
@@ -291,19 +307,37 @@ namespace blazefeo
     template <typename T, size_t M, size_t N, size_t SS>
     inline void RegisterMatrix<T, M, N, SS>::store(T * ptr, size_t spacing, size_t m, size_t n) const
     {
-        for (size_t i = 0; i < RM; ++i) if (SS * (i + 1) <= m)
-            // The compile-time constant size of the j loop in combination with the if() expression
-            // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
-            for (size_t j = 0; j < N; ++j) if (j < n)
-                blazefeo::store(ptr + spacing * i + SS * j, v_[i][j]);
+        BLAZE_STATIC_ASSERT_MSG((RM * RN + 2 <= RegisterCapacity_v<T, SS>), "Not enough registers");
+        BLAZE_INTERNAL_ASSERT(m > M - SS && m <= M, "Invalid number of rows in partial store");
+        BLAZE_INTERNAL_ASSERT(n > 0 && n <= N, "Invalid number of columns in partial store");
+        BLAZE_INTERNAL_ASSERT(m < M || n < N, "Partial store with full size");
 
         if (IntType const rem = m % SS)
         {
+            #pragma unroll
+            for (size_t i = 0; i < RM - 1; ++i)
+                // The compile-time constant size of the j loop in combination with the if() expression
+                // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
+                #pragma unroll
+                for (size_t j = 0; j < N; ++j) if (j < n)
+                    blazefeo::store(ptr + spacing * i + SS * j, v_[i][j]);
+                    
             MaskType const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType, SS>());
-            size_t const i = m / SS;
-
-            for (size_t j = 0; j < n && j < columns(); ++j)
+            size_t constexpr i = RM - 1;
+        
+            #pragma unroll
+            for (size_t j = 0; j < N; ++j) if (j < n)
                 maskstore(ptr + spacing * i + SS * j, mask, v_[i][j]);
+        }
+        else
+        {
+            #pragma unroll
+            for (size_t i = 0; i < RM; ++i)
+                // The compile-time constant size of the j loop in combination with the if() expression
+                // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
+                #pragma unroll
+                for (size_t j = 0; j < N; ++j) if (j < n)
+                    blazefeo::store(ptr + spacing * i + SS * j, v_[i][j]);
         }
     }
 
@@ -340,12 +374,14 @@ namespace blazefeo
     {
         if (SOA == columnMajor && SOB == rowMajor)
         {
+            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T, SS>), "Not enough registers for ger()");
+
             IntrinsicType ax[RM];
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
                 ax[i] = alpha * blazefeo::load<SS>(a + i * sa);
-            
+
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
             {
@@ -369,6 +405,8 @@ namespace blazefeo
     {
         if (SOA == columnMajor && SOB == rowMajor)
         {
+            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T, SS>), "Not enough registers for ger()");
+
             IntrinsicType ax[RM];
 
             #pragma unroll
@@ -403,6 +441,7 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::potrf()
     {
         static_assert(M >= N, "potrf() not implemented for register matrices with columns more than rows");
+        static_assert(RM * RN + 2 <= RegisterCapacity_v<T, SS>, "Not enough registers");
         
         #pragma unroll
         for (size_t k = 0; k < N; ++k)

@@ -72,7 +72,7 @@ namespace blazefeo
         if (columns(L) != N)
             BLAZE_THROW_INVALID_ARGUMENT("Invalid matrix size");
 
-        size_t constexpr KN = TILE_SIZE;
+        size_t constexpr KN = 4;
         size_t k = 0;
 
         // This loop unroll gives some performance benefit for N >= 18,

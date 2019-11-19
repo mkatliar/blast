@@ -19,7 +19,7 @@ namespace blazefeo :: benchmark
 
         Kernel ker;
         
-        DynamicPanelMatrix<double> c(ker.rows(), ker.columns()), d(ker.rows(), ker.columns());
+        DynamicPanelMatrix<T> c(ker.rows(), ker.columns()), d(ker.rows(), ker.columns());
         randomize(c);        
 
         load(ker, c.ptr(0, 0), c.spacing());
@@ -86,14 +86,23 @@ namespace blazefeo :: benchmark
     }
 
 
-    static void args_8_8(internal::Benchmark * b) 
+    static void args_16_4(internal::Benchmark * b) 
     {
-        args(b, 8, 8);
+        args(b, 16, 4);
+    }
+
+
+    static void args_24_4(internal::Benchmark * b) 
+    {
+        args(b, 24, 4);
     }
 
 
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 4, 4, 4)->Apply(args_4_4);
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 8, 4, 4)->Apply(args_8_4);
     BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 12, 4, 4)->Apply(args_12_4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 8, 8, 4)->Apply(args_8_8);
+
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, float, 8, 4, 8)->Apply(args_8_4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, float, 16, 4, 8)->Apply(args_16_4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, float, 24, 4, 8)->Apply(args_24_4);
 }

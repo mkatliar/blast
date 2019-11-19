@@ -40,10 +40,10 @@ target_link_libraries(blazefeo
     INTERFACE blaze::blaze
 )
 
-# SMOKE_WITH_TEST
-set(SMOKE_WITH_TEST ON CACHE BOOL "Build blazefeo tests")
+# BLAZEFEO_WITH_TEST
+set(BLAZEFEO_WITH_TEST ON CACHE BOOL "Build blazefeo tests")
 
-if (SMOKE_WITH_TEST)
+if (BLAZEFEO_WITH_TEST)
     enable_testing()
     add_subdirectory(test)
 endif()

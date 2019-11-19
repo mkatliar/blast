@@ -138,8 +138,8 @@ namespace blazefeo :: testing
         RM ker;
         ker.load(A);
 
-        for (size_t m = 0; m <= Traits::rows; ++m)
-            for (size_t n = 0; n <= Traits::columns; ++n)
+        for (size_t m = ker.rows() + 1 - ker.simdSize(); m <= Traits::rows; ++m)
+            for (size_t n = 1; n <= Traits::columns; ++n)
             {
                 B = 0.;
                 ker.store(B, 0, 0, m, n);
@@ -307,20 +307,18 @@ namespace blazefeo :: testing
     using RM_double_4_1_4 = RegisterMatrix<double, 4, 1, 4>;
     using RM_double_8_4_4 = RegisterMatrix<double, 8, 4, 4>;
     using RM_double_12_4_4 = RegisterMatrix<double, 12, 4, 4>;
-    using RM_double_8_8_4 = RegisterMatrix<double, 8, 8, 4>;
 
-    using RM_float_8_8_8 = RegisterMatrix<float, 8, 8, 8>;
-    using RM_float_16_8_8 = RegisterMatrix<float, 16, 8, 8>;
-    using RM_float_24_8_8 = RegisterMatrix<float, 24, 8, 8>;
+    using RM_float_8_4_8 = RegisterMatrix<float, 8, 4, 8>;
+    using RM_float_16_4_8 = RegisterMatrix<float, 16, 4, 8>;
+    using RM_float_24_4_8 = RegisterMatrix<float, 24, 4, 8>;
 
     INSTANTIATE_TYPED_TEST_SUITE_P(double_4_4_4, RegisterMatrixTest, RM_double_4_4_4);
     INSTANTIATE_TYPED_TEST_SUITE_P(double_4_2_4, RegisterMatrixTest, RM_double_4_2_4);
     INSTANTIATE_TYPED_TEST_SUITE_P(double_4_1_4, RegisterMatrixTest, RM_double_4_1_4);
     INSTANTIATE_TYPED_TEST_SUITE_P(double_8_4_4, RegisterMatrixTest, RM_double_8_4_4);
     INSTANTIATE_TYPED_TEST_SUITE_P(double_12_4_4, RegisterMatrixTest, RM_double_12_4_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(double_8_8_4, RegisterMatrixTest, RM_double_8_8_4);
 
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_8_8_8, RegisterMatrixTest, RM_float_8_8_8);
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_16_8_8, RegisterMatrixTest, RM_float_16_8_8);
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_24_8_8, RegisterMatrixTest, RM_float_24_8_8);
+    INSTANTIATE_TYPED_TEST_SUITE_P(float_8_4_8, RegisterMatrixTest, RM_float_8_4_8);
+    INSTANTIATE_TYPED_TEST_SUITE_P(float_16_4_8, RegisterMatrixTest, RM_float_16_4_8);
+    INSTANTIATE_TYPED_TEST_SUITE_P(float_24_4_8, RegisterMatrixTest, RM_float_24_4_8);
 }
