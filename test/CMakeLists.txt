@@ -9,7 +9,6 @@ find_package(blaze 3.5 REQUIRED)
 add_executable(test-blazefeo
     RegisterMatrixTest.cpp
     StaticPanelMatrixTest.cpp
-    SubmatrixTest.cpp
     DynamicPanelMatrixTest.cpp
     GemmTest.cpp
     PotrfTest.cpp
@@ -17,6 +16,9 @@ add_executable(test-blazefeo
     simd/HsumTest.cpp
 
     math/expressions/PMatTransExprTest.cpp
+
+    math/views/RowTest.cpp
+    math/views/SubmatrixTest.cpp
 )
 
 target_link_libraries(test-blazefeo PRIVATE

@@ -32,8 +32,7 @@ namespace blazefeo
     // This Specialization of PanelSubmatrix adapts the class template to the requirements of unaligned
     // row-major panel submatrices.
     */
-    template< typename MT       // Type of the panel matrix
-            , bool SO >  // Compile time submatrix arguments
+    template <typename MT, bool SO>
     class PanelSubmatrix<MT, SO>
     : public View<PanelMatrix<PanelSubmatrix<MT, SO>, SO>>
     {

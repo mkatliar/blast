@@ -13,4 +13,8 @@ namespace blazefeo
             , bool SO
             , size_t... CSAs >  // Compile time submatrix arguments
     class PanelSubmatrix;
+
+
+    template <typename MT, bool SO, size_t... CSAs>
+    class PanelMatrixRow;
 }
