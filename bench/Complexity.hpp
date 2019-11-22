@@ -59,6 +59,6 @@ namespace blazefeo :: benchmark
                 flops += it->second;
         }
 
-        counters["flops"] = Counter(flops, Counter::kIsIterationInvariantRate);;
+        counters["flops"] = Counter(flops, Counter::kIsIterationInvariantRate);
     }
 }

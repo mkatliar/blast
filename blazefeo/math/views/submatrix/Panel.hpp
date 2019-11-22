@@ -7,11 +7,18 @@
 #include <blazefeo/math/panel/PanelSize.hpp>
 #include <blazefeo/math/constraints/PanelMatrix.hpp>
 
-#include <blaze/math/constraints/Submatrix.h>
-#include <blaze/math/constraints/Symmetric.h>
+#include <blaze/math/Constraints.h>
 #include <blaze/math/traits/SubmatrixTrait.h>
+#include <blaze/math/expressions/View.h>
+#include <blaze/math/views/Check.h>
+#include <blaze/math/typetraits/HasMutableDataAccess.h>
+#include <blaze/math/Aliases.h>
 #include <blaze/util/constraints/Pointer.h>
 #include <blaze/util/constraints/Reference.h>
+#include <blaze/util/typetraits/IsConst.h>
+#include <blaze/util/TypeList.h>
+#include <blaze/util/Exception.h>
+#include <blaze/util/Assert.h>
 
 #include <algorithm>
 #include <iterator>

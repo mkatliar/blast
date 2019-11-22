@@ -1,7 +1,7 @@
 #pragma once
 
 #include <blazefeo/math/simd/Simd.hpp>
-#include <blazefeo/math/views/submatrix/Panel.hpp>
+#include <blazefeo/math/panel/Forward.hpp>
 
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/Matrix.h>
@@ -94,7 +94,7 @@ namespace blazefeo
 
 
         /// @brief load from memory
-        [[deprecated("Use load with a matrix argument instead")]]
+        // [[deprecated("Use load with a matrix argument instead")]]
         void load(T beta, T const * ptr, size_t spacing);
 
         
@@ -134,11 +134,11 @@ namespace blazefeo
 
 
         /// @brief store to memory with specified size
-        [[deprecated("Use load with a matrix argument instead")]]
+        // [[deprecated("Use load with a matrix argument instead")]]
         void store(T * ptr, size_t spacing, size_t m, size_t n) const;
 
 
-        /// @brief Store register matrix to a memory matrix;
+        /// @brief Store register matrix to a memory panel matrix;
         ///
         /// The size of the memory matrix \a A must be not smaller than the size of the register matrix.
         /// If the memory matrix is smaller than the register matrix, the register matrix is partially stored,
@@ -162,7 +162,64 @@ namespace blazefeo
         }
 
 
-        /// @brief Store register matrix to a submatrix of a memory matrix;
+        /// @brief Store register matrix to a memory dense matrix;
+        ///
+        /// The size of the memory matrix \a A must be not smaller than the size of the register matrix.
+        /// If the memory matrix is smaller than the register matrix, the register matrix is partially stored,
+        /// and the remaining elements of \a A are unchanged.
+        ///
+        /// @param A memory matrix
+        template <typename MT>
+        void store(DenseMatrix<MT, columnMajor>& A) const
+        {
+            size_t const m = (~A).rows();
+            size_t const n = (~A).columns();
+            size_t const sp = spacing(A);
+            auto * ptr = data(A);
+
+            BLAZE_STATIC_ASSERT_MSG((RM * RN + 2 <= RegisterCapacity_v<T, SS>), "Not enough registers");
+            BLAZE_INTERNAL_ASSERT(m > M - SS && m <= M, "Invalid number of rows in partial store");
+            BLAZE_INTERNAL_ASSERT(n > 0 && n <= N, "Invalid number of columns in partial store");
+            // BLAZE_INTERNAL_ASSERT(m < M || n < N, "Partial store with full size");
+
+            if (IntType const rem = m % SS)
+            {
+                #pragma unroll
+                for (size_t i = 0; i < RM - 1; ++i)
+                    // The compile-time constant size of the j loop in combination with the if() expression
+                    // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
+                    #pragma unroll
+                    for (size_t j = 0; j < N; ++j) if (j < n)
+                        blazefeo::store(ptr + SS * i + sp * j, v_[i][j]);
+                        
+                MaskType const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType, SS>());
+                size_t constexpr i = RM - 1;
+            
+                #pragma unroll
+                for (size_t j = 0; j < N; ++j) if (j < n)
+                    maskstore(ptr + SS * i + sp * j, mask, v_[i][j]);
+            }
+            else
+            {
+                #pragma unroll
+                for (size_t i = 0; i < RM; ++i)
+                    // The compile-time constant size of the j loop in combination with the if() expression
+                    // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
+                    #pragma unroll
+                    for (size_t j = 0; j < N; ++j) if (j < n)
+                        blazefeo::store(ptr + SS * i + sp * j, v_[i][j]);
+            }
+        }
+
+
+        template <typename MT>
+        void store(DenseMatrix<MT, columnMajor>&& A) const
+        {
+            this->store(~A);
+        }
+
+
+        /// @brief Store register matrix to a submatrix of a memory panel matrix;
         ///
         /// The size (m, n) of the submatrix be not bigger than the size of the register matrix.
         /// If (m, n) is smaller than the register matrix, the register matrix is partially stored,
@@ -483,7 +540,7 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    [[deprecated("Use load with a matrix argument instead")]]
+    // [[deprecated("Use load with a matrix argument instead")]]
     BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T const * a, size_t sa)
     {
         ker.load(1., a, sa);
@@ -498,7 +555,7 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    [[deprecated("Use load with a matrix argument instead")]]
+    // [[deprecated("Use load with a matrix argument instead")]]
     BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T beta, T const * a, size_t sa)
     {
         ker.load(beta, a, sa);
@@ -520,7 +577,7 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    [[deprecated("Use store with a matrix argument instead")]]
+    // [[deprecated("Use store with a matrix argument instead")]]
     BLAZE_ALWAYS_INLINE void store(RegisterMatrix<T, M, N, SS> const& ker, T * a, size_t sa, size_t m, size_t n)
     {
         ker.store(a, sa, m, n);

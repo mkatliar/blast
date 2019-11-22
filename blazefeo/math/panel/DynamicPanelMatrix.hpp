@@ -196,6 +196,18 @@ namespace blazefeo
         }
 
 
+        template <size_t SS>
+        auto load(size_t i, size_t j) const
+        {
+            BLAZE_INTERNAL_ASSERT(i < m_, "Invalid row access index");
+            BLAZE_INTERNAL_ASSERT(j < n_, "Invalid column access index");
+            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
+            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
+
+            return blazefeo::load<SS>(v_ + elementIndex(i, j));
+        }
+
+
     private:
         static size_t constexpr alignment_ = CACHE_LINE_SIZE;
         static size_t constexpr panelSize_ = PanelSize_v<Type>;
