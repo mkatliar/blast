@@ -217,6 +217,17 @@ namespace blazefeo
             //         maskstore(pl + PANEL_SIZE * j, mask, load<SS>(pr + s * j));
             // }
         }
+        else if constexpr (SO1 == columnMajor && SO2 == rowMajor)
+        {
+			for (size_t i = 0; i < m; ++i)
+            {
+                ET2 const * pr = data(rhs) + s * i;
+                ET1 * pl = ptr(lhs, i, 0);
+
+                for (size_t j = 0; j < n; ++j)
+                    pl[PANEL_SIZE * j] = pr[j];
+            }
+        }
         else
         {
             for (size_t i = 0; i < m; ++i)

@@ -16,6 +16,8 @@ add_executable(test-blazefeo
     simd/HsumTest.cpp
 
     math/expressions/PMatTransExprTest.cpp
+    math/expressions/AssignPanelDenseTest.cpp
+    math/expressions/AssignDensePanelTest.cpp
 
     math/views/RowTest.cpp
     math/views/SubmatrixTest.cpp

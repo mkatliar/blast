@@ -100,46 +100,6 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(StaticPanelMatrixTest, testPack)
-    {
-        size_t constexpr SS = PanelSize_v<TypeParam>;
-        size_t constexpr M = 2 * SS + 1;
-        size_t constexpr N = 3 * SS + 2;
-
-        StaticMatrix<TypeParam, M, N, columnMajor> A_ref;
-        randomize(A_ref);
-
-        StaticPanelMatrix<TypeParam, M, N, columnMajor> A;
-        A = A_ref;
-
-        auto const& A_cref = A;
-
-        for (size_t i = 0; i < M; ++i)
-            for (size_t j = 0; j < N; ++j)
-                EXPECT_EQ(A(i, j), A_ref(i, j)) << "element mismatch at (" << i << ", " << j << ")";
-    }
-
-
-    TYPED_TEST_P(StaticPanelMatrixTest, testUnpack)
-    {
-        size_t constexpr M = 5;
-        size_t constexpr N = 7;
-        size_t constexpr P = 4;        
-
-        StaticPanelMatrix<TypeParam, M, N, columnMajor> A;
-        for (size_t i = 0; i < M; ++i)
-            for (size_t j = 0; j < N; ++j)
-                blaze::randomize(A(i, j));
-
-        StaticMatrix<TypeParam, M, N, blaze::columnMajor> A1;
-        A1 = A;
-
-        for (size_t i = 0; i < M; ++i)
-            for (size_t j = 0; j < N; ++j)
-                EXPECT_EQ(A(i, j), A1(i, j)) << "element mismatch at (" << i << ", " << j << ")";
-    }
-
-
     TYPED_TEST_P(StaticPanelMatrixTest, testPMatPMatMulAssign)
     {
         size_t constexpr M = 5;
@@ -201,8 +161,6 @@ namespace blazefeo :: testing
         testElementAccess,
         testLoad,
         testStore,
-        testPack,
-        testUnpack,
         testPMatPMatMulAssign,
         testPMatTPMatMulAssign
     );
