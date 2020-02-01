@@ -211,8 +211,10 @@ namespace blazefeo
     template <typename T, size_t M, size_t N, size_t SS>
     inline void RegisterMatrix<T, M, N, SS>::load2(T beta, T const * ptr, size_t spacing)
     {
-        for (size_t i = 0; i < RM; ++i)
-            for (size_t j = 0; j < N; ++j)
+        #pragma unroll
+        for (size_t j = 0; j < N; ++j)
+            #pragma unroll
+            for (size_t i = 0; i < RM; ++i)
                 v_[i][j] = blazefeo::load<SS>(ptr + SS * i + spacing * j);
     }
 
@@ -232,9 +234,9 @@ namespace blazefeo
     inline void RegisterMatrix<T, M, N, SS>::load2(T beta, T const * ptr, size_t spacing, size_t m, size_t n)
     {
         #pragma unroll
-        for (size_t j = 0; j < N; ++j)
+        for (size_t j = 0; j < N; ++j) if (j < n)
             #pragma unroll
-            for (size_t i = 0; i < RM; ++i) if (j < n)
+            for (size_t i = 0; i < RM; ++i)
                 v_[i][j] = blazefeo::load<SS>(ptr + SS * i + spacing * j);
     }
 
@@ -380,6 +382,8 @@ namespace blazefeo
     {
         if (SOA == columnMajor && SOB == rowMajor)
         {
+            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T, SS>), "Not enough registers for ger()");
+            
             IntrinsicType ax[RM];
 
             #pragma unroll
