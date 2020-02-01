@@ -52,7 +52,7 @@ namespace blazefeo
 
 
     template <typename MT1, typename MT2>
-    BLAZE_ALWAYS_INLINE void potrf(
+    inline void potrf(
         PanelMatrix<MT1, columnMajor> const& A, PanelMatrix<MT2, columnMajor>& L)
     {
         using ET = ElementType_t<MT1>;

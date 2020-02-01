@@ -182,6 +182,14 @@ namespace blazefeo
         }
 
 
+        void unpackLower(Type * data, size_t lda) const
+        {
+            for (size_t i = 0; i < m_; ++i)
+                for (size_t j = 0; j <= i; ++j)
+                    data[i + lda * j] = (*this)(i, j);
+        }
+
+
         Type * ptr(size_t i, size_t j)
         {
             // BLAZE_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");

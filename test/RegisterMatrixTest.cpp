@@ -146,13 +146,16 @@ namespace blazefeo :: testing
         for (size_t m = ker.rows() + 1 - ker.simdSize(); m <= Traits::rows; ++m)
             for (size_t n = 1; n <= Traits::columns; ++n)
             {
-                B = 0.;
-                ker.store(B, 0, 0, m, n);
+                if (m != Traits::rows && n != Traits::columns)
+                {
+                    B = 0.;
+                	ker.store(B, 0, 0, m, n);
 
-                for (size_t i = 0; i < Traits::rows; ++i)
-                    for (size_t j = 0; j < Traits::columns; ++j)
-                        ASSERT_EQ(B(i, j), i < m && j < n ? A_ref(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), " 
-                            << "store size = " << m << "x" << n;
+                    for (size_t i = 0; i < Traits::rows; ++i)
+                        for (size_t j = 0; j < Traits::columns; ++j)
+                            ASSERT_EQ(B(i, j), i < m && j < n ? A_ref(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), " 
+                                << "store size = " << m << "x" << n;
+                }
             }
     }
 

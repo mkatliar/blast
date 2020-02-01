@@ -38,3 +38,7 @@ target_compile_definitions(test-blazefeo
 )
 
 gtest_discover_tests(test-blazefeo)
+
+if (BLAZEFEO_WITH_BLASFEO)
+    add_subdirectory("blasfeo")
+endif ()

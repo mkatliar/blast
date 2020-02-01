@@ -9,7 +9,7 @@
 namespace blazefeo :: benchmark
 {
     template <typename Real>
-    static void BM_gemm_nn_libxsmm(::benchmark::State& state)
+    static void BM_gemm_nn(::benchmark::State& state)
     {
         using value_type = double;
 
@@ -41,7 +41,7 @@ namespace blazefeo :: benchmark
 
 
     template <typename Real>
-    static void BM_gemm_nt_libxsmm(::benchmark::State& state)
+    static void BM_gemm_nt(::benchmark::State& state)
     {
         size_t const m = state.range(0);
         size_t const n = m;
@@ -70,9 +70,9 @@ namespace blazefeo :: benchmark
     }
     
 
-    BENCHMARK_TEMPLATE(BM_gemm_nn_libxsmm, double)->DenseRange(1, 50);
-    BENCHMARK_TEMPLATE(BM_gemm_nt_libxsmm, double)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, double)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double)->DenseRange(1, 50);
 
-    BENCHMARK_TEMPLATE(BM_gemm_nn_libxsmm, float)->DenseRange(1, 50);
-    BENCHMARK_TEMPLATE(BM_gemm_nt_libxsmm, float)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, float)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, float)->DenseRange(1, 50);
 }
