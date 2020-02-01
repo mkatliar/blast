@@ -54,5 +54,5 @@ namespace blazefeo :: testing
 
 
     INSTANTIATE_TYPED_TEST_SUITE_P(Potrf_double, PotrfTest, double);
-    INSTANTIATE_TYPED_TEST_SUITE_P(Potrf_float, PotrfTest, float);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(Potrf_float, PotrfTest, float);
 }
