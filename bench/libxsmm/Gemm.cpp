@@ -9,7 +9,7 @@
 namespace blazefeo :: benchmark
 {
     template <typename Real>
-    static void BM_gemm_nn_libxsmm(::benchmark::State& state)
+    static void BM_gemm_nn(::benchmark::State& state)
     {
         using value_type = double;
 
@@ -41,17 +41,15 @@ namespace blazefeo :: benchmark
 
 
     template <typename Real>
-    static void BM_gemm_nt_libxsmm(::benchmark::State& state)
+    static void BM_gemm_nt(::benchmark::State& state)
     {
-        using value_type = double;
-
         size_t const m = state.range(0);
         size_t const n = m;
         size_t const k = m;
-        std::vector<value_type> a(m * k), b(n * k), c(m * n, 0);
+        std::vector<Real> a(m * k), b(n * k), c(m * n, 0);
 
         /* C/C++ and Fortran interfaces are available */
-        using kernel_type = libxsmm_mmfunction<value_type>;
+        using kernel_type = libxsmm_mmfunction<Real>;
         
         /* generates and dispatches a matrix multiplication kernel (C++ functor) */
         kernel_type kernel(LIBXSMM_GEMM_FLAG_TRANS_B, m, n, k, 1.0/*alpha*/, 1.0/*beta*/);
@@ -72,6 +70,9 @@ namespace blazefeo :: benchmark
     }
     
 
-    BENCHMARK_TEMPLATE(BM_gemm_nn_libxsmm, double)->DenseRange(1, 50);
-    BENCHMARK_TEMPLATE(BM_gemm_nt_libxsmm, double)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, double)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double)->DenseRange(1, 50);
+
+    BENCHMARK_TEMPLATE(BM_gemm_nn, float)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, float)->DenseRange(1, 50);
 }

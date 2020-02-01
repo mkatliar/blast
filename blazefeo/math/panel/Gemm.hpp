@@ -106,13 +106,13 @@ namespace blazefeo
         // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
         // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
         for (; i + 2 * TILE_SIZE < M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
-            gemm_nt_backend<3 * TILE_SIZE, TILE_SIZE>(i, alpha, beta, ~A, ~B, ~C, ~D);
+            gemm_nt_backend<3 * TILE_SIZE, 4>(i, alpha, beta, ~A, ~B, ~C, ~D);
 
         for (; i + 1 * TILE_SIZE < M; i += 2 * TILE_SIZE)
-            gemm_nt_backend<2 * TILE_SIZE, TILE_SIZE>(i, alpha, beta, ~A, ~B, ~C, ~D);
+            gemm_nt_backend<2 * TILE_SIZE, 4>(i, alpha, beta, ~A, ~B, ~C, ~D);
 
         for (; i + 0 * TILE_SIZE < M; i += 1 * TILE_SIZE)
-            gemm_nt_backend<1 * TILE_SIZE, TILE_SIZE>(i, alpha, beta, ~A, ~B, ~C, ~D);
+            gemm_nt_backend<1 * TILE_SIZE, 4>(i, alpha, beta, ~A, ~B, ~C, ~D);
     }
 
 
@@ -160,8 +160,7 @@ namespace blazefeo
         {
             // Use partial save to calculate the bottom of the resulting matrix.
             size_t j = 0;
-            ET const * b = ptr(B, 0, 0);
-
+            
             for (; j + KN <= N; j += KN)
                 gemm_backend<columnMajor, rowMajor>(ker, K, alpha, beta,
                     ptr(A, i, 0), spacing(A), ptr(B, j, 0), spacing(B),

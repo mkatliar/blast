@@ -33,4 +33,5 @@ namespace blazefeo :: benchmark
 
 
     BENCHMARK_TEMPLATE(BM_potrf_dynamic, double)->DenseRange(1, 300);
+    BENCHMARK_TEMPLATE(BM_potrf_dynamic, float)->DenseRange(1, 300);
 }
