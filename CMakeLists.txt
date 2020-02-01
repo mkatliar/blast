@@ -13,7 +13,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Include CMakeToolsHelpers for easier debugging from VS Code
 include(CMakeToolsHelpers OPTIONAL)
 
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -40,6 +40,24 @@ target_link_libraries(blazefeo
     INTERFACE blaze::blaze
 )
 
+# BLAZEFEO_WITH_BLASFEO
+set(BLAZEFEO_WITH_BLASFEO ON CACHE BOOL "Build blasfeo C++ interface")
+
+if (BLAZEFEO_WITH_BLASFEO)
+    find_package(BLASFEO REQUIRED)
+
+    add_library(blazefeo-blasfeo INTERFACE)
+
+    target_include_directories(blazefeo-blasfeo
+        INTERFACE ${PROJECT_INCLUDE_DIR}
+        INTERFACE ${BLASFEO_INCLUDE_DIR}
+    )
+
+    target_link_libraries(blazefeo-blasfeo
+        INTERFACE ${BLASFEO_STATIC_LIB}
+    )
+endif()
+
 # BLAZEFEO_WITH_TEST
 set(BLAZEFEO_WITH_TEST ON CACHE BOOL "Build blazefeo tests")
 
@@ -48,9 +66,9 @@ if (BLAZEFEO_WITH_TEST)
     add_subdirectory(test)
 endif()
 
-# SMOKE_WITH_BENCHMARK
-set(SMOKE_WITH_BENCHMARK ON CACHE BOOL "Build blazefeo benchmarks")
+# BLAZEFEO_WITH_BENCHMARK
+set(BLAZEFEO_WITH_BENCHMARK ON CACHE BOOL "Build blazefeo benchmarks")
 
-if (SMOKE_WITH_BENCHMARK)
+if (BLAZEFEO_WITH_BENCHMARK)
     add_subdirectory(bench)
 endif()
