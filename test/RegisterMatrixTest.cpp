@@ -271,8 +271,6 @@ namespace blazefeo :: testing
         static size_t constexpr m = Traits::rows;
         static size_t constexpr n = Traits::columns;
         
-        TypeParam ker;
-
         if constexpr (m >= n)
         {
             StaticPanelMatrix<ET, m, n, columnMajor> A, L;
@@ -289,9 +287,12 @@ namespace blazefeo :: testing
                 A.pack(data(C), spacing(C));
             }
 
-            load(ker, A.ptr(0, 0), A.spacing());
-            ker.potrf();
-            store(ker, L.ptr(0, 0), L.spacing());
+            {
+                TypeParam ker;
+                load(ker, A.ptr(0, 0), A.spacing());
+                ker.potrf();
+                store(ker, L.ptr(0, 0), L.spacing());
+            }
 
             A1 = 0.;
             gemm_nt(L, L, A1, A1);
