@@ -97,6 +97,21 @@ namespace blazefeo
         // [[deprecated("Use load with a matrix argument instead")]]
         void load(T beta, T const * ptr, size_t spacing);
 
+
+        template <typename MT>
+        void load(T beta, PanelMatrix<MT, columnMajor> const& A, size_t i, size_t j)
+        {
+            BLAZE_INTERNAL_ASSERT(i + rows() <= (~A).rows(), "Invalid submatrix specification");
+            BLAZE_INTERNAL_ASSERT(j + columns() <= (~A).columns(), "Invalid submatrix specification");
+            BLAZE_INTERNAL_ASSERT((i + (~A).offset()) % SS == 0, "Invalid submatrix specification");
+
+            size_t const p = (i + (~A).offset()) / SS;
+
+            for (size_t ri = 0; ri < RM; ++ri)
+                for (size_t rj = 0; rj < RN; ++rj)
+                    v_[ri][rj] = beta * blazefeo::load<SS>(data(A) + (p + ri) * spacing(A) + SS * rj);
+        }
+
         
         /// @brief Load register matrix from a submatrix of a memory matrix and multiply it by a constant;
         ///
@@ -119,9 +134,11 @@ namespace blazefeo
             BLAZE_INTERNAL_ASSERT(m <= rows(), "Invalid number of rows");
             BLAZE_INTERNAL_ASSERT(n <= columns(), "Invalid number of columns");
 
+            size_t const p = (i + (~A).offset()) / SS;
+
             for (size_t ri = 0; ri * SS < m; ++ri)
                 for (size_t rj = 0; rj < n; ++rj)
-                    v_[ri][rj] = beta * (~A).template load<SS>(i + SS * ri, j + rj);
+                    v_[ri][rj] = beta * blazefeo::load<SS>(data(A) + (p + ri) * spacing(A) + SS * rj);
         }
 
 
