@@ -38,6 +38,20 @@ namespace blazefeo
 
 
     template <typename MT, bool SO>
+    inline auto * data(PanelMatrix<MT, SO>& m) noexcept
+    {
+        return (~m).data();
+    }
+
+
+    template <typename MT, bool SO>
+    inline auto const * data(PanelMatrix<MT, SO> const& m) noexcept
+    {
+        return (~m).data();
+    }
+
+
+    template <typename MT, bool SO>
     inline auto * ptr(PanelMatrix<MT, SO>& m, size_t i, size_t j)
     {
         return (~m).ptr(i, j);

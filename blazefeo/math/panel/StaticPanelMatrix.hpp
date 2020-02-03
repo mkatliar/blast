@@ -144,6 +144,18 @@ namespace blazefeo
         }
 
 
+        Type * data() noexcept
+        {
+            return v_;
+        }
+
+
+        Type const * data() const noexcept
+        {
+            return v_;
+        }
+
+
         Type * ptr(size_t i, size_t j)
         {
             // BLAZE_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
