@@ -49,8 +49,8 @@ namespace blazefeo
         using Pointer        = Type*;        //!< Pointer to a non-constant matrix value.
         using ConstPointer   = const Type*;  //!< Pointer to a constant matrix value.
 
-        using Iterator      = DenseIterator<Type, true>;        //!< Iterator over non-constant elements.
-        using ConstIterator = DenseIterator<const Type, true>;  //!< Iterator over constant elements.
+        using Iterator      = DenseIterator<Type, aligned>;        //!< Iterator over non-constant elements.
+        using ConstIterator = DenseIterator<const Type, aligned>;  //!< Iterator over constant elements.
    
         
         StaticPanelMatrix()

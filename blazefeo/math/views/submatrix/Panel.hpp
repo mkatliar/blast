@@ -48,7 +48,7 @@ namespace blazefeo
 
         using BaseType      = PanelMatrix<This, SO>;       //!< Base type of this PanelSubmatrix instance.
         using ViewedType    = MT;                            //!< The type viewed by this PanelSubmatrix instance.
-        using ResultType    = SubmatrixTrait_t<MT>;  //!< Result type for expression template evaluations.
+        // using ResultType    = SubmatrixTrait_t<MT>;  //!< Result type for expression template evaluations.
         // using OppositeType  = OppositeType_t<ResultType>;    //!< Result type with opposite storage order for expression template evaluations.
         // using TransposeType = TransposeType_t<ResultType>;   //!< Transpose type for expression template evaluations.
         using ElementType   = ElementType_t<MT>;             //!< Type of the submatrix elements.
