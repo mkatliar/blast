@@ -55,6 +55,7 @@ if (BLAZEFEO_WITH_BLASFEO)
 
     target_link_libraries(blazefeo-blasfeo
         INTERFACE ${BLASFEO_STATIC_LIB}
+        INTERFACE blazefeo
     )
 endif()
 
