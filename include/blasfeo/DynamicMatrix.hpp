@@ -1,8 +1,8 @@
 #pragma once
 
 #include <blasfeo/BlasfeoMatrix.hpp>
+#include <blasfeo/BlasfeoApi.hpp>
 #include <blasfeo/Matrix.hpp>
-#include <blasfeo/Alloc.hpp>
 
 #include <blasfeo/Exception.hpp>
 

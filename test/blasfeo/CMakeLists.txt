@@ -1,6 +1,7 @@
 add_executable(test-blasfeo
     CustomMatrixTest.cpp
     DynamicMatrixTest.cpp
+    SyrkTest.cpp
     SyrkPotrfTest.cpp
     PotrfTest.cpp
     GemmTest.cpp

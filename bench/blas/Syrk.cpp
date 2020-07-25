@@ -24,7 +24,7 @@ namespace blazefeo :: benchmark
 
     static void syrkBenchArguments(::benchmark::internal::Benchmark* b) 
     {
-        b->Args({4, 5})->Args({30, 35});
+        b->Args({4, 5})->Args({20, 40})->Args({30, 35});
     }
 
 

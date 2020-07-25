@@ -6,6 +6,7 @@ add_executable(bench-blasfeo
     Main.cpp
     Trmm.cpp
     Gemm.cpp
+    Syrk.cpp
     SyrkPotrf.cpp
     Potrf.cpp
 )

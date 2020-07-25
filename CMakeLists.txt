@@ -71,5 +71,6 @@ endif()
 set(BLAZEFEO_WITH_BENCHMARK ON CACHE BOOL "Build blazefeo benchmarks")
 
 if (BLAZEFEO_WITH_BENCHMARK)
+    include_directories(${PROJECT_INCLUDE_DIR})
     add_subdirectory(bench)
 endif()

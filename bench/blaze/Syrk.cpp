@@ -1,81 +1,95 @@
 #include <blaze/Math.h>
 
-#include <benchmark/benchmark.h>
+#include <bench/Benchmark.hpp>
+
+
+#define BENCHMARK_STATIC(M, N) \
+    BENCHMARK_TEMPLATE(BM_syrk_static, double, M, N, columnMajor); \
+    BENCHMARK_TEMPLATE(BM_syrk_static, double, M, N, rowMajor); \
+    BENCHMARK_TEMPLATE(BM_syrk_declsym_static, double, M, N, columnMajor); \
+    BENCHMARK_TEMPLATE(BM_syrk_declsym_static, double, M, N, rowMajor); \
+    BENCHMARK_TEMPLATE(BM_syrk_symmetric_declsym_static, double, M, N, columnMajor); \
+    BENCHMARK_TEMPLATE(BM_syrk_symmetric_declsym_static, double, M, N, rowMajor); \
+    BENCHMARK_TEMPLATE(BM_syrk_loop_static, double, M, N, columnMajor); \
+    BENCHMARK_TEMPLATE(BM_syrk_loop_static, double, M, N, rowMajor);
 
 
 namespace blazefeo :: benchmark
 {
-    template <typename Real>
-    static void BM_syrk_dynamic(::benchmark::State& state)
+    using namespace blaze;
+
+
+    template <typename Real, bool SO>
+    static void BM_syrk_dynamic(State& state)
     {
         size_t const M = state.range(0);
         size_t const N = state.range(1);
-        blaze::DynamicMatrix<Real, blaze::columnMajor> A(M, N);        
-        blaze::DynamicMatrix<Real, blaze::columnMajor> B(N, N);
+        DynamicMatrix<Real, SO> A(M, N);        
+        DynamicMatrix<Real, SO> B(N, N);
 
         randomize(A);
         
         for (auto _ : state)
-            ::benchmark::DoNotOptimize(B = trans(A) * A);
+            DoNotOptimize(B = trans(A) * A);
     }
 
 
-    template <typename Real>
-    static void BM_syrk_symmetric_dynamic(::benchmark::State& state)
+    template <typename Real, bool SO>
+    static void BM_syrk_symmetric_dynamic(State& state)
     {
         size_t const M = state.range(0);
         size_t const N = state.range(1);
-        blaze::DynamicMatrix<Real, blaze::columnMajor> A(M, N);        
-        blaze::SymmetricMatrix<blaze::DynamicMatrix<Real, blaze::columnMajor>> B(N);
+        DynamicMatrix<Real, SO> A(M, N);        
+        SymmetricMatrix<DynamicMatrix<Real, SO>> B(N);
 
         randomize(A);
         
         for (auto _ : state)
-            ::benchmark::DoNotOptimize(B = declsym(trans(A) * A));
+            DoNotOptimize(B = declsym(trans(A) * A));
     }
 
 
-    template <typename Real, size_t M, size_t N>
-    static void BM_syrk_static(::benchmark::State& state)
+    template <typename Real, size_t M, size_t N, bool SO>
+    static void BM_syrk_static(State& state)
     {
-        blaze::StaticMatrix<Real, M, N, blaze::columnMajor> A;        
-        blaze::StaticMatrix<Real, N, N, blaze::columnMajor> B;
+        StaticMatrix<Real, M, N, SO> A;        
+        StaticMatrix<Real, N, N, SO> B;
 
         randomize(A);
         
         for (auto _ : state)
-            ::benchmark::DoNotOptimize(B = trans(A) * A);
+            DoNotOptimize(B = trans(A) * A);
     }
 
 
-    template <typename Real, size_t M, size_t N>
-    static void BM_syrk_declsym_static(::benchmark::State& state)
+    template <typename Real, size_t M, size_t N, bool SO>
+    static void BM_syrk_declsym_static(State& state)
     {
-        blaze::StaticMatrix<Real, M, N, blaze::columnMajor> A;        
-        blaze::StaticMatrix<Real, N, N, blaze::columnMajor> B;
+        StaticMatrix<Real, M, N, SO> A;        
+        StaticMatrix<Real, N, N, SO> B;
 
         randomize(A);
         
         for (auto _ : state)
-            ::benchmark::DoNotOptimize(B = declsym(trans(A) * A));
+            DoNotOptimize(B = declsym(trans(A) * A));
     }
 
 
-    template <typename Real, size_t M, size_t N>
-    static void BM_syrk_symmetric_declsym_static(::benchmark::State& state)
+    template <typename Real, size_t M, size_t N, bool SO>
+    static void BM_syrk_symmetric_declsym_static(State& state)
     {
-        blaze::StaticMatrix<Real, M, N, blaze::columnMajor> A;
-        blaze::SymmetricMatrix<blaze::StaticMatrix<Real, N, N, blaze::columnMajor>> B;
+        StaticMatrix<Real, M, N, SO> A;
+        SymmetricMatrix<StaticMatrix<Real, N, N, SO>> B;
 
         randomize(A);
         
         for (auto _ : state)
-            ::benchmark::DoNotOptimize(B = declsym(trans(A) * A));
+            DoNotOptimize(B = declsym(trans(A) * A));
     }
 
 
     template <typename Real, size_t M, size_t N, bool SO1, bool SO2>
-    void syrkStaticLoop(blaze::StaticMatrix<Real, M, N, SO1> const& A, blaze::StaticMatrix<Real, N, N, SO2>& B)
+    void syrkStaticLoop(StaticMatrix<Real, M, N, SO1> const& A, StaticMatrix<Real, N, N, SO2>& B)
     {
         for (size_t j = 0; j < N; ++j)
         {
@@ -85,36 +99,33 @@ namespace blazefeo :: benchmark
     }
 
 
-    template <typename Real, size_t M, size_t N>
-    static void BM_syrk_loop_static(::benchmark::State& state)
+    template <typename Real, size_t M, size_t N, bool SO>
+    static void BM_syrk_loop_static(State& state)
     {
-        blaze::StaticMatrix<Real, M, N, blaze::columnMajor> A;        
-        blaze::StaticMatrix<Real, N, N, blaze::columnMajor> B;
+        StaticMatrix<Real, M, N, SO> A;        
+        StaticMatrix<Real, N, N, SO> B;
 
         randomize(A);
         
         for (auto _ : state)
         {
             syrkStaticLoop(A, B);
+            DoNotOptimize(A);
+            DoNotOptimize(B);
         }
     }
 
 
-    static void syrkBenchArguments(::benchmark::internal::Benchmark* b) 
+    static void syrkBenchArguments(internal::Benchmark* b) 
     {
         b->Args({4, 5})->Args({30, 35});
     }
 
 
-    BENCHMARK_TEMPLATE(BM_syrk_dynamic, double)->Apply(syrkBenchArguments);
-    BENCHMARK_TEMPLATE(BM_syrk_symmetric_dynamic, double)->Apply(syrkBenchArguments);
-    BENCHMARK_TEMPLATE(BM_syrk_static, double, 4, 5);
-    BENCHMARK_TEMPLATE(BM_syrk_static, double, 30, 35);
-    BENCHMARK_TEMPLATE(BM_syrk_declsym_static, double, 4, 5);
-    BENCHMARK_TEMPLATE(BM_syrk_declsym_static, double, 30, 35);
-    BENCHMARK_TEMPLATE(BM_syrk_symmetric_declsym_static, double, 4, 5);
-    BENCHMARK_TEMPLATE(BM_syrk_symmetric_declsym_static, double, 30, 35);
-
-    BENCHMARK_TEMPLATE(BM_syrk_loop_static, double, 4, 5);
-    BENCHMARK_TEMPLATE(BM_syrk_loop_static, double, 30, 35);
+    BENCHMARK_TEMPLATE(BM_syrk_dynamic, double, columnMajor)->Apply(syrkBenchArguments);
+    BENCHMARK_TEMPLATE(BM_syrk_symmetric_dynamic, double, columnMajor)->Apply(syrkBenchArguments);
+    
+    BENCHMARK_STATIC(4, 5);
+    BENCHMARK_STATIC(20, 40);
+    BENCHMARK_STATIC(30, 35);
 }
