@@ -57,7 +57,7 @@ namespace blazefeo :: benchmark
 
         for (auto _ : state)
         {
-            gemm_nt(A, B, C, D);
+            gemm(1., A, trans(B), 1., C, D);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);

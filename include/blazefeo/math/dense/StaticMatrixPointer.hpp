@@ -9,7 +9,7 @@ namespace blazefeo
 {
     template <typename T, size_t S, bool SO>
     class StaticMatrixPointer
-    :   public MatrixPointer<StaticMatrixPointer<T, S, SO>, SO>
+    :   public MatrixPointerBase<StaticMatrixPointer<T, S, SO>, SO>
     {
     public:
         using ElementType = T;
@@ -38,6 +38,15 @@ namespace blazefeo
         T * get() const noexcept
         {
             return ptr_;
+        }
+
+
+        T * offset(ptrdiff_t i, ptrdiff_t j) const noexcept
+        {
+            if (SO == columnMajor)
+                return ptr_ + i + spacing() * j;
+            else
+                return ptr_ + spacing() * i + j;
         }
 
 

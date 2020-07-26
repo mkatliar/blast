@@ -1,8 +1,6 @@
 #pragma once
 
-#include <blazefeo/math/dense/Ptr.hpp>
 #include <blazefeo/math/dense/GemmBackend.hpp>
-#include <blazefeo/system/Tile.hpp>
 
 #include <blaze/util/Exception.h>
 #include <blaze/util/constraints/SameType.h>
@@ -14,39 +12,10 @@
 namespace blazefeo
 {
     template <typename ST1, typename ST2, typename MT1, typename MT2, typename MT3, typename MT4>
-    void gemm_nt(
-        ST1 alpha, ST2 beta,
-        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, columnMajor> const& B, 
-        DenseMatrix<MT3, columnMajor> const& C, DenseMatrix<MT4, columnMajor>& D);
-
-
-    template <typename MT1, typename MT2, typename MT3, typename MT4>
-    BLAZE_ALWAYS_INLINE void gemm_nt(
-        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, columnMajor> const& B, 
-        DenseMatrix<MT3, columnMajor> const& C, DenseMatrix<MT4, columnMajor>& D)
-    {
-        using ET = ElementType_t<MT1>;
-        
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT2>, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT3>, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT4>, ET);
-
-        gemm_nt(ET(1.), ET(1.), ~A, ~B, ~C, ~D);
-    }
-
-
-    template <size_t KM, size_t KN, typename ST1, typename ST2, typename MT1, typename MT2, typename MT3, typename MT4>
-    void gemm_nt_backend(
-        size_t i, ST1 alpha, ST2 beta,
-        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, columnMajor> const& B, 
-        DenseMatrix<MT3, columnMajor> const& C, DenseMatrix<MT4, columnMajor>& D);
-
-
-    template <typename ST1, typename ST2, typename MT1, typename MT2, typename MT3, typename MT4>
-    BLAZE_ALWAYS_INLINE void gemm_nt(
-        ST1 alpha, ST2 beta,
-        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, columnMajor> const& B, 
-        DenseMatrix<MT3, columnMajor> const& C, DenseMatrix<MT4, columnMajor>& D)
+    BLAZE_ALWAYS_INLINE void gemm(
+        ST1 alpha,
+        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, rowMajor> const& B, 
+        ST2 beta, DenseMatrix<MT3, columnMajor> const& C, DenseMatrix<MT4, columnMajor>& D)
     {
         using ET = ElementType_t<MT1>;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;
@@ -56,10 +25,10 @@ namespace blazefeo
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT4>, ET);
 
         size_t const M = rows(A);
-        size_t const N = rows(B);
+        size_t const N = columns(B);
         size_t const K = columns(A);
 
-        if (columns(B) != K)
+        if (rows(B) != K)
             BLAZE_THROW_INVALID_ARGUMENT("Matrix sizes do not match");
 
         if (rows(C) != M || columns(C) != N)
@@ -73,71 +42,12 @@ namespace blazefeo
         // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
         // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
         for (; i + 2 * TILE_SIZE < M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
-            gemm_nt_backend<3 * TILE_SIZE, TILE_SIZE>(i, alpha, beta, ~A, ~B, ~C, ~D);
+            gemm_backend<3 * TILE_SIZE, TILE_SIZE>(i, alpha, ~A, ~B, beta, ~C, ~D);
 
         for (; i + 1 * TILE_SIZE < M; i += 2 * TILE_SIZE)
-            gemm_nt_backend<2 * TILE_SIZE, TILE_SIZE>(i, alpha, beta, ~A, ~B, ~C, ~D);
+            gemm_backend<2 * TILE_SIZE, TILE_SIZE>(i, alpha, ~A, ~B, beta, ~C, ~D);
 
         for (; i + 0 * TILE_SIZE < M; i += 1 * TILE_SIZE)
-            gemm_nt_backend<1 * TILE_SIZE, TILE_SIZE>(i, alpha, beta, ~A, ~B, ~C, ~D);
-    }
-
-
-    template <size_t KM, size_t KN, typename ST1, typename ST2, typename MT1, typename MT2, typename MT3, typename MT4>
-    BLAZE_ALWAYS_INLINE void gemm_nt_backend(
-        size_t i, ST1 alpha, ST2 beta,
-        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, columnMajor> const& B, 
-        DenseMatrix<MT3, columnMajor> const& C, DenseMatrix<MT4, columnMajor>& D)
-    {
-        using ET = ElementType_t<MT1>;
-        size_t constexpr TILE_SIZE = TileSize_v<ET>;
-
-        BLAZE_STATIC_ASSERT(KM % TILE_SIZE == 0);
-
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT2>, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT3>, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT4>, ET);
-
-        size_t const M = rows(A);
-        size_t const N = rows(B);
-        size_t const K = columns(A);
-
-        BLAZE_USER_ASSERT(columns(B) == K, "Matrix sizes do not match");
-        BLAZE_USER_ASSERT(rows(C) == M && columns(C) == N, "Matrix sizes do not match");
-        BLAZE_USER_ASSERT(rows(D) == M && columns(D) == N, "Matrix sizes do not match");
-
-        RegisterMatrix<ET, KM, KN, TILE_SIZE> ker;
-
-        if (i + KM <= M)
-        {
-            size_t j = 0;
-            ET const * a = ptr(A, i, 0);
-
-            for (; j + KN <= N; j += KN)
-                gemm_backend2<columnMajor, rowMajor>(ker, K, alpha, beta,
-                    a, spacing(A), ptr(B, j, 0), spacing(B),
-                    ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D));
-
-            if (j < N)
-                gemm_backend2<columnMajor, rowMajor>(ker, K, alpha, beta,
-                    a, spacing(A), ptr(B, j, 0), spacing(B),
-                    ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D), KM, N - j);
-        }
-        else
-        {
-            // Use partial save to calculate the bottom of the resulting matrix.
-            size_t j = 0;
-            ET const * b = ptr(B, 0, 0);
-
-            for (; j + KN <= N; j += KN)
-                gemm_backend2<columnMajor, rowMajor>(ker, K, alpha, beta,
-                    ptr(A, i, 0), spacing(A), ptr(B, j, 0), spacing(B),
-                    ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D), M - i, KN);
-
-            if (j < N)
-                gemm_backend2<columnMajor, rowMajor>(ker, K, alpha, beta,
-                    ptr(A, i, 0), spacing(A), ptr(B, j, 0), spacing(B),
-                    ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D), M - i, N - j);
-        }
+            gemm_backend<1 * TILE_SIZE, TILE_SIZE>(i, alpha, ~A, ~B, beta, ~C, ~D);
     }
 }

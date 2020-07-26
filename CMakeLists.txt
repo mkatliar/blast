@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.10)   # Need at least 3.10 for gtest_discover_
 project (blazefeo)
 
 # Enable modern C++
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Don't use compiler's C++ extensions
 set(CMAKE_CXX_EXTENSIONS False)

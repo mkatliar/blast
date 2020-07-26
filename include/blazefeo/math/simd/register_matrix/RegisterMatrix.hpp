@@ -95,34 +95,34 @@ namespace blazefeo
 
         /// @brief load from memory
         void load(T beta, T const * ptr, size_t spacing);
-        void load2(T beta, T const * ptr, size_t spacing);
 
         template <typename P>
-        void load(T beta, MatrixPointer<P, storageOrder> const& p)
-        {
-            load2(beta, (~p).get(), (~p).spacing());
-        }
+            requires MatrixPointer<P, columnMajor>
+        void load(T beta, P p) noexcept;
 
 
         /// @brief load from memory with specified size
         void load(T beta, T const * ptr, size_t spacing, size_t m, size_t n);
-        void load2(T beta, T const * ptr, size_t spacing, size_t m, size_t n);
+
+        template <typename P>
+            requires MatrixPointer<P, columnMajor>
+        void load(T beta, P p, size_t m, size_t n) noexcept;
 
 
         /// @brief store to memory
         void store(T * ptr, size_t spacing) const;
-        void store2(T * ptr, size_t spacing) const;
 
         template <typename P>
-        void store(MatrixPointer<P, storageOrder> const& p)
-        {
-            store2((~p).get(), (~p).spacing());
-        }
+            requires MatrixPointer<P, columnMajor>
+        void store(P p) const noexcept;
 
 
         /// @brief store to memory with specified size
         void store(T * ptr, size_t spacing, size_t m, size_t n) const;
-        void store2(T * ptr, size_t spacing, size_t m, size_t n) const;
+
+        template <typename P>
+            requires MatrixPointer<P, columnMajor>
+        void store(P p, size_t m, size_t n) const noexcept;
 
 
         /// @brief Rank-1 update
@@ -137,8 +137,9 @@ namespace blazefeo
         template <bool SOA, bool SOB>
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb);
 
-        template <bool SOA, bool SOB>
-        void ger2(T alpha, T const * a, size_t sa, T const * b, size_t sb);
+        template <typename PA, typename PB>
+            requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
+        void ger(T alpha, PA a, PB b) noexcept;
 
 
         /// @brief Rank-1 update of specified size
@@ -153,8 +154,9 @@ namespace blazefeo
         template <bool SOA, bool SOB>
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n);
 
-        template <bool SOA, bool SOB>
-        void ger2(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n);
+        template <typename PA, typename PB>
+            requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
+        void ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept;
 
 
         /// @brief In-place Cholesky decomposition
@@ -226,13 +228,15 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    inline void RegisterMatrix<T, M, N, SS>::load2(T beta, T const * ptr, size_t spacing)
+    template <typename P>
+        requires MatrixPointer<P, columnMajor>
+    inline void RegisterMatrix<T, M, N, SS>::load(T beta, P p) noexcept
     {
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                v_[i][j] = blazefeo::load<SS>(ptr + SS * i + spacing * j);
+                v_[i][j] = blazefeo::load<SS>(p.offset(SS * i, j));
     }
 
 
@@ -248,13 +252,15 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    inline void RegisterMatrix<T, M, N, SS>::load2(T beta, T const * ptr, size_t spacing, size_t m, size_t n)
+    template <typename P>
+        requires MatrixPointer<P, columnMajor>
+    inline void RegisterMatrix<T, M, N, SS>::load(T beta, P p, size_t m, size_t n) noexcept
     {
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                v_[i][j] = blazefeo::load<SS>(ptr + SS * i + spacing * j);
+                v_[i][j] = blazefeo::load<SS>(p.offset(SS * i, j));
     }
 
 
@@ -270,11 +276,13 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    inline void RegisterMatrix<T, M, N, SS>::store2(T * ptr, size_t spacing) const
+    template <typename P>
+        requires MatrixPointer<P, columnMajor>
+    inline void RegisterMatrix<T, M, N, SS>::store(P p) const noexcept
     {
         for (size_t j = 0; j < N; ++j)
             for (size_t i = 0; i < RM; ++i)
-                blazefeo::store(ptr + SS * i + spacing * j, v_[i][j]);
+                blazefeo::store(p.offset(SS * i, j), v_[i][j]);
     }
 
 
@@ -317,13 +325,15 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    inline void RegisterMatrix<T, M, N, SS>::store2(T * ptr, size_t spacing, size_t m, size_t n) const
+    template <typename P>
+        requires MatrixPointer<P, columnMajor>
+    inline void RegisterMatrix<T, M, N, SS>::store(P p, size_t m, size_t n) const noexcept
     {
         // The compile-time constant size of the j loop in combination with the if() expression
         // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
         for (size_t j = 0; j < N; ++j) if (j < n)
             for (size_t i = 0; i < RM; ++i) if (SS * (i + 1) <= m)
-                blazefeo::store(ptr + SS * i + spacing * j, v_[i][j]);
+                blazefeo::store(p.offset(SS * i, j), v_[i][j]);
 
         if (IntType const rem = m % SS)
         {
@@ -331,7 +341,7 @@ namespace blazefeo
             size_t const i = m / SS;
 
             for (size_t j = 0; j < n && j < columns(); ++j)
-                maskstore(ptr + SS * i + spacing * j, mask, v_[i][j]);
+                maskstore(p.offset(SS * i, j), mask, v_[i][j]);
         }
     }
 
@@ -394,32 +404,26 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    template <bool SOA, bool SOB>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger2(T alpha, T const * a, size_t sa, T const * b, size_t sb)
+    template <typename PA, typename PB>
+        requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, PA a, PB b) noexcept
     {
-        if (SOA == columnMajor && SOB == rowMajor)
-        {
-            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T, SS>), "Not enough registers for ger()");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T, SS>), "Not enough registers for ger()");
             
-            IntrinsicType ax[RM];
+        IntrinsicType ax[RM];
+
+        #pragma unroll
+        for (size_t i = 0; i < RM; ++i)
+            ax[i] = alpha * blazefeo::load<SS>(a.get() + i * SS);
+        
+        #pragma unroll
+        for (size_t j = 0; j < N; ++j)
+        {
+            IntrinsicType bx = broadcast<SS>(b.get() + j);
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                ax[i] = alpha * blazefeo::load<SS>(a + i * SS);
-            
-            #pragma unroll
-            for (size_t j = 0; j < N; ++j)
-            {
-                IntrinsicType bx = broadcast<SS>(b + j);
-
-                #pragma unroll
-                for (size_t i = 0; i < RM; ++i)
-                    v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
-            }
-        }
-        else
-        {
-            BLAZE_THROW_LOGIC_ERROR("Not implemented");
+                v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
         }        
     }
 
@@ -456,30 +460,24 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    template <bool SOA, bool SOB>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger2(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
+    template <typename PA, typename PB>
+        requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept
     {
-        if (SOA == columnMajor && SOB == rowMajor)
+        IntrinsicType ax[RM];
+
+        #pragma unroll
+        for (size_t i = 0; i < RM; ++i)
+            ax[i] = alpha * blazefeo::load<SS>(a.get() + i * SS);
+        
+        #pragma unroll
+        for (size_t j = 0; j < N; ++j) if (j < n)
         {
-            IntrinsicType ax[RM];
+            IntrinsicType bx = broadcast<SS>(b.get() + j);
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                ax[i] = alpha * blazefeo::load<SS>(a + i * SS);
-            
-            #pragma unroll
-            for (size_t j = 0; j < N; ++j) if (j < n)
-            {
-                IntrinsicType bx = broadcast<SS>(b + j);
-
-                #pragma unroll
-                for (size_t i = 0; i < RM; ++i)
-                    v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
-            }
-        }
-        else
-        {
-            BLAZE_THROW_LOGIC_ERROR("Not implemented");
+                v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
         }        
     }
 
@@ -532,23 +530,9 @@ namespace blazefeo
 
 
     template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void ger2(RegisterMatrix<T, M, N, SS>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb)
-    {
-        ker.template ger2<SOA, SOB>(alpha, a, sa, b, sb);
-    }
-
-
-    template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t SS>
     BLAZE_ALWAYS_INLINE void ger(RegisterMatrix<T, M, N, SS>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
     {
         ker.template ger<SOA, SOB>(alpha, a, sa, b, sb, m, n);
-    }
-
-
-    template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void ger2(RegisterMatrix<T, M, N, SS>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
-    {
-        ker.template ger2<SOA, SOB>(alpha, a, sa, b, sb, m, n);
     }
 
 
@@ -560,23 +544,9 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void load2(RegisterMatrix<T, M, N, SS>& ker, T const * a, size_t sa)
-    {
-        ker.load2(1.0, a, sa);
-    }
-
-
-    template <typename T, size_t M, size_t N, size_t SS>
     BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T const * a, size_t sa, size_t m, size_t n)
     {
         ker.load(1.0, a, sa, m, n);
-    }
-
-
-    template <typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void load2(RegisterMatrix<T, M, N, SS>& ker, T const * a, size_t sa, size_t m, size_t n)
-    {
-        ker.load2(1.0, a, sa, m, n);
     }
 
 
@@ -588,23 +558,9 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void load2(RegisterMatrix<T, M, N, SS>& ker, T beta, T const * a, size_t sa)
-    {
-        ker.load2(beta, a, sa);
-    }
-
-
-    template <typename T, size_t M, size_t N, size_t SS>
     BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T beta, T const * a, size_t sa, size_t m, size_t n)
     {
         ker.load(beta, a, sa, m, n);
-    }
-
-
-    template <typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void load2(RegisterMatrix<T, M, N, SS>& ker, T beta, T const * a, size_t sa, size_t m, size_t n)
-    {
-        ker.load2(beta, a, sa, m, n);
     }
 
 
@@ -616,23 +572,9 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void store2(RegisterMatrix<T, M, N, SS> const& ker, T * a, size_t sa)
-    {
-        ker.store2(a, sa);
-    }
-
-
-    template <typename T, size_t M, size_t N, size_t SS>
     BLAZE_ALWAYS_INLINE void store(RegisterMatrix<T, M, N, SS> const& ker, T * a, size_t sa, size_t m, size_t n)
     {
         ker.store(a, sa, m, n);
-    }
-
-
-    template <typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void store2(RegisterMatrix<T, M, N, SS> const& ker, T * a, size_t sa, size_t m, size_t n)
-    {
-        ker.store2(a, sa, m, n);
     }
 
 

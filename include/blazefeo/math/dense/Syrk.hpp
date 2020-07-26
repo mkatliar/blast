@@ -1,6 +1,5 @@
 #pragma once
 
-#include <blazefeo/math/dense/Ptr.hpp>
 #include <blazefeo/math/dense/GemmBackend.hpp>
 #include <blazefeo/system/Tile.hpp>
 
@@ -100,28 +99,28 @@ namespace blazefeo
         if (i + KM <= M)
         {
             size_t j = 0;
-            ET const * a = ptr(A, i, 0);
+            auto a = ptr(A, i, 0);
 
             for (; j <= i; j += KN)
-                gemm_backend2<columnMajor, rowMajor>(ker, K, alpha, beta,
-                    a, spacing(A), ptr(A, j, 0), spacing(A),
-                    ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D));
+                gemm_backend2(ker, K,
+                    alpha, a, ptr(trans(A), 0, j),
+                    beta, ptr(C, i, j), ptr(D, i, j));
         }
         else
         {
             // Use partial save to calculate the bottom of the resulting matrix.
             size_t j = 0;
-            ET const * b = ptr(A, 0, 0);
+            auto b = ptr(A, 0, 0);
 
             for (; j + KN <= M; j += KN)
-                gemm_backend2<columnMajor, rowMajor>(ker, K, alpha, beta,
-                    ptr(A, i, 0), spacing(A), ptr(A, j, 0), spacing(A),
-                    ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D), M - i, KN);
+                gemm_backend2(ker, K,
+                    alpha, ptr(A, i, 0), ptr(trans(A), 0, j),
+                    beta, ptr(C, i, j), ptr(D, i, j), M - i, KN);
 
             if (j < M)
-                gemm_backend2<columnMajor, rowMajor>(ker, K, alpha, beta,
-                    ptr(A, i, 0), spacing(A), ptr(A, j, 0), spacing(A),
-                    ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D), M - i, M - j);
+                gemm_backend2(ker, K,
+                    alpha, ptr(A, i, 0), ptr(trans(A), 0, j),
+                    beta, ptr(C, i, j), ptr(D, i, j), M - i, M - j);
         }
     }
 }

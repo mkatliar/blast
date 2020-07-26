@@ -65,8 +65,8 @@ namespace blazefeo :: testing
         randomize(A);
 
         RM ker;
-        load2(ker, A.data(), A.spacing());
-        store2(ker, B.data(), B.spacing());
+        ker.load(1., ptr(A, 0, 0));
+        ker.store(ptr(B, 0, 0));
 
         for (size_t i = 0; i < Traits::rows; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)
@@ -191,13 +191,13 @@ namespace blazefeo :: testing
         randomize(A);
 
         RM ker;
-        load2(ker, A.data(), A.spacing());
+        ker.load(1., ptr(A, 0, 0));
 
         for (size_t m = 0; m <= Traits::rows; ++m)
             for (size_t n = 0; n <= Traits::columns; ++n)
             {
                 B = 0.;
-                store2(ker, B.data(), B.spacing(), m, n);
+                ker.store(ptr(B, 0, 0), m, n);
 
                 for (size_t i = 0; i < Traits::rows; ++i)
                     for (size_t j = 0; j < Traits::columns; ++j)
@@ -314,8 +314,8 @@ namespace blazefeo :: testing
             for (size_t n = 0; n <= columns(C); ++n)
             {
                 TypeParam ker;
-                load2(ker, C.data(), C.spacing());
-                ger2<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.data(), A.spacing(), B.data(), B.spacing(), m, n);
+                ker.load(1., ptr(C, 0, 0));
+                ker.ger(ET(1.), ptr(A, 0, 0), ptr(trans(B), 0, 0), m, n);
 
                 for (size_t i = 0; i < m; ++i)
                     for (size_t j = 0; j < n; ++j)
@@ -345,9 +345,10 @@ namespace blazefeo :: testing
         // std::cout << "C=\n" << C << std::endl;
 
         TypeParam ker;
-        load2(ker, C.data(), C.spacing());
-        ger2<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.data(), A.spacing(), B.data(), B.spacing());
-        store2(ker, D.data(), D.spacing());
+        ker.load(1., ptr(C, 0, 0));
+        // ger2<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.data(), A.spacing(), B.data(), B.spacing());
+        ker.ger(ET(1.), ptr(A, 0, 0), ptr(trans(B), 0, 0));
+        ker.store(ptr(D, 0, 0));
 
         BLAZEFEO_EXPECT_EQ(D, evaluate(C + A * trans(B)));
     }

@@ -28,7 +28,7 @@ namespace blazefeo :: testing
                     // std::cout << "C+A*trans(B)=\n" << C + A * trans(B) << std::endl;
 
                     // Do gemm
-                    gemm_nt(A, B, C, D);
+                    gemm(1., A, trans(B), 1., C, D);
 
                     // Print the result from BLASFEO
                     // std::cout << "D=\n" << blaze_blasfeo_D;

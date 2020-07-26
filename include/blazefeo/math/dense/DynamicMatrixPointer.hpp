@@ -9,7 +9,7 @@ namespace blazefeo
 {
     template <typename T, bool SO>
     class DynamicMatrixPointer
-    :   public MatrixPointer<DynamicMatrixPointer<T, SO>, SO>
+    :   public MatrixPointerBase<DynamicMatrixPointer<T, SO>, SO>
     {
     public:
         using ElementType = T;
@@ -46,6 +46,15 @@ namespace blazefeo
         size_t spacing() const noexcept
         {
             return spacing_;
+        }
+
+
+        T * offset(ptrdiff_t i, ptrdiff_t j) const noexcept
+        {
+            if (SO == columnMajor)
+                return ptr_ + i + spacing_ * j;
+            else
+                return ptr_ + spacing_ * i + j;
         }
 
 
@@ -88,5 +97,12 @@ namespace blazefeo
         ptr(DenseMatrix<MT, SO> const& m, size_t i, size_t j)
     {
         return  {&(~m)(i, j), spacing(m)};
+    }
+
+
+    template <bool SO, typename T>
+    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<T, SO> ptr(T * p, size_t spacing)
+    {
+        return {p, spacing};
     }
 }

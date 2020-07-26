@@ -2,27 +2,20 @@
 
 #include <blazefeo/Blaze.hpp>
 
+#include <type_traits>
+
 
 namespace blazefeo
 {
     template <typename Derived, bool SO>
-    class MatrixPointer
+    class MatrixPointerBase
     {
-    public:
-        Derived& operator~() noexcept
-        {
-            return static_cast<Derived&>(*this);
-        }
-
-
-        Derived const& operator~() const noexcept
-        {
-            return static_cast<Derived const&>(*this);
-        }
-
-
     protected:
-        MatrixPointer() = default;
-        MatrixPointer(MatrixPointer const&) = default;
+        MatrixPointerBase() = default;
+        MatrixPointerBase(MatrixPointerBase const&) = default;
     };
+
+
+    template <typename P, bool SO>
+    concept MatrixPointer = std::is_base_of_v<MatrixPointerBase<P, SO>, P>;
 }
