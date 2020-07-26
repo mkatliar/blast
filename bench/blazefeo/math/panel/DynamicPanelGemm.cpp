@@ -1,6 +1,5 @@
-#include <blazefeo/math/dense/Gemm.hpp>
-
-#include <blaze/math/DynamicMatrix.h>
+#include <blazefeo/math/DynamicPanelMatrix.hpp>
+#include <blazefeo/math/panel/Gemm.hpp>
 
 #include <bench/Benchmark.hpp>
 #include <test/Randomize.hpp>
@@ -12,16 +11,16 @@
 namespace blazefeo :: benchmark
 {
     template <typename Real>
-    static void BM_gemm2_nt_dynamic(::benchmark::State& state)
+    static void BM_DynamicPanelGemm(State& state)
     {
         size_t const M = state.range(0);
         size_t const N = M;
         size_t const K = M;
 
-        DynamicMatrix<Real, columnMajor> A(M, K);
-        DynamicMatrix<Real, columnMajor> B(N, K);
-        DynamicMatrix<Real, columnMajor> C(M, N);
-        DynamicMatrix<Real, columnMajor> D(M, N);
+        DynamicPanelMatrix<Real> A(M, K);
+        DynamicPanelMatrix<Real> B(N, K);
+        DynamicPanelMatrix<Real> C(M, N);
+        DynamicPanelMatrix<Real> D(M, N);
 
         randomize(A);
         randomize(B);
@@ -29,7 +28,7 @@ namespace blazefeo :: benchmark
 
         for (auto _ : state)
         {
-            gemm(1., A, trans(B), 1., C, D);
+            gemm_nt(A, B, C, D);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);
@@ -40,6 +39,7 @@ namespace blazefeo :: benchmark
         state.counters["m"] = M;
     }
 
-
-    BENCHMARK_TEMPLATE(BM_gemm2_nt_dynamic, double)->DenseRange(1, 300);
+    
+    BENCHMARK_TEMPLATE(BM_DynamicPanelGemm, double)->DenseRange(1, BENCHMARK_MAX_GEMM);
+    BENCHMARK_TEMPLATE(BM_DynamicPanelGemm, float)->DenseRange(1, BENCHMARK_MAX_GEMM);
 }
