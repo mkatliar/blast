@@ -1,5 +1,7 @@
 #include <blazefeo/math/simd/RegisterMatrix.hpp>
 #include <blazefeo/math/StaticPanelMatrix.hpp>
+#include <blazefeo/math/dense/DynamicMatrixPointer.hpp>
+#include <blazefeo/math/dense/StaticMatrixPointer.hpp>
 #include <blazefeo/math/views/submatrix/Panel.hpp>
 
 #include <test/Testing.hpp>
@@ -16,10 +18,22 @@ namespace blazefeo :: testing
     };
 
 
-    TYPED_TEST_SUITE_P(RegisterMatrixTest);
+    using MyTypes = Types<
+        RegisterMatrix<double, 4, 4, 4>,
+        RegisterMatrix<double, 4, 2, 4>,
+        RegisterMatrix<double, 4, 1, 4>,
+        RegisterMatrix<double, 8, 4, 4>,
+        RegisterMatrix<double, 12, 4, 4>,
+        RegisterMatrix<float, 8, 4, 8>,
+        RegisterMatrix<float, 16, 4, 8>,
+        RegisterMatrix<float, 24, 4, 8>
+    >;
+        
+        
+    TYPED_TEST_SUITE(RegisterMatrixTest, MyTypes);
 
 
-    TYPED_TEST_P(RegisterMatrixTest, testLoadStore)
+    TYPED_TEST(RegisterMatrixTest, testLoadStore)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -41,7 +55,7 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(RegisterMatrixTest, testLoadStore2)
+    TYPED_TEST(RegisterMatrixTest, testLoadStore2)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -60,7 +74,82 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(RegisterMatrixTest, testPartialStore)
+    TYPED_TEST(RegisterMatrixTest, testLoadDynamicMatrix)
+    {
+        using RM = TypeParam;
+        using ET = ElementType_t<RM>;
+
+        RM ker;
+
+        DynamicMatrix<ET, StorageOrder_v<RM>> A(ker.rows(), ker.columns());
+        randomize(A);
+        
+        ker.load(1., ptr(A, 0, 0));
+        // store2(ker, B.data(), B.spacing());
+
+        EXPECT_EQ(ker, A);
+
+        // for (size_t i = 0; i < ker.rows(); ++i)
+        //     for (size_t j = 0; j < ker.columns(); ++j)
+        //         EXPECT_EQ(ker(i, j), A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testStoreDynamicMatrix)
+    {
+        using RM = TypeParam;
+        using ET = ElementType_t<RM>;
+
+        RM ker;
+
+        DynamicMatrix<ET, StorageOrder_v<RM>> A(ker.rows(), ker.columns());
+        randomize(A);
+
+        DynamicMatrix<ET, StorageOrder_v<RM>> B(ker.rows(), ker.columns());
+        reset(B);
+        
+        ker.load(1., ptr(A, 0, 0));
+        ker.store(ptr(B, 0, 0));
+
+        EXPECT_EQ(B, A);
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testLoadStaticMatrix)
+    {
+        using RM = TypeParam;
+        using ET = ElementType_t<RM>;
+
+        RM ker;
+
+        StaticMatrix<ET, ker.rows(), ker.columns(), StorageOrder_v<RM>> A;
+        randomize(A);
+        
+        ker.load(1., ptr(A, 0, 0));
+
+        EXPECT_EQ(ker, A);
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testStoreStaticMatrix)
+    {
+        using RM = TypeParam;
+        using ET = ElementType_t<RM>;
+
+        RM ker;
+
+        StaticMatrix<ET, ker.rows(), ker.columns(), StorageOrder_v<RM>> A, B;
+        randomize(A);
+        reset(B);
+        
+        ker.load(1., ptr(A, 0, 0));
+        ker.store(ptr(B, 0, 0));
+
+        EXPECT_EQ(B, A);
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testPartialStore)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -92,7 +181,7 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(RegisterMatrixTest, testPartialStore2)
+    TYPED_TEST(RegisterMatrixTest, testPartialStore2)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -118,7 +207,7 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(RegisterMatrixTest, testGerNT)
+    TYPED_TEST(RegisterMatrixTest, testGerNT)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -155,7 +244,7 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(RegisterMatrixTest, testPartialGerNT)
+    TYPED_TEST(RegisterMatrixTest, testPartialGerNT)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -200,7 +289,7 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(RegisterMatrixTest, testPartialGerNT2)
+    TYPED_TEST(RegisterMatrixTest, testPartialGerNT2)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -237,7 +326,7 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(RegisterMatrixTest, testGerNT2)
+    TYPED_TEST(RegisterMatrixTest, testGerNT2)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -264,7 +353,7 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(RegisterMatrixTest, testPotrf)
+    TYPED_TEST(RegisterMatrixTest, testPotrf)
     {
         using Traits = RegisterMatrixTraits<TypeParam>;
         using ET = typename Traits::ElementType;
@@ -310,7 +399,7 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(RegisterMatrixTest, testTrsmRLT)
+    TYPED_TEST(RegisterMatrixTest, testTrsmRLT)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -361,39 +450,4 @@ namespace blazefeo :: testing
         // TODO: should be strictly equal?
         BLAZEFEO_ASSERT_APPROX_EQ(X, XX, absTol<ET>(), relTol<ET>());
     }
-
-
-    REGISTER_TYPED_TEST_SUITE_P(RegisterMatrixTest,
-        testLoadStore,
-        testLoadStore2,
-        testPartialStore,
-        testPartialStore2,
-        testGerNT,
-        testPartialGerNT,
-        testPartialGerNT2,
-        testGerNT2,
-        testPotrf,
-        testTrsmRLT
-    );
-
-
-    using RM_double_4_4_4 = RegisterMatrix<double, 4, 4, 4>;
-    using RM_double_4_2_4 = RegisterMatrix<double, 4, 2, 4>;
-    using RM_double_4_1_4 = RegisterMatrix<double, 4, 1, 4>;
-    using RM_double_8_4_4 = RegisterMatrix<double, 8, 4, 4>;
-    using RM_double_12_4_4 = RegisterMatrix<double, 12, 4, 4>;
-
-    using RM_float_8_4_8 = RegisterMatrix<float, 8, 4, 8>;
-    using RM_float_16_4_8 = RegisterMatrix<float, 16, 4, 8>;
-    using RM_float_24_4_8 = RegisterMatrix<float, 24, 4, 8>;
-
-    INSTANTIATE_TYPED_TEST_SUITE_P(double_4_4_4, RegisterMatrixTest, RM_double_4_4_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(double_4_2_4, RegisterMatrixTest, RM_double_4_2_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(double_4_1_4, RegisterMatrixTest, RM_double_4_1_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(double_8_4_4, RegisterMatrixTest, RM_double_8_4_4);
-    INSTANTIATE_TYPED_TEST_SUITE_P(double_12_4_4, RegisterMatrixTest, RM_double_12_4_4);
-
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_8_4_8, RegisterMatrixTest, RM_float_8_4_8);
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_16_4_8, RegisterMatrixTest, RM_float_16_4_8);
-    INSTANTIATE_TYPED_TEST_SUITE_P(float_24_4_8, RegisterMatrixTest, RM_float_24_4_8);
 }

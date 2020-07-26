@@ -13,16 +13,16 @@
 namespace blazefeo :: testing
 {
     template <typename T>
-    class GemmTest
+    class PanelGemmTest
     :   public Test
     {
     };
 
 
-    TYPED_TEST_SUITE_P(GemmTest);
+    TYPED_TEST_SUITE_P(PanelGemmTest);
 
 
-    TYPED_TEST_P(GemmTest, testNT)
+    TYPED_TEST_P(PanelGemmTest, testNT)
     {
         using Real = TypeParam;
         size_t const M_max = 20, N_max = 20, K_max = 20;
@@ -72,7 +72,7 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST_P(GemmTest, testNT_submatrix)
+    TYPED_TEST_P(PanelGemmTest, testNT_submatrix)
     {
         using Real = TypeParam;
         size_t const M = 8, N = 8, K = 3 * 8;
@@ -109,12 +109,12 @@ namespace blazefeo :: testing
     }
 
 
-    REGISTER_TYPED_TEST_SUITE_P(GemmTest,
+    REGISTER_TYPED_TEST_SUITE_P(PanelGemmTest,
         testNT,
         testNT_submatrix
     );
 
 
-    INSTANTIATE_TYPED_TEST_SUITE_P(Gemm_double, GemmTest, double);
-    INSTANTIATE_TYPED_TEST_SUITE_P(Gemm_float, GemmTest, float);
+    INSTANTIATE_TYPED_TEST_SUITE_P(double, PanelGemmTest, double);
+    INSTANTIATE_TYPED_TEST_SUITE_P(float, PanelGemmTest, float);
 }

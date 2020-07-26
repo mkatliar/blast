@@ -7,15 +7,19 @@ find_package(blaze 3.5 REQUIRED)
 
 # ~~~~~~~~~~ Our tests ~~~~~~~~~~~~~~
 add_executable(test-blazefeo
-    RegisterMatrixTest.cpp
-    StaticPanelMatrixTest.cpp
-    SubmatrixTest.cpp
-    DynamicPanelMatrixTest.cpp
-    GemmTest.cpp
-    Gemm2Test.cpp
-    PotrfTest.cpp
+    math/simd/RegisterMatrixTest.cpp
+    math/simd/HsumTest.cpp
 
-    simd/HsumTest.cpp
+    math/dense/StaticMatrixPointerTest.cpp
+    math/dense/DynamicMatrixPointerTest.cpp
+    math/dense/GemmTest.cpp
+    math/dense/SyrkTest.cpp
+
+    math/panel/StaticPanelMatrixTest.cpp
+    math/panel/SubmatrixTest.cpp
+    math/panel/DynamicPanelMatrixTest.cpp
+    math/panel/GemmTest.cpp
+    math/panel/PotrfTest.cpp
 )
 
 target_link_libraries(test-blazefeo PRIVATE

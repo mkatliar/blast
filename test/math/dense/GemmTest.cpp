@@ -9,7 +9,7 @@
 
 namespace blazefeo :: testing
 {
-    TEST(Gemm2Test, testNT_dynamic)
+    TEST(DenseGemmTest, testNT_dynamic)
     {
         for (size_t m = 1; m <= 20; m += 1)
             for (size_t n = 1; n <= 20; n += 1)
@@ -39,7 +39,7 @@ namespace blazefeo :: testing
     }
 
 
-    // TEST(Gemm2Test, testNT_submatrix)
+    // TEST(DenseGemmTest, testNT_submatrix)
     // {
     //     size_t const M = 8, N = 8, K = 3 * 8;
 

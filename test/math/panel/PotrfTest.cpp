@@ -9,16 +9,16 @@
 namespace blazefeo :: testing
 {
     template <typename T>
-    class PotrfTest
+    class PanelPotrfTest
     :   public Test
     {
     };
 
 
-    TYPED_TEST_SUITE_P(PotrfTest);
+    TYPED_TEST_SUITE_P(PanelPotrfTest);
 
 
-    TYPED_TEST_P(PotrfTest, testDynamicSize)
+    TYPED_TEST_P(PanelPotrfTest, testDynamicSize)
     {
         using Real = TypeParam;
 
@@ -48,11 +48,11 @@ namespace blazefeo :: testing
     }
 
 
-    REGISTER_TYPED_TEST_SUITE_P(PotrfTest,
+    REGISTER_TYPED_TEST_SUITE_P(PanelPotrfTest,
         testDynamicSize
     );
 
 
-    INSTANTIATE_TYPED_TEST_SUITE_P(Potrf_double, PotrfTest, double);
-    // INSTANTIATE_TYPED_TEST_SUITE_P(Potrf_float, PotrfTest, float);
+    INSTANTIATE_TYPED_TEST_SUITE_P(double, PanelPotrfTest, double);
+    // INSTANTIATE_TYPED_TEST_SUITE_P(Potrf_float, PanelPotrfTest, float);
 }

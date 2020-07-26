@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blazefeo/math/simd/Simd.hpp>
+#include <blazefeo/math/simd/MatrixPointer.hpp>
 
 #include <blaze/math/StorageOrder.h>
 #include <blaze/system/Inline.h>
@@ -25,8 +26,12 @@ namespace blazefeo
     /// @tparam SS number of T elements that can be stored in a SIMD register.
     template <typename T, size_t M, size_t N, size_t SS>
     class RegisterMatrix
+    :   public Matrix<RegisterMatrix<T, M, N, SS>, columnMajor>
     {
     public:
+        using BaseType = Matrix<RegisterMatrix<T, M, N, SS>, columnMajor>;
+        using BaseType::storageOrder;
+
         /// @brief Type of matrix elements
         using ElementType = T;
 
@@ -92,6 +97,12 @@ namespace blazefeo
         void load(T beta, T const * ptr, size_t spacing);
         void load2(T beta, T const * ptr, size_t spacing);
 
+        template <typename P>
+        void load(T beta, MatrixPointer<P, storageOrder> const& p)
+        {
+            load2(beta, (~p).get(), (~p).spacing());
+        }
+
 
         /// @brief load from memory with specified size
         void load(T beta, T const * ptr, size_t spacing, size_t m, size_t n);
@@ -101,6 +112,12 @@ namespace blazefeo
         /// @brief store to memory
         void store(T * ptr, size_t spacing) const;
         void store2(T * ptr, size_t spacing) const;
+
+        template <typename P>
+        void store(MatrixPointer<P, storageOrder> const& p)
+        {
+            store2((~p).get(), (~p).spacing());
+        }
 
 
         /// @brief store to memory with specified size
@@ -616,5 +633,27 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE void store2(RegisterMatrix<T, M, N, SS> const& ker, T * a, size_t sa, size_t m, size_t n)
     {
         ker.store2(a, sa, m, n);
+    }
+
+
+    template <typename T, size_t M, size_t N, size_t SS, typename MT, bool SO>
+    inline bool operator==(RegisterMatrix<T, M, N, SS> const& rm, Matrix<MT, SO> const& m)
+    {
+        if (rows(m) != rm.rows() || columns(m) != rm.columns())
+            return false;
+
+        for (size_t i = 0; i < rm.rows(); ++i)
+            for (size_t j = 0; j < rm.columns(); ++j)
+                if (rm(i, j) != (~m)(i, j))
+                    return false;
+
+        return true;
+    }
+
+
+    template <typename MT, bool SO, typename T, size_t M, size_t N, size_t SS>
+    inline bool operator==(Matrix<MT, SO> const& m, RegisterMatrix<T, M, N, SS> const& rm)
+    {
+        return rm == m;
     }
 }
