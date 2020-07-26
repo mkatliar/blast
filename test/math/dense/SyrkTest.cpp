@@ -49,9 +49,9 @@ namespace blazefeo :: testing
 
                 // Calculate the reference value
                 auto D_ref = evaluate(alpha * A * trans(A) + beta * C);
-                // for (size_t i = 0; i < m; ++i)
-                //     for (size_t j = i + 1; j < m; ++j)
-                //         D_ref(i, j) = 0.;
+                for (size_t i = 0; i < m; ++i)
+                    for (size_t j = i + 1; j < m; ++j)
+                        D_ref(i, j) = 0.;
 
                 // Print the result
                 // std::cout << "D=\n" << D;

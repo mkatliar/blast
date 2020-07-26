@@ -10,46 +10,35 @@ namespace blazefeo
 {
     template <
         typename T, size_t M, size_t N, size_t SS,
-        typename PA, typename PB, typename PC, typename PD
+        typename PA, typename PB
     >
         requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
-            && MatrixPointer<PC, columnMajor> && MatrixPointer<PD, columnMajor>
-    BLAZE_ALWAYS_INLINE void gemm_backend2(
-        RegisterMatrix<T, M, N, SS>& ker, size_t K, 
-        T alpha, PA a, PB b, T beta, PC c, PD d)
+    BLAZE_ALWAYS_INLINE void gemm_backend(
+        RegisterMatrix<T, M, N, SS>& ker, size_t K, T alpha, PA a, PB b)
     {
-        ker.load(beta, c);
-
         for (size_t k = 0; k < K; ++k)
         {
             ker.ger(alpha, a, b);
             a.hmove(1);
             b.vmove(1);
         }
-
-        ker.store(d);
     }
 
 
     template <
         typename T, size_t M, size_t N, size_t SS,
-        typename PA, typename PB, typename PC, typename PD
+        typename PA, typename PB
     >
         requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
-            && MatrixPointer<PC, columnMajor> && MatrixPointer<PD, columnMajor>
-    BLAZE_ALWAYS_INLINE void gemm_backend2(RegisterMatrix<T, M, N, SS>& ker, size_t K,
-        T alpha, PA a, PB b, T beta, PC c, PD d, size_t md, size_t nd)
+    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, SS>& ker, size_t K,
+        T alpha, PA a, PB b, size_t md, size_t nd)
     {
-        ker.load(beta, c, md, nd);
-        
         for (size_t k = 0; k < K; ++k)
         {
             ker.ger(alpha, a, b, md, nd);
             a.hmove(1);
             b.vmove(1);
         }
-
-        ker.store(d, md, nd);
     }
 
 
@@ -84,14 +73,19 @@ namespace blazefeo
             auto a = ptr(A, i, 0);
 
             for (; j + KN <= N; j += KN)
-                gemm_backend2(ker, K, 
-                    alpha, a, ptr(B, 0, j),
-                    beta, ptr(C, i, j), ptr(D, i, j));
+            {
+                ker.load(beta, ptr(C, i, j));
+                gemm_backend(ker, K, alpha, a, ptr(B, 0, j));
+                ker.store(ptr(D, i, j));
+            }
 
             if (j < N)
-                gemm_backend2(ker, K,
-                    alpha, a, ptr(B, 0, j),
-                    beta, ptr(C, i, j), ptr(D, i, j), KM, N - j);
+            {
+                auto const md = KM, nd = N - j;
+                ker.load(beta, ptr(C, i, j), md, nd);
+                gemm_backend(ker, K, alpha, a, ptr(B, 0, j), md, nd);
+                ker.store(ptr(D, i, j), md, nd);
+            }
         }
         else
         {
@@ -100,14 +94,20 @@ namespace blazefeo
             auto b = ptr(B, 0, 0);
 
             for (; j + KN <= N; j += KN)
-                gemm_backend2(ker, K,
-                    alpha, ptr(A, i, 0), ptr(B, 0, j),
-                    beta, ptr(C, i, j), ptr(D, i, j), M - i, KN);
+            {
+                auto const md = M - i, nd = KN;
+                ker.load(beta, ptr(C, i, j), md, nd);
+                gemm_backend(ker, K, alpha, ptr(A, i, 0), ptr(B, 0, j), md, nd);
+                ker.store(ptr(D, i, j), md, nd);
+            }
 
             if (j < N)
-                gemm_backend2(ker, K,
-                    alpha, ptr(A, i, 0), ptr(B, 0, j),
-                    beta, ptr(C, i, j), ptr(D, i, j), M - i, N - j);
+            {
+                auto const md = M - i, nd = N - j;
+                ker.load(beta, ptr(C, i, j), md, nd);
+                gemm_backend(ker, K, alpha, ptr(A, i, 0), ptr(B, 0, j), md, nd);
+                ker.store(ptr(D, i, j), md, nd);
+            }
         }
     }
 }

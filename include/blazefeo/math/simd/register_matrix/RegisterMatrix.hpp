@@ -112,13 +112,29 @@ namespace blazefeo
         /// @brief store to memory
         void store(T * ptr, size_t spacing) const;
 
+        
+        /// @brief Store matrix at location pointed by \a p
         template <typename P>
             requires MatrixPointer<P, columnMajor>
         void store(P p) const noexcept;
 
 
+        /// @brief Store lower-triangular part of the matrix at location pointed by \a p.
+        template <typename P>
+            requires MatrixPointer<P, columnMajor>
+        void storeLower(P p) const noexcept;
+
+
+        /// @brief Store lower-triangular part of the matrix
+        /// of size \a m by \a n at location pointed by \a p.
+        template <typename P>
+            requires MatrixPointer<P, columnMajor>
+        void storeLower(P p, size_t m, size_t n) const noexcept;
+
+
         /// @brief store to memory with specified size
         void store(T * ptr, size_t spacing, size_t m, size_t n) const;
+
 
         template <typename P>
             requires MatrixPointer<P, columnMajor>
@@ -342,6 +358,54 @@ namespace blazefeo
 
             for (size_t j = 0; j < n && j < columns(); ++j)
                 maskstore(p.offset(SS * i, j), mask, v_[i][j]);
+        }
+    }
+
+
+    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename P>
+        requires MatrixPointer<P, columnMajor>
+    inline void RegisterMatrix<T, M, N, SS>::storeLower(P p) const noexcept
+    {
+        for (size_t j = 0; j < N; ++j)
+        {
+            size_t ri = j / SS;
+            IntType const skip = j % SS;
+
+            if (skip && ri < RM)
+            {
+                MaskType const mask = cmpgt<SS>(countUp<MaskType, SS>(), set1<SS>(skip - 1));
+                maskstore(p.offset(SS * ri, j), mask, v_[ri][j]);
+                ++ri;
+            }
+            
+            for(; ri < RM; ++ri)
+                blazefeo::store(p.offset(SS * ri, j), v_[ri][j]);
+        }
+    }
+
+
+    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename P>
+        requires MatrixPointer<P, columnMajor>
+    inline void RegisterMatrix<T, M, N, SS>::storeLower(P p, size_t m, size_t n) const noexcept
+    {
+        assert(m < rows() || n < columns());
+
+        for (size_t j = 0; j < N; ++j) if (j < n)
+        {
+            for (size_t ri = j / SS; ri < RM; ++ri)
+            {
+                IntType const skip = j - ri * SS;
+                IntType const rem = m - ri * SS;
+
+                MaskType mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType, SS>());
+
+                if (skip > 0)
+                    mask &= cmpgt<SS>(countUp<MaskType, SS>(), set1<SS>(skip - 1));
+
+                maskstore(p.offset(SS * ri, j), mask, v_[ri][j]);
+            }
         }
     }
 

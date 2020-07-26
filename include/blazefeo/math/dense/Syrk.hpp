@@ -98,13 +98,18 @@ namespace blazefeo
 
         if (i + KM <= M)
         {
-            size_t j = 0;
             auto a = ptr(A, i, 0);
 
-            for (; j <= i; j += KN)
-                gemm_backend2(ker, K,
-                    alpha, a, ptr(trans(A), 0, j),
-                    beta, ptr(C, i, j), ptr(D, i, j));
+            for (size_t j = 0; j < i; j += KN)
+            {
+                ker.load(beta, ptr(C, i, j));
+                gemm_backend(ker, K, alpha, a, ptr(trans(A), 0, j));
+                ker.store(ptr(D, i, j));
+            }
+
+            ker.load(beta, ptr(C, i, i));
+            gemm_backend(ker, K, alpha, a, ptr(trans(A), 0, i));
+            ker.storeLower(ptr(D, i, i));
         }
         else
         {
@@ -112,15 +117,21 @@ namespace blazefeo
             size_t j = 0;
             auto b = ptr(A, 0, 0);
 
-            for (; j + KN <= M; j += KN)
-                gemm_backend2(ker, K,
-                    alpha, ptr(A, i, 0), ptr(trans(A), 0, j),
-                    beta, ptr(C, i, j), ptr(D, i, j), M - i, KN);
+            for (; j < i; j += KN)
+            {
+                auto const md = M - i, nd = KN;
+                ker.load(beta, ptr(C, i, j), md, nd);
+                gemm_backend(ker, K, alpha, ptr(A, i, 0), ptr(trans(A), 0, j), md, nd);
+                ker.store(ptr(D, i, j), md, nd);
+            }
 
             if (j < M)
-                gemm_backend2(ker, K,
-                    alpha, ptr(A, i, 0), ptr(trans(A), 0, j),
-                    beta, ptr(C, i, j), ptr(D, i, j), M - i, M - j);
+            {
+                auto const md = M - i, nd = M - j;
+                ker.load(beta, ptr(C, i, j), md, nd);
+                gemm_backend(ker, K, alpha, ptr(A, i, 0), ptr(trans(A), 0, j), md, nd);
+                ker.storeLower(ptr(D, i, j), md, nd);
+            }
         }
     }
 }
