@@ -45,6 +45,16 @@ namespace blazefeo :: benchmark
     }
 
 
+    /// @brief Algorithmic complexity of syrk
+    inline Complexity complexitySyrk(std::size_t m, std::size_t k)
+    {
+        return {
+            {"add", m * (m + 1) * k / 2},
+            {"mul", m * (m + 1) * k / 2}
+        };
+    }
+
+
     template <typename Map>
     void setCounters(Map& counters, Complexity const& c)
     {

@@ -12,6 +12,7 @@ add_executable(bench-blazefeo
     register_matrix/Potrf.cpp
     register_matrix/Trsm.cpp
 
+    math/dense/DynamicSyrk.cpp
     math/dense/StaticSyrk.cpp
     math/dense/DynamicGemm.cpp
     math/dense/StaticGemm.cpp

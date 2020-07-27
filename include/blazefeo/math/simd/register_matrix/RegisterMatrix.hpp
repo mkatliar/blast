@@ -252,7 +252,7 @@ namespace blazefeo
         for (size_t j = 0; j < N; ++j)
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                v_[i][j] = blazefeo::load<SS>(p.offset(SS * i, j));
+                v_[i][j] = blazefeo::load<SS>(p.offset(SS * i, j).get());
     }
 
 
@@ -276,7 +276,7 @@ namespace blazefeo
         for (size_t j = 0; j < N; ++j) if (j < n)
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                v_[i][j] = blazefeo::load<SS>(p.offset(SS * i, j));
+                v_[i][j] = blazefeo::load<SS>(p.offset(SS * i, j).get());
     }
 
 
@@ -298,7 +298,7 @@ namespace blazefeo
     {
         for (size_t j = 0; j < N; ++j)
             for (size_t i = 0; i < RM; ++i)
-                blazefeo::store(p.offset(SS * i, j), v_[i][j]);
+                blazefeo::store(p.offset(SS * i, j).get(), v_[i][j]);
     }
 
 
@@ -349,7 +349,7 @@ namespace blazefeo
         // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
         for (size_t j = 0; j < N; ++j) if (j < n)
             for (size_t i = 0; i < RM; ++i) if (SS * (i + 1) <= m)
-                blazefeo::store(p.offset(SS * i, j), v_[i][j]);
+                blazefeo::store(p.offset(SS * i, j).get(), v_[i][j]);
 
         if (IntType const rem = m % SS)
         {
@@ -357,7 +357,7 @@ namespace blazefeo
             size_t const i = m / SS;
 
             for (size_t j = 0; j < n && j < columns(); ++j)
-                maskstore(p.offset(SS * i, j), mask, v_[i][j]);
+                maskstore(p.offset(SS * i, j).get(), mask, v_[i][j]);
         }
     }
 
@@ -375,12 +375,12 @@ namespace blazefeo
             if (skip && ri < RM)
             {
                 MaskType const mask = cmpgt<SS>(countUp<MaskType, SS>(), set1<SS>(skip - 1));
-                maskstore(p.offset(SS * ri, j), mask, v_[ri][j]);
+                maskstore(p.offset(SS * ri, j).get(), mask, v_[ri][j]);
                 ++ri;
             }
             
             for(; ri < RM; ++ri)
-                blazefeo::store(p.offset(SS * ri, j), v_[ri][j]);
+                blazefeo::store(p.offset(SS * ri, j).get(), v_[ri][j]);
         }
     }
 
@@ -390,8 +390,6 @@ namespace blazefeo
         requires MatrixPointer<P, columnMajor>
     inline void RegisterMatrix<T, M, N, SS>::storeLower(P p, size_t m, size_t n) const noexcept
     {
-        assert(m < rows() || n < columns());
-
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
             for (size_t ri = j / SS; ri < RM; ++ri)
@@ -404,7 +402,7 @@ namespace blazefeo
                 if (skip > 0)
                     mask &= cmpgt<SS>(countUp<MaskType, SS>(), set1<SS>(skip - 1));
 
-                maskstore(p.offset(SS * ri, j), mask, v_[ri][j]);
+                maskstore(p.offset(SS * ri, j).get(), mask, v_[ri][j]);
             }
         }
     }

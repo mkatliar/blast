@@ -43,18 +43,30 @@ namespace blazefeo
         }
 
 
+        // operator T*() const noexcept
+        // {
+        //     return ptr_;
+        // }
+
+
         size_t spacing() const noexcept
         {
             return spacing_;
         }
 
 
-        T * offset(ptrdiff_t i, ptrdiff_t j) const noexcept
+        DynamicMatrixPointer offset(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
             if (SO == columnMajor)
-                return ptr_ + i + spacing_ * j;
+                return {ptr_ + i + spacing_ * j, spacing_};
             else
-                return ptr_ + spacing_ * i + j;
+                return {ptr_ + spacing_ * i + j, spacing_};
+        }
+
+
+        DynamicMatrixPointer<T, !SO> constexpr trans() const noexcept
+        {
+            return {ptr_, spacing_};
         }
 
 
@@ -80,6 +92,13 @@ namespace blazefeo
         T * ptr_;
         size_t spacing_;
     };
+
+
+    template <bool SO, typename T>
+    BLAZE_ALWAYS_INLINE auto trans(DynamicMatrixPointer<T, SO> const& p) noexcept
+    {
+        return p.trans();
+    }
 
 
     template <typename MT, bool SO>

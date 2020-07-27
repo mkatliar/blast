@@ -12,4 +12,11 @@
 namespace blazefeo :: benchmark
 {
     using namespace ::benchmark;
+
+
+    inline void syrkBenchArguments(internal::Benchmark * b) 
+    {
+        for (int i = 1; i <= BENCHMARK_MAX_SYRK; ++i)
+            b->Args({i, i});
+    }
 }

@@ -116,16 +116,14 @@ namespace blazefeo :: benchmark
     }
 
 
-    static void syrkBenchArguments(internal::Benchmark* b) 
-    {
-        b->Args({4, 5})->Args({30, 35});
-    }
-
-
     BENCHMARK_TEMPLATE(BM_syrk_dynamic, double, columnMajor)->Apply(syrkBenchArguments);
     BENCHMARK_TEMPLATE(BM_syrk_symmetric_dynamic, double, columnMajor)->Apply(syrkBenchArguments);
     
-    BENCHMARK_STATIC(4, 5);
-    BENCHMARK_STATIC(20, 40);
-    BENCHMARK_STATIC(30, 35);
+    // BENCHMARK_STATIC(4, 5);
+    // BENCHMARK_STATIC(20, 40);
+    // BENCHMARK_STATIC(30, 35);
+#define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_GEMM)
+#define BOOST_PP_LOCAL_MACRO(N) \
+    BENCHMARK_STATIC(N, N);
+#include BOOST_PP_LOCAL_ITERATE()
 }

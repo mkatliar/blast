@@ -35,13 +35,13 @@ namespace blazefeo
 
         // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
         // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
-        // for (; i + 2 * TILE_SIZE < M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
-        //     syrk_ln_backend<3 * TILE_SIZE, TILE_SIZE>(i, alpha, ~A, beta, ~C, ~D);
+        for (; i + 2 * TILE_SIZE < M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
+            syrk_ln_backend<3 * TILE_SIZE, TILE_SIZE>(i, M, K, alpha, ptr(A, 0, 0), beta, ptr(C, 0, 0), ptr(D, 0, 0));
 
-        // for (; i + 1 * TILE_SIZE < M; i += 2 * TILE_SIZE)
-        //     syrk_ln_backend<2 * TILE_SIZE, TILE_SIZE>(i, alpha, ~A, beta, ~C, ~D);
+        for (; i + 1 * TILE_SIZE < M; i += 2 * TILE_SIZE)
+            syrk_ln_backend<2 * TILE_SIZE, TILE_SIZE>(i, M, K, alpha, ptr(A, 0, 0), beta, ptr(C, 0, 0), ptr(D, 0, 0));
 
         for (; i + 0 * TILE_SIZE < M; i += 1 * TILE_SIZE)
-            syrk_ln_backend<1 * TILE_SIZE, TILE_SIZE>(i, alpha, ~A, beta, ~C, ~D);
+            syrk_ln_backend<1 * TILE_SIZE, TILE_SIZE>(i, M, K, alpha, ptr(A, 0, 0), beta, ptr(C, 0, 0), ptr(D, 0, 0));
     }
 }
