@@ -4,6 +4,7 @@
 #pragma once
 
 #include "blasfeo_api/Mat.hpp"
+#include "blasfeo_api/Vec.hpp"
 #include "blasfeo_api/Potrf.hpp"
 #include "blasfeo_api/Syrk.hpp"
 #include "blasfeo_api/SyrkPotrf.hpp"

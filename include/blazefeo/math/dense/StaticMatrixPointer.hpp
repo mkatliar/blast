@@ -92,6 +92,15 @@ namespace blazefeo
     }
 
 
+    // NOTE:
+    // IsStatic_v<...> for adapted static matrix types such as 
+    // e.g. SymmetricMatrix<StaticMatrix<...>> evaluates to false;
+    // therefore ptr() for these types will return a DynamicMatrixPointer,
+    // which is not performance-optimal.
+    //
+    // See this issue: https://bitbucket.org/blaze-lib/blaze/issues/368
+    //
+
     template <typename MT, bool SO>
     BLAZE_ALWAYS_INLINE std::enable_if_t<IsStatic_v<MT>,
         StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), SO>> 
