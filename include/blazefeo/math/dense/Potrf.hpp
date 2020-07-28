@@ -41,14 +41,25 @@ namespace blazefeo
             ker.ger(ET(-1.), a.offset(0, l), trans(b).offset(l, 0));
 
         if (i == k)
+        {
+            // Diagonal blocks
             ker.potrf();
+
+            if (k + KN <= N)
+                ker.storeLower(ptr(L, i, k));
+            else
+                ker.storeLower(ptr(L, i, k), std::min(M - i, KM), N - k);
+        }
         else
+        {
+            // Off-diagonal blocks
             ker.template trsm<false, false, true>(ptr(L, k, k));
 
-        if (k + KN <= N)
-            ker.store(ptr(L, i, k));
-        else
-            ker.store(ptr(L, i, k), std::min(M - i, KM), N - k);
+            if (k + KN <= N)
+                ker.store(ptr(L, i, k));
+            else
+                ker.store(ptr(L, i, k), std::min(M - i, KM), N - k);
+        }
     }
 
 
