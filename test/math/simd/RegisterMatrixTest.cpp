@@ -207,40 +207,49 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST(RegisterMatrixTest, testGerNT)
+    TYPED_TEST(RegisterMatrixTest, testGerCc)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        DynamicMatrix<ET, columnMajor> ma(Traits::rows, 1);
-        DynamicMatrix<ET, columnMajor> mb(Traits::columns, 1);
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> mc, md;
+        DynamicMatrix<ET, columnMajor> A(Traits::rows, 1);
+        DynamicMatrix<ET, columnMajor> B(1, Traits::columns);
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
 
-        randomize(ma);
-        randomize(mb);
-        randomize(mc);
-
-        StaticPanelMatrix<ET, Traits::rows, 1, columnMajor> A;
-        StaticPanelMatrix<ET, Traits::columns, 1, columnMajor> B;
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
-
-        A.pack(data(ma), spacing(ma));
-        B.pack(data(mb), spacing(mb));
-        C.pack(data(mc), spacing(mc));
-
-        // std::cout << "A=\n" << A << std::endl;
-        // std::cout << "B=\n" << B << std::endl;
-        // std::cout << "C=\n" << C << std::endl;
+        randomize(A);
+        randomize(B);
+        randomize(C);
 
         TypeParam ker;
-        load(ker, C.ptr(0, 0), C.spacing());
-        ger<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.ptr(0, 0), A.spacing(), B.ptr(0, 0), B.spacing());
-        store(ker, D.ptr(0, 0), D.spacing());
-        
-        D.unpack(data(md), spacing(md));
+        ker.load(1., ptr(C, 0, 0));
+        ker.ger(ET(1.), ptr(A, 0, 0), ptr(B, 0, 0));
+        ker.store(ptr(D, 0, 0));
 
-        BLAZEFEO_EXPECT_EQ(md, evaluate(mc + ma * trans(mb)));
+        BLAZEFEO_EXPECT_EQ(D, evaluate(C + A * B));
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testGerCr)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        DynamicMatrix<ET, columnMajor> A(Traits::rows, 1);
+        DynamicMatrix<ET, rowMajor> B(1, Traits::columns);
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
+
+        randomize(A);
+        randomize(B);
+        randomize(C);
+
+        TypeParam ker;
+        ker.load(1., ptr(C, 0, 0));
+        ker.ger(ET(1.), ptr(A, 0, 0), ptr(B, 0, 0));
+        ker.store(ptr(D, 0, 0));
+
+        BLAZEFEO_EXPECT_EQ(D, evaluate(C + A * B));
     }
 
 

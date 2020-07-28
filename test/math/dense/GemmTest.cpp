@@ -9,7 +9,7 @@
 
 namespace blazefeo :: testing
 {
-    TEST(DenseGemmTest, testNT_dynamic)
+    TEST(DenseGemmTest, testGemmCrStatic)
     {
         for (size_t m = 1; m <= 20; m += 1)
             for (size_t n = 1; n <= 20; n += 1)
@@ -17,7 +17,35 @@ namespace blazefeo :: testing
                 {
                     // Init Blaze matrices
                     //
-                    DynamicMatrix<double, columnMajor> A(m, k), B(n, k), C(m, n), D(m, n);
+                    DynamicMatrix<double, columnMajor> A(m, k), C(m, n), D(m, n);
+                    DynamicMatrix<double, rowMajor> B(k, n);
+                    randomize(A);
+                    randomize(B);
+                    randomize(C);
+
+                    double alpha {}, beta {};
+                    blaze::randomize(alpha);
+                    blaze::randomize(beta);
+
+                    /// Do gemm
+                    gemm(alpha, A, B, beta, C, D);
+
+                    BLAZEFEO_ASSERT_APPROX_EQ(D, evaluate(beta * C + alpha * A * B), 1e-10, 1e-10)
+                        << "gemm error at size m,n,k=" << m << "," << n << "," << k;
+                }
+    }
+
+
+    TEST(DenseGemmTest, testGemmCcStatic)
+    {
+        for (size_t m = 1; m <= 20; m += 1)
+            for (size_t n = 1; n <= 20; n += 1)
+                for (size_t k = 1; k <= 20; ++k)
+                {
+                    // Init Blaze matrices
+                    //
+                    DynamicMatrix<double, columnMajor> A(m, k), C(m, n), D(m, n);
+                    DynamicMatrix<double, columnMajor> B(k, n);
                     randomize(A);
                     randomize(B);
                     randomize(C);
@@ -32,12 +60,12 @@ namespace blazefeo :: testing
                     // std::cout << "C+A*trans(B)=\n" << C + A * trans(B) << std::endl;
 
                     // Do gemm
-                    gemm(alpha, A, trans(B), beta, C, D);
+                    gemm(alpha, A, B, beta, C, D);
 
                     // Print the result from BLASFEO
                     // std::cout << "D=\n" << blaze_blasfeo_D;
 
-                    BLAZEFEO_ASSERT_APPROX_EQ(D, evaluate(beta * C + alpha * A * trans(B)), 1e-10, 1e-10)
+                    BLAZEFEO_ASSERT_APPROX_EQ(D, evaluate(beta * C + alpha * A * B), 1e-10, 1e-10)
                         << "gemm error at size m,n,k=" << m << "," << n << "," << k;
                 }
     }

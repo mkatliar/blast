@@ -11,10 +11,13 @@
 
 namespace blazefeo
 {
-    template <typename ST1, typename ST2, typename MT1, typename MT2, typename MT3, typename MT4>
+    template <
+        typename ST1, typename MT1, typename MT2, bool SO2,
+        typename ST2, typename MT3, typename MT4
+    >
     inline void gemm(
         ST1 alpha,
-        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, rowMajor> const& B, 
+        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, SO2> const& B, 
         ST2 beta, DenseMatrix<MT3, columnMajor> const& C, DenseMatrix<MT4, columnMajor>& D)
     {
         using ET = ElementType_t<MT1>;

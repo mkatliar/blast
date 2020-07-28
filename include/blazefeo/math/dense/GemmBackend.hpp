@@ -12,7 +12,8 @@ namespace blazefeo
         typename T, size_t M, size_t N, size_t SS,
         typename PA, typename PB
     >
-        requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
+        requires MatrixPointer<PA, columnMajor> 
+        && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
     BLAZE_ALWAYS_INLINE void gemm_backend(
         RegisterMatrix<T, M, N, SS>& ker, size_t K, T alpha, PA a, PB b)
     {
@@ -29,7 +30,8 @@ namespace blazefeo
         typename T, size_t M, size_t N, size_t SS,
         typename PA, typename PB
     >
-        requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
+        requires MatrixPointer<PA, columnMajor> 
+        && (MatrixPointer<PB, rowMajor> || MatrixPointer<PB, columnMajor>)
     BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, SS>& ker, size_t K,
         T alpha, PA a, PB b, size_t md, size_t nd)
     {
@@ -42,10 +44,14 @@ namespace blazefeo
     }
 
 
-    template <size_t KM, size_t KN, typename ST1, typename ST2, typename MT1, typename MT2, typename MT3, typename MT4>
+    template <
+        size_t KM, size_t KN,
+        typename ST1, typename MT1, typename MT2, bool SO2,
+        typename ST2, typename MT3, typename MT4
+    >
     BLAZE_ALWAYS_INLINE void gemm_backend(
         size_t i,
-        ST1 alpha, DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, rowMajor> const& B, 
+        ST1 alpha, DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, SO2> const& B, 
         ST2 beta, DenseMatrix<MT3, columnMajor> const& C, DenseMatrix<MT4, columnMajor>& D)
     {
         using ET = ElementType_t<MT1>;

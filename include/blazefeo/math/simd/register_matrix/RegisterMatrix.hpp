@@ -154,7 +154,8 @@ namespace blazefeo
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb);
 
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
+            requires MatrixPointer<PA, columnMajor>
+            && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
         void ger(T alpha, PA a, PB b) noexcept;
 
 
@@ -171,7 +172,8 @@ namespace blazefeo
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n);
 
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
+            requires MatrixPointer<PA, columnMajor>
+            && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
         void ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept;
 
 
@@ -506,7 +508,8 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, size_t SS>
     template <typename PA, typename PB>
-        requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
+        requires MatrixPointer<PA, columnMajor> 
+        && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, PA a, PB b) noexcept
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T, SS>), "Not enough registers for ger()");
@@ -515,12 +518,12 @@ namespace blazefeo
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
-            ax[i] = alpha * blazefeo::load<SS>(a.get() + i * SS);
+            ax[i] = alpha * blazefeo::load<SS>(a.offset(i * SS, 0).get());
         
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
         {
-            IntrinsicType bx = broadcast<SS>(b.get() + j);
+            IntrinsicType bx = broadcast<SS>(b.offset(0, j).get());
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -562,19 +565,20 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, size_t SS>
     template <typename PA, typename PB>
-        requires MatrixPointer<PA, columnMajor> && MatrixPointer<PB, rowMajor>
+        requires MatrixPointer<PA, columnMajor>
+        && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept
     {
         IntrinsicType ax[RM];
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
-            ax[i] = alpha * blazefeo::load<SS>(a.get() + i * SS);
+            ax[i] = alpha * blazefeo::load<SS>(a.offset(i * SS, 0).get());
         
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
-            IntrinsicType bx = broadcast<SS>(b.get() + j);
+            IntrinsicType bx = broadcast<SS>(b.offset(0, j).get());
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
