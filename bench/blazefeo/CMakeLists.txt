@@ -1,4 +1,3 @@
-find_package(benchmark REQUIRED)
 find_package(Threads REQUIRED)
 
 
@@ -17,6 +16,7 @@ add_executable(bench-blazefeo
     math/dense/DynamicGemm.cpp
     math/dense/StaticGemm.cpp
     math/dense/StaticPotrf.cpp
+    math/dense/StaticTrmm.cpp
 
     math/panel/StaticGemm.cpp
     math/panel/DynamicGemm.cpp    
@@ -26,7 +26,6 @@ add_executable(bench-blazefeo
 
 
 target_link_libraries(bench-blazefeo
-    blazefeo
-    benchmark
+    bench-blazefeo-common
     ${CMAKE_THREAD_LIBS_INIT}
 )

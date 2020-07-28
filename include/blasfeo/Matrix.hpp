@@ -2,7 +2,7 @@
 
 #include <blasfeo/BlasfeoApi.hpp>
 
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 
 
 namespace blasfeo

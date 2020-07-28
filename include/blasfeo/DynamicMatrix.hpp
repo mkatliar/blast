@@ -6,7 +6,7 @@
 
 #include <blasfeo/Exception.hpp>
 
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 
 
 namespace blasfeo

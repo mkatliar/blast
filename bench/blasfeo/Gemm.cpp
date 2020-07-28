@@ -6,7 +6,7 @@
 #include <memory>
 
 
-namespace blasfeo :: benchmark
+namespace blazefeo :: benchmark
 {
     using namespace ::benchmark;
 

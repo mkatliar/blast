@@ -1,4 +1,3 @@
-find_package(benchmark REQUIRED)
 find_package(Threads REQUIRED)
 
 
@@ -7,7 +6,8 @@ add_executable(bench-blaze
     Main.cpp
     ZeroMatrixAssign.cpp
     Syrk.cpp
-    Trmm.cpp
+    DynamicTrmm.cpp
+    StaticTrmm.cpp
     Trmv.cpp
     Trsv.cpp
     Gemm.cpp
@@ -20,6 +20,6 @@ add_executable(bench-blaze
 
 target_link_libraries(bench-blaze
     blaze::blaze
-    benchmark
+    bench-blazefeo-common
     ${CMAKE_THREAD_LIBS_INIT}
 )

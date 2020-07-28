@@ -2,7 +2,7 @@
 #pragma once
 
 #include <blasfeo/BlasfeoApi.hpp>
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 
 #include <type_traits>
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <blazefeo/math/StaticPanelMatrix.hpp>
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 
 #include <array>
 

@@ -1,4 +1,3 @@
-find_package(benchmark REQUIRED)
 find_package(Threads REQUIRED)
 
 foreach (BLAS_LIB openblas mkl_rt)
@@ -24,7 +23,7 @@ foreach (BLAS_LIB openblas mkl_rt)
         )
 
         target_link_libraries(bench-blas-${BLAS_LIB}
-            benchmark
+            bench-blazefeo-common
             blaze::blaze
             ${BLAS_LIB_PATH_${BLAS_LIB}}
             ${CMAKE_THREAD_LIBS_INIT}

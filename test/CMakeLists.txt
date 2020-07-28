@@ -15,6 +15,7 @@ add_executable(test-blazefeo
     math/dense/GemmTest.cpp
     math/dense/SyrkTest.cpp
     math/dense/PotrfTest.cpp
+    math/dense/TrmmTest.cpp
 
     math/panel/StaticPanelMatrixTest.cpp
     math/panel/SubmatrixTest.cpp

@@ -1,4 +1,3 @@
-find_package(benchmark REQUIRED)
 find_package(Threads REQUIRED)
 
 
@@ -14,6 +13,6 @@ add_executable(bench-blasfeo
 
 target_link_libraries(bench-blasfeo
     blazefeo-blasfeo
-    benchmark
+    bench-blazefeo-common
     ${CMAKE_THREAD_LIBS_INIT}
 )

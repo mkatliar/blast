@@ -251,7 +251,7 @@ namespace blazefeo
         for (size_t i = 0; i < RM; ++i)
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
-                v_[i][j] = blazefeo::load<SS>(ptr + spacing * i + SS * j);
+                v_[i][j] = beta * blazefeo::load<SS>(ptr + spacing * i + SS * j);
     }
 
 
@@ -264,7 +264,7 @@ namespace blazefeo
         for (size_t j = 0; j < N; ++j)
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                v_[i][j] = blazefeo::load<SS>(p.offset(SS * i, j).get());
+                v_[i][j] = beta * blazefeo::load<SS>(p.offset(SS * i, j).get());
     }
 
 
@@ -275,7 +275,7 @@ namespace blazefeo
         for (size_t i = 0; i < RM; ++i)
             #pragma unroll
             for (size_t j = 0; j < N; ++j) if (j < n)
-                v_[i][j] = blazefeo::load<SS>(ptr + spacing * i + SS * j);
+                v_[i][j] = beta * blazefeo::load<SS>(ptr + spacing * i + SS * j);
     }
 
 
@@ -288,7 +288,7 @@ namespace blazefeo
         for (size_t j = 0; j < N; ++j) if (j < n)
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                v_[i][j] = blazefeo::load<SS>(p.offset(SS * i, j).get());
+                v_[i][j] = beta * blazefeo::load<SS>(p.offset(SS * i, j).get());
     }
 
 

@@ -1,4 +1,4 @@
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 
 #include <benchmark/benchmark.h>
 

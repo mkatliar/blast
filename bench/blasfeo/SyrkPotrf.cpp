@@ -1,11 +1,11 @@
 #include <blasfeo/Blasfeo.hpp>
 
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 
 #include <benchmark/benchmark.h>
 
 
-namespace blasfeo :: benchmark
+namespace blazefeo :: benchmark
 {
     void BM_syrkPotrf(::benchmark::State& state)
     {

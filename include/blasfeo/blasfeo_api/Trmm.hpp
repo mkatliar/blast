@@ -18,7 +18,7 @@ namespace blasfeo
         blasfeo_dmat const& sB, size_t bi, size_t bj,
         blasfeo_dmat& sD, size_t di, size_t dj)
     {
-        blasfeo_dtrmm_rlnn(m, n, alpha, const_cast<blasfeo_dmat *>(&sA), ai, aj, const_cast<blasfeo_dmat *>(&sB), bi, bj, &sD, di, dj);
+        ::blasfeo_dtrmm_rlnn(m, n, alpha, const_cast<blasfeo_dmat *>(&sA), ai, aj, const_cast<blasfeo_dmat *>(&sB), bi, bj, &sD, di, dj);
     }
 
 
@@ -30,6 +30,26 @@ namespace blasfeo
         blasfeo_smat const& sB, size_t bi, size_t bj,
         blasfeo_smat& sD, size_t di, size_t dj)
     {
-        blasfeo_strmm_rlnn(m, n, alpha, const_cast<blasfeo_smat *>(&sA), ai, aj, const_cast<blasfeo_smat *>(&sB), bi, bj, &sD, di, dj);
+        ::blasfeo_strmm_rlnn(m, n, alpha, const_cast<blasfeo_smat *>(&sA), ai, aj, const_cast<blasfeo_smat *>(&sB), bi, bj, &sD, di, dj);
+    }
+
+
+    /// @brief D <= alpha * B * A^T ; B upper triangular
+    inline void trmm_rutn(size_t m, size_t n, double alpha,
+        blasfeo_dmat& sA, size_t ai, size_t aj,
+        blasfeo_dmat& sB, size_t bi, size_t bj,
+        blasfeo_dmat& sD, size_t di, size_t dj)
+    {
+        ::blasfeo_dtrmm_rutn(m, n, alpha, const_cast<blasfeo_dmat *>(&sA), ai, aj, const_cast<blasfeo_dmat *>(&sB), bi, bj, &sD, di, dj);
+    }
+
+
+    /// @brief D <= alpha * B * A^T ; B upper triangular
+    inline void trmm_rutn(size_t m, size_t n, float alpha,
+        blasfeo_smat& sA, size_t ai, size_t aj,
+        blasfeo_smat& sB, size_t bi, size_t bj,
+        blasfeo_smat& sD, size_t di, size_t dj)
+    {
+        ::blasfeo_strmm_rutn(m, n, alpha, const_cast<blasfeo_smat *>(&sA), ai, aj, const_cast<blasfeo_smat *>(&sB), bi, bj, &sD, di, dj);
     }
 }

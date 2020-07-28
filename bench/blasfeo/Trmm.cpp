@@ -1,6 +1,6 @@
 #include <blasfeo/Blasfeo.hpp>
 
-#include <benchmark/benchmark.h>
+#include <bench/Benchmark.hpp>
 
 #include <random>
 #include <memory>
@@ -9,7 +9,7 @@
 #define ADD_BM_TRMM(m, n, p) BENCHMARK_CAPTURE(BM_trmm, m##x##n##x##p##_blasfeo, m, n, p)
 
 
-namespace blasfeo :: benchmark
+namespace blazefeo :: benchmark
 {
     template <typename MT>
     static void randomize(blasfeo::Matrix<MT>& A)
@@ -24,22 +24,20 @@ namespace blasfeo :: benchmark
     }
 
 
-    static void BM_trmm(::benchmark::State& state, size_t m, size_t n, size_t p)
+    static void BM_trmm(::benchmark::State& state)
     {
-        blasfeo::DynamicMatrix<double> A(m, n), B(n, p), C(m, p);
+        size_t const m = state.range(0);
+        size_t const n = state.range(1);
+
+        blasfeo::DynamicMatrix<double> A(m, m), B(m, n), C(m, n);
 
         randomize(A);
         randomize(B);
         
         for (auto _ : state)
-            trmm_rlnn(n /*m*/, p /*n*/, 1., A, 0, 0, B, 0, 0, C, 0, 0);
+            trmm_rutn(m, n, 1., A, 0, 0, B, 0, 0, C, 0, 0);
     }
 
     
-    ADD_BM_TRMM(2, 2, 2);
-    ADD_BM_TRMM(3, 3, 3);
-    ADD_BM_TRMM(5, 5, 5);
-    ADD_BM_TRMM(10, 10, 10);
-    ADD_BM_TRMM(20, 20, 20);
-    ADD_BM_TRMM(30, 30, 30);
+    BENCHMARK(BM_trmm)->Apply(trmmBenchArguments);
 }

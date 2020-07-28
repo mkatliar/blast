@@ -1,4 +1,4 @@
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 
 #include <bench/Benchmark.hpp>
 #include <bench/Complexity.hpp>

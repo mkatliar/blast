@@ -1,7 +1,7 @@
 #include <blasfeo/Blasfeo.hpp>
 #include <test/Testing.hpp>
 
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 
 
 namespace blasfeo :: testing

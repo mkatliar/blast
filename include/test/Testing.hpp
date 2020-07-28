@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 #include <blaze/util/typetraits/IsArithmetic.h>
 
 #include <iostream>

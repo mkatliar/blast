@@ -2,7 +2,7 @@
 
 #include <blazefeo/math/dense/Gemm.hpp>
 
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
@@ -22,18 +22,22 @@ namespace blazefeo :: testing
                     randomize(B);
                     randomize(C);
 
+                    double alpha {}, beta {};
+                    blaze::randomize(alpha);
+                    blaze::randomize(beta);
+
                     // std::cout << "A=\n" << A << std::endl;
                     // std::cout << "B=\n" << B << std::endl;
                     // std::cout << "C=\n" << C << std::endl;
                     // std::cout << "C+A*trans(B)=\n" << C + A * trans(B) << std::endl;
 
                     // Do gemm
-                    gemm(1., A, trans(B), 1., C, D);
+                    gemm(alpha, A, trans(B), beta, C, D);
 
                     // Print the result from BLASFEO
                     // std::cout << "D=\n" << blaze_blasfeo_D;
 
-                    BLAZEFEO_ASSERT_APPROX_EQ(D, evaluate(C + A * trans(B)), 1e-10, 1e-10)
+                    BLAZEFEO_ASSERT_APPROX_EQ(D, evaluate(beta * C + alpha * A * trans(B)), 1e-10, 1e-10)
                         << "gemm error at size m,n,k=" << m << "," << n << "," << k;
                 }
     }

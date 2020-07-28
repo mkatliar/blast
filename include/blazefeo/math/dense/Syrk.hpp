@@ -11,7 +11,7 @@
 namespace blazefeo
 {
     template <typename ST1, typename MT1, typename ST2, typename MT2, typename MT3>
-    BLAZE_ALWAYS_INLINE void syrk_ln(
+    inline void syrk_ln(
         ST1 alpha,
         DenseMatrix<MT1, columnMajor> const& A,
         ST2 beta, DenseMatrix<MT2, columnMajor> const& C, DenseMatrix<MT3, columnMajor>& D)

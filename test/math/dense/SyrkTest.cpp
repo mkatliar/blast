@@ -2,7 +2,7 @@
 
 #include <blazefeo/math/dense/Syrk.hpp>
 
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>

@@ -1,6 +1,6 @@
-#include <blaze/Math.h>
+#include <blazefeo/Blaze.hpp>
 
-#include <benchmark/benchmark.h>
+#include <bench/Benchmark.hpp>
 
 
 namespace blazefeo :: benchmark
@@ -22,12 +22,6 @@ namespace blazefeo :: benchmark
             C = B;
             trmm(C, trans(std::as_const(A)), CblasLeft, CblasUpper, 1.);
         }
-    }
-
-
-    static void trmmBenchArguments(::benchmark::internal::Benchmark* b) 
-    {
-        b->Args({1, 2})->Args({4, 5})->Args({30, 35});
     }
 
 

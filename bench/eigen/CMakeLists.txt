@@ -1,5 +1,4 @@
 find_package(Eigen3 3.2.10 REQUIRED)
-find_package(benchmark REQUIRED)
 find_package(Threads REQUIRED)
 
 
@@ -18,6 +17,6 @@ target_include_directories(bench-eigen
 
 
 target_link_libraries(bench-eigen
-    benchmark
+    bench-blazefeo-common
     ${CMAKE_THREAD_LIBS_INIT}
 )

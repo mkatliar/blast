@@ -1,3 +1,4 @@
+add_subdirectory("common")
 add_subdirectory("blazefeo")
 add_subdirectory("libxsmm")
 add_subdirectory("blas")
