@@ -13,7 +13,7 @@
 namespace blazefeo :: benchmark
 {
     template <typename Real>
-    static void BM_DynamicPanelPotrf(::benchmark::State& state)
+    static void BM_potrf_dynamic_panel(State& state)
     {
         size_t const M = state.range(0);
 
@@ -32,6 +32,6 @@ namespace blazefeo :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_DynamicPanelPotrf, double)->DenseRange(1, BENCHMARK_MAX_POTRF);
-    BENCHMARK_TEMPLATE(BM_DynamicPanelPotrf, float)->DenseRange(1, BENCHMARK_MAX_POTRF);
+    BENCHMARK_TEMPLATE(BM_potrf_dynamic_panel, double)->DenseRange(1, BENCHMARK_MAX_POTRF);
+    BENCHMARK_TEMPLATE(BM_potrf_dynamic_panel, float)->DenseRange(1, BENCHMARK_MAX_POTRF);
 }

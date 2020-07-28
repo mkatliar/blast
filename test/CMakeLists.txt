@@ -14,6 +14,7 @@ add_executable(test-blazefeo
     math/dense/DynamicMatrixPointerTest.cpp
     math/dense/GemmTest.cpp
     math/dense/SyrkTest.cpp
+    math/dense/PotrfTest.cpp
 
     math/panel/StaticPanelMatrixTest.cpp
     math/panel/SubmatrixTest.cpp

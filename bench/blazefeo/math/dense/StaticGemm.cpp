@@ -12,7 +12,7 @@
 namespace blazefeo :: benchmark
 {
     template <typename Real, size_t M>
-    static void BM_StaticGemm(State& state)
+    static void BM_gemm_static_plain(State& state)
     {
         size_t constexpr N = M;
         size_t constexpr K = M;
@@ -41,6 +41,6 @@ namespace blazefeo :: benchmark
 
 
 #define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_GEMM)
-#define BOOST_PP_LOCAL_MACRO(n) BENCHMARK_TEMPLATE(BM_StaticGemm, double, n);
+#define BOOST_PP_LOCAL_MACRO(n) BENCHMARK_TEMPLATE(BM_gemm_static_plain, double, n);
 #include BOOST_PP_LOCAL_ITERATE()
 }

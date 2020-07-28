@@ -16,11 +16,12 @@ add_executable(bench-blazefeo
     math/dense/StaticSyrk.cpp
     math/dense/DynamicGemm.cpp
     math/dense/StaticGemm.cpp
+    math/dense/StaticPotrf.cpp
 
-    math/panel/StaticPanelGemm.cpp
-    math/panel/DynamicPanelGemm.cpp    
-    math/panel/StaticPanelPotrf.cpp
-    math/panel/DynamicPanelPotrf.cpp
+    math/panel/StaticGemm.cpp
+    math/panel/DynamicGemm.cpp    
+    math/panel/StaticPotrf.cpp
+    math/panel/DynamicPotrf.cpp
 )
 
 

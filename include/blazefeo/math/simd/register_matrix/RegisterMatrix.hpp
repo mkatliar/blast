@@ -179,9 +179,21 @@ namespace blazefeo
         void potrf();
 
 
-        /// @brief Triangular substitution
+        /// @brief Triangular substitution, panel matrix pointer argument
+        ///
+        /// @brief l pointer to a triangular matrix
+        ///
         template <bool LeftSide, bool Upper, bool TransA>
         void trsm(T const * l, size_t sl);
+
+
+        /// @brief Triangular substitution, matrix pointer argument
+        ///
+        /// @brief l pointer to a triangular matrix
+        ///
+        template <bool LeftSide, bool Upper, bool TransA, typename P>
+            requires MatrixPointer<P, columnMajor>
+        void trsm(P l);
 
 
     private:
@@ -426,6 +438,33 @@ namespace blazefeo
             }
 
             IntrinsicType const l_jj = broadcast<SS>(l + (j / SS) * sl + j % SS + j * SS);
+            
+            #pragma unroll
+            for (size_t i = 0; i < RM; ++i)
+                v_[i][j] /= l_jj;
+        }
+    }
+
+
+    template <typename T, size_t M, size_t N, size_t SS>
+    template <bool LeftSide, bool Upper, bool TransA, typename P>
+        requires MatrixPointer<P, columnMajor>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::trsm(P l)
+    {
+        #pragma unroll
+        for (size_t j = 0; j < N; ++j)
+        {
+            #pragma unroll
+            for (size_t k = 0; k < j; ++k)
+            {
+                IntrinsicType const l_jk = broadcast<SS>(l.offset(j, k).get());
+
+                #pragma unroll
+                for (size_t i = 0; i < RM; ++i)
+                    v_[i][j] = fnmadd(l_jk, v_[i][k], v_[i][j]);
+            }
+
+            IntrinsicType const l_jj = broadcast<SS>(l.offset(j, j).get());
             
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)

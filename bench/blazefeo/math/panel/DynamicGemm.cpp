@@ -11,7 +11,7 @@
 namespace blazefeo :: benchmark
 {
     template <typename Real>
-    static void BM_DynamicPanelGemm(State& state)
+    static void BM_gemm_dynamic_panel(State& state)
     {
         size_t const M = state.range(0);
         size_t const N = M;
@@ -40,6 +40,6 @@ namespace blazefeo :: benchmark
     }
 
     
-    BENCHMARK_TEMPLATE(BM_DynamicPanelGemm, double)->DenseRange(1, BENCHMARK_MAX_GEMM);
-    BENCHMARK_TEMPLATE(BM_DynamicPanelGemm, float)->DenseRange(1, BENCHMARK_MAX_GEMM);
+    BENCHMARK_TEMPLATE(BM_gemm_dynamic_panel, double)->DenseRange(1, BENCHMARK_MAX_GEMM);
+    BENCHMARK_TEMPLATE(BM_gemm_dynamic_panel, float)->DenseRange(1, BENCHMARK_MAX_GEMM);
 }

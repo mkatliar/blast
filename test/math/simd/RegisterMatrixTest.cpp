@@ -400,7 +400,7 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST(RegisterMatrixTest, testTrsmRLT)
+    TYPED_TEST(RegisterMatrixTest, testTrsmRltPanel)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -412,7 +412,7 @@ namespace blazefeo :: testing
         StaticPanelMatrix<ET, Traits::columns, Traits::columns, columnMajor> L;
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> B, X, B1;            
         
-        for (size_t i = 0; i < Traits::rows; ++i)
+        for (size_t i = 0; i < Traits::columns; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)
                 if (j <= i)
                 {
@@ -444,6 +444,46 @@ namespace blazefeo :: testing
         load(ker, B.ptr(0, 0), B.spacing());
         trsm<false, false, true>(ker, L.ptr(0, 0), spacing(L));
         store(ker, X.ptr(0, 0), X.spacing());
+
+        // std::cout << "X=\n" << X << std::endl;
+        // std::cout << "XX=\n" << XX << std::endl;
+        
+        // TODO: should be strictly equal?
+        BLAZEFEO_ASSERT_APPROX_EQ(X, XX, absTol<ET>(), relTol<ET>());
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testTrsmRltDense)
+    {
+        using RM = TypeParam;
+        using ET = ElementType_t<RM>;
+
+        RM ker;
+
+        using blaze::randomize;
+        StaticMatrix<ET, RM::columns(), RM::columns(), columnMajor> L;
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> B, X, B1;            
+        
+        for (size_t i = 0; i < RM::columns(); ++i)
+            for (size_t j = 0; j < RM::columns(); ++j)
+                if (j <= i)
+                {
+                    randomize(L(i, j));
+                    if (i == j)
+                        L(i, j) += ET(1.);  // Improve conditioning
+                }
+                else
+                    reset(L(i, j));
+
+        randomize(B);
+
+        // Workaround the bug:
+        // https://bitbucket.org/blaze-lib/blaze/issues/301/error-in-evaluation-of-a-inv-trans-b
+        auto const XX = evaluate(B * evaluate(inv(evaluate(trans(L)))));
+        
+        ker.load(1., ptr(B, 0, 0));
+        ker.template trsm<false, false, true>(ptr(L, 0, 0));
+        ker.store(ptr(X, 0, 0));
 
         // std::cout << "X=\n" << X << std::endl;
         // std::cout << "XX=\n" << XX << std::endl;

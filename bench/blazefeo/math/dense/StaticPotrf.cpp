@@ -1,5 +1,5 @@
-#include <blazefeo/math/StaticPanelMatrix.hpp>
-#include <blazefeo/math/panel/Potrf.hpp>
+#include <blazefeo/Blaze.hpp>
+#include <blazefeo/math/dense/Potrf.hpp>
 
 #include <bench/Benchmark.hpp>
 #include <bench/Complexity.hpp>
@@ -13,9 +13,9 @@
 namespace blazefeo :: benchmark
 {
     template <typename Real, size_t M>
-    static void BM_StaticPanelPotrf(State& state)
+    static void BM_potrf_static_plain(State& state)
     {
-        StaticPanelMatrix<Real, M, M, columnMajor> A, L;
+        StaticMatrix<Real, M, M, columnMajor> A, L;
         makePositiveDefinite(A);
 
         for (auto _ : state)
@@ -32,7 +32,7 @@ namespace blazefeo :: benchmark
 
 #define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_POTRF)
 #define BOOST_PP_LOCAL_MACRO(n) \
-    BENCHMARK_TEMPLATE(BM_StaticPanelPotrf, double, n);\
-    BENCHMARK_TEMPLATE(BM_StaticPanelPotrf, float, n);
+    BENCHMARK_TEMPLATE(BM_potrf_static_plain, double, n);\
+    BENCHMARK_TEMPLATE(BM_potrf_static_plain, float, n);
 #include BOOST_PP_LOCAL_ITERATE()
 }
