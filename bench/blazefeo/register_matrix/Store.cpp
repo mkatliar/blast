@@ -7,10 +7,10 @@
 
 namespace blazefeo :: benchmark
 {
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     static void BM_RegisterMatrix_store(State& state)
     {
-        using Kernel = RegisterMatrix<T, M, N, SS>;
+        using Kernel = RegisterMatrix<T, M, N, SO>;
         using Traits = RegisterMatrixTraits<Kernel>;
 
         Kernel ker;
@@ -30,8 +30,8 @@ namespace blazefeo :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 4, 4, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 8, 4, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 12, 4, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 8, 8, 4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 4, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 8, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 12, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_store, double, 8, 8, columnMajor);
 }

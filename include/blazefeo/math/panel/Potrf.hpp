@@ -29,7 +29,7 @@ namespace blazefeo
         BLAZE_USER_ASSERT(i < M, "Index too big");
         BLAZE_USER_ASSERT(k < N, "Index too big");
 
-        RegisterMatrix<ET, KM, KN, PANEL_SIZE> ker;
+        RegisterMatrix<ET, KM, KN, columnMajor> ker;
 
         load(ker, ptr(A, i, k), spacing(A));
 

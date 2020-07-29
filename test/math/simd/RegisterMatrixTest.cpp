@@ -19,14 +19,14 @@ namespace blazefeo :: testing
 
 
     using MyTypes = Types<
-        RegisterMatrix<double, 4, 4, 4>,
-        RegisterMatrix<double, 4, 2, 4>,
-        RegisterMatrix<double, 4, 1, 4>,
-        RegisterMatrix<double, 8, 4, 4>,
-        RegisterMatrix<double, 12, 4, 4>,
-        RegisterMatrix<float, 8, 4, 8>,
-        RegisterMatrix<float, 16, 4, 8>,
-        RegisterMatrix<float, 24, 4, 8>
+        RegisterMatrix<double, 4, 4, columnMajor>,
+        RegisterMatrix<double, 4, 2, columnMajor>,
+        RegisterMatrix<double, 4, 1, columnMajor>,
+        RegisterMatrix<double, 8, 4, columnMajor>,
+        RegisterMatrix<double, 12, 4, columnMajor>,
+        RegisterMatrix<float, 8, 4, columnMajor>,
+        RegisterMatrix<float, 16, 4, columnMajor>,
+        RegisterMatrix<float, 24, 4, columnMajor>
     >;
         
         

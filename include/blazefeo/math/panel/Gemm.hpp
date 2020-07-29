@@ -15,8 +15,8 @@ namespace blazefeo
     using namespace blaze;
 
 
-    template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t BS>
-    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, BS>& ker, size_t K, T alpha, T beta,
+    template <bool SOA, bool SOB, typename T, size_t M, size_t N>
+    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, columnMajor>& ker, size_t K, T alpha, T beta,
         T const * a, size_t sa, T const * b, size_t sb, T const * c, size_t sc, T * d, size_t sd)
     {
         load(ker, beta, c, sc);
@@ -25,8 +25,8 @@ namespace blazefeo
         {
             ger<SOA, SOB>(ker, alpha, a, sa, b, sb);
 
-            a += SOA == rowMajor ? ker.panels() * sa : BS;
-            b += SOB == rowMajor ? BS : N * sb;
+            a += SOA == rowMajor ? ker.panels() * sa : Simd<T>::size;
+            b += SOB == rowMajor ? Simd<T>::size : N * sb;
         }
 
         store(ker, d, sd);
@@ -34,11 +34,11 @@ namespace blazefeo
 
 
     template <
-        typename T, size_t M, size_t N, size_t BS, 
+        typename T, size_t M, size_t N, 
         typename MT1, bool SO1, typename MT2, bool SO2,
         typename MT3, bool SO3, typename MT4, bool SO4
         >
-    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, BS>& ker, size_t K, T alpha, T beta,
+    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, columnMajor>& ker, size_t K, T alpha, T beta,
         Matrix<MT1, SO1> const& A, Matrix<MT2, SO2> const& B, Matrix<MT3, SO3> const& C, Matrix<MT4, SO4>& D)
     {
         ker.load(beta, ~C);
@@ -50,8 +50,8 @@ namespace blazefeo
     }
 
 
-    template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t BS>
-    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, BS>& ker, size_t K, T alpha, T beta,
+    template <bool SOA, bool SOB, typename T, size_t M, size_t N>
+    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, columnMajor>& ker, size_t K, T alpha, T beta,
         T const * a, size_t sa, T const * b, size_t sb, T const * c, size_t sc, T * d, size_t sd,
         size_t md, size_t nd)
     {
@@ -61,8 +61,8 @@ namespace blazefeo
         {
             ger<SOA, SOB>(ker, alpha, a, sa, b, sb, md, nd);
 
-            a += SOA == rowMajor ? ker.panels() * sa : BS;
-            b += SOB == rowMajor ? BS : N * sb;
+            a += SOA == rowMajor ? ker.panels() * sa : Simd<T>::size;
+            b += SOB == rowMajor ? Simd<T>::size : N * sb;
         }
 
         store(ker, d, sd, md, nd);
@@ -156,7 +156,7 @@ namespace blazefeo
         BLAZE_USER_ASSERT(rows(C) == M && columns(C) == N, "Matrix sizes do not match");
         BLAZE_USER_ASSERT(rows(D) == M && columns(D) == N, "Matrix sizes do not match");
 
-        RegisterMatrix<ET, KM, KN, PANEL_SIZE> ker;
+        RegisterMatrix<ET, KM, KN, columnMajor> ker;
 
         if (i + KM <= M)
         {

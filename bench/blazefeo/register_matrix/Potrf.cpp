@@ -10,10 +10,10 @@
 
 namespace blazefeo :: benchmark
 {
-    template <typename T, size_t M, size_t N, size_t P>
+    template <typename T, size_t M, size_t N, bool SO>
     static void BM_RegisterMatrix_potrf(State& state)
     {
-        using Kernel = RegisterMatrix<T, M, N, P>;
+        using Kernel = RegisterMatrix<T, M, N, SO>;
         using Traits = RegisterMatrixTraits<Kernel>;
         size_t constexpr m = Traits::rows;
         size_t constexpr n = Traits::columns;
@@ -35,11 +35,11 @@ namespace blazefeo :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, double, 4, 4, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, double, 8, 4, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, double, 12, 4, 4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, double, 4, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, double, 8, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, double, 12, 4, columnMajor);
 
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, float, 8, 4, 8);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, float, 16, 4, 8);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, float, 24, 4, 8);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, float, 8, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, float, 16, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_potrf, float, 24, 4, columnMajor);
 }

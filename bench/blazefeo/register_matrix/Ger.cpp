@@ -8,10 +8,10 @@
 
 namespace blazefeo :: benchmark
 {
-    template <typename T, size_t M, size_t N, size_t P>
+    template <typename T, size_t M, size_t N, bool SO>
     static void BM_RegisterMatrix_ger_nt(State& state)
     {
-        using Kernel = RegisterMatrix<T, M, N, P>;
+        using Kernel = RegisterMatrix<T, M, N, SO>;
         using Traits = RegisterMatrixTraits<Kernel>;
         using ET = ElementType_t<Kernel>;
         size_t constexpr K = 100;
@@ -39,14 +39,14 @@ namespace blazefeo :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 4, 4, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 4, 8, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 8, 4, 4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 12, 4, 4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 4, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 4, 8, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 8, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, double, 12, 4, columnMajor);
 
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 8, 4, 8);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 16, 4, 8);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 24, 4, 8);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 16, 5, 8);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 16, 6, 8);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 8, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 16, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 24, 4, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 16, 5, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_ger_nt, float, 16, 6, columnMajor);
 }

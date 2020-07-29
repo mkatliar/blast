@@ -10,10 +10,10 @@
 
 namespace blazefeo :: benchmark
 {
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     static void BM_RegisterMatrix_partialStore(State& state)
     {
-        using Kernel = RegisterMatrix<T, M, N, SS>;
+        using Kernel = RegisterMatrix<T, M, N, SO>;
         size_t const m = state.range(0);
         size_t const n = state.range(1);
 
@@ -98,11 +98,11 @@ namespace blazefeo :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 4, 4, 4)->Apply(args_4_4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 8, 4, 4)->Apply(args_8_4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 12, 4, 4)->Apply(args_12_4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 4, 4, columnMajor)->Apply(args_4_4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 8, 4, columnMajor)->Apply(args_8_4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, double, 12, 4, columnMajor)->Apply(args_12_4);
 
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, float, 8, 4, 8)->Apply(args_8_4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, float, 16, 4, 8)->Apply(args_16_4);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, float, 24, 4, 8)->Apply(args_24_4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, float, 8, 4, columnMajor)->Apply(args_8_4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, float, 16, 4, columnMajor)->Apply(args_16_4);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_partialStore, float, 24, 4, columnMajor)->Apply(args_24_4);
 }

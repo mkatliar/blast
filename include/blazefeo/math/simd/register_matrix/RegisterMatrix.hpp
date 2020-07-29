@@ -24,13 +24,15 @@ namespace blazefeo
     /// @tparam T type of matrix elements
     /// @tparam M number of rows of the matrix. Must be a multiple of SS.
     /// @tparam N number of columns of the matrix.
-    /// @tparam SS number of T elements that can be stored in a SIMD register.
-    template <typename T, size_t M, size_t N, size_t SS>
+    /// @tparam SO orientation of SIMD registers.
+    template <typename T, size_t M, size_t N, bool SO = columnMajor>
     class RegisterMatrix
-    :   public Matrix<RegisterMatrix<T, M, N, SS>, columnMajor>
+    :   public Matrix<RegisterMatrix<T, M, N, SO>, SO>
     {
     public:
-        using BaseType = Matrix<RegisterMatrix<T, M, N, SS>, columnMajor>;
+        static_assert(SO == columnMajor, "Only column-major register matrices are currently supported");
+
+        using BaseType = Matrix<RegisterMatrix<T, M, N, SO>, SO>;
         using BaseType::storageOrder;
 
         /// @brief Type of matrix elements
@@ -208,6 +210,9 @@ namespace blazefeo
         using MaskType = typename Simd<T>::MaskType;
         using IntType = typename Simd<T>::IntType;
 
+        // SIMD size
+        static size_t constexpr SS = Simd<T>::size;
+
         // Numberf of SIMD registers required to store a single column of the matrix.
         static size_t constexpr RM = M / SS;
         static size_t constexpr RN = N;
@@ -239,10 +244,11 @@ namespace blazefeo
     struct RegisterMatrixTraits;
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
-    struct RegisterMatrixTraits<RegisterMatrix<T, M, N, SS>>
+    // TODO: deprecate
+    template <typename T, size_t M, size_t N, bool SO>
+    struct RegisterMatrixTraits<RegisterMatrix<T, M, N, SO>>
     {
-        static size_t constexpr simdSize = SS;
+        static size_t constexpr simdSize = RegisterMatrix<T, M, N, SO>::SS;
         static size_t constexpr rows = M;
         static size_t constexpr columns = N;
         static size_t constexpr elementCount = rows * columns;
@@ -251,8 +257,8 @@ namespace blazefeo
     };
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
-    inline void RegisterMatrix<T, M, N, SS>::load(T beta, T const * ptr, size_t spacing)
+    template <typename T, size_t M, size_t N, bool SO>
+    inline void RegisterMatrix<T, M, N, SO>::load(T beta, T const * ptr, size_t spacing)
     {
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
@@ -262,10 +268,10 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
         requires MatrixPointer<P, columnMajor>
-    inline void RegisterMatrix<T, M, N, SS>::load(T beta, P p) noexcept
+    inline void RegisterMatrix<T, M, N, SO>::load(T beta, P p) noexcept
     {
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
@@ -275,8 +281,8 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
-    inline void RegisterMatrix<T, M, N, SS>::load(T beta, T const * ptr, size_t spacing, size_t m, size_t n)
+    template <typename T, size_t M, size_t N, bool SO>
+    inline void RegisterMatrix<T, M, N, SO>::load(T beta, T const * ptr, size_t spacing, size_t m, size_t n)
     {
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
@@ -286,10 +292,10 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
         requires MatrixPointer<P, columnMajor>
-    inline void RegisterMatrix<T, M, N, SS>::load(T beta, P p, size_t m, size_t n) noexcept
+    inline void RegisterMatrix<T, M, N, SO>::load(T beta, P p, size_t m, size_t n) noexcept
     {
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
@@ -299,8 +305,8 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
-    inline void RegisterMatrix<T, M, N, SS>::store(T * ptr, size_t spacing) const
+    template <typename T, size_t M, size_t N, bool SO>
+    inline void RegisterMatrix<T, M, N, SO>::store(T * ptr, size_t spacing) const
     {
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
@@ -310,10 +316,10 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
         requires MatrixPointer<P, columnMajor>
-    inline void RegisterMatrix<T, M, N, SS>::store(P p) const noexcept
+    inline void RegisterMatrix<T, M, N, SO>::store(P p) const noexcept
     {
         for (size_t j = 0; j < N; ++j)
             for (size_t i = 0; i < RM; ++i)
@@ -321,8 +327,8 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
-    inline void RegisterMatrix<T, M, N, SS>::store(T * ptr, size_t spacing, size_t m, size_t n) const
+    template <typename T, size_t M, size_t N, bool SO>
+    inline void RegisterMatrix<T, M, N, SO>::store(T * ptr, size_t spacing, size_t m, size_t n) const
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + 2 <= RegisterCapacity_v<T>), "Not enough registers");
         BLAZE_INTERNAL_ASSERT(m > M - SS && m <= M, "Invalid number of rows in partial store");
@@ -359,10 +365,10 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
         requires MatrixPointer<P, columnMajor>
-    inline void RegisterMatrix<T, M, N, SS>::store(P p, size_t m, size_t n) const noexcept
+    inline void RegisterMatrix<T, M, N, SO>::store(P p, size_t m, size_t n) const noexcept
     {
         // The compile-time constant size of the j loop in combination with the if() expression
         // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
@@ -381,10 +387,10 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
         requires MatrixPointer<P, columnMajor>
-    inline void RegisterMatrix<T, M, N, SS>::storeLower(P p) const noexcept
+    inline void RegisterMatrix<T, M, N, SO>::storeLower(P p) const noexcept
     {
         for (size_t j = 0; j < N; ++j)
         {
@@ -404,10 +410,10 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
         requires MatrixPointer<P, columnMajor>
-    inline void RegisterMatrix<T, M, N, SS>::storeLower(P p, size_t m, size_t n) const noexcept
+    inline void RegisterMatrix<T, M, N, SO>::storeLower(P p, size_t m, size_t n) const noexcept
     {
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
@@ -427,9 +433,9 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <bool LeftSide, bool Upper, bool TransA>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::trsm(T const * l, size_t sl)
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsm(T const * l, size_t sl)
     {
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
@@ -453,10 +459,10 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <bool LeftSide, bool Upper, bool TransA, typename P>
         requires MatrixPointer<P, columnMajor>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::trsm(P l)
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsm(P l)
     {
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
@@ -480,9 +486,9 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <bool SOA, bool SOB>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb)
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb)
     {
         if (SOA == columnMajor && SOB == rowMajor)
         {
@@ -511,11 +517,11 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <typename PA, typename PB>
         requires MatrixPointer<PA, columnMajor> 
         && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, PA a, PB b) noexcept
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b) noexcept
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
             
@@ -537,9 +543,9 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <bool SOA, bool SOB>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
     {
         if (SOA == columnMajor && SOB == rowMajor)
         {
@@ -568,11 +574,11 @@ namespace blazefeo
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     template <typename PA, typename PB>
         requires MatrixPointer<PA, columnMajor>
         && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept
     {
         IntrinsicType ax[RM];
 
@@ -592,15 +598,15 @@ namespace blazefeo
     }
 
 
-    template <bool LeftSide, bool Upper, bool TransA, typename T, size_t M, size_t N, size_t SS>
-    inline void trsm(RegisterMatrix<T, M, N, SS>& ker, T const * a, size_t sa)
+    template <bool LeftSide, bool Upper, bool TransA, typename T, size_t M, size_t N, bool SO>
+    inline void trsm(RegisterMatrix<T, M, N, SO>& ker, T const * a, size_t sa)
     {
         ker.template trsm<LeftSide, Upper, TransA>(a, sa);
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::potrf()
+    template <typename T, size_t M, size_t N, bool SO>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::potrf()
     {
         static_assert(M >= N, "potrf() not implemented for register matrices with columns more than rows");
         static_assert(RM * RN + 2 <= RegisterCapacity_v<T>, "Not enough registers");
@@ -632,67 +638,67 @@ namespace blazefeo
     }
 
 
-    template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void ger(RegisterMatrix<T, M, N, SS>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb)
+    template <bool SOA, bool SOB, typename T, size_t M, size_t N, bool SO>
+    BLAZE_ALWAYS_INLINE void ger(RegisterMatrix<T, M, N, SO>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb)
     {
         ker.template ger<SOA, SOB>(alpha, a, sa, b, sb);
     }
 
 
-    template <bool SOA, bool SOB, typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void ger(RegisterMatrix<T, M, N, SS>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
+    template <bool SOA, bool SOB, typename T, size_t M, size_t N, bool SO>
+    BLAZE_ALWAYS_INLINE void ger(RegisterMatrix<T, M, N, SO>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
     {
         ker.template ger<SOA, SOB>(alpha, a, sa, b, sb, m, n);
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     // [[deprecated("Use load with a matrix argument instead")]]
-    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T const * a, size_t sa)
+    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SO>& ker, T const * a, size_t sa)
     {
         ker.load(1., a, sa);
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T const * a, size_t sa, size_t m, size_t n)
+    template <typename T, size_t M, size_t N, bool SO>
+    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SO>& ker, T const * a, size_t sa, size_t m, size_t n)
     {
         ker.load(1.0, a, sa, m, n);
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     // [[deprecated("Use load with a matrix argument instead")]]
-    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T beta, T const * a, size_t sa)
+    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SO>& ker, T beta, T const * a, size_t sa)
     {
         ker.load(beta, a, sa);
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T beta, T const * a, size_t sa, size_t m, size_t n)
+    template <typename T, size_t M, size_t N, bool SO>
+    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SO>& ker, T beta, T const * a, size_t sa, size_t m, size_t n)
     {
         ker.load(beta, a, sa, m, n);
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
-    BLAZE_ALWAYS_INLINE void store(RegisterMatrix<T, M, N, SS> const& ker, T * a, size_t sa)
+    template <typename T, size_t M, size_t N, bool SO>
+    BLAZE_ALWAYS_INLINE void store(RegisterMatrix<T, M, N, SO> const& ker, T * a, size_t sa)
     {
         ker.store(a, sa);
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS>
+    template <typename T, size_t M, size_t N, bool SO>
     // [[deprecated("Use store with a matrix argument instead")]]
-    BLAZE_ALWAYS_INLINE void store(RegisterMatrix<T, M, N, SS> const& ker, T * a, size_t sa, size_t m, size_t n)
+    BLAZE_ALWAYS_INLINE void store(RegisterMatrix<T, M, N, SO> const& ker, T * a, size_t sa, size_t m, size_t n)
     {
         ker.store(a, sa, m, n);
     }
 
 
-    template <typename T, size_t M, size_t N, size_t SS, typename MT, bool SO>
-    inline bool operator==(RegisterMatrix<T, M, N, SS> const& rm, Matrix<MT, SO> const& m)
+    template <typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2>
+    inline bool operator==(RegisterMatrix<T, M, N, SO1> const& rm, Matrix<MT, SO2> const& m)
     {
         if (rows(m) != rm.rows() || columns(m) != rm.columns())
             return false;
@@ -706,8 +712,8 @@ namespace blazefeo
     }
 
 
-    template <typename MT, bool SO, typename T, size_t M, size_t N, size_t SS>
-    inline bool operator==(Matrix<MT, SO> const& m, RegisterMatrix<T, M, N, SS> const& rm)
+    template <typename MT, bool SO1, typename T, size_t M, size_t N, bool SO2>
+    inline bool operator==(Matrix<MT, SO1> const& m, RegisterMatrix<T, M, N, SO2> const& rm)
     {
         return rm == m;
     }

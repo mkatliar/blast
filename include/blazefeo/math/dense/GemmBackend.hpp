@@ -9,13 +9,13 @@
 namespace blazefeo
 {
     template <
-        typename T, size_t M, size_t N, size_t SS,
+        typename T, size_t M, size_t N, bool SO,
         typename PA, typename PB
     >
         requires MatrixPointer<PA, columnMajor> 
         && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
     BLAZE_ALWAYS_INLINE void gemm_backend(
-        RegisterMatrix<T, M, N, SS>& ker, size_t K, T alpha, PA a, PB b)
+        RegisterMatrix<T, M, N, SO>& ker, size_t K, T alpha, PA a, PB b)
     {
         for (size_t k = 0; k < K; ++k)
         {
@@ -27,12 +27,12 @@ namespace blazefeo
 
 
     template <
-        typename T, size_t M, size_t N, size_t SS,
+        typename T, size_t M, size_t N, bool SO,
         typename PA, typename PB
     >
         requires MatrixPointer<PA, columnMajor> 
         && (MatrixPointer<PB, rowMajor> || MatrixPointer<PB, columnMajor>)
-    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, SS>& ker, size_t K,
+    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, SO>& ker, size_t K,
         T alpha, PA a, PB b, size_t md, size_t nd)
     {
         for (size_t k = 0; k < K; ++k)
@@ -71,7 +71,7 @@ namespace blazefeo
         BLAZE_USER_ASSERT(rows(C) == M && columns(C) == N, "Matrix sizes do not match");
         BLAZE_USER_ASSERT(rows(D) == M && columns(D) == N, "Matrix sizes do not match");
 
-        RegisterMatrix<ET, KM, KN, TILE_SIZE> ker;
+        RegisterMatrix<ET, KM, KN, columnMajor> ker;
 
         if (i + KM <= M)
         {

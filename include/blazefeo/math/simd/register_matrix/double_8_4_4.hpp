@@ -11,7 +11,7 @@
 namespace blazefeo
 {
     template<>
-    inline void RegisterMatrix<double, 8, 4, 4>::load(double beta, double const * ptr, size_t spacing, size_t m, size_t n)
+    inline void RegisterMatrix<double, 8, 4, columnMajor>::load(double beta, double const * ptr, size_t spacing, size_t m, size_t n)
     {
         if (n > 0)
         {
@@ -41,7 +41,7 @@ namespace blazefeo
 
 #if 1
     template<>
-    inline void RegisterMatrix<double, 8, 4, 4>::store(double * ptr, size_t spacing, size_t m, size_t n) const
+    inline void RegisterMatrix<double, 8, 4, columnMajor>::store(double * ptr, size_t spacing, size_t m, size_t n) const
     {
         for (size_t i = 0; i < 2; ++i)
         {

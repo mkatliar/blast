@@ -28,7 +28,7 @@ namespace blazefeo
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<PC>, ET);
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<PD>, ET);
 
-        RegisterMatrix<ET, KM, KN, TILE_SIZE> ker;
+        RegisterMatrix<ET, KM, KN, columnMajor> ker;
 
         if (i + KM <= M)
         {
