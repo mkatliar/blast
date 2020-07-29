@@ -15,9 +15,11 @@
 
 namespace blazefeo
 {
-    template <size_t KM, size_t KN, typename ST1, typename PA, typename ST2, typename PC, typename PD>
-        requires MatrixPointer<PA, columnMajor> && MatrixPointer<PC, columnMajor> && MatrixPointer<PD, columnMajor>
-    BLAZE_ALWAYS_INLINE void syrk_ln_backend(size_t i, size_t M, size_t K, ST1 alpha, PA a, ST2 beta, PC c, PD d)
+    template <size_t KM, size_t KN, typename ST1, typename PA, typename T, typename PC, typename PD>
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) 
+        && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
+        && MatrixPointer<PD, T> && (PD::storageOrder == columnMajor)
+    BLAZE_ALWAYS_INLINE void syrk_ln_backend(size_t i, size_t M, size_t K, ST1 alpha, PA a, T beta, PC c, PD d)
     {
         using ET = std::remove_cv_t<ElementType_t<PA>>;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;

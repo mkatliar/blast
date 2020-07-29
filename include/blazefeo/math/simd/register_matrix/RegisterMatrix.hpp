@@ -104,7 +104,7 @@ namespace blazefeo
         
 
         template <typename P>
-            requires MatrixPointer<P, columnMajor>
+            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(T beta, P p) noexcept;
 
 
@@ -112,7 +112,7 @@ namespace blazefeo
         void load(T beta, T const * ptr, size_t spacing, size_t m, size_t n);
 
         template <typename P>
-            requires MatrixPointer<P, columnMajor>
+            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(T beta, P p, size_t m, size_t n) noexcept;
 
 
@@ -122,20 +122,20 @@ namespace blazefeo
         
         /// @brief Store matrix at location pointed by \a p
         template <typename P>
-            requires MatrixPointer<P, columnMajor>
+            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void store(P p) const noexcept;
 
 
         /// @brief Store lower-triangular part of the matrix at location pointed by \a p.
         template <typename P>
-            requires MatrixPointer<P, columnMajor>
+            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void storeLower(P p) const noexcept;
 
 
         /// @brief Store lower-triangular part of the matrix
         /// of size \a m by \a n at location pointed by \a p.
         template <typename P>
-            requires MatrixPointer<P, columnMajor>
+            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void storeLower(P p, size_t m, size_t n) const noexcept;
 
 
@@ -144,7 +144,7 @@ namespace blazefeo
 
 
         template <typename P>
-            requires MatrixPointer<P, columnMajor>
+            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void store(P p, size_t m, size_t n) const noexcept;
 
 
@@ -161,8 +161,7 @@ namespace blazefeo
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb);
 
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, columnMajor>
-            && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
+            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
         void ger(T alpha, PA a, PB b) noexcept;
 
 
@@ -179,8 +178,7 @@ namespace blazefeo
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n);
 
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, columnMajor>
-            && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
+            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
         void ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept;
 
 
@@ -201,7 +199,7 @@ namespace blazefeo
         /// @brief l pointer to a triangular matrix
         ///
         template <bool LeftSide, bool Upper, bool TransA, typename P>
-            requires MatrixPointer<P, columnMajor>
+            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void trsm(P l);
 
 
@@ -270,7 +268,7 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, columnMajor>
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::load(T beta, P p) noexcept
     {
         #pragma unroll
@@ -294,7 +292,7 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, columnMajor>
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::load(T beta, P p, size_t m, size_t n) noexcept
     {
         #pragma unroll
@@ -318,7 +316,7 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, columnMajor>
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::store(P p) const noexcept
     {
         for (size_t j = 0; j < N; ++j)
@@ -367,7 +365,7 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, columnMajor>
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::store(P p, size_t m, size_t n) const noexcept
     {
         // The compile-time constant size of the j loop in combination with the if() expression
@@ -389,7 +387,7 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, columnMajor>
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::storeLower(P p) const noexcept
     {
         for (size_t j = 0; j < N; ++j)
@@ -412,7 +410,7 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, columnMajor>
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::storeLower(P p, size_t m, size_t n) const noexcept
     {
         for (size_t j = 0; j < N; ++j) if (j < n)
@@ -461,7 +459,7 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, bool SO>
     template <bool LeftSide, bool Upper, bool TransA, typename P>
-        requires MatrixPointer<P, columnMajor>
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsm(P l)
     {
         #pragma unroll
@@ -519,8 +517,7 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PA, typename PB>
-        requires MatrixPointer<PA, columnMajor> 
-        && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b) noexcept
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
@@ -576,8 +573,7 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PA, typename PB>
-        requires MatrixPointer<PA, columnMajor>
-        && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept
     {
         IntrinsicType ax[RM];

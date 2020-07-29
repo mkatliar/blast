@@ -1,6 +1,6 @@
 #pragma once
 
-#include <blazefeo/math/simd/MatrixPointer.hpp>
+#include <blazefeo/Blaze.hpp>
 
 #include <type_traits>
 
@@ -9,7 +9,6 @@ namespace blazefeo
 {
     template <typename T, size_t S, bool SO>
     class StaticMatrixPointer
-    :   public MatrixPointerBase<StaticMatrixPointer<T, S, SO>, SO>
     {
     public:
         using ElementType = T;

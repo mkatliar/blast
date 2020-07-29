@@ -7,15 +7,16 @@
 
 namespace blazefeo
 {
-    template <typename Derived, bool SO>
-    class MatrixPointerBase
+    template <typename P, typename T>
+    concept MatrixPointer = requires(P p, ptrdiff_t i, ptrdiff_t j)
     {
-    protected:
-        MatrixPointerBase() = default;
-        MatrixPointerBase(MatrixPointerBase const&) = default;
+        p.offset(i, j);
+        p.vmove(i);
+        p.hmove(j);
+        p.spacing();
+        p.trans();
+        trans(p);
+
+        // {p.get()} -> std::same_as<T *>;
     };
-
-
-    template <typename P, bool SO>
-    concept MatrixPointer = std::is_base_of_v<MatrixPointerBase<P, SO>, P>;
 }
