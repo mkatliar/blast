@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blazefeo/Blaze.hpp>
+#include <blazefeo/math/simd/Simd.hpp>
 
 #include <type_traits>
 
@@ -12,6 +13,9 @@ namespace blazefeo
     {
     public:
         using ElementType = T;
+        using IntrinsicType = typename Simd<std::remove_cv_t<T>>::IntrinsicType;
+        using MaskType = typename Simd<std::remove_cv_t<T>>::MaskType;
+
         static bool constexpr storageOrder = SO;
 
         
@@ -34,18 +38,33 @@ namespace blazefeo
         StaticMatrixPointer& operator=(StaticMatrixPointer const&) = default;
 
 
-        T * get() const noexcept
+        IntrinsicType load(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
-            return ptr_;
+            return blazefeo::load<SS>(ptrOffset(i, j));
+        }
+
+
+        IntrinsicType broadcast(ptrdiff_t i, ptrdiff_t j) const noexcept
+        {
+            return blazefeo::broadcast<SS>(ptrOffset(i, j));
+        }
+
+
+        void store(ptrdiff_t i, ptrdiff_t j, IntrinsicType val) const noexcept
+        {
+            blazefeo::store(ptrOffset(i, j), val);
+        }
+
+
+        void maskStore(ptrdiff_t i, ptrdiff_t j, MaskType mask, IntrinsicType val) const noexcept
+        {
+            blazefeo::maskstore(ptrOffset(i, j), mask, val);
         }
 
 
         StaticMatrixPointer constexpr offset(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
-            if (SO == columnMajor)
-                return {ptr_ + i + spacing() * j};
-            else
-                return {ptr_ + spacing() * i + j};
+            return {ptrOffset(i, j)};
         }
 
 
@@ -80,6 +99,18 @@ namespace blazefeo
 
 
     private:
+        static size_t constexpr SS = Simd<std::remove_cv_t<T>>::size;
+
+        
+        T * ptrOffset(ptrdiff_t i, ptrdiff_t j) const noexcept
+        {
+            if (SO == columnMajor)
+                return ptr_ + i + spacing() * j;
+            else
+                return ptr_ + spacing() * i + j;
+        }
+
+
         T * ptr_;
     };
 

@@ -39,7 +39,6 @@ namespace blazefeo :: testing
     TYPED_TEST(DynamicMatrixPointerTest, testCtor)
     {
         typename TestFixture::Pointer p {this->m_.data(), this->m_.spacing()};
-        EXPECT_EQ(p.get(), this->m_.data());
         EXPECT_EQ(p.spacing(), this->m_.spacing());
     }
 
@@ -48,7 +47,6 @@ namespace blazefeo :: testing
     {
         size_t const i = 1, j = 2;
         typename TestFixture::Pointer p = ptr(this->m_, i, j);
-        EXPECT_EQ(p.get(), &this->m_(i, j));
         EXPECT_EQ(p.spacing(), this->m_.spacing());
     }
 }
