@@ -20,3 +20,7 @@ target_link_libraries(bench-eigen
     bench-blazefeo-common
     ${CMAKE_THREAD_LIBS_INIT}
 )
+
+target_compile_options(bench-eigen
+    PRIVATE "-Wno-deprecated-anon-enum-enum-conversion"
+)
