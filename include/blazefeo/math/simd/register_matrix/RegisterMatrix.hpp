@@ -4,6 +4,7 @@
 #include <blazefeo/math/simd/MatrixPointer.hpp>
 
 #include <blaze/math/StorageOrder.h>
+#include <blaze/math/Matrix.h>
 #include <blaze/system/Inline.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/Exception.h>
@@ -34,11 +35,13 @@ namespace blazefeo
 
         /// @brief Type of matrix elements
         using ElementType = T;
+        using CompositeType = RegisterMatrix const&;              //!< Data type for composite expression templates.
 
 
         /// @brief Default ctor
         RegisterMatrix()
         {
+            reset();
         }
 
 
@@ -94,7 +97,9 @@ namespace blazefeo
 
 
         /// @brief load from memory
+        // [[deprecated("Use load with a matrix argument instead")]]
         void load(T beta, T const * ptr, size_t spacing);
+        
 
         template <typename P>
             requires MatrixPointer<P, columnMajor>
@@ -642,9 +647,10 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
+    // [[deprecated("Use load with a matrix argument instead")]]
     BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T const * a, size_t sa)
     {
-        ker.load(1.0, a, sa);
+        ker.load(1., a, sa);
     }
 
 
@@ -656,6 +662,7 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
+    // [[deprecated("Use load with a matrix argument instead")]]
     BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SS>& ker, T beta, T const * a, size_t sa)
     {
         ker.load(beta, a, sa);
@@ -677,6 +684,7 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, size_t SS>
+    // [[deprecated("Use store with a matrix argument instead")]]
     BLAZE_ALWAYS_INLINE void store(RegisterMatrix<T, M, N, SS> const& ker, T * a, size_t sa, size_t m, size_t n)
     {
         ker.store(a, sa, m, n);

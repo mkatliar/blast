@@ -4,6 +4,9 @@ find_package(Threads REQUIRED)
 #~~~~~~~~~~~~~~~~
 add_executable(bench-blazefeo
     Main.cpp
+
+    math/expressions/AssignDensePanel.cpp
+    math/expressions/AssignPanelDense.cpp
     
     register_matrix/Ger.cpp
     register_matrix/Store.cpp

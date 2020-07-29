@@ -3,13 +3,22 @@
 #include <blazefeo/math/PanelMatrix.hpp>
 #include <blazefeo/math/views/submatrix/BaseTemplate.hpp>
 #include <blazefeo/math/constraints/Submatrix.hpp>
-#include <blazefeo/system/Tile.hpp>
+#include <blazefeo/math/simd/Simd.hpp>
+#include <blazefeo/math/panel/PanelSize.hpp>
+#include <blazefeo/math/constraints/PanelMatrix.hpp>
 
-#include <blaze/math/constraints/Submatrix.h>
-#include <blaze/math/constraints/Symmetric.h>
+#include <blaze/math/Constraints.h>
 #include <blaze/math/traits/SubmatrixTrait.h>
+#include <blaze/math/expressions/View.h>
+#include <blaze/math/views/Check.h>
+#include <blaze/math/typetraits/HasMutableDataAccess.h>
+#include <blaze/math/Aliases.h>
 #include <blaze/util/constraints/Pointer.h>
 #include <blaze/util/constraints/Reference.h>
+#include <blaze/util/typetraits/IsConst.h>
+#include <blaze/util/TypeList.h>
+#include <blaze/util/Exception.h>
+#include <blaze/util/Assert.h>
 
 #include <algorithm>
 #include <iterator>
@@ -30,8 +39,7 @@ namespace blazefeo
     // This Specialization of PanelSubmatrix adapts the class template to the requirements of unaligned
     // row-major panel submatrices.
     */
-    template< typename MT       // Type of the panel matrix
-            , bool SO >  // Compile time submatrix arguments
+    template <typename MT, bool SO>
     class PanelSubmatrix<MT, SO>
     : public View<PanelMatrix<PanelSubmatrix<MT, SO>, SO>>
     {
@@ -86,11 +94,11 @@ namespace blazefeo
                     BLAZE_THROW_INVALID_ARGUMENT( "Invalid submatrix specification" );
                 }
 
-                if (IsRowMajorMatrix_v<MT> && column() % tileSize_ > 0)
+                if (IsRowMajorMatrix_v<MT> && column() % panelSize_ > 0)
                     BLAZE_THROW_LOGIC_ERROR("Submatrices of a row-major panel matrix which are not horizontally aligned on panel boundary "
                         "are currently not supported");
 
-                if (IsColumnMajorMatrix_v<MT> && row() % tileSize_ > 0)
+                if (IsColumnMajorMatrix_v<MT> && row() % panelSize_ > 0)
                     BLAZE_THROW_LOGIC_ERROR("Submatrices of a column-major panel matrix which are not vertically aligned on panel boundary "
                         "are currently not supported");
             }
@@ -132,6 +140,16 @@ namespace blazefeo
         {
             return n_;
         };
+
+
+        /// @brief Offset of the first matrix element from the start of the panel.
+        ///
+        /// In rows for column-major matrices, in columns for row-major matrices.
+        size_t constexpr offset() const
+        {
+            return SO == (columnMajor ? i_ : j_) % panelSize_;
+        }
+
 
         MT& operand() noexcept
         {
@@ -178,6 +196,45 @@ namespace blazefeo
             BLAZE_USER_ASSERT( j < columns(), "Invalid column access index" );
 
             return const_cast<const MT&>( matrix_ )(row()+i, column()+j);
+        }
+
+
+        template <size_t SS>
+        auto load(size_t i, size_t j) const
+        {
+            if( i >= rows() ) {
+                BLAZE_THROW_OUT_OF_RANGE( "Invalid row access index" );
+            }
+            if( j >= columns() ) {
+                BLAZE_THROW_OUT_OF_RANGE( "Invalid column access index" );
+            }
+            return matrix_.template load<SS>(row() + i, column() + j);
+        }
+
+
+        template <typename T>
+        void store(size_t i, size_t j, T val)
+        {
+            if( i >= rows() ) {
+                BLAZE_THROW_OUT_OF_RANGE( "Invalid row access index" );
+            }
+            if( j >= columns() ) {
+                BLAZE_THROW_OUT_OF_RANGE( "Invalid column access index" );
+            }
+
+            size_t constexpr SS = SimdSize_v<T>;
+
+            if (i + SS <= rows())
+            {
+                matrix_.store(row() + i, column() + j, val);
+            }
+            else
+            {
+                IntType_t<T> const rem = rows() % SS;
+                MaskType_t<T> const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType_t<T>, SS>());
+
+                maskstore(&matrix_(row() + i, column() + j), mask, val);
+            }
         }
 
 
@@ -230,7 +287,7 @@ namespace blazefeo
         
 
     private:
-        static size_t constexpr tileSize_ = TileSize_v<ElementType>;
+        static size_t constexpr panelSize_ = PanelSize_v<ElementType>;
 
         Operand matrix_;        //!< The matrix containing the submatrix.
         
@@ -248,7 +305,7 @@ namespace blazefeo
         //**********************************************************************************************
 
         //**Compile time checks*************************************************************************
-        // BLAZE_CONSTRAINT_MUST_BE_DENSE_MATRIX_TYPE    ( MT );
+        BLAZEFEO_CONSTRAINT_MUST_BE_PANEL_MATRIX_TYPE    ( MT );
         BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE ( MT );
         BLAZE_CONSTRAINT_MUST_NOT_BE_TRANSEXPR_TYPE   ( MT );
         BLAZE_CONSTRAINT_MUST_NOT_BE_SUBMATRIX_TYPE   ( MT );

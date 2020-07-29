@@ -2,7 +2,7 @@
 
 #include <blazefeo/math/PanelMatrix.hpp>
 #include <blazefeo/math/views/submatrix/BaseTemplate.hpp>
-#include <blazefeo/system/Tile.hpp>
+#include <blazefeo/math/panel/PanelSize.hpp>
 #include <blazefeo/system/CacheLine.hpp>
 
 #include <blaze/util/Memory.h>
@@ -28,8 +28,6 @@ namespace blazefeo
     class DynamicPanelMatrix
     :   public PanelMatrix<DynamicPanelMatrix<Type, SO>, SO>
     {
-        BLAZE_STATIC_ASSERT_MSG((SO == columnMajor), "Row-major panel matrices are not implemented");
-        
     public:
         //**Type definitions****************************************************************************
         using This          = DynamicPanelMatrix<Type, SO>;   //!< Type of this StaticPanelMatrix instance.
@@ -52,8 +50,12 @@ namespace blazefeo
         explicit DynamicPanelMatrix(size_t m, size_t n)
         :   m_(m)
         ,   n_(n)
-        ,   spacing_(tileSize_ * nextMultiple(n, tileSize_))
-        ,   capacity_(nextMultiple(m, tileSize_) * nextMultiple(n, tileSize_))
+        ,   spacing_(
+                SO == columnMajor 
+                ? panelSize_ * nextMultiple(n, panelSize_)
+                : nextMultiple(m, panelSize_) * panelSize_
+            )
+        ,   capacity_(nextMultiple(m, panelSize_) * nextMultiple(n, panelSize_))
         // Initialize padding elements to 0 to prevent denorms in calculations.
         // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
         ,   v_(new(std::align_val_t {alignment_}) Type[capacity_] {})
@@ -103,6 +105,44 @@ namespace blazefeo
         }
 
 
+        template< typename MT    // Type of the right-hand side matrix
+            , bool SO2 >      // Storage order of the right-hand side matrix
+        DynamicPanelMatrix& operator=(Matrix<MT, SO2> const& rhs)
+        {
+            // using blaze::assign;
+
+            // using TT = decltype( trans( *this ) );
+            // using CT = decltype( ctrans( *this ) );
+            // using IT = decltype( inv( *this ) );
+
+            // if( (~rhs).rows() != M || (~rhs).columns() != N ) {
+            //     BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to static matrix" );
+            // }
+
+            // if( IsSame_v<MT,TT> && (~rhs).isAliased( this ) ) {
+            //     transpose( typename IsSquare<This>::Type() );
+            // }
+            // else if( IsSame_v<MT,CT> && (~rhs).isAliased( this ) ) {
+            //     ctranspose( typename IsSquare<This>::Type() );
+            // }
+            // else if( !IsSame_v<MT,IT> && (~rhs).canAlias( this ) ) {
+            //     StaticPanelMatrix tmp( ~rhs );
+            //     assign( *this, tmp );
+            // }
+            // else {
+            //     if( IsSparseMatrix_v<MT> )
+            //         reset();
+            //     assign( *this, ~rhs );
+            // }
+
+            // BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
+
+            assign(*this, ~rhs);
+
+            return *this;
+        }
+
+
         ConstReference operator()(size_t i, size_t j) const noexcept
         {
             return v_[elementIndex(i, j)];
@@ -127,25 +167,18 @@ namespace blazefeo
         }
 
 
-        size_t spacing() const
+        size_t spacing() const noexcept
         {
             return spacing_;
         }
 
 
-        void pack(Type const * data, size_t lda)
+        /// @brief Offset of the first matrix element from the start of the panel.
+        ///
+        /// In rows for column-major matrices, in columns for row-major matrices.
+        size_t constexpr offset() const
         {
-            for (size_t i = 0; i < m_; ++i)
-                for (size_t j = 0; j < n_; ++j)
-                    (*this)(i, j) = data[i + lda * j];
-        }
-
-
-        void unpack(Type * data, size_t lda) const
-        {
-            for (size_t i = 0; i < m_; ++i)
-                for (size_t j = 0; j < n_; ++j)
-                    data[i + lda * j] = (*this)(i, j);
+            return 0;
         }
 
 
@@ -157,24 +190,47 @@ namespace blazefeo
         }
 
 
+        Type * data() noexcept
+        {
+            return v_;
+        }
+
+
+        Type const * data() const noexcept
+        {
+            return v_;
+        }
+
+
         Type * ptr(size_t i, size_t j)
         {
-            // BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            // BLAZE_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
             return v_ + elementIndex(i, j);
         }
 
 
         Type const * ptr(size_t i, size_t j) const
         {
-            // BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            // BLAZE_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
             return v_ + elementIndex(i, j);
+        }
+
+
+        template <size_t SS>
+        auto load(size_t i, size_t j) const
+        {
+            BLAZE_INTERNAL_ASSERT(i < m_, "Invalid row access index");
+            BLAZE_INTERNAL_ASSERT(j < n_, "Invalid column access index");
+            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
+            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
+
+            return blazefeo::load<SS>(v_ + elementIndex(i, j));
         }
 
 
     private:
         static size_t constexpr alignment_ = CACHE_LINE_SIZE;
-        static size_t constexpr tileSize_ = TileSize_v<Type>;
-        static size_t constexpr elementsPerTile_ = tileSize_ * tileSize_;
+        static size_t constexpr panelSize_ = PanelSize_v<Type>;
 
         size_t m_;
         size_t n_;
@@ -186,7 +242,9 @@ namespace blazefeo
 
         size_t elementIndex(size_t i, size_t j) const noexcept
         {
-            return i / tileSize_ * spacing_ + i % tileSize_ + j * tileSize_;
+            return SO == columnMajor 
+                ? i / panelSize_ * spacing_ + i % panelSize_ + j * panelSize_
+                : j / panelSize_ * spacing_ + j % panelSize_ + i * panelSize_;
         }
     };
 }

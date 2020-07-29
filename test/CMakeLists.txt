@@ -18,10 +18,16 @@ add_executable(test-blazefeo
     math/dense/TrmmTest.cpp
 
     math/panel/StaticPanelMatrixTest.cpp
-    math/panel/SubmatrixTest.cpp
     math/panel/DynamicPanelMatrixTest.cpp
     math/panel/GemmTest.cpp
     math/panel/PotrfTest.cpp
+
+    math/expressions/PMatTransExprTest.cpp
+    math/expressions/AssignPanelDenseTest.cpp
+    math/expressions/AssignDensePanelTest.cpp
+
+    math/views/RowTest.cpp
+    math/views/SubmatrixTest.cpp
 )
 
 target_link_libraries(test-blazefeo PRIVATE

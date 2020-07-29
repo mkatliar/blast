@@ -3,14 +3,15 @@
 #include <blazefeo/math/Forward.hpp>
 #include <blazefeo/math/panel/Gemm.hpp>
 #include <blazefeo/math/views/submatrix/BaseTemplate.hpp>
-#include <blazefeo/system/Tile.hpp>
+#include <blazefeo/math/simd/Simd.hpp>
+#include <blazefeo/math/panel/PanelSize.hpp>
 #include <blazefeo/system/CacheLine.hpp>
 
 #include <blaze/math/shims/NextMultiple.h>
 #include <blaze/math/dense/DenseIterator.h>
 #include <blaze/util/typetraits/AlignmentOf.h>
 #include <blaze/math/typetraits/HasMutableDataAccess.h>
-#include <blaze/math/traits/SubmatrixTrait.h>
+#include <blaze/util/constraints/Vectorizable.h>
 
 #include <initializer_list>
 
@@ -30,8 +31,6 @@ namespace blazefeo
     class StaticPanelMatrix
     :   public PanelMatrix<StaticPanelMatrix<Type, M, N, SO>, SO>
     {
-        BLAZE_STATIC_ASSERT_MSG((SO == columnMajor), "Row-major panel matrices are not implemented");
-
     public:
         //**Type definitions****************************************************************************
         using This          = StaticPanelMatrix<Type, M, N, SO>;   //!< Type of this StaticPanelMatrix instance.
@@ -136,42 +135,73 @@ namespace blazefeo
         }
 
 
-        void pack(Type const * data, size_t lda)
+        /// @brief Offset of the first matrix element from the start of the panel.
+        ///
+        /// In rows for column-major matrices, in columns for row-major matrices.
+        size_t constexpr offset() const
         {
-            for (size_t i = 0; i < M; ++i)
-                for (size_t j = 0; j < N; ++j)
-                    (*this)(i, j) = data[i + lda * j];
+            return 0;
         }
 
 
-        void unpack(Type * data, size_t lda) const
+        Type * data() noexcept
         {
-            for (size_t i = 0; i < M; ++i)
-                for (size_t j = 0; j < N; ++j)
-                    data[i + lda * j] = (*this)(i, j);
+            return v_;
+        }
+
+
+        Type const * data() const noexcept
+        {
+            return v_;
         }
 
 
         Type * ptr(size_t i, size_t j)
         {
-            // BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            // BLAZE_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
             return v_ + elementIndex(i, j);
         }
 
 
         Type const * ptr(size_t i, size_t j) const
         {
-            // BLAZE_USER_ASSERT(i % tileSize_ == 0, "Row index not aligned to panel boundary");
+            // BLAZE_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
             return v_ + elementIndex(i, j);
         }
 
 
+        template <size_t SS>
+        auto load(size_t i, size_t j) const
+        {
+            BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
+            BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
+            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
+            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
+
+            return blazefeo::load<SS>(v_ + elementIndex(i, j));
+        }
+
+
+        template <typename T>
+        void store(size_t i, size_t j, T val)
+        {
+            BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
+            BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
+            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
+            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
+
+            // We never use maskstore here because we have padding
+            blazefeo::store(v_ + elementIndex(i, j), val);
+        }
+
+
     private:
-        static size_t constexpr tileSize_ = TileSize_v<Type>;
-        static size_t constexpr elementsPerTile_ = tileSize_ * tileSize_;
-        static size_t constexpr panels_ = M / tileSize_ + (M % tileSize_ > 0);
-        static size_t constexpr tileColumns_ = N / tileSize_ + (N % tileSize_ > 0);
-        static size_t constexpr spacing_ = tileColumns_ * elementsPerTile_;
+        static size_t constexpr panelSize_ = PanelSize_v<Type>;
+        static size_t constexpr elementsPerTile_ = panelSize_ * panelSize_;
+        static size_t constexpr tileRows_ = M / panelSize_ + (M % panelSize_ > 0);
+        static size_t constexpr tileColumns_ = N / panelSize_ + (N % panelSize_ > 0);
+        static size_t constexpr panels_ = SO == columnMajor ? tileRows_ : tileColumns_;
+        static size_t constexpr spacing_ = (SO == columnMajor ? tileColumns_ : tileRows_) * elementsPerTile_;
         static size_t constexpr capacity_ = panels_ * spacing_;
 
         // Alignment of the data elements.
@@ -183,8 +213,13 @@ namespace blazefeo
 
         size_t elementIndex(size_t i, size_t j) const
         {
-            return i / tileSize_ * spacing_ + i % tileSize_ + j * tileSize_;
+            return SO == columnMajor 
+                ? i / panelSize_ * spacing_ + i % panelSize_ + j * panelSize_
+                : j / panelSize_ * spacing_ + j % panelSize_ + i * panelSize_;
         }
+
+
+        BLAZE_CONSTRAINT_MUST_BE_VECTORIZABLE_TYPE(Type);
     };
 
 

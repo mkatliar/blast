@@ -6,6 +6,7 @@
 #include <immintrin.h>
 
 #include <cstdint>
+#include <type_traits>
 
 
 namespace blazefeo
@@ -39,6 +40,49 @@ namespace blazefeo
     };
 
 
+    template <typename T, size_t N>
+    using IntrinsicType_t = typename Simd<T, N>::IntrinsicType;
+
+
+    template <typename T>
+    struct SimdTraits;
+
+
+    template <>
+    struct SimdTraits<__m256d>
+    {
+        using ScalarType = double;
+        using MaskType = __m256i;
+        using IntType = long long;
+        static size_t constexpr size = 4;
+    };
+
+
+    template <>
+    struct SimdTraits<__m256>
+    {
+        using ScalarType = float;
+        using MaskType = __m256i;
+        using IntType = int;
+        static size_t constexpr size = 8;
+    };
+
+
+    template <typename T>
+    using ScalarType_t = typename SimdTraits<T>::ScalarType;
+
+
+    template <typename T>
+    using MaskType_t = typename SimdTraits<T>::MaskType;
+
+    template <typename T>
+    using IntType_t = typename SimdTraits<T>::IntType;
+
+
+    template <typename T>
+    size_t constexpr SimdSize_v = SimdTraits<T>::size;
+	
+	
     template <typename T, size_t SIMD_SIZE>
     size_t constexpr RegisterCapacity_v = Simd<T, SIMD_SIZE>::registerCapacity;
 

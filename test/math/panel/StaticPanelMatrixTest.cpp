@@ -6,28 +6,41 @@
 
 namespace blazefeo :: testing
 {
-    TEST(StaticPanelMatrixTest, testIsPanelMatrix)
+    template <typename Real>
+    class StaticPanelMatrixTest
+    :   public Test
     {
-        using MatrixType = StaticPanelMatrix<double, 5, 7>;
+    };
+
+
+    TYPED_TEST_SUITE_P(StaticPanelMatrixTest);
+
+
+    TYPED_TEST_P(StaticPanelMatrixTest, testIsPanelMatrix)
+    {
+        using MatrixType = StaticPanelMatrix<TypeParam, 5, 7>;
         EXPECT_TRUE(IsPanelMatrix_v<MatrixType>);
     }
 
 
-    TEST(StaticPanelMatrixTest, testPanels)
+    TYPED_TEST_P(StaticPanelMatrixTest, testPanels)
     {
-        EXPECT_EQ((StaticPanelMatrix<double, 5, 7, columnMajor>().panels()), 2);
-        EXPECT_EQ((StaticPanelMatrix<double, 8, 7, columnMajor>().panels()), 2);
+        size_t constexpr SS = PanelSize_v<TypeParam>;
+        EXPECT_EQ((StaticPanelMatrix<TypeParam, 2 * SS, 1, columnMajor>().panels()), 2);
+        EXPECT_EQ((StaticPanelMatrix<TypeParam, 2 * SS + 1, 1, columnMajor>().panels()), 3);
     }
 
-    TEST(StaticPanelMatrixTest, testElementAccess)
+    
+    TYPED_TEST_P(StaticPanelMatrixTest, testElementAccess)
     {
-        size_t constexpr M = 5;
-        size_t constexpr N = 7;
+        size_t constexpr SS = PanelSize_v<TypeParam>;
+        size_t constexpr M = 2 * SS + 1;
+        size_t constexpr N = 3 * SS + 2;
 
-        blaze::StaticMatrix<double, M, N> A_ref;
+        blaze::StaticMatrix<TypeParam, M, N> A_ref;
         randomize(A_ref);
 
-        StaticPanelMatrix<double, M, N, columnMajor> A;
+        StaticPanelMatrix<TypeParam, M, N, columnMajor> A;
         for (size_t i = 0; i < M; ++i)
             for (size_t j = 0; j < N; ++j)
                 A(i, j) = A_ref(i, j);
@@ -43,56 +56,60 @@ namespace blazefeo :: testing
     }
 
 
-    TEST(StaticPanelMatrixTest, testPack)
+    TYPED_TEST_P(StaticPanelMatrixTest, testLoad)
     {
-        size_t constexpr M = 5;
-        size_t constexpr N = 7;
-        size_t constexpr P = 4;
+        size_t constexpr SS = PanelSize_v<TypeParam>;
+        size_t constexpr M = 2 * SS + 1;
+        size_t constexpr N = 3 * SS + 2;
 
-        blaze::StaticMatrix<double, M, N, blaze::columnMajor> A_ref;
-        randomize(A_ref);
+        StaticPanelMatrix<TypeParam, M, N, columnMajor> A;
+        randomize(A);
 
-        StaticPanelMatrix<double, M, N, columnMajor> A;
-        A.pack(data(A_ref), spacing(A_ref));
-
-        auto const& A_cref = A;
-
-        for (size_t i = 0; i < M; ++i)
+        for (size_t i = 0; i < M; i += SS)
             for (size_t j = 0; j < N; ++j)
-                EXPECT_EQ(A(i, j), A_ref(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+            {
+                auto const xmm = A.template load<SS>(i, j);
+
+                for (size_t k = 0; k < SS; ++k)
+                    ASSERT_EQ(xmm[k], A(i + k, j)) << "element mismatch at i,j,k=" << i << "," << j << "," << k;
+            }
     }
 
 
-    TEST(StaticPanelMatrixTest, testUnpack)
+    TYPED_TEST_P(StaticPanelMatrixTest, testStore)
     {
-        size_t constexpr M = 5;
-        size_t constexpr N = 7;
-        size_t constexpr P = 4;        
+        size_t constexpr SS = PanelSize_v<TypeParam>;
+        size_t constexpr M = 2 * SS + 1;
+        size_t constexpr N = 3 * SS + 2;
 
-        StaticPanelMatrix<double, M, N, columnMajor> A;
-        for (size_t i = 0; i < M; ++i)
+        StaticPanelMatrix<TypeParam, M, N, columnMajor> A;
+        IntrinsicType_t<TypeParam, SS> val;
+
+        for (size_t i = 0; i < SS; ++i)
+            val[i] = TypeParam(i + 1);
+
+        for (size_t i = 0; i < M; i += SS)
             for (size_t j = 0; j < N; ++j)
-                blaze::randomize(A(i, j));
+            {
+                A = TypeParam(0.);
+                A.store(i, j, val);
 
-        blaze::StaticMatrix<double, M, N, blaze::columnMajor> A1;
-        A.unpack(data(A1), spacing(A1));
-
-        for (size_t i = 0; i < M; ++i)
-            for (size_t j = 0; j < N; ++j)
-                EXPECT_EQ(A(i, j), A1(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+                for (size_t k = 0; k < SS && i + k < rows(A); ++k)
+                    ASSERT_EQ(A(i + k, j), val[k]) << "element mismatch at i,j,k=" << i << "," << j << "," << k;
+            }
     }
 
 
-    TEST(StaticPanelMatrixTest, DISABLED_testPMatPMatMulAssign)
+    TYPED_TEST_P(StaticPanelMatrixTest, testPMatPMatMulAssign)
     {
         size_t constexpr M = 5;
         size_t constexpr N = 7;
         size_t constexpr K = 10;
         size_t constexpr P = 4;        
 
-        StaticPanelMatrix<double, M, K, columnMajor> A;
-        StaticPanelMatrix<double, K, N, columnMajor> B;
-        StaticPanelMatrix<double, M, N, columnMajor> D;
+        StaticPanelMatrix<TypeParam, M, K, columnMajor> A;
+        StaticPanelMatrix<TypeParam, K, N, columnMajor> B;
+        StaticPanelMatrix<TypeParam, M, N, columnMajor> D;
 
         randomize(A);
         randomize(B);
@@ -105,16 +122,16 @@ namespace blazefeo :: testing
     }
 
 
-    TEST(StaticPanelMatrixTest, testPMatTPMatMulAssign)
+    TYPED_TEST_P(StaticPanelMatrixTest, testPMatTPMatMulAssign)
     {
         size_t constexpr M = 5;
         size_t constexpr N = 7;
         size_t constexpr K = 10;
         size_t constexpr P = 4;        
 
-        StaticPanelMatrix<double, M, K, columnMajor> A;
-        StaticPanelMatrix<double, N, K, columnMajor> B;
-        StaticPanelMatrix<double, M, N, columnMajor> D;
+        StaticPanelMatrix<TypeParam, M, K, columnMajor> A;
+        StaticPanelMatrix<TypeParam, N, K, columnMajor> B;
+        StaticPanelMatrix<TypeParam, M, N, columnMajor> D;
 
         randomize(A);
         randomize(B);
@@ -136,4 +153,19 @@ namespace blazefeo :: testing
         //     for (size_t j = 0; j < N; ++j)
         //         EXPECT_EQ(A(i, j), A1(i, j)) << "element mismatch at (" << i << ", " << j << ")";
     }
+
+
+    REGISTER_TYPED_TEST_SUITE_P(StaticPanelMatrixTest,
+        testIsPanelMatrix,
+        testPanels,
+        testElementAccess,
+        testLoad,
+        testStore,
+        testPMatPMatMulAssign,
+        testPMatTPMatMulAssign
+    );
+
+
+    INSTANTIATE_TYPED_TEST_SUITE_P(double, StaticPanelMatrixTest, double);
+    INSTANTIATE_TYPED_TEST_SUITE_P(float, StaticPanelMatrixTest, float);
 }

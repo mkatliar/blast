@@ -31,7 +31,7 @@ namespace blazefeo :: testing
             llh(blaze_A, blaze_L);
 
             DynamicPanelMatrix<Real, columnMajor> A(M, M), L(M, M), A1(M, M);
-            A.pack(data(blaze_A), spacing(blaze_A));
+            A = blaze_A;
             
             // Do potrf
             potrf(A, L);

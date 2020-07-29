@@ -32,26 +32,113 @@ namespace blazefeo :: testing
         
     TYPED_TEST_SUITE(RegisterMatrixTest, MyTypes);
 
+    
+    TYPED_TEST(RegisterMatrixTest, testDefaultCtor)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
 
+        RM ker;
+        
+        for (size_t i = 0; i < ker.rows(); ++i)
+            for (size_t j = 0; j < ker.columns(); ++j)
+                ASSERT_EQ(ker(i, j), ET(0.));
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testReset)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
+        randomize(A);
+
+        RM ker;
+        ET const beta = 0.1;
+        ker.load(beta, A.ptr(0, 0), spacing(A));
+
+        for (size_t i = 0; i < ker.rows(); ++i)
+            for (size_t j = 0; j < ker.columns(); ++j)
+                ASSERT_EQ(ker(i, j), beta * A(i, j));
+
+        ker.reset();
+        for (size_t i = 0; i < ker.rows(); ++i)
+            for (size_t j = 0; j < ker.columns(); ++j)
+                ASSERT_EQ(ker(i, j), ET(0.));
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testLoad)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
+        randomize(A);
+
+        RM ker;
+        ET const beta = 0.1;
+        ker.load(beta, A.ptr(0, 0), spacing(A));
+
+        for (size_t i = 0; i < Traits::rows; ++i)
+            for (size_t j = 0; j < Traits::columns; ++j)
+                EXPECT_EQ(ker(i, j), beta * A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testPartialLoad)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
+        randomize(A);
+
+        for (size_t m = 0; m <= rows(A); ++m)
+        {
+            for (size_t n = 0; n <= columns(A); ++n)
+            {
+                RM ker;
+                ET const beta = 0.1;
+                ker.load(beta, A.ptr(0, 0), spacing(A), m, n);
+
+                for (size_t i = 0; i < m; ++i)
+                    for (size_t j = 0; j < n; ++j)
+                        ASSERT_EQ(ker(i, j), beta * A(i, j)) 
+                        << "load error for size (" << m << ", " << n << "); "
+                        << "element mismatch at (" << i << ", " << j << ")" ;
+            }
+        }
+    }
+	
+	
     TYPED_TEST(RegisterMatrixTest, testLoadStore)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A_ref;
-        randomize(A_ref);
-
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
-        A.pack(data(A_ref), spacing(A_ref));
+        randomize(A);
 
         RM ker;
-        load(ker, A.ptr(0, 0), A.spacing());
-        store(ker, B.ptr(0, 0), B.spacing());
+        ker.load(1., A.ptr(0, 0), spacing(A));
+
+        // std::cout << "A_ref=\n" << A_ref << std::endl;
+        // std::cout << "A=\n" << A << std::endl;
+        // std::cout << "ker=\n" << ker << std::endl;
+
+        ker.store(B.ptr(0, 0), spacing(B));
+        // std::cout << "B=\n" << B << std::endl;
 
         for (size_t i = 0; i < Traits::rows; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)
-                EXPECT_EQ(B(i, j), A_ref(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+                EXPECT_EQ(B(i, j), A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
     }
 
 
@@ -159,7 +246,7 @@ namespace blazefeo :: testing
         randomize(A_ref);
 
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
-        A.pack(data(A_ref), spacing(A_ref));
+        A = A_ref;
 
         RM ker;
         load(ker, A.ptr(0, 0), A.spacing());
@@ -207,6 +294,43 @@ namespace blazefeo :: testing
     }
 
 
+    TYPED_TEST(RegisterMatrixTest, testGerNT)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        blaze::DynamicMatrix<ET, blaze::columnMajor> ma(Traits::rows, 1);
+        blaze::DynamicMatrix<ET, blaze::columnMajor> mb(Traits::columns, 1);
+        blaze::StaticMatrix<ET, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
+
+        randomize(ma);
+        randomize(mb);
+        randomize(mc);
+
+        StaticPanelMatrix<ET, Traits::rows, 1, columnMajor> A;
+        StaticPanelMatrix<ET, Traits::columns, 1, columnMajor> B;
+        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
+
+        A = ma;
+        B = mb;
+        C = mc;
+
+        // std::cout << "A=\n" << A << std::endl;
+        // std::cout << "B=\n" << B << std::endl;
+        // std::cout << "C=\n" << C << std::endl;
+
+        TypeParam ker;
+        ker.load(1., C.ptr(0, 0), spacing(C));
+        ger<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.ptr(0, 0), A.spacing(), B.ptr(0, 0), B.spacing());
+        ker.store(D.ptr(0, 0), spacing(D));
+        
+        md = D;
+
+        BLAZEFEO_EXPECT_EQ(md, evaluate(mc + ma * trans(mb)));
+    }
+	
+	
     TYPED_TEST(RegisterMatrixTest, testGerCc)
     {
         using RM = TypeParam;
@@ -273,9 +397,9 @@ namespace blazefeo :: testing
         StaticPanelMatrix<ET, Traits::columns, 1, columnMajor> B;
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
 
-        A.pack(data(ma), spacing(ma));
-        B.pack(data(mb), spacing(mb));
-        C.pack(data(mc), spacing(mc));
+        A = ma;
+        B = mb;
+        C = mc;
 
         // std::cout << "A=\n" << A << std::endl;
         // std::cout << "B=\n" << B << std::endl;
@@ -383,7 +507,7 @@ namespace blazefeo :: testing
                 submatrix(C, 0, 0, n, n) = C0;
                 randomize(submatrix(C, n, 0, m - n, n));
 
-                A.pack(data(C), spacing(C));
+                A = C;
             }
 
             {
@@ -440,8 +564,8 @@ namespace blazefeo :: testing
         StaticMatrix<ET, Traits::columns, Traits::columns, columnMajor> LL;
         StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> BB, XX;
 
-        L.unpack(LL.data(), LL.spacing());
-        B.unpack(BB.data(), BB.spacing());
+        LL = L;
+        BB = B;
 
         // std::cout << "BB=\n" << BB << std::endl;
         // std::cout << "LL=\n" << LL << std::endl;
