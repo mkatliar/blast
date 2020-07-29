@@ -204,9 +204,9 @@ namespace blazefeo
 
 
     private:
-        using IntrinsicType = typename Simd<T, SS>::IntrinsicType;
-        using MaskType = typename Simd<T, SS>::MaskType;
-        using IntType = typename Simd<T, SS>::IntType;
+        using IntrinsicType = typename Simd<T>::IntrinsicType;
+        using MaskType = typename Simd<T>::MaskType;
+        using IntType = typename Simd<T>::IntType;
 
         // Numberf of SIMD registers required to store a single column of the matrix.
         static size_t constexpr RM = M / SS;
@@ -215,7 +215,7 @@ namespace blazefeo
         BLAZE_STATIC_ASSERT_MSG((RM > 0), "Number of rows must be not less than SIMD size");
         BLAZE_STATIC_ASSERT_MSG((RN > 0), "Number of columns must be positive");
         BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
-        BLAZE_STATIC_ASSERT_MSG((RM * RN <= RegisterCapacity_v<T, SS>), "Not enough registers for a RegisterMatrix");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN <= RegisterCapacity_v<T>), "Not enough registers for a RegisterMatrix");
         
         IntrinsicType v_[RM][RN];
 
@@ -324,7 +324,7 @@ namespace blazefeo
     template <typename T, size_t M, size_t N, size_t SS>
     inline void RegisterMatrix<T, M, N, SS>::store(T * ptr, size_t spacing, size_t m, size_t n) const
     {
-        BLAZE_STATIC_ASSERT_MSG((RM * RN + 2 <= RegisterCapacity_v<T, SS>), "Not enough registers");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN + 2 <= RegisterCapacity_v<T>), "Not enough registers");
         BLAZE_INTERNAL_ASSERT(m > M - SS && m <= M, "Invalid number of rows in partial store");
         BLAZE_INTERNAL_ASSERT(n > 0 && n <= N, "Invalid number of columns in partial store");
         BLAZE_INTERNAL_ASSERT(m < M || n < N, "Partial store with full size");
@@ -486,7 +486,7 @@ namespace blazefeo
     {
         if (SOA == columnMajor && SOB == rowMajor)
         {
-            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T, SS>), "Not enough registers for ger()");
+            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
 
             IntrinsicType ax[RM];
 
@@ -517,7 +517,7 @@ namespace blazefeo
         && (MatrixPointer<PB, columnMajor> || MatrixPointer<PB, rowMajor>)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::ger(T alpha, PA a, PB b) noexcept
     {
-        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T, SS>), "Not enough registers for ger()");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
             
         IntrinsicType ax[RM];
 
@@ -543,7 +543,7 @@ namespace blazefeo
     {
         if (SOA == columnMajor && SOB == rowMajor)
         {
-            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T, SS>), "Not enough registers for ger()");
+            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
 
             IntrinsicType ax[RM];
 
@@ -603,7 +603,7 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SS>::potrf()
     {
         static_assert(M >= N, "potrf() not implemented for register matrices with columns more than rows");
-        static_assert(RM * RN + 2 <= RegisterCapacity_v<T, SS>, "Not enough registers");
+        static_assert(RM * RN + 2 <= RegisterCapacity_v<T>, "Not enough registers");
         
         #pragma unroll
         for (size_t k = 0; k < N; ++k)

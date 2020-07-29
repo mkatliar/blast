@@ -83,7 +83,7 @@ namespace blazefeo :: testing
         size_t constexpr N = 3 * SS + 2;
 
         StaticPanelMatrix<TypeParam, M, N, columnMajor> A;
-        IntrinsicType_t<TypeParam, SS> val;
+        IntrinsicType_t<TypeParam> val;
 
         for (size_t i = 0; i < SS; ++i)
             val[i] = TypeParam(i + 1);

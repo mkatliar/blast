@@ -105,8 +105,8 @@ namespace blazefeo
         static size_t constexpr PANEL_SIZE = PanelSize_v<ET2>;
         static_assert(PANEL_SIZE % SS == 0);
 
-        using MaskType = typename Simd<ET2, SS>::MaskType;
-        using IntType = typename Simd<ET2, SS>::IntType;
+        using MaskType = typename Simd<ET2>::MaskType;
+        using IntType = typename Simd<ET2>::IntType;
 
 
         if constexpr (SO1 == columnMajor && SO2 == columnMajor)
@@ -198,8 +198,8 @@ namespace blazefeo
         static size_t constexpr PANEL_SIZE = PanelSize_v<ET2>;
         static_assert(PANEL_SIZE % SS == 0);
 
-        using MaskType = typename Simd<ET2, SS>::MaskType;
-        using IntType = typename Simd<ET2, SS>::IntType;
+        using MaskType = typename Simd<ET2>::MaskType;
+        using IntType = typename Simd<ET2>::IntType;
 
         if constexpr (SO1 == columnMajor && SO2 == columnMajor)
         {

@@ -14,34 +14,36 @@ namespace blazefeo
     using namespace blaze;
 
 
-    template <typename T, size_t SIMD_SIZE>
+    template <typename T>
     struct Simd;
 
 
     template <>
-    struct Simd<double, 4>
+    struct Simd<double>
     {
         using IntrinsicType = __m256d;
         using MaskType = __m256i;
         using IntType = long long;
         
+        static size_t constexpr size = 4;
         static size_t constexpr registerCapacity = 16;
     };
 
 
     template <>
-    struct Simd<float, 8>
+    struct Simd<float>
     {
         using IntrinsicType = __m256;
         using MaskType = __m256i;
         using IntType = int;
 
+        static size_t constexpr size = 8;
         static size_t constexpr registerCapacity = 16;
     };
 
 
-    template <typename T, size_t N>
-    using IntrinsicType_t = typename Simd<T, N>::IntrinsicType;
+    template <typename T>
+    using IntrinsicType_t = typename Simd<T>::IntrinsicType;
 
 
     template <typename T>
@@ -83,8 +85,8 @@ namespace blazefeo
     size_t constexpr SimdSize_v = SimdTraits<T>::size;
 	
 	
-    template <typename T, size_t SIMD_SIZE>
-    size_t constexpr RegisterCapacity_v = Simd<T, SIMD_SIZE>::registerCapacity;
+    template <typename T>
+    size_t constexpr RegisterCapacity_v = Simd<T>::registerCapacity;
 
 
     //*******************************************************
