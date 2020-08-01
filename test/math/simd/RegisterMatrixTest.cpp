@@ -622,4 +622,34 @@ namespace blazefeo :: testing
         // TODO: should be strictly equal?
         BLAZEFEO_ASSERT_APPROX_EQ(X, XX, absTol<ET>(), relTol<ET>());
     }
+
+
+    TYPED_TEST(RegisterMatrixTest, testTrmmLu)
+    {
+        using RM = TypeParam;
+        using ET = ElementType_t<RM>;
+
+        StaticMatrix<ET, RM::rows(), RM::rows(), columnMajor> A;
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> B, X, B1;
+
+        randomize(A);
+        A += IdentityMatrix<ET>(RM::rows());  // Improve conditioning
+        
+        randomize(B);
+
+        RM ker;
+        ker.template trmm<Side::Left, UpLo::Upper>(ptr(A, 0, 0), ptr(B, 0, 0));
+        ker.store(ptr(X, 0, 0));
+
+        // Reset lower-triangular part
+        for (size_t i = 0; i < RM::rows(); ++i)
+            for (size_t j = 0; j < i; ++j)
+                reset(A(i, j));
+
+        // True value
+        auto const XX = evaluate(A * B);
+
+        // TODO: should be strictly equal?
+        BLAZEFEO_ASSERT_APPROX_EQ(X, XX, absTol<ET>(), relTol<ET>());
+    }
 }

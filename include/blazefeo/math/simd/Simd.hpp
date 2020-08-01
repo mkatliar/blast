@@ -21,24 +21,122 @@ namespace blazefeo
     template <>
     struct Simd<double>
     {
+    private:
+        class Index;
+
+
+    public:
         using IntrinsicType = __m256d;
         using MaskType = __m256i;
         using IntType = long long;
         
         static size_t constexpr size = 4;
         static size_t constexpr registerCapacity = 16;
+
+
+        //*******************************************************
+        //
+        // CUSTOM
+        //
+        //*******************************************************
+        static Index index() noexcept
+        {
+            return Index {};
+        }
+
+
+    private:
+        class Index
+        {
+        public:
+            MaskType operator<(IntType n) const noexcept
+            {
+                return _mm256_cmpgt_epi64(_mm256_set1_epi64x(n), val_);
+            }
+
+
+            MaskType operator>(IntType n) const noexcept
+            {
+                return _mm256_cmpgt_epi64(val_, _mm256_set1_epi64x(n));
+            }
+
+
+            MaskType operator<=(IntType n) const noexcept
+            {
+                return *this < n + 1;
+            }
+
+
+            MaskType operator>=(IntType n) const noexcept
+            {
+                return *this > n - 1;
+            }
+
+
+        private:
+            MaskType val_ = _mm256_set_epi64x(3, 2, 1, 0);
+        };
     };
 
 
     template <>
     struct Simd<float>
     {
+    private:
+        class Index;
+
+
+    public:
         using IntrinsicType = __m256;
         using MaskType = __m256i;
         using IntType = int;
 
         static size_t constexpr size = 8;
         static size_t constexpr registerCapacity = 16;
+
+
+        //*******************************************************
+        //
+        // CUSTOM
+        //
+        //*******************************************************
+        static Index index() noexcept
+        {
+            return Index {};
+        }
+
+
+    private:
+        class Index
+        {
+        public:
+            MaskType operator<(IntType n) const noexcept
+            {
+                return _mm256_cmpgt_epi32(_mm256_set1_epi32(n), val_);
+            }
+
+
+            MaskType operator>(IntType n) const noexcept
+            {
+                return _mm256_cmpgt_epi32(val_, _mm256_set1_epi32(n));
+            }
+
+
+            MaskType operator<=(IntType n) const noexcept
+            {
+                return *this < n + 1;
+            }
+
+
+            MaskType operator>=(IntType n) const noexcept
+            {
+                return *this > n - 1;
+            }
+
+
+        private:
+            MaskType val_ = _mm256_set_epi32(7, 6, 5, 4, 3, 2, 1, 0);
+        };
     };
 
 
@@ -114,6 +212,18 @@ namespace blazefeo
     inline auto load<8, float>(float const * ptr)
     {
         return _mm256_load_ps(ptr);
+    }
+
+
+    inline auto maskload(double const * ptr, __m256i mask)
+    {
+        return _mm256_maskload_pd(ptr, mask);
+    }
+
+
+    inline auto maskload(float const * ptr, __m256i mask)
+    {
+        return _mm256_maskload_ps(ptr, mask);
     }
 
 
@@ -271,11 +381,6 @@ namespace blazefeo
     //
     //*******************************************************
     
-    // inline auto operator>(__m256i a, __m256i b)
-    // {
-    //     return _mm256_cmpgt_epi64(a, b);
-    // }
-
     template <size_t N, typename MM>
     auto cmpgt(MM a, MM b);
 
@@ -291,28 +396,5 @@ namespace blazefeo
     inline auto cmpgt<8>(__m256i a, __m256i b)
     {
         return _mm256_cmpgt_epi32(a, b);
-    }
-
-
-    //*******************************************************
-    //
-    // CUSTOM
-    //
-    //*******************************************************
-    template <typename MM, size_t N>
-    MM countUp();
-
-
-    template <>
-    inline __m256i countUp<__m256i, 4>()
-    {
-        return _mm256_set_epi64x(3, 2, 1, 0);
-    }
-
-
-    template <>
-    inline __m256i countUp<__m256i, 8>()
-    {
-        return _mm256_set_epi32(7, 6, 5, 4, 3, 2, 1, 0);
     }
 }

@@ -209,23 +209,75 @@ namespace blazefeo
         ///
         /// Performs one of the matrix-matrix operations
         ///
-        /// B := alpha*A*B,   or   B := alpha*B*A,
+        /// R := A*B,   or   R := B*A,
         ///
         /// where alpha is a scalar, B is an m by n matrix, 
         /// A is an upper or lower triangular matrix.
         ///
-        /// op( A ) = A   or   op( A ) = A**T.
-        /// 
-        template <Side SIDE, UpLo UPLO, typename P>
-            requires MatrixPointer<P, T>
-        void trmm(P a)
-        {}
+        /// @tparam SIDE compute B := A*B if \a SIDE == Side::Left,
+        /// compute B := B*A if \a SIDE == Side::Right.
+        ///
+        /// @tparam UPLO use lower-triangular part of \a if \a UPLO == UpLo::Lower,
+        /// use upper-triangular part of \a if \a UPLO == UpLo::Upper,
+        ///
+        /// @tparam P matrix pointer type.
+        ///
+        template <Side SIDE, UpLo UPLO, typename P1, typename P2>
+            requires MatrixPointer<P1, T> && MatrixPointer<P2, T>
+        BLAZE_ALWAYS_INLINE void trmm(P1 a, P2 b)
+        {
+            static_assert(
+                SO == columnMajor &&
+                P1::storageOrder == columnMajor &&
+                SIDE == Side::Left &&
+                UPLO == UpLo::Upper,
+                "Unsupported combination of SO, SIDE, and UPLO");
+
+            if constexpr (
+                SO == columnMajor &&
+                P1::storageOrder == columnMajor &&
+                SIDE == Side::Left &&
+                UPLO == UpLo::Upper)
+            {
+                for (size_t k = 0; k < rows(); ++k)
+                {
+                    // ger(alpha, a, b);
+                    IntrinsicType ax[RM];
+                    size_t const ii = (k + 1) / SS;
+                    size_t const rem = (k + 1) % SS;
+                    
+                    #pragma unroll
+                    for (size_t i = 0; i < ii; ++i)
+                        ax[i] = a.load(i * SS, 0);
+
+                    if (rem)
+                        ax[ii] = a.maskLoad(ii * SS, 0, SIMD::index() < rem);
+                    
+                    #pragma unroll
+                    for (size_t j = 0; j < N; ++j)
+                    {
+                        IntrinsicType bx = b.broadcast(0, j);
+
+                        #pragma unroll
+                        for (size_t i = 0; i < ii; ++i)
+                            v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
+
+                        if (rem)
+                            v_[ii][j] = fmadd(ax[ii], bx, v_[ii][j]);
+                    } 
+                    
+                    a.hmove(1);
+                    b.vmove(1);
+                }
+            }
+        }
 
 
     private:
-        using IntrinsicType = typename Simd<T>::IntrinsicType;
-        using MaskType = typename Simd<T>::MaskType;
-        using IntType = typename Simd<T>::IntType;
+        using SIMD = Simd<T>;
+        using IntrinsicType = typename SIMD::IntrinsicType;
+        using MaskType = typename SIMD::MaskType;
+        using IntType = typename SIMD::IntType;
 
         // SIMD size
         static size_t constexpr SS = Simd<T>::size;
@@ -362,7 +414,7 @@ namespace blazefeo
                 for (size_t j = 0; j < N; ++j) if (j < n)
                     blazefeo::store(ptr + spacing * i + SS * j, v_[i][j]);
                     
-            MaskType const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType, SS>());
+            MaskType const mask = SIMD::index() < rem;
             size_t constexpr i = RM - 1;
         
             #pragma unroll
@@ -395,7 +447,7 @@ namespace blazefeo
 
         if (IntType const rem = m % SS)
         {
-            MaskType const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType, SS>());
+            MaskType const mask = SIMD::index() < rem;
             size_t const i = m / SS;
 
             for (size_t j = 0; j < n && j < columns(); ++j)
@@ -416,7 +468,7 @@ namespace blazefeo
 
             if (skip && ri < RM)
             {
-                MaskType const mask = cmpgt<SS>(countUp<MaskType, SS>(), set1<SS>(skip - 1));
+                MaskType const mask = SIMD::index() >= skip;
                 p.maskStore(SS * ri, j, mask, v_[ri][j]);
                 ++ri;
             }
@@ -438,11 +490,10 @@ namespace blazefeo
             {
                 IntType const skip = j - ri * SS;
                 IntType const rem = m - ri * SS;
-
-                MaskType mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType, SS>());
+                MaskType mask = SIMD::index() < rem;
 
                 if (skip > 0)
-                    mask &= cmpgt<SS>(countUp<MaskType, SS>(), set1<SS>(skip - 1));
+                    mask &= SIMD::index() >= skip;
 
                 p.maskStore(SS * ri, j, mask, v_[ri][j]);
             }

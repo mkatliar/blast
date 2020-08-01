@@ -107,6 +107,7 @@ namespace blazefeo
 
         using MaskType = typename Simd<ET2>::MaskType;
         using IntType = typename Simd<ET2>::IntType;
+        using SIMD = Simd<ET2>;
 
 
         if constexpr (SO1 == columnMajor && SO2 == columnMajor)
@@ -126,7 +127,7 @@ namespace blazefeo
 
             if (IntType const rem = m % SS)
             {
-                MaskType const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType, SS>());
+                MaskType const mask = SIMD::index() < rem;
                 size_t const i = m - rem;
                 ET2 const * pr = ptr(rhs, i, 0);
                 ET1 * pl = data(lhs) + i;
@@ -225,7 +226,7 @@ namespace blazefeo
 
             // if (IntType const rem = m % SS)
             // {
-            //     MaskType const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType, SS>());
+            //     MaskType const mask = SIMD::index() < rem;
             //     size_t const i = m - rem;
             //     ET2 const * pr = ptr(rhs, i, 0);
             //     ET1 * pl = data(lhs) + i;

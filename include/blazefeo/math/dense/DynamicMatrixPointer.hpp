@@ -46,6 +46,12 @@ namespace blazefeo
         }
 
 
+        IntrinsicType maskLoad(ptrdiff_t i, ptrdiff_t j, MaskType mask) const noexcept
+        {
+            return blazefeo::maskload(ptrOffset(i, j), mask);
+        }
+
+
         IntrinsicType broadcast(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
             return blazefeo::broadcast<SS>(ptrOffset(i, j));
