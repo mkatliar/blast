@@ -8,25 +8,33 @@
 
 namespace blazefeo :: testing
 {
-    TEST(DenseTrmmTest, testNT_dynamic)
+    TEST(DenseTrmmTest, testLeftUpper)
     {
         for (size_t m = 1; m <= 20; m += 1)
             for (size_t n = 1; n <= 20; n += 1)
-            {
-                // Init Blaze matrices
-                //
-                DynamicMatrix<double, columnMajor> A(m, m), B(n, m), C(m, n);
-                randomize(A);
-                randomize(B);
+                for (size_t k = 1; k <= 20; ++k)
+                {
+                    // Init Blaze matrices
+                    //
+                    DynamicMatrix<double, columnMajor> A(m, k);
+                    DynamicMatrix<double, rowMajor> B(k, n);
+                    DynamicMatrix<double, columnMajor> C(m, n);
+                    randomize(A);
+                    randomize(B);
 
-                double alpha {};
-                blaze::randomize(alpha);
+                    // Reset lower-triangular part of A
+                    for (size_t i = 0; i < m; ++i)
+                        for (size_t j = 0; j < i && j < k; ++j)
+                            reset(A(i, j));
 
-                // Do trmm
-                blazefeo::trmm(alpha, A, trans(B), C);
+                    double alpha {};
+                    blaze::randomize(alpha);
 
-                BLAZEFEO_ASSERT_APPROX_EQ(C, evaluate(alpha * A * trans(B)), 1e-10, 1e-10)
-                    << "trmm error at size m,n=" << m << "," << n;
-            }
+                    // Do trmm
+                    blazefeo::trmm<Side::Left, UpLo::Upper>(alpha, A, B, C);
+
+                    BLAZEFEO_ASSERT_APPROX_EQ(C, evaluate(alpha * A * B), 1e-10, 1e-10)
+                        << "trmm error at size m,n,k=" << m << "," << n << "," << k;
+                }
     }
 }

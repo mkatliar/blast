@@ -8,11 +8,12 @@ add_executable(bench-blazefeo
     math/expressions/AssignDensePanel.cpp
     math/expressions/AssignPanelDense.cpp
     
-    register_matrix/Ger.cpp
-    register_matrix/Store.cpp
-    register_matrix/PartialStore.cpp
-    register_matrix/Potrf.cpp
-    register_matrix/Trsm.cpp
+    math/simd/Ger.cpp
+    math/simd/Store.cpp
+    math/simd/PartialStore.cpp
+    math/simd/Potrf.cpp
+    math/simd/Trsm.cpp
+    math/simd/Trmm.cpp
 
     math/dense/DynamicSyrk.cpp
     math/dense/StaticSyrk.cpp

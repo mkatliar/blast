@@ -9,42 +9,6 @@
 namespace blazefeo
 {
     template <
-        typename T, size_t M, size_t N, bool SO,
-        typename PA, typename PB
-    >
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
-        && MatrixPointer<PB, T>
-    BLAZE_ALWAYS_INLINE void gemm_backend(
-        RegisterMatrix<T, M, N, SO>& ker, size_t K, T alpha, PA a, PB b)
-    {
-        for (size_t k = 0; k < K; ++k)
-        {
-            ker.ger(alpha, a, b);
-            a.hmove(1);
-            b.vmove(1);
-        }
-    }
-
-
-    template <
-        typename T, size_t M, size_t N, bool SO,
-        typename PA, typename PB
-    >
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
-        && MatrixPointer<PB, T>
-    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, SO>& ker, size_t K,
-        T alpha, PA a, PB b, size_t md, size_t nd)
-    {
-        for (size_t k = 0; k < K; ++k)
-        {
-            ker.ger(alpha, a, b, md, nd);
-            a.hmove(1);
-            b.vmove(1);
-        }
-    }
-
-
-    template <
         size_t KM, size_t KN,
         typename ST1, typename MT1, typename MT2, bool SO2,
         typename ST2, typename MT3, typename MT4
@@ -81,7 +45,7 @@ namespace blazefeo
             for (; j + KN <= N; j += KN)
             {
                 ker.load(beta, ptr(C, i, j));
-                gemm_backend(ker, K, alpha, a, ptr(B, 0, j));
+                ker.gemm(K, alpha, a, ptr(B, 0, j));
                 ker.store(ptr(D, i, j));
             }
 
@@ -89,7 +53,7 @@ namespace blazefeo
             {
                 auto const md = KM, nd = N - j;
                 ker.load(beta, ptr(C, i, j), md, nd);
-                gemm_backend(ker, K, alpha, a, ptr(B, 0, j), md, nd);
+                ker.gemm(K, alpha, a, ptr(B, 0, j), md, nd);
                 ker.store(ptr(D, i, j), md, nd);
             }
         }
@@ -103,7 +67,7 @@ namespace blazefeo
             {
                 auto const md = M - i, nd = KN;
                 ker.load(beta, ptr(C, i, j), md, nd);
-                gemm_backend(ker, K, alpha, ptr(A, i, 0), ptr(B, 0, j), md, nd);
+                ker.gemm(K, alpha, ptr(A, i, 0), ptr(B, 0, j), md, nd);
                 ker.store(ptr(D, i, j), md, nd);
             }
 
@@ -111,7 +75,7 @@ namespace blazefeo
             {
                 auto const md = M - i, nd = N - j;
                 ker.load(beta, ptr(C, i, j), md, nd);
-                gemm_backend(ker, K, alpha, ptr(A, i, 0), ptr(B, 0, j), md, nd);
+                ker.gemm(K, alpha, ptr(A, i, 0), ptr(B, 0, j), md, nd);
                 ker.store(ptr(D, i, j), md, nd);
             }
         }

@@ -15,7 +15,7 @@ namespace blazefeo :: benchmark
     static void BM_trmm_static_plain(State& state)
     {
         StaticMatrix<Real, M, M, columnMajor> A;
-        StaticMatrix<Real, N, M, columnMajor> B;
+        StaticMatrix<Real, M, N, columnMajor> B;
         StaticMatrix<Real, M, N, columnMajor> C;
 
         randomize(A);
@@ -23,7 +23,7 @@ namespace blazefeo :: benchmark
 
         for (auto _ : state)
         {
-            trmm(1., A, trans(B), C);
+            trmm<Side::Left, UpLo::Upper>(1., A, B, C);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);

@@ -162,6 +162,7 @@ namespace blazefeo
         template <bool SOA, bool SOB>
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb);
 
+
         template <typename PA, typename PB>
             requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
         void ger(T alpha, PA a, PB b) noexcept;
@@ -179,9 +180,28 @@ namespace blazefeo
         template <bool SOA, bool SOB>
         void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n);
 
+
         template <typename PA, typename PB>
             requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
         void ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept;
+
+
+        /// @brief General matrix-matrix multiplication
+        ///
+        /// R += alpha * A * B
+        ///
+        template <typename PA, typename PB>
+            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        void gemm(size_t K, T alpha, PA a, PB b) noexcept;
+
+
+        /// @brief General matrix-matrix multiplication with limited size
+        ///
+        /// R(0:md-1, 0:nd-1) += alpha * A * B
+        ///
+        template <typename PA, typename PB>
+            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        void gemm(size_t K, T alpha, PA a, PB b, size_t md, size_t nd) noexcept;
 
 
         /// @brief In-place Cholesky decomposition
@@ -216,61 +236,18 @@ namespace blazefeo
         ///
         /// @tparam SIDE compute B := A*B if \a SIDE == Side::Left,
         /// compute B := B*A if \a SIDE == Side::Right.
-        ///
         /// @tparam UPLO use lower-triangular part of \a if \a UPLO == UpLo::Lower,
         /// use upper-triangular part of \a if \a UPLO == UpLo::Upper,
         ///
         /// @tparam P matrix pointer type.
+        /// @param K number of columns of matrix \a a if \a SIDE == Side::Left,
+        /// number of rows of matrix \a a if \a SIDE == Side::Right.
+        /// @param a triangular matrix.
+        /// @param b general matrix.
         ///
         template <Side SIDE, UpLo UPLO, typename P1, typename P2>
-            requires MatrixPointer<P1, T> && MatrixPointer<P2, T>
-        BLAZE_ALWAYS_INLINE void trmm(P1 a, P2 b)
-        {
-            static_assert(
-                SO == columnMajor &&
-                P1::storageOrder == columnMajor &&
-                SIDE == Side::Left &&
-                UPLO == UpLo::Upper,
-                "Unsupported combination of SO, SIDE, and UPLO");
-
-            if constexpr (
-                SO == columnMajor &&
-                P1::storageOrder == columnMajor &&
-                SIDE == Side::Left &&
-                UPLO == UpLo::Upper)
-            {
-                for (size_t k = 0; k < rows(); ++k)
-                {
-                    // ger(alpha, a, b);
-                    IntrinsicType ax[RM];
-                    size_t const ii = (k + 1) / SS;
-                    size_t const rem = (k + 1) % SS;
-                    
-                    #pragma unroll
-                    for (size_t i = 0; i < ii; ++i)
-                        ax[i] = a.load(i * SS, 0);
-
-                    if (rem)
-                        ax[ii] = a.maskLoad(ii * SS, 0, SIMD::index() < rem);
-                    
-                    #pragma unroll
-                    for (size_t j = 0; j < N; ++j)
-                    {
-                        IntrinsicType bx = b.broadcast(0, j);
-
-                        #pragma unroll
-                        for (size_t i = 0; i < ii; ++i)
-                            v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
-
-                        if (rem)
-                            v_[ii][j] = fmadd(ax[ii], bx, v_[ii][j]);
-                    } 
-                    
-                    a.hmove(1);
-                    b.vmove(1);
-                }
-            }
-        }
+            requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
+        void trmm(size_t K, T alpha, P1 a, P2 b);
 
 
     private:
@@ -670,6 +647,37 @@ namespace blazefeo
     }
 
 
+    template <typename T, size_t M, size_t N, bool SO>
+    template <typename PA, typename PB>
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+        && MatrixPointer<PB, T>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::gemm(size_t K, T alpha, PA a, PB b) noexcept
+    {
+        for (size_t k = 0; k < K; ++k)
+        {
+            ger(alpha, a, b);
+            a.hmove(1);
+            b.vmove(1);
+        }
+    }
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    template <typename PA, typename PB>
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+        && MatrixPointer<PB, T>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::gemm(size_t K,
+        T alpha, PA a, PB b, size_t md, size_t nd) noexcept
+    {
+        for (size_t k = 0; k < K; ++k)
+        {
+            ger(alpha, a, b, md, nd);
+            a.hmove(1);
+            b.vmove(1);
+        }
+    }
+
+
     template <bool LeftSide, bool Upper, bool TransA, typename T, size_t M, size_t N, bool SO>
     inline void trsm(RegisterMatrix<T, M, N, SO>& ker, T const * a, size_t sa)
     {
@@ -707,6 +715,67 @@ namespace blazefeo
                     v_[i][k] /= sqrt_a_kk;
             }
         }     
+    }
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    template <Side SIDE, UpLo UPLO, typename P1, typename P2>
+        requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(size_t K, T alpha, P1 a, P2 b)
+    {
+        static_assert(
+            SO == columnMajor &&
+            P1::storageOrder == columnMajor &&
+            SIDE == Side::Left &&
+            UPLO == UpLo::Upper,
+            "Unsupported combination of SO, SIDE, and UPLO");
+
+        if constexpr (
+            SO == columnMajor &&
+            P1::storageOrder == columnMajor &&
+            SIDE == Side::Left &&
+            UPLO == UpLo::Upper)
+        {
+            // Triangular part
+            #pragma unroll
+            for (size_t k = 0; k < rows(); ++k) if (k < K)
+            {
+                IntrinsicType ax[RM];
+                size_t const ii = (k + 1) / SS;
+                size_t const rem = (k + 1) % SS;
+                
+                #pragma unroll
+                for (size_t i = 0; i < ii; ++i)
+                    ax[i] = alpha * a.load(i * SS, 0);
+
+                if (rem)
+                    ax[ii] = alpha * a.maskLoad(ii * SS, 0, SIMD::index() < rem);
+                
+                #pragma unroll
+                for (size_t j = 0; j < N; ++j)
+                {
+                    IntrinsicType bx = b.broadcast(0, j);
+
+                    #pragma unroll
+                    for (size_t i = 0; i < ii; ++i)
+                        v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
+
+                    if (rem)
+                        v_[ii][j] = fmadd(ax[ii], bx, v_[ii][j]);
+                } 
+                
+                a.hmove(1);
+                b.vmove(1);
+            }
+
+            // Rectangular part (equivalent of gemm)
+            for (size_t k = rows(); k < K; ++k)
+            {
+                ger(alpha, a, b);
+                a.hmove(1);
+                b.vmove(1);
+            }
+        }
     }
 
 
