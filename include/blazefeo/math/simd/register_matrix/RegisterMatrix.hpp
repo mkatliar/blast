@@ -2,6 +2,8 @@
 
 #include <blazefeo/math/simd/Simd.hpp>
 #include <blazefeo/math/simd/MatrixPointer.hpp>
+#include <blazefeo/math/Side.hpp>
+#include <blazefeo/math/UpLo.hpp>
 
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/Matrix.h>
@@ -198,9 +200,26 @@ namespace blazefeo
         ///
         /// @brief l pointer to a triangular matrix
         ///
-        template <bool LeftSide, bool Upper, bool TransA, typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
-        void trsm(P l);
+        template <Side SIDE, UpLo UPLO, typename P>
+            requires MatrixPointer<P, T>
+        void trsm(P a);
+
+
+        /// @brief Triangular matrix multiplication
+        ///
+        /// Performs one of the matrix-matrix operations
+        ///
+        /// B := alpha*A*B,   or   B := alpha*B*A,
+        ///
+        /// where alpha is a scalar, B is an m by n matrix, 
+        /// A is an upper or lower triangular matrix.
+        ///
+        /// op( A ) = A   or   op( A ) = A**T.
+        /// 
+        template <Side SIDE, UpLo UPLO, typename P>
+            requires MatrixPointer<P, T>
+        void trmm(P a)
+        {}
 
 
     private:
@@ -458,28 +477,34 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, bool SO>
-    template <bool LeftSide, bool Upper, bool TransA, typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    template <Side SIDE, UpLo UPLO, typename P>
+        requires MatrixPointer<P, T>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsm(P l)
     {
-        #pragma unroll
-        for (size_t j = 0; j < N; ++j)
+        static_assert(SO == columnMajor && SIDE == Side::Right && UPLO == UpLo::Upper,
+            "Unsupported combination of SO, SIDE, and UPLO");
+
+        if constexpr (SO == columnMajor && SIDE == Side::Right && UPLO == UpLo::Upper)
         {
             #pragma unroll
-            for (size_t k = 0; k < j; ++k)
+            for (size_t j = 0; j < N; ++j)
             {
-                IntrinsicType const l_jk = l.broadcast(j, k);
+                #pragma unroll
+                for (size_t k = 0; k < j; ++k)
+                {
+                    IntrinsicType const l_kj = l.broadcast(k, j);
 
+                    #pragma unroll
+                    for (size_t i = 0; i < RM; ++i)
+                        v_[i][j] = fnmadd(l_kj, v_[i][k], v_[i][j]);
+                }
+
+                IntrinsicType const l_jj = l.broadcast(j, j);
+                
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i)
-                    v_[i][j] = fnmadd(l_jk, v_[i][k], v_[i][j]);
+                    v_[i][j] /= l_jj;
             }
-
-            IntrinsicType const l_jj = l.broadcast(j, j);
-            
-            #pragma unroll
-            for (size_t i = 0; i < RM; ++i)
-                v_[i][j] /= l_jj;
         }
     }
 

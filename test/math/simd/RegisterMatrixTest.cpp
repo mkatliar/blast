@@ -570,9 +570,8 @@ namespace blazefeo :: testing
         // std::cout << "BB=\n" << BB << std::endl;
         // std::cout << "LL=\n" << LL << std::endl;
 
-        // Workaround the bug:
-        // https://bitbucket.org/blaze-lib/blaze/issues/301/error-in-evaluation-of-a-inv-trans-b
-        XX = evaluate(BB * evaluate(inv(evaluate(trans(LL)))));
+        // True value
+        XX = evaluate(BB * inv(trans(LL)));
         
         load(ker, B.ptr(0, 0), B.spacing());
         trsm<false, false, true>(ker, L.ptr(0, 0), spacing(L));
@@ -610,12 +609,11 @@ namespace blazefeo :: testing
 
         randomize(B);
 
-        // Workaround the bug:
-        // https://bitbucket.org/blaze-lib/blaze/issues/301/error-in-evaluation-of-a-inv-trans-b
-        auto const XX = evaluate(B * evaluate(inv(evaluate(trans(L)))));
+        // True value
+        auto const XX = evaluate(B * inv(trans(L)));
         
         ker.load(1., ptr(B, 0, 0));
-        ker.template trsm<false, false, true>(ptr(L, 0, 0));
+        ker.template trsm<Side::Right, UpLo::Upper>(trans(ptr(L, 0, 0)));
         ker.store(ptr(X, 0, 0));
 
         // std::cout << "X=\n" << X << std::endl;

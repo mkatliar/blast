@@ -9,7 +9,7 @@
 
 namespace blazefeo :: testing
 {
-    TEST(DenseGemmTest, testGemmCrStatic)
+    TEST(DenseGemmTest, testCr)
     {
         for (size_t m = 1; m <= 20; m += 1)
             for (size_t n = 1; n <= 20; n += 1)
@@ -36,7 +36,7 @@ namespace blazefeo :: testing
     }
 
 
-    TEST(DenseGemmTest, testGemmCcStatic)
+    TEST(DenseGemmTest, testCc)
     {
         for (size_t m = 1; m <= 20; m += 1)
             for (size_t n = 1; n <= 20; n += 1)
