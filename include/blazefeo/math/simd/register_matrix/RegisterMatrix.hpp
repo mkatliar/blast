@@ -227,27 +227,22 @@ namespace blazefeo
 
         /// @brief Triangular matrix multiplication
         ///
-        /// Performs one of the matrix-matrix operations
+        /// Performs the matrix-matrix operation
         ///
-        /// R := A*B,   or   R := B*A,
+        /// R := A*B,
         ///
         /// where alpha is a scalar, B is an m by n matrix, 
-        /// A is an upper or lower triangular matrix.
+        /// A is an upper triangular matrix.
         ///
-        /// @tparam SIDE compute B := A*B if \a SIDE == Side::Left,
-        /// compute B := B*A if \a SIDE == Side::Right.
-        /// @tparam UPLO use lower-triangular part of \a if \a UPLO == UpLo::Lower,
-        /// use upper-triangular part of \a if \a UPLO == UpLo::Upper,
+        /// @tparam P1 matrix A pointer type.
+        /// @tparam P2 matrix B pointer type.
         ///
-        /// @tparam P matrix pointer type.
-        /// @param K number of columns of matrix \a a if \a SIDE == Side::Left,
-        /// number of rows of matrix \a a if \a SIDE == Side::Right.
         /// @param a triangular matrix.
         /// @param b general matrix.
         ///
-        template <Side SIDE, UpLo UPLO, typename P1, typename P2>
+        template <typename P1, typename P2>
             requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
-        void trmm(size_t K, T alpha, P1 a, P2 b);
+        void trmmLeftUpper(T alpha, P1 a, P2 b) noexcept;
 
 
     private:
@@ -719,62 +714,39 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, bool SO>
-    template <Side SIDE, UpLo UPLO, typename P1, typename P2>
+    template <typename P1, typename P2>
         requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(size_t K, T alpha, P1 a, P2 b)
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmmLeftUpper(T alpha, P1 a, P2 b) noexcept
     {
-        static_assert(
-            SO == columnMajor &&
-            P1::storageOrder == columnMajor &&
-            SIDE == Side::Left &&
-            UPLO == UpLo::Upper,
-            "Unsupported combination of SO, SIDE, and UPLO");
-
-        if constexpr (
-            SO == columnMajor &&
-            P1::storageOrder == columnMajor &&
-            SIDE == Side::Left &&
-            UPLO == UpLo::Upper)
+        #pragma unroll
+        for (size_t k = 0; k < rows(); ++k)
         {
-            // Triangular part
+            IntrinsicType ax[RM];
+            size_t const ii = (k + 1) / SS;
+            size_t const rem = (k + 1) % SS;
+            
             #pragma unroll
-            for (size_t k = 0; k < rows(); ++k) if (k < K)
+            for (size_t i = 0; i < ii; ++i)
+                ax[i] = alpha * a.load(i * SS, 0);
+
+            if (rem)
+                ax[ii] = alpha * a.maskLoad(ii * SS, 0, SIMD::index() < rem);
+            
+            #pragma unroll
+            for (size_t j = 0; j < N; ++j)
             {
-                IntrinsicType ax[RM];
-                size_t const ii = (k + 1) / SS;
-                size_t const rem = (k + 1) % SS;
-                
+                IntrinsicType bx = b.broadcast(0, j);
+
                 #pragma unroll
                 for (size_t i = 0; i < ii; ++i)
-                    ax[i] = alpha * a.load(i * SS, 0);
+                    v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
 
                 if (rem)
-                    ax[ii] = alpha * a.maskLoad(ii * SS, 0, SIMD::index() < rem);
-                
-                #pragma unroll
-                for (size_t j = 0; j < N; ++j)
-                {
-                    IntrinsicType bx = b.broadcast(0, j);
-
-                    #pragma unroll
-                    for (size_t i = 0; i < ii; ++i)
-                        v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
-
-                    if (rem)
-                        v_[ii][j] = fmadd(ax[ii], bx, v_[ii][j]);
-                } 
-                
-                a.hmove(1);
-                b.vmove(1);
-            }
-
-            // Rectangular part (equivalent of gemm)
-            for (size_t k = rows(); k < K; ++k)
-            {
-                ger(alpha, a, b);
-                a.hmove(1);
-                b.vmove(1);
-            }
+                    v_[ii][j] = fmadd(ax[ii], bx, v_[ii][j]);
+            } 
+            
+            a.hmove(1);
+            b.vmove(1);
         }
     }
 

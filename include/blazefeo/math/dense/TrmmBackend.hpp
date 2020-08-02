@@ -8,9 +8,9 @@
 
 namespace blazefeo
 {
-    template <Side SIDE, UpLo UPLO, size_t KM, size_t KN, typename T, typename P1, typename P2, typename P3>
+    template <size_t KM, size_t KN, typename T, typename P1, typename P2, typename P3>
         requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T> && MatrixPointer<P3, T>
-    BLAZE_ALWAYS_INLINE void trmm_backend(size_t M, size_t N, size_t K, T alpha, P1 a, P2 b, P3 c)
+    BLAZE_ALWAYS_INLINE void trmmLeftUpper_backend(size_t M, size_t N, T alpha, P1 a, P2 b, P3 c)
     {
         size_t constexpr TILE_SIZE = TileSize_v<T>;
         BLAZE_STATIC_ASSERT(KM % TILE_SIZE == 0);
@@ -24,8 +24,8 @@ namespace blazefeo
             for (; j + KN <= N; j += KN)
             {
                 ker.reset();
-                ker.template trmm<SIDE, UPLO>(K, alpha, a, b.offset(0, j));
-                // ker.gemm(K, alpha, a, b.offset(0, j));
+                ker.trmmLeftUpper(alpha, a, b.offset(0, j));
+                ker.gemm(M - KM, alpha, a.offset(0, KM), b.offset(KM, j));
                 ker.store(c.offset(0, j));
             }
 
@@ -33,7 +33,7 @@ namespace blazefeo
             {
                 auto const md = KM, nd = N - j;
                 ker.reset();
-                ker.gemm(K, alpha, a, b.offset(0, j), md, nd);
+                ker.gemm(M, alpha, a, b.offset(0, j), md, nd);
                 ker.store(c.offset(0, j), md, nd);
             }
         }
@@ -46,7 +46,7 @@ namespace blazefeo
             {
                 auto const md = M, nd = KN;
                 ker.reset();
-                ker.gemm(K, alpha, a, b.offset(0, j), md, nd);
+                ker.gemm(M, alpha, a, b.offset(0, j), md, nd);
                 ker.store(c.offset(0, j), md, nd);
             }
 
@@ -54,7 +54,7 @@ namespace blazefeo
             {
                 auto const md = M, nd = N - j;
                 ker.reset();
-                ker.gemm(K, alpha, a, b.offset(0, j), md, nd);
+                ker.gemm(M, alpha, a, b.offset(0, j), md, nd);
                 ker.store(c.offset(0, j), md, nd);
             }
         }

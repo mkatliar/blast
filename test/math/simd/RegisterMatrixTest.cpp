@@ -630,36 +630,33 @@ namespace blazefeo :: testing
         using ET = ElementType_t<RM>;
 
 
-        for (size_t k = 1; k < 3 * RM::rows(); ++ k)
-        {
-            DynamicMatrix<ET, columnMajor> A(RM::rows(), k);
-            DynamicMatrix<ET, columnMajor> B(k, RM::columns()), X(RM::rows(), RM::columns());
+        DynamicMatrix<ET, columnMajor> A(RM::rows(), RM::rows());
+        DynamicMatrix<ET, columnMajor> B(RM::rows(), RM::columns()), X(RM::rows(), RM::columns());
 
-            randomize(A);
+        randomize(A);
 
-            // Improve conditioning
-            for (size_t i = 0; i < A.rows() && i < A.columns(); ++i)
-                A(i, i) += 1.;
-            
-            randomize(B);
+        // Improve conditioning
+        for (size_t i = 0; i < A.rows() && i < A.columns(); ++i)
+            A(i, i) += 1.;
+        
+        randomize(B);
 
-            ET alpha {};
-            blaze::randomize(alpha);
+        ET alpha {};
+        blaze::randomize(alpha);
 
-            RM ker;
-            ker.template trmm<Side::Left, UpLo::Upper>(k, alpha, ptr(A, 0, 0), ptr(B, 0, 0));
-            ker.store(ptr(X, 0, 0));
+        RM ker;
+        ker.trmmLeftUpper(alpha, ptr(A, 0, 0), ptr(B, 0, 0));
+        ker.store(ptr(X, 0, 0));
 
-            // Reset lower-triangular part
-            for (size_t i = 0; i < A.rows(); ++i)
-                for (size_t j = 0; j < i && j < A.columns(); ++j)
-                    reset(A(i, j));
+        // Reset lower-triangular part
+        for (size_t i = 0; i < A.rows(); ++i)
+            for (size_t j = 0; j < i && j < A.columns(); ++j)
+                reset(A(i, j));
 
-            // True value
-            auto const XX = evaluate(alpha * A * B);
+        // True value
+        auto const XX = evaluate(alpha * A * B);
 
-            // TODO: should be strictly equal?
-            BLAZEFEO_ASSERT_APPROX_EQ(X, XX, absTol<ET>(), relTol<ET>());
-        }
+        // TODO: should be strictly equal?
+        BLAZEFEO_ASSERT_APPROX_EQ(X, XX, absTol<ET>(), relTol<ET>());
     }
 }

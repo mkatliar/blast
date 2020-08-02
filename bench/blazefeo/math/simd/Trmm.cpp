@@ -24,9 +24,7 @@ namespace blazefeo :: benchmark
         
         for (auto _ : state)
         {
-            ker.template trmm<Side::Left, UpLo::Upper>(
-                columns(A), T(1.), ptr(A, 0, 0), ptr(B, 0, 0));
-
+            ker.trmmLeftUpper(T(1.), ptr(A, 0, 0), ptr(B, 0, 0));
             DoNotOptimize(ker);
         }
 

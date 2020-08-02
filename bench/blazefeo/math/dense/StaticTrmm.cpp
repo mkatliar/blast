@@ -23,7 +23,7 @@ namespace blazefeo :: benchmark
 
         for (auto _ : state)
         {
-            trmm<Side::Left, UpLo::Upper>(1., A, B, C);
+            trmmLeftUpper(1., A, B, C);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);
