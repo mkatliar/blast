@@ -28,7 +28,7 @@ namespace blazefeo :: benchmark
 
         for (auto _ : state)
         {
-            syrk_ln(1., A, 1., C, D);
+            syrkLower(1., A, 1., C, D);
             DoNotOptimize(A);
             DoNotOptimize(C);
             DoNotOptimize(D);

@@ -23,7 +23,7 @@ namespace blazefeo :: benchmark
 
         for (auto _ : state)
         {
-            syrk_ln(1., A, 1., C, D);
+            syrkLower(1., A, 1., C, D);
             DoNotOptimize(A);
             DoNotOptimize(C);
             DoNotOptimize(D);
@@ -34,7 +34,8 @@ namespace blazefeo :: benchmark
     }
 
 
-    // BENCHMARK_TEMPLATE(BM_syrk_static_plain, double, 40, 20);
+    BENCHMARK_TEMPLATE(BM_syrk_static_plain, double, 40, 20);
+    BENCHMARK_TEMPLATE(BM_syrk_static_plain, double, 70, 35);
 
 #define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_SYRK)
 #define BOOST_PP_LOCAL_MACRO(n) BENCHMARK_TEMPLATE(BM_syrk_static_plain, double, n, n);

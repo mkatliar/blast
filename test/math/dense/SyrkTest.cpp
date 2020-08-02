@@ -45,7 +45,7 @@ namespace blazefeo :: testing
                 Real const alpha = 1.0;
                 Real const beta = 1.0;
                 D = 0.;
-                syrk_ln(alpha, A, beta, C, D);
+                syrkLower(alpha, A, beta, C, D);
 
                 // Calculate the reference value
                 auto D_ref = evaluate(alpha * A * trans(A) + beta * C);

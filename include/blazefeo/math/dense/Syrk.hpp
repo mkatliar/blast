@@ -11,7 +11,7 @@
 namespace blazefeo
 {
     template <typename ST1, typename MT1, typename ST2, typename MT2, typename MT3>
-    inline void syrk_ln(
+    inline void syrkLower(
         ST1 alpha,
         DenseMatrix<MT1, columnMajor> const& A,
         ST2 beta, DenseMatrix<MT2, columnMajor> const& C, DenseMatrix<MT3, columnMajor>& D)
@@ -31,17 +31,114 @@ namespace blazefeo
         if (rows(D) != M || columns(D) != M)
             BLAZE_THROW_INVALID_ARGUMENT("Matrix sizes do not match");
 
-        size_t i = 0;
+        size_t j = 0;
 
-        // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
-        // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
-        for (; i + 2 * TILE_SIZE < M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
-            syrk_ln_backend<3 * TILE_SIZE, TILE_SIZE>(i, M, K, alpha, ptr(A, 0, 0), beta, ptr(C, 0, 0), ptr(D, 0, 0));
+        // Main part
+        for (; j + TILE_SIZE <= M; j += TILE_SIZE)
+        {
+            size_t i = j;
 
-        for (; i + 1 * TILE_SIZE < M; i += 2 * TILE_SIZE)
-            syrk_ln_backend<2 * TILE_SIZE, TILE_SIZE>(i, M, K, alpha, ptr(A, 0, 0), beta, ptr(C, 0, 0), ptr(D, 0, 0));
+            // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
+            // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
+            for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(beta, ptr(C, i, j));
+                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)));
+                if (i == j)
+                    ker.storeLower(ptr(D, i, j));
+                else
+                    ker.store(ptr(D, i, j));
+            }
 
-        for (; i + 0 * TILE_SIZE < M; i += 1 * TILE_SIZE)
-            syrk_ln_backend<1 * TILE_SIZE, TILE_SIZE>(i, M, K, alpha, ptr(A, 0, 0), beta, ptr(C, 0, 0), ptr(D, 0, 0));
+            for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(beta, ptr(C, i, j));
+                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)));
+                if (i == j)
+                    ker.storeLower(ptr(D, i, j));
+                else
+                    ker.store(ptr(D, i, j));
+            }
+
+            for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(beta, ptr(C, i, j));
+                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)));
+                if (i == j)
+                    ker.storeLower(ptr(D, i, j));
+                else
+                    ker.store(ptr(D, i, j));
+            }
+
+            // Bottom edge
+            if (i < M)
+            {
+                RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(beta, ptr(C, i, j), M - i, ker.columns());
+                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)), M - i, ker.columns());
+                if (i == j)
+                    ker.storeLower(ptr(D, i, j), M - i, ker.columns());
+                else
+                    ker.store(ptr(D, i, j), M - i, ker.columns());
+            }
+        }
+
+
+        // Right edge
+        if (j < M)
+        {
+            size_t i = j;
+
+            // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
+            // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
+            for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(beta, ptr(C, i, j), ker.rows(), M - j);
+                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)), ker.rows(), M - j);
+
+                if (i == j)
+                    ker.storeLower(ptr(D, i, j), ker.rows(), M - j);
+                else
+                    ker.store(ptr(D, i, j), ker.rows(), M - j);
+            }
+
+            for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(beta, ptr(C, i, j), ker.rows(), M - j);
+                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)), ker.rows(), M - j);
+                if (i == j)
+                    ker.storeLower(ptr(D, i, j), ker.rows(), M - j);
+                else
+                    ker.store(ptr(D, i, j), ker.rows(), M - j);
+            }
+
+            for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(beta, ptr(C, i, j), ker.rows(), M - j);
+                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)), ker.rows(), M - j);
+                if (i == j)
+                    ker.storeLower(ptr(D, i, j), ker.rows(), M - j);
+                else
+                    ker.store(ptr(D, i, j), ker.rows(), M - j);
+            }
+
+            // Bottom-right corner
+            if (i < M)
+            {
+                RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(beta, ptr(C, i, j), ker.rows(), M - j);
+                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)), M - i, M - j);
+                if (i == j)
+                    ker.storeLower(ptr(D, i, j), M - i, M - j);
+                else
+                    ker.store(ptr(D, i, j), M - i, M - j);
+            }
+        }
     }
 }
