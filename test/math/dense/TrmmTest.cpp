@@ -36,4 +36,34 @@ namespace blazefeo :: testing
                     << "trmm error at size m,n=" << m << "," << n;
             }
     }
+
+
+    TEST(DenseTrmmTest, testRightLower)
+    {
+        for (size_t m = 4; m <= 20; m += 1)
+            for (size_t n = 4; n <= 20; n += 1)
+            {
+                // Init Blaze matrices
+                //
+                DynamicMatrix<double, columnMajor> A(n, n);
+                DynamicMatrix<double, columnMajor> B(m, n);
+                DynamicMatrix<double, columnMajor> C(m, n);
+                randomize(A);
+                randomize(B);
+
+                // Reset upper-triangular part of A
+                for (size_t i = 0; i < n; ++i)
+                    for (size_t j = i + 1; j < n; ++j)
+                        reset(A(i, j));
+
+                double alpha {};
+                blaze::randomize(alpha);
+
+                // Do trmm
+                trmmRightLower(alpha, B, A, C);
+
+                BLAZEFEO_ASSERT_APPROX_EQ(C, evaluate(alpha * B * A), 1e-10, 1e-10)
+                    << "trmm error at size m,n=" << m << "," << n;
+            }
+    }
 }

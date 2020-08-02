@@ -82,4 +82,61 @@ namespace blazefeo
         }
     }
 #endif
+
+
+#ifdef BLAZEFEO_USE_CUSTOM_TRMM_RIGHT_LOWER
+    template <>
+    template <typename PB, typename PA>
+        requires MatrixPointer<PB, double> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, double>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<double, 8, 4, columnMajor>::trmmRightLower(double alpha, PB b, PA a) noexcept
+    {
+        IntrinsicType bx[2], ax;
+
+        // k == 0
+        bx[0] = alpha * b.load(0 * SS, 0);
+        bx[1] = alpha * b.load(1 * SS, 0);
+        ax = a.broadcast(0, 0);
+        v_[0][0] = fmadd(bx[0], ax, v_[0][0]);
+        v_[1][0] = fmadd(bx[1], ax, v_[1][0]);
+
+        // k == 1
+        bx[0] = alpha * b.load(0 * SS, 1);
+        bx[1] = alpha * b.load(1 * SS, 1);
+        ax = a.broadcast(1, 0);
+        v_[0][0] = fmadd(bx[0], ax, v_[0][0]);
+        v_[1][0] = fmadd(bx[1], ax, v_[1][0]);
+        ax = a.broadcast(1, 1);
+        v_[0][1] = fmadd(bx[0], ax, v_[0][1]);
+        v_[1][1] = fmadd(bx[1], ax, v_[1][1]);
+
+        // k == 2
+        bx[0] = alpha * b.load(0 * SS, 2);
+        bx[1] = alpha * b.load(1 * SS, 2);
+        ax = a.broadcast(2, 0);
+        v_[0][0] = fmadd(bx[0], ax, v_[0][0]);
+        v_[1][0] = fmadd(bx[1], ax, v_[1][0]);
+        ax = a.broadcast(2, 1);
+        v_[0][1] = fmadd(bx[0], ax, v_[0][1]);
+        v_[1][1] = fmadd(bx[1], ax, v_[1][1]);
+        ax = a.broadcast(2, 2);
+        v_[0][2] = fmadd(bx[0], ax, v_[0][2]);
+        v_[1][2] = fmadd(bx[1], ax, v_[1][2]);
+
+        // k == 3
+        bx[0] = alpha * b.load(0 * SS, 3);
+        bx[1] = alpha * b.load(1 * SS, 3);
+        ax = a.broadcast(3, 0);
+        v_[0][0] = fmadd(bx[0], ax, v_[0][0]);
+        v_[1][0] = fmadd(bx[1], ax, v_[1][0]);
+        ax = a.broadcast(3, 1);
+        v_[0][1] = fmadd(bx[0], ax, v_[0][1]);
+        v_[1][1] = fmadd(bx[1], ax, v_[1][1]);
+        ax = a.broadcast(3, 2);
+        v_[0][2] = fmadd(bx[0], ax, v_[0][2]);
+        v_[1][2] = fmadd(bx[1], ax, v_[1][2]);
+        ax = a.broadcast(3, 3);
+        v_[0][3] = fmadd(bx[0], ax, v_[0][3]);
+        v_[1][3] = fmadd(bx[1], ax, v_[1][3]);
+    }
+#endif
 }

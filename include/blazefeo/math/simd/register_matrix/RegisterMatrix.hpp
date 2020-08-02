@@ -229,7 +229,7 @@ namespace blazefeo
         ///
         /// Performs the matrix-matrix operation
         ///
-        /// R := A*B,
+        /// R += alpha*A*B,
         ///
         /// where alpha is a scalar, B is an m by n matrix, 
         /// A is an upper triangular matrix.
@@ -243,6 +243,26 @@ namespace blazefeo
         template <typename P1, typename P2>
             requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
         void trmmLeftUpper(T alpha, P1 a, P2 b) noexcept;
+
+
+        /// @brief Triangular matrix multiplication
+        ///
+        /// Performs the matrix-matrix operation
+        ///
+        /// R += alpha*B*A,
+        ///
+        /// where alpha is a scalar, B is an m by n matrix, 
+        /// A is a lower triangular matrix.
+        ///
+        /// @tparam P1 matrix A pointer type.
+        /// @tparam P2 matrix B pointer type.
+        ///
+        /// @param a triangular matrix.
+        /// @param b general matrix.
+        ///
+        template <typename P1, typename P2>
+            requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
+        void trmmRightLower(T alpha, P1 a, P2 b) noexcept;
 
 
     private:
@@ -747,6 +767,48 @@ namespace blazefeo
             
             a.hmove(1);
             b.vmove(1);
+        }
+    }
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    template <typename PB, typename PA>
+        requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmmRightLower(T alpha, PB b, PA a) noexcept
+    {
+        if constexpr (SO == columnMajor)
+        {
+            // for (size_t j = 0; j < columns(); ++j)
+            // {
+            //     ger(alpha, b.offset(0, j), a.offset(j, 0));
+            // }
+
+            #pragma unroll
+            for (size_t k = 0; k < N; ++k)
+            {
+                IntrinsicType bx[RM];
+                
+                #pragma unroll
+                for (size_t i = 0; i < RM; ++i)
+                    bx[i] = alpha * b.load(i * SS, 0);
+                
+                #pragma unroll
+                for (size_t j = 0; j <= k; ++j)
+                {
+                    IntrinsicType ax = a.broadcast(0, j);
+
+                    #pragma unroll
+                    for (size_t i = 0; i < RM; ++i)
+                        v_[i][j] = fmadd(bx[i], ax, v_[i][j]);
+                } 
+                
+                b.hmove(1);
+                a.vmove(1);
+            }
+        }
+        else
+        {
+            BLAZE_THROW_LOGIC_ERROR("Not implemented");
         }
     }
 

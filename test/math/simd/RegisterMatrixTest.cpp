@@ -624,21 +624,16 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST(RegisterMatrixTest, testTrmmLu)
+    TYPED_TEST(RegisterMatrixTest, testTrmmLeftUpper)
     {
         using RM = TypeParam;
         using ET = ElementType_t<RM>;
 
 
         DynamicMatrix<ET, columnMajor> A(RM::rows(), RM::rows());
-        DynamicMatrix<ET, columnMajor> B(RM::rows(), RM::columns()), X(RM::rows(), RM::columns());
+        DynamicMatrix<ET, columnMajor> B(RM::rows(), RM::columns());
 
         randomize(A);
-
-        // Improve conditioning
-        for (size_t i = 0; i < A.rows() && i < A.columns(); ++i)
-            A(i, i) += 1.;
-        
         randomize(B);
 
         ET alpha {};
@@ -646,17 +641,41 @@ namespace blazefeo :: testing
 
         RM ker;
         ker.trmmLeftUpper(alpha, ptr(A, 0, 0), ptr(B, 0, 0));
-        ker.store(ptr(X, 0, 0));
 
         // Reset lower-triangular part
         for (size_t i = 0; i < A.rows(); ++i)
             for (size_t j = 0; j < i && j < A.columns(); ++j)
                 reset(A(i, j));
 
-        // True value
-        auto const XX = evaluate(alpha * A * B);
+        // TODO: should be strictly equal?
+        BLAZEFEO_ASSERT_APPROX_EQ(ker, alpha * A * B, absTol<ET>(), relTol<ET>());
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testTrmmRightLower)
+    {
+        using RM = TypeParam;
+        using ET = ElementType_t<RM>;
+
+
+        DynamicMatrix<ET, columnMajor> A(RM::columns(), RM::columns());
+        DynamicMatrix<ET, columnMajor> B(RM::rows(), RM::columns());
+
+        randomize(A);
+        randomize(B);
+
+        ET alpha {};
+        blaze::randomize(alpha);
+
+        RM ker;
+        ker.trmmRightLower(alpha, ptr(B, 0, 0), ptr(A, 0, 0));
+
+        // Reset upper-triangular part
+        for (size_t i = 0; i < A.rows(); ++i)
+            for (size_t j = i + 1; j < A.columns(); ++j)
+                reset(A(i, j));
 
         // TODO: should be strictly equal?
-        BLAZEFEO_ASSERT_APPROX_EQ(X, XX, absTol<ET>(), relTol<ET>());
+        BLAZEFEO_ASSERT_APPROX_EQ(ker, alpha * B * A, absTol<ET>(), relTol<ET>());
     }
 }
