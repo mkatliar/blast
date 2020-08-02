@@ -220,9 +220,9 @@ namespace blazefeo
         ///
         /// @brief l pointer to a triangular matrix
         ///
-        template <Side SIDE, UpLo UPLO, typename P>
+        template <typename P>
             requires MatrixPointer<P, T>
-        void trsm(P a);
+        void trsmRightUpper(P a);
 
 
         /// @brief Triangular matrix multiplication
@@ -520,14 +520,11 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, bool SO>
-    template <Side SIDE, UpLo UPLO, typename P>
+    template <typename P>
         requires MatrixPointer<P, T>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsm(P l)
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsmRightUpper(P l)
     {
-        static_assert(SO == columnMajor && SIDE == Side::Right && UPLO == UpLo::Upper,
-            "Unsupported combination of SO, SIDE, and UPLO");
-
-        if constexpr (SO == columnMajor && SIDE == Side::Right && UPLO == UpLo::Upper)
+        if constexpr (SO == columnMajor)
         {
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
@@ -548,6 +545,10 @@ namespace blazefeo
                 for (size_t i = 0; i < RM; ++i)
                     v_[i][j] /= l_jj;
             }
+        }
+        else
+        {
+            BLAZE_THROW_LOGIC_ERROR("Not implemented");
         }
     }
 

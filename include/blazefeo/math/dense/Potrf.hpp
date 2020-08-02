@@ -53,7 +53,7 @@ namespace blazefeo
         else
         {
             // Off-diagonal blocks
-            ker.template trsm<Side::Right, UpLo::Upper>(trans(ptr(L, k, k)));
+            ker.trsmRightUpper(trans(ptr(L, k, k)));
 
             if (k + KN <= N)
                 ker.store(ptr(L, i, k));

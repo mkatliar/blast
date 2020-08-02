@@ -594,7 +594,7 @@ namespace blazefeo :: testing
 
         using blaze::randomize;
         StaticMatrix<ET, RM::columns(), RM::columns(), columnMajor> L;
-        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> B, X, B1;            
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> B, B1;            
         
         for (size_t i = 0; i < RM::columns(); ++i)
             for (size_t j = 0; j < RM::columns(); ++j)
@@ -609,18 +609,11 @@ namespace blazefeo :: testing
 
         randomize(B);
 
-        // True value
-        auto const XX = evaluate(B * inv(trans(L)));
-        
         ker.load(1., ptr(B, 0, 0));
-        ker.template trsm<Side::Right, UpLo::Upper>(trans(ptr(L, 0, 0)));
-        ker.store(ptr(X, 0, 0));
+        ker.trsmRightUpper(trans(ptr(L, 0, 0)));
 
-        // std::cout << "X=\n" << X << std::endl;
-        // std::cout << "XX=\n" << XX << std::endl;
-        
         // TODO: should be strictly equal?
-        BLAZEFEO_ASSERT_APPROX_EQ(X, XX, absTol<ET>(), relTol<ET>());
+        BLAZEFEO_ASSERT_APPROX_EQ(ker, evaluate(B * inv(trans(L))), absTol<ET>(), relTol<ET>());
     }
 
 
