@@ -218,7 +218,7 @@ namespace blazefeo
 
         /// @brief Triangular substitution, matrix pointer argument
         ///
-        /// @brief l pointer to a triangular matrix
+        /// @brief a pointer to a triangular matrix
         ///
         template <typename P>
             requires MatrixPointer<P, T>
@@ -522,7 +522,7 @@ namespace blazefeo
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
         requires MatrixPointer<P, T>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsmRightUpper(P l)
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsmRightUpper(P a)
     {
         if constexpr (SO == columnMajor)
         {
@@ -532,18 +532,18 @@ namespace blazefeo
                 #pragma unroll
                 for (size_t k = 0; k < j; ++k)
                 {
-                    IntrinsicType const l_kj = l.broadcast(k, j);
+                    IntrinsicType const a_kj = a.broadcast(k, j);
 
                     #pragma unroll
                     for (size_t i = 0; i < RM; ++i)
-                        v_[i][j] = fnmadd(l_kj, v_[i][k], v_[i][j]);
+                        v_[i][j] = fnmadd(a_kj, v_[i][k], v_[i][j]);
                 }
 
-                IntrinsicType const l_jj = l.broadcast(j, j);
+                IntrinsicType const a_jj = a.broadcast(j, j);
                 
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i)
-                    v_[i][j] /= l_jj;
+                    v_[i][j] /= a_jj;
             }
         }
         else
