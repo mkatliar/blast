@@ -30,6 +30,7 @@ add_executable(bench-blazefeo
 
 
 target_link_libraries(bench-blazefeo
+    blazefeo
     bench-blazefeo-common
-    ${CMAKE_THREAD_LIBS_INIT}
+    Threads::Threads
 )

@@ -40,6 +40,10 @@ target_link_libraries(blazefeo
     INTERFACE blaze::blaze
 )
 
+target_compile_options(blazefeo
+    INTERFACE "-Wno-ignored-attributes"
+)
+
 # BLAZEFEO_WITH_BLASFEO
 set(BLAZEFEO_WITH_BLASFEO ON CACHE BOOL "Build blasfeo C++ interface")
 

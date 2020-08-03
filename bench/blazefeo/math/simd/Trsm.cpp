@@ -19,7 +19,7 @@ namespace blazefeo :: benchmark
         StaticPanelMatrix<double, m, n, columnMajor> L;
         randomize(L);
 
-        StaticPanelMatrix<double, n, n, columnMajor> A;
+        StaticPanelMatrix<double, m, n, columnMajor> A;
         randomize(A);
 
         Kernel ker;

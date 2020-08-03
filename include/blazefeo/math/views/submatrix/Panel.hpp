@@ -212,32 +212,6 @@ namespace blazefeo
         }
 
 
-        template <typename T>
-        void store(size_t i, size_t j, T val)
-        {
-            if( i >= rows() ) {
-                BLAZE_THROW_OUT_OF_RANGE( "Invalid row access index" );
-            }
-            if( j >= columns() ) {
-                BLAZE_THROW_OUT_OF_RANGE( "Invalid column access index" );
-            }
-
-            size_t constexpr SS = SimdSize_v<T>;
-
-            if (i + SS <= rows())
-            {
-                matrix_.store(row() + i, column() + j, val);
-            }
-            else
-            {
-                IntType_t<T> const rem = rows() % SS;
-                MaskType_t<T> const mask = cmpgt<SS>(set1<SS>(rem), countUp<MaskType_t<T>, SS>());
-
-                maskstore(&matrix_(row() + i, column() + j), mask, val);
-            }
-        }
-
-
         Reference at( size_t i, size_t j )
         {
             if( i >= rows() ) {
