@@ -40,44 +40,6 @@ namespace blazefeo
         if (rows(D) != M || columns(D) != N)
             BLAZE_THROW_INVALID_ARGUMENT("Matrix sizes do not match");
 
-        size_t i = 0;
-
-        // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
-        // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
-        for (; i + 2 * TILE_SIZE < M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
-            gemm_backend<3 * TILE_SIZE, TILE_SIZE>(i, alpha, ~A, ~B, beta, ~C, ~D);
-
-        for (; i + 1 * TILE_SIZE < M; i += 2 * TILE_SIZE)
-            gemm_backend<2 * TILE_SIZE, TILE_SIZE>(i, alpha, ~A, ~B, beta, ~C, ~D);
-
-        for (; i + 0 * TILE_SIZE < M; i += 1 * TILE_SIZE)
-            gemm_backend<1 * TILE_SIZE, TILE_SIZE>(i, alpha, ~A, ~B, beta, ~C, ~D);
-    }
-
-
-    /// @brief New and better gemm?
-    ///
-    template <typename ST, typename MT1, typename MT2, bool SO2, typename MT3>
-    inline void gemmNewAndBetter(
-        ST alpha,
-        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, SO2> const& B, 
-        DenseMatrix<MT3, columnMajor>& C)
-    {
-        using ET = ElementType_t<MT1>;
-        size_t constexpr TILE_SIZE = TileSize_v<ET>;
-
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT2>, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT3>, ET);
-
-        size_t const M = rows(B);
-        size_t const N = columns(B);
-
-        if (rows(A) != N || columns(A) != N)
-            BLAZE_THROW_INVALID_ARGUMENT("Matrix sizes do not match");
-
-        if (rows(C) != M || columns(C) != N)
-            BLAZE_THROW_INVALID_ARGUMENT("Matrix sizes do not match");            
-
         size_t j = 0;
 
         // Main part
@@ -90,30 +52,34 @@ namespace blazefeo
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N, alpha, ptr(B, i, 0), ptr(A, 0, j));
-                ker.store(ptr(C, i, j));
+                ker.load(beta, ptr(C, i, j));
+                ker.gemm(K, alpha, ptr(A, i, 0), ptr(B, 0, j));
+                ker.store(ptr(D, i, j));
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N, alpha, ptr(B, i, 0), ptr(A, 0, j));
-                ker.store(ptr(C, i, j));
+                ker.load(beta, ptr(C, i, j));
+                ker.gemm(K, alpha, ptr(A, i, 0), ptr(B, 0, j));
+                ker.store(ptr(D, i, j));
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N, alpha, ptr(B, i, 0), ptr(A, 0, j));
-                ker.store(ptr(C, i, j));
+                ker.load(beta, ptr(C, i, j));
+                ker.gemm(K, alpha, ptr(A, i, 0), ptr(B, 0, j));
+                ker.store(ptr(D, i, j));
             }
 
             // Bottom edge
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N, alpha, ptr(B, i, 0), ptr(A, 0, j), M - i, ker.columns());
-                ker.store(ptr(C, i, j), M - i, ker.columns());
+                ker.load(beta, ptr(C, i, j), M - i, ker.columns());
+                ker.gemm(K, alpha, ptr(A, i, 0), ptr(B, 0, j), M - i, ker.columns());
+                ker.store(ptr(D, i, j), M - i, ker.columns());
             }
         }
 
@@ -128,30 +94,34 @@ namespace blazefeo
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N, alpha, ptr(B, i, 0), ptr(A, 0, j), ker.rows(), N - j);
-                ker.store(ptr(C, i, j), ker.rows(), N - j);
+                ker.load(beta, ptr(C, i, j), ker.rows(), N - j);
+                ker.gemm(K, alpha, ptr(A, i, 0), ptr(B, 0, j), ker.rows(), N - j);
+                ker.store(ptr(D, i, j), ker.rows(), N - j);
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N, alpha, ptr(B, i, 0), ptr(A, 0, j), ker.rows(), N - j);
-                ker.store(ptr(C, i, j), ker.rows(), N - j);
+                ker.load(beta, ptr(C, i, j), ker.rows(), N - j);
+                ker.gemm(K, alpha, ptr(A, i, 0), ptr(B, 0, j), ker.rows(), N - j);
+                ker.store(ptr(D, i, j), ker.rows(), N - j);
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N, alpha, ptr(B, i, 0), ptr(A, 0, j), ker.rows(), N - j);
-                ker.store(ptr(C, i, j), ker.rows(), N - j);
+                ker.load(beta, ptr(C, i, j), ker.rows(), N - j);
+                ker.gemm(K, alpha, ptr(A, i, 0), ptr(B, 0, j), ker.rows(), N - j);
+                ker.store(ptr(D, i, j), ker.rows(), N - j);
             }
 
             // Bottom-right corner
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N, alpha, ptr(B, i, 0), ptr(A, 0, j), M - i, N - j);
-                ker.store(ptr(C, i, j), M - i, N - j);
+                ker.load(beta, ptr(C, i, j), M - i, N - j);
+                ker.gemm(K, alpha, ptr(A, i, 0), ptr(B, 0, j), M - i, N - j);
+                ker.store(ptr(D, i, j), M - i, N - j);
             }
         }
     }
