@@ -85,18 +85,55 @@ namespace blazefeo
 
 
         /// @brief Value of the matrix element at row \a i and column \a j
-        T operator()(size_t i, size_t j) const
+        T operator()(size_t i, size_t j) const noexcept
         {
             return at(i, j);
         }
 
 
         /// @brief Set all elements to 0.
-        void reset()
+        void reset() noexcept
         {
             for (size_t i = 0; i < RM; ++i)
                 for (size_t j = 0; j < N; ++j)
                     v_[i][j] = setzero<T, SS>();
+        }
+
+
+        /// @brief Multiply all elements by a constant.
+        void operator*=(T alpha) noexcept
+        {
+            #pragma unroll
+            for (size_t i = 0; i < RM; ++i)
+                #pragma unroll
+                for (size_t j = 0; j < RN; ++j)
+                    v_[i][j] *= alpha;
+        }
+
+
+        /// @brief R += beta * A
+        template <typename PA>
+            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+        void axpy(T beta, PA a) noexcept
+        {
+            #pragma unroll
+            for (size_t j = 0; j < N; ++j)
+                #pragma unroll
+                for (size_t i = 0; i < RM; ++i)
+                    v_[i][j] += beta * a.load(SS * i, j);
+        }
+
+
+        /// @brief R(0:m-1, 0:n-1) += beta * A
+        template <typename PA>
+            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+        void axpy(T beta, PA a, size_t m, size_t n) noexcept
+        {
+            #pragma unroll
+            for (size_t j = 0; j < N; ++j) if (j < n)
+                #pragma unroll
+                for (size_t i = 0; i < RM; ++i) if (i * RM < m)
+                    v_[i][j] += beta * a.load(SS * i, j);
         }
 
 
@@ -168,6 +205,11 @@ namespace blazefeo
         void ger(T alpha, PA a, PB b) noexcept;
 
 
+        template <typename PA, typename PB>
+            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        void ger(PA a, PB b) noexcept;
+
+
         /// @brief Rank-1 update of specified size
         ///
         /// @tparam SOA storage order of the panels of the first matrix
@@ -186,6 +228,11 @@ namespace blazefeo
         void ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept;
 
 
+        template <typename PA, typename PB>
+            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        void ger(PA a, PB b, size_t m, size_t n) noexcept;
+
+
         /// @brief General matrix-matrix multiplication
         ///
         /// R += alpha * A * B
@@ -195,7 +242,7 @@ namespace blazefeo
         void gemm(size_t K, T alpha, PA a, PB b) noexcept;
 
 
-        /// @brief General matrix-matrix multiplication with limited size
+		/// @brief General matrix-matrix multiplication with limited size
         ///
         /// R(0:md-1, 0:nd-1) += alpha * A * B
         ///
@@ -610,6 +657,31 @@ namespace blazefeo
 
 
     template <typename T, size_t M, size_t N, bool SO>
+    template <typename PA, typename PB>
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b) noexcept
+    {
+        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
+            
+        IntrinsicType ax[RM];
+
+        #pragma unroll
+        for (size_t i = 0; i < RM; ++i)
+            ax[i] = a.load(i * SS, 0);
+        
+        #pragma unroll
+        for (size_t j = 0; j < N; ++j)
+        {
+            IntrinsicType bx = b.broadcast(0, j);
+
+            #pragma unroll
+            for (size_t i = 0; i < RM; ++i)
+                v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
+        }        
+    }
+
+
+    template <typename T, size_t M, size_t N, bool SO>
     template <bool SOA, bool SOB>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
     {
@@ -650,6 +722,29 @@ namespace blazefeo
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
             ax[i] = alpha * a.load(i * SS, 0);
+        
+        #pragma unroll
+        for (size_t j = 0; j < N; ++j) if (j < n)
+        {
+            IntrinsicType bx = b.broadcast(0, j);
+
+            #pragma unroll
+            for (size_t i = 0; i < RM; ++i)
+                v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
+        }        
+    }
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    template <typename PA, typename PB>
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b, size_t m, size_t n) noexcept
+    {
+        IntrinsicType ax[RM];
+
+        #pragma unroll
+        for (size_t i = 0; i < RM; ++i)
+            ax[i] = a.load(i * SS, 0);
         
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
@@ -892,5 +987,55 @@ namespace blazefeo
     inline bool operator==(Matrix<MT, SO1> const& m, RegisterMatrix<T, M, N, SO2> const& rm)
     {
         return rm == m;
+    }
+
+
+    template <
+        typename T, size_t M, size_t N, bool SO,
+        typename PA, typename PB, typename PC, typename PD
+    >
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+            && MatrixPointer<PB, T>
+            && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
+    BLAZE_ALWAYS_INLINE void gemm(RegisterMatrix<T, M, N, SO>& ker,
+        size_t K, T alpha, PA a, PB b, T beta, PC c, PD d) noexcept
+    {
+        ker.reset();
+
+        for (size_t k = 0; k < K; ++k)
+        {
+            ker.ger(a, b);
+            a.hmove(1);
+            b.vmove(1);
+        }
+
+        ker *= alpha;
+        ker.axpy(beta, c);
+        ker.store(d);
+    }
+
+
+    template <
+        typename T, size_t M, size_t N, bool SO,
+        typename PA, typename PB, typename PC, typename PD
+    >
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+            && MatrixPointer<PB, T>
+            && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
+    BLAZE_ALWAYS_INLINE void gemm(RegisterMatrix<T, M, N, SO>& ker,
+        size_t K, T alpha, PA a, PB b, T beta, PC c, PD d, size_t md, size_t nd) noexcept
+    {
+        ker.reset();
+
+        for (size_t k = 0; k < K; ++k)
+        {
+            ker.ger(a, b, md, nd);
+            a.hmove(1);
+            b.vmove(1);
+        }
+
+        ker *= alpha;
+        ker.axpy(beta, c, md, nd);
+        ker.store(d, md, nd);
     }
 }

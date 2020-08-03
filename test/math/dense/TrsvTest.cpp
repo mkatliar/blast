@@ -15,6 +15,7 @@ namespace blazefeo :: testing
             DynamicVector<double> b(n);
             DynamicVector<double> x(n);
             randomize(A);
+            A += IdentityMatrix<double>(n); // Improve conditioning
             randomize(b);
 
             // Do trsv
@@ -36,6 +37,7 @@ namespace blazefeo :: testing
             DynamicVector<double> b(n);
             DynamicVector<double> x(n);
             randomize(A);
+            A += IdentityMatrix<double>(n); // Improve conditioning
             randomize(b);
 
             // Do trsv
