@@ -21,7 +21,7 @@ namespace blazefeo
     using namespace blaze;
 
 
-    /// @brief Regiter-resident matrix
+    /// @brief Register-resident matrix
     ///
     /// @tparam T type of matrix elements
     /// @tparam M number of rows of the matrix. Must be a multiple of SS.
@@ -47,6 +47,14 @@ namespace blazefeo
         {
             reset();
         }
+
+
+        /// @brief Copying prohibited
+        RegisterMatrix(RegisterMatrix const&) = delete;
+
+        
+        /// @brief Assignment prohibited
+        RegisterMatrix& operator=(RegisterMatrix const&) = delete;
 
 
         /// @brief Number of matrix rows

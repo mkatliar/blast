@@ -8,6 +8,7 @@ find_package(blaze 3.5 REQUIRED)
 # ~~~~~~~~~~ Our tests ~~~~~~~~~~~~~~
 add_executable(test-blazefeo
     math/simd/RegisterMatrixTest.cpp
+    math/simd/DynamicRegisterMatrixTest.cpp
     math/simd/HsumTest.cpp
 
     math/dense/StaticMatrixPointerTest.cpp

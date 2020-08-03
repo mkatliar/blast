@@ -339,18 +339,19 @@ namespace blazefeo :: testing
 
         DynamicMatrix<ET, columnMajor> A(Traits::rows, 1);
         DynamicMatrix<ET, columnMajor> B(1, Traits::columns);
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
 
         randomize(A);
         randomize(B);
         randomize(C);
+        ET alpha {};
+        blaze::randomize(alpha);
 
         TypeParam ker;
         ker.load(1., ptr(C, 0, 0));
-        ker.ger(ET(1.), ptr(A, 0, 0), ptr(B, 0, 0));
-        ker.store(ptr(D, 0, 0));
+        ker.ger(alpha, ptr(A, 0, 0), ptr(B, 0, 0));
 
-        BLAZEFEO_EXPECT_EQ(D, evaluate(C + A * B));
+        BLAZEFEO_EXPECT_APPROX_EQ(ker, evaluate(C + alpha * A * B), absTol<ET>(), relTol<ET>());
     }
 
 
@@ -362,18 +363,19 @@ namespace blazefeo :: testing
 
         DynamicMatrix<ET, columnMajor> A(Traits::rows, 1);
         DynamicMatrix<ET, rowMajor> B(1, Traits::columns);
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
 
         randomize(A);
         randomize(B);
         randomize(C);
+        ET alpha {};
+        blaze::randomize(alpha);
 
         TypeParam ker;
         ker.load(1., ptr(C, 0, 0));
-        ker.ger(ET(1.), ptr(A, 0, 0), ptr(B, 0, 0));
-        ker.store(ptr(D, 0, 0));
+        ker.ger(alpha, ptr(A, 0, 0), ptr(B, 0, 0));
 
-        BLAZEFEO_EXPECT_EQ(D, evaluate(C + A * B));
+        BLAZEFEO_EXPECT_APPROX_EQ(ker, evaluate(C + alpha * A * B), absTol<ET>(), relTol<ET>());
     }
 
 
