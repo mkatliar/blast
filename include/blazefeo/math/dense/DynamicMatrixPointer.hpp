@@ -3,8 +3,6 @@
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/math/simd/Simd.hpp>
 
-#include <type_traits>
-
 
 namespace blazefeo
 {
@@ -132,20 +130,29 @@ namespace blazefeo
 
 
     template <typename MT, bool SO>
-    BLAZE_ALWAYS_INLINE std::enable_if_t<!IsStatic_v<MT>,
-        DynamicMatrixPointer<ElementType_t<MT>, SO>>
+        requires (!IsStatic_v<MT>)
+    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT>, SO> 
         ptr(DenseMatrix<MT, SO>& m, size_t i, size_t j)
     {
-        return {&(~m)(i, j), spacing(m)};
+        return {&(*m)(i, j), spacing(m)};
     }
 
 
     template <typename MT, bool SO>
-    BLAZE_ALWAYS_INLINE std::enable_if_t<!IsStatic_v<MT>,
-        DynamicMatrixPointer<ElementType_t<MT> const, SO>>
+        requires (!IsStatic_v<MT>)
+    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO>
         ptr(DenseMatrix<MT, SO> const& m, size_t i, size_t j)
     {
-        return  {&(~m)(i, j), spacing(m)};
+        return {&(*m)(i, j), spacing(m)};
+    }
+
+
+    template <typename MT, bool SO>
+        requires (!IsStatic_v<MT>)
+    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO>
+        ptr(DMatTransExpr<MT, SO> const& m, size_t i, size_t j)
+    {
+        return {&(*m)(i, j), spacing(m)};
     }
 
 

@@ -555,7 +555,7 @@ namespace blazefeo
 
         for (size_t i = 0; i < rm.rows(); ++i)
             for (size_t j = 0; j < rm.columns(); ++j)
-                if (rm(i, j) != (~m)(i, j))
+                if (rm(i, j) != (*m)(i, j))
                     return false;
 
         return true;

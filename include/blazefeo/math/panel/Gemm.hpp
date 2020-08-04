@@ -41,12 +41,12 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, columnMajor>& ker, size_t K, T alpha, T beta,
         Matrix<MT1, SO1> const& A, Matrix<MT2, SO2> const& B, Matrix<MT3, SO3> const& C, Matrix<MT4, SO4>& D)
     {
-        ker.load(beta, ~C);
+        ker.load(beta, *C);
 
         for (size_t k = 0; k < K; ++k)
-            ker.ger(alpha, column(~A, k), row(~B, k));
+            ker.ger(alpha, column(*A, k), row(*B, k));
 
-        ker.store(~D);
+        ker.store(*D);
     }
 
 
@@ -80,7 +80,7 @@ namespace blazefeo
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT3>, ET);
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT4>, ET);
 
-        gemm_nt(ET(1.), ET(1.), ~A, ~B, ~C, ~D);
+        gemm_nt(ET(1.), ET(1.), *A, *B, *C, *D);
     }
 
 
@@ -123,13 +123,13 @@ namespace blazefeo
         // i + 4 * PANEL_SIZE != M is to improve performance in case when the remaining number of rows is 4 * PANEL_SIZE:
         // it is more efficient to apply 2 * PANEL_SIZE kernel 2 times than 3 * PANEL_SIZE + 1 * PANEL_SIZE kernel.
         for (; i + 2 * PANEL_SIZE < M && i + 4 * PANEL_SIZE != M; i += 3 * PANEL_SIZE)
-            gemm_nt_backend<3 * PANEL_SIZE, 4>(i, alpha, beta, ~A, ~B, ~C, ~D);
+            gemm_nt_backend<3 * PANEL_SIZE, 4>(i, alpha, beta, *A, *B, *C, *D);
 
         for (; i + 1 * PANEL_SIZE < M; i += 2 * PANEL_SIZE)
-            gemm_nt_backend<2 * PANEL_SIZE, 4>(i, alpha, beta, ~A, ~B, ~C, ~D);
+            gemm_nt_backend<2 * PANEL_SIZE, 4>(i, alpha, beta, *A, *B, *C, *D);
 
         for (; i + 0 * PANEL_SIZE < M; i += 1 * PANEL_SIZE)
-            gemm_nt_backend<1 * PANEL_SIZE, 4>(i, alpha, beta, ~A, ~B, ~C, ~D);
+            gemm_nt_backend<1 * PANEL_SIZE, 4>(i, alpha, beta, *A, *B, *C, *D);
     }
 
 

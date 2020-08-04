@@ -1,3 +1,9 @@
+/// @brief Eigen GEMM benchmarks.
+///
+
+// Allow Eigen static matrices of any size to be created on stack.
+#define EIGEN_STACK_ALLOCATION_LIMIT 0
+
 #include <Eigen/Dense>
 
 #include <bench/Benchmark.hpp>

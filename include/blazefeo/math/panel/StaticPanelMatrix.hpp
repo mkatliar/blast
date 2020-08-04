@@ -234,29 +234,29 @@ namespace blazefeo
         // using CT = decltype( ctrans( *this ) );
         // using IT = decltype( inv( *this ) );
 
-        // if( (~rhs).rows() != M || (~rhs).columns() != N ) {
+        // if( (*rhs).rows() != M || (*rhs).columns() != N ) {
         //     BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to static matrix" );
         // }
 
-        // if( IsSame_v<MT,TT> && (~rhs).isAliased( this ) ) {
+        // if( IsSame_v<MT,TT> && (*rhs).isAliased( this ) ) {
         //     transpose( typename IsSquare<This>::Type() );
         // }
-        // else if( IsSame_v<MT,CT> && (~rhs).isAliased( this ) ) {
+        // else if( IsSame_v<MT,CT> && (*rhs).isAliased( this ) ) {
         //     ctranspose( typename IsSquare<This>::Type() );
         // }
-        // else if( !IsSame_v<MT,IT> && (~rhs).canAlias( this ) ) {
-        //     StaticPanelMatrix tmp( ~rhs );
+        // else if( !IsSame_v<MT,IT> && (*rhs).canAlias( this ) ) {
+        //     StaticPanelMatrix tmp( *rhs );
         //     assign( *this, tmp );
         // }
         // else {
         //     if( IsSparseMatrix_v<MT> )
         //         reset();
-        //     assign( *this, ~rhs );
+        //     assign( *this, *rhs );
         // }
 
         // BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 
-        assign(*this, ~rhs);
+        assign(*this, *rhs);
 
         return *this;
     }

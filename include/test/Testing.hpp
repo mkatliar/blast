@@ -60,8 +60,8 @@ namespace blazefeo :: testing
 		for (size_t i = 0; i < M; ++i)
 			for (size_t j = 0; j < N; ++j)
 			{
-				auto const a = (~lhs)(i, j);
-				auto const b = (~rhs)(i, j);
+				auto const a = (*lhs)(i, j);
+				auto const b = (*rhs)(i, j);
 				auto delta = a - b;
 
 				if (std::isnan(a) != std::isnan(b) 
@@ -87,7 +87,7 @@ namespace blazefeo :: testing
 			return AssertionFailure() << "Vector size mismatch";
 
 		for (size_t j = 0; j < N; ++j)
-			if (abs((~lhs)[j] - (~rhs)[j]) > abs_tol + rel_tol * abs((~rhs)[j]))
+			if (abs((*lhs)[j] - (*rhs)[j]) > abs_tol + rel_tol * abs((*rhs)[j]))
 				return AssertionFailure()
 					<< "Actual value:\n" << lhs 
 					<< "Expected value:\n" << rhs
@@ -109,9 +109,9 @@ namespace blazefeo :: testing
 		auto atol = begin(abs_tol);
 
 		for (size_t j = 0; j < N; ++j, ++atol)
-			if (abs((~lhs)[j] - (~rhs)[j]) > *atol)
+			if (abs((*lhs)[j] - (*rhs)[j]) > *atol)
 				return AssertionFailure() << "First element mismatch at index " 
-					<< j << ", lhs=" << (~lhs)[j] << ", rhs=" << (~rhs)[j] << ", abs_tol=" << *atol;
+					<< j << ", lhs=" << (*lhs)[j] << ", rhs=" << (*rhs)[j] << ", abs_tol=" << *atol;
 
 		return AssertionSuccess();
 	}
@@ -127,9 +127,9 @@ namespace blazefeo :: testing
 			return AssertionFailure() << "Vector size mismatch";
 
 		for (size_t j = 0; j < N; ++j)
-			if (abs((~lhs)[j] - (~rhs)[j]) > (~abs_tol)[j])
+			if (abs((*lhs)[j] - (*rhs)[j]) > (*abs_tol)[j])
 				return AssertionFailure() << "First element mismatch at index " 
-					<< j << ", lhs=" << (~lhs)[j] << ", rhs=" << (~rhs)[j] << ", abs_tol=" << (~abs_tol)[j];
+					<< j << ", lhs=" << (*lhs)[j] << ", rhs=" << (*rhs)[j] << ", abs_tol=" << (*abs_tol)[j];
 
 		return AssertionSuccess();
 	}
@@ -147,9 +147,9 @@ namespace blazefeo :: testing
 
 		for (size_t i = 0; i < M; ++i)
 			for (size_t j = 0; j < N; ++j)
-				if (!((~lhs)(i, j) == (~rhs)(i, j)))
+				if (!((*lhs)(i, j) == (*rhs)(i, j)))
 					return AssertionFailure() << "First element mismatch at index (" 
-						<< i << "," << j << "), lhs=" << (~lhs)(i, j) << ", rhs=" << (~rhs)(i, j);
+						<< i << "," << j << "), lhs=" << (*lhs)(i, j) << ", rhs=" << (*rhs)(i, j);
 
 		return AssertionSuccess();
 	}
@@ -165,9 +165,9 @@ namespace blazefeo :: testing
 			return AssertionFailure() << "Vector size mismatch";
 
 		for (size_t j = 0; j < N; ++j)
-			if (!((~lhs)[j] == (~rhs)[j]))
+			if (!((*lhs)[j] == (*rhs)[j]))
 				return AssertionFailure() << "First element mismatch at index " 
-					<< j << ", lhs=" << (~lhs)[j] << ", rhs=" << (~rhs)[j];
+					<< j << ", lhs=" << (*lhs)[j] << ", rhs=" << (*rhs)[j];
 
 		return AssertionSuccess();
 	}

@@ -95,13 +95,13 @@ namespace blazefeo
             size_t i = k;
 
             for (; i + 2 * TILE_SIZE < M; i += 3 * TILE_SIZE)
-                potrf_backend<3 * TILE_SIZE, KN>(k, i, ~A, ~L);
+                potrf_backend<3 * TILE_SIZE, KN>(k, i, *A, *L);
 
             for (; i + 1 * TILE_SIZE < M; i += 2 * TILE_SIZE)
-                potrf_backend<2 * TILE_SIZE, KN>(k, i, ~A, ~L);
+                potrf_backend<2 * TILE_SIZE, KN>(k, i, *A, *L);
 
             for (; i + 0 * TILE_SIZE < M; i += 1 * TILE_SIZE)
-                potrf_backend<1 * TILE_SIZE, KN>(k, i, ~A, ~L);
+                potrf_backend<1 * TILE_SIZE, KN>(k, i, *A, *L);
         }
     }
 }

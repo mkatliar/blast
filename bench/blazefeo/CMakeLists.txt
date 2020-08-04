@@ -14,6 +14,7 @@ add_executable(bench-blazefeo
     math/simd/Potrf.cpp
     math/simd/Trsm.cpp
     math/simd/Trmm.cpp
+    math/simd/PartialGemm.cpp
 
     math/dense/DynamicSyrk.cpp
     math/dense/StaticSyrk.cpp
@@ -28,9 +29,12 @@ add_executable(bench-blazefeo
     math/panel/DynamicPotrf.cpp
 )
 
-
 target_link_libraries(bench-blazefeo
     blazefeo
     bench-blazefeo-common
     Threads::Threads
+)
+
+target_compile_options(bench-blazefeo
+    PRIVATE "-mllvm" "-inline-threshold=500"
 )

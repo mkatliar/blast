@@ -83,13 +83,13 @@ namespace blazefeo
             size_t i = k;
 
             for (; i + 2 * PANEL_SIZE < M; i += 3 * PANEL_SIZE)
-                potrf_backend<3 * PANEL_SIZE, KN>(k, i, ~A, ~L);
+                potrf_backend<3 * PANEL_SIZE, KN>(k, i, *A, *L);
 
             for (; i + 1 * PANEL_SIZE < M; i += 2 * PANEL_SIZE)
-                potrf_backend<2 * PANEL_SIZE, KN>(k, i, ~A, ~L);
+                potrf_backend<2 * PANEL_SIZE, KN>(k, i, *A, *L);
 
             for (; i + 0 * PANEL_SIZE < M; i += 1 * PANEL_SIZE)
-                potrf_backend<1 * PANEL_SIZE, KN>(k, i, ~A, ~L);
+                potrf_backend<1 * PANEL_SIZE, KN>(k, i, *A, *L);
         }
     }
 }

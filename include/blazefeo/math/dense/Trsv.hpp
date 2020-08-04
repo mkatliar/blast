@@ -24,12 +24,12 @@ namespace blazefeo
 
         for (size_t i = 0; i < N; ++i)
         { 
-           auto acc = (~b)[i]; 
+           auto acc = (*b)[i]; 
 
            for (size_t j = 0; j < i; ++j)
-                acc -= (~A)(i, j) * (~x)[j];
+                acc -= (*A)(i, j) * (*x)[j];
 
-           (~x)[i] = acc / (~A)(i, i);
+           (*x)[i] = acc / (*A)(i, i);
         } 
     }
 
@@ -53,12 +53,12 @@ namespace blazefeo
 
         for (size_t i = N; i-- > 0; )
         { 
-           auto acc = (~b)[i]; 
+           auto acc = (*b)[i]; 
 
            for (size_t j = i + 1; j < N; ++j)
-                acc -= (~A)(i, j) * (~x)[j];
+                acc -= (*A)(i, j) * (*x)[j];
 
-           (~x)[i] = acc / (~A)(i, i);
+           (*x)[i] = acc / (*A)(i, i);
         } 
     }
 }

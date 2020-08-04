@@ -1,6 +1,6 @@
 #include <blasfeo/Blasfeo.hpp>
 
-#include <benchmark/benchmark.h>
+#include <bench/Benchmark.hpp>
 
 #include <random>
 #include <memory>
@@ -54,6 +54,6 @@ namespace blazefeo :: benchmark
     }
     
 
-    BENCHMARK_TEMPLATE(BM_gemm, double)->DenseRange(1, 300);
-    BENCHMARK_TEMPLATE(BM_gemm, float)->DenseRange(1, 300);
+    BENCHMARK_TEMPLATE(BM_gemm, double)->DenseRange(1, BENCHMARK_MAX_GEMM);
+    BENCHMARK_TEMPLATE(BM_gemm, float)->DenseRange(1, BENCHMARK_MAX_GEMM);
 }

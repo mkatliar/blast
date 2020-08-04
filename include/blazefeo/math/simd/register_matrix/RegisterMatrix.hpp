@@ -148,6 +148,11 @@ namespace blazefeo
         /// @brief load from memory
         // [[deprecated("Use load with a matrix argument instead")]]
         void load(T beta, T const * ptr, size_t spacing);
+
+
+        template <typename P>
+            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        void load(P p) noexcept;
         
 
         template <typename P>
@@ -158,6 +163,12 @@ namespace blazefeo
         /// @brief load from memory with specified size
         void load(T beta, T const * ptr, size_t spacing, size_t m, size_t n);
 
+        
+        template <typename P>
+            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        void load(P p, size_t m, size_t n) noexcept;
+
+        
         template <typename P>
             requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(T beta, P p, size_t m, size_t n) noexcept;
@@ -387,6 +398,19 @@ namespace blazefeo
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
         requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    inline void RegisterMatrix<T, M, N, SO>::load(P p) noexcept
+    {
+        #pragma unroll
+        for (size_t j = 0; j < N; ++j)
+            #pragma unroll
+            for (size_t i = 0; i < RM; ++i)
+                v_[i][j] = p.load(SS * i, j);
+    }
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    template <typename P>
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::load(T beta, P p) noexcept
     {
         #pragma unroll
@@ -405,6 +429,19 @@ namespace blazefeo
             #pragma unroll
             for (size_t j = 0; j < N; ++j) if (j < n)
                 v_[i][j] = beta * blazefeo::load<SS>(ptr + spacing * i + SS * j);
+    }
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    template <typename P>
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    inline void RegisterMatrix<T, M, N, SO>::load(P p, size_t m, size_t n) noexcept
+    {
+        #pragma unroll
+        for (size_t j = 0; j < N; ++j) if (j < n)
+            #pragma unroll
+            for (size_t i = 0; i < RM; ++i)
+                v_[i][j] = p.load(SS * i, j);
     }
 
 
@@ -984,7 +1021,7 @@ namespace blazefeo
 
         for (size_t i = 0; i < rm.rows(); ++i)
             for (size_t j = 0; j < rm.columns(); ++j)
-                if (rm(i, j) != (~m)(i, j))
+                if (rm(i, j) != (*m)(i, j))
                     return false;
 
         return true;
@@ -1044,6 +1081,52 @@ namespace blazefeo
 
         ker *= alpha;
         ker.axpy(beta, c, md, nd);
+        ker.store(d, md, nd);
+    }
+
+
+    template <
+        typename T, size_t M, size_t N, bool SO,
+        typename PA, typename PB, typename PC, typename PD
+    >
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+            && MatrixPointer<PB, T>
+            && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
+    BLAZE_ALWAYS_INLINE void gemm(RegisterMatrix<T, M, N, SO>& ker,
+        size_t K, PA a, PB b, PC c, PD d) noexcept
+    {
+        ker.load(c);
+
+        for (size_t k = 0; k < K; ++k)
+        {
+            ker.ger(a, b);
+            a.hmove(1);
+            b.vmove(1);
+        }
+
+        ker.store(d);
+    }
+
+
+    template <
+        typename T, size_t M, size_t N, bool SO,
+        typename PA, typename PB, typename PC, typename PD
+    >
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+            && MatrixPointer<PB, T>
+            && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
+    BLAZE_ALWAYS_INLINE void gemm(RegisterMatrix<T, M, N, SO>& ker,
+        size_t K, PA a, PB b, PC c, PD d, size_t md, size_t nd) noexcept
+    {
+        ker.load(c);
+
+        for (size_t k = 0; k < K; ++k)
+        {
+            ker.ger(a, b, md, nd);
+            a.hmove(1);
+            b.vmove(1);
+        }
+        
         ker.store(d, md, nd);
     }
 }

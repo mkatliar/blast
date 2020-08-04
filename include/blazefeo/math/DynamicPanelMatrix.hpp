@@ -177,7 +177,7 @@ namespace blaze
     {
         using blaze::randomize;
 
-        if( !isSquare( ~matrix ) ) {
+        if( !isSquare( *matrix ) ) {
             BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
         }
 
@@ -214,7 +214,7 @@ namespace blaze
     {
         using blaze::randomize;
 
-        if( !isSquare( ~matrix ) ) {
+        if( !isSquare( *matrix ) ) {
             BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
         }
 
@@ -252,7 +252,7 @@ namespace blaze
 
         using BT = UnderlyingBuiltin_t<Type>;
 
-        if( !isSquare( ~matrix ) ) {
+        if( !isSquare( *matrix ) ) {
             BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
         }
 
@@ -293,7 +293,7 @@ namespace blaze
 
         using BT = UnderlyingBuiltin_t<Type>;
 
-        if( !isSquare( ~matrix ) ) {
+        if( !isSquare( *matrix ) ) {
             BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
         }
 
@@ -329,7 +329,7 @@ namespace blaze
 
         BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( Type );
 
-        if( !isSquare( ~matrix ) ) {
+        if( !isSquare( *matrix ) ) {
             BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
         }
 

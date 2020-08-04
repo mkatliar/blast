@@ -207,6 +207,6 @@ namespace blazefeo
         BLAZE_FUNCTION_TRACE;
 
         using ReturnType = const PMatTransExpr<MT, !SO>;
-        return ReturnType(~pm);
+        return ReturnType(*pm);
     }
 }

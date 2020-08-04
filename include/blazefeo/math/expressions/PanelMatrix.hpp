@@ -43,35 +43,35 @@ namespace blazefeo
     template <typename MT, bool SO>
     inline auto * data(PanelMatrix<MT, SO>& m) noexcept
     {
-        return (~m).data();
+        return (*m).data();
     }
 
 
     template <typename MT, bool SO>
     inline auto const * data(PanelMatrix<MT, SO> const& m) noexcept
     {
-        return (~m).data();
+        return (*m).data();
     }
 
 
     template <typename MT, bool SO>
     inline auto * ptr(PanelMatrix<MT, SO>& m, size_t i, size_t j)
     {
-        return (~m).ptr(i, j);
+        return (*m).ptr(i, j);
     }
 
 
     template <typename MT, bool SO>
     inline auto const * ptr(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
     {
-        return (~m).ptr(i, j);
+        return (*m).ptr(i, j);
     }
 
 
     template <typename MT, bool SO>
     inline size_t spacing(PanelMatrix<MT, SO> const& m)
     {
-        return (~m).spacing();
+        return (*m).spacing();
     }
 
 
@@ -96,8 +96,8 @@ namespace blazefeo
     template <typename MT1, bool SO1, typename MT2, bool SO2>
     inline void assign(DenseMatrix<MT1, SO1>& lhs, PanelMatrix<MT2, SO2> const& rhs)
     {
-        BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == (~rhs).rows()   , "Invalid number of rows"    );
-        BLAZE_INTERNAL_ASSERT( (~lhs).columns() == (~rhs).columns(), "Invalid number of columns" );
+        BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == (*rhs).rows()   , "Invalid number of rows"    );
+        BLAZE_INTERNAL_ASSERT( (*lhs).columns() == (*rhs).columns(), "Invalid number of columns" );
 
         using ET1 = ElementType_t<MT1>;
         using ET2 = ElementType_t<MT2>;
@@ -112,8 +112,8 @@ namespace blazefeo
 
         if constexpr (SO1 == columnMajor && SO2 == columnMajor)
         {
-            size_t const m = (~rhs).rows();
-            size_t const n = (~rhs).columns();
+            size_t const m = (*rhs).rows();
+            size_t const n = (*rhs).columns();
             size_t const s = spacing(lhs);
 			
 			for (size_t i = 0; i + SS <= m; i += SS)
@@ -144,14 +144,14 @@ namespace blazefeo
                 for (size_t j = 0; j + SS <= n; ++j)
                 {
                     ker.load(1., rhs, i, j, SS, SS);
-                    ker.store(submatrix(~lhs, i, j, SS, SS));
+                    ker.store(submatrix(*lhs, i, j, SS, SS));
                 }
 
                 if (size_t const rn = n % SS)
                 {
                     size_t const j = n - rn;
                     ker.load(1., rhs, i, j, SS, rn);
-                    ker.store(submatrix(~lhs, i, j, SS, rn));
+                    ker.store(submatrix(*lhs, i, j, SS, rn));
                 }
             }
 
@@ -176,9 +176,9 @@ namespace blazefeo
         }
         else
         {
-            for (size_t i = 0; i < (~rhs).rows(); ++i)
-                for (size_t j = 0; j < (~rhs).columns(); ++j)
-                    (~lhs)(i, j) = (~rhs)(i, j);
+            for (size_t i = 0; i < (*rhs).rows(); ++i)
+                for (size_t j = 0; j < (*rhs).columns(); ++j)
+                    (*lhs)(i, j) = (*rhs)(i, j);
         }
     }
 
@@ -186,12 +186,12 @@ namespace blazefeo
     template <typename MT1, bool SO1, typename MT2, bool SO2>
     inline void assign(PanelMatrix<MT1, SO1>& lhs, DenseMatrix<MT2, SO2> const& rhs)
     {
-        size_t const m = (~rhs).rows();
-        size_t const n = (~rhs).columns();
+        size_t const m = (*rhs).rows();
+        size_t const n = (*rhs).columns();
         size_t const s = spacing(rhs);
         
-        BLAZE_INTERNAL_ASSERT((~lhs).rows() == m, "Invalid number of rows");
-        BLAZE_INTERNAL_ASSERT((~lhs).columns() == n, "Invalid number of columns");
+        BLAZE_INTERNAL_ASSERT((*lhs).rows() == m, "Invalid number of rows");
+        BLAZE_INTERNAL_ASSERT((*lhs).columns() == n, "Invalid number of columns");
 
         using ET1 = ElementType_t<MT1>;
         using ET2 = ElementType_t<MT2>;
@@ -250,7 +250,7 @@ namespace blazefeo
         {
             for (size_t i = 0; i < m; ++i)
                 for (size_t j = 0; j < n; ++j)
-                    (~lhs)(i, j) = (~rhs)(i, j);
+                    (*lhs)(i, j) = (*rhs)(i, j);
         }
     }
 }

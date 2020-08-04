@@ -70,4 +70,19 @@ namespace blazefeo :: testing
             EXPECT_EQ(val[k], this->storageOrder == columnMajor ?
                 this->m_(i + k, j) : this->m_(i, j + k));
     }
+
+
+    TYPED_TEST(StaticMatrixPointerTest, testPtrTrans)
+    {
+        size_t const i = 0, j = 0;
+        auto p = ptr(trans(this->m_), 0, 0);
+        auto const val = p.load(i, j);
+        
+        ASSERT_EQ(p.storageOrder, !this->storageOrder);
+        EXPECT_EQ(p.spacing(), this->m_.spacing());
+
+        for (size_t k = 0; k < this->SS; ++k)
+            EXPECT_EQ(val[k], this->storageOrder == columnMajor ?
+                this->m_(i + k, j) : this->m_(i, j + k)) << " at k=" << k;
+    }
 }
