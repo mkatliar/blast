@@ -5,7 +5,6 @@
 #include <benchmark/benchmark.h>
 
 #define BENCHMARK_MAX_SYRK 50
-#define BENCHMARK_MAX_GEMM 50
 #define BENCHMARK_MAX_POTRF 50
 
 

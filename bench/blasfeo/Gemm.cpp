@@ -1,6 +1,6 @@
 #include <blasfeo/Blasfeo.hpp>
 
-#include <bench/Benchmark.hpp>
+#include <bench/Gemm.hpp>
 
 #include <random>
 #include <memory>

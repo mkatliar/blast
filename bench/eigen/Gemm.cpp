@@ -6,7 +6,7 @@
 
 #include <Eigen/Dense>
 
-#include <bench/Benchmark.hpp>
+#include <bench/Gemm.hpp>
 
 #include <vector>
 

@@ -1,6 +1,6 @@
 #include <blazefeo/Blaze.hpp>
 
-#include <bench/Benchmark.hpp>
+#include <bench/Gemm.hpp>
 
 
 #define BENCHMARK_STATIC(M, N) \
