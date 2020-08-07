@@ -29,12 +29,9 @@ add_executable(bench-blazefeo
     math/panel/DynamicPotrf.cpp
 )
 
+
 target_link_libraries(bench-blazefeo
     blazefeo
     bench-blazefeo-common
     Threads::Threads
-)
-
-target_compile_options(bench-blazefeo
-    PRIVATE "-mllvm" "-inline-threshold=500"
 )

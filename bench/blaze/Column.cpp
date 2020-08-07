@@ -20,7 +20,7 @@ namespace blazefeo :: benchmark
             auto const D20 = submatrix(A, k, 0, rs, k, blaze::checked);
 
             for (size_t j = 0; j < k; ++j)
-                column(D21, 0, blaze::Check<CL> {}) -= (~A)(k, j) * column(D20, j, blaze::Check<CR> {});
+                column(D21, 0, blaze::Check<CL> {}) -= (*A)(k, j) * column(D20, j, blaze::Check<CR> {});
 
             ::benchmark::DoNotOptimize(A(N - 1, N - 1));
         }

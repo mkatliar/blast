@@ -2,7 +2,7 @@
 
 #include <blaze/math/DynamicMatrix.h>
 
-#include <bench/Benchmark.hpp>
+#include <bench/Gemm.hpp>
 #include <test/Randomize.hpp>
 
 #include <random>

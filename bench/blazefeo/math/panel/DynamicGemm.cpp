@@ -1,7 +1,7 @@
 #include <blazefeo/math/DynamicPanelMatrix.hpp>
 #include <blazefeo/math/panel/Gemm.hpp>
 
-#include <bench/Benchmark.hpp>
+#include <bench/Gemm.hpp>
 #include <test/Randomize.hpp>
 
 #include <random>

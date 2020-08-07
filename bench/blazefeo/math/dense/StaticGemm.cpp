@@ -2,7 +2,7 @@
 
 #include <blaze/math/StaticMatrix.h>
 
-#include <bench/Benchmark.hpp>
+#include <bench/Gemm.hpp>
 #include <test/Randomize.hpp>
 
 #include <random>
@@ -29,7 +29,7 @@ namespace blazefeo :: benchmark
         for (auto _ : state)
         {
             // gemm(1., A, trans(B), 1., C, D);
-            gemm(A, trans(B), C, D);
+            gemm(A, B, C, D);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);

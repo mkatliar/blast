@@ -1,6 +1,6 @@
 #include <blaze/math/StaticMatrix.h>
 
-#include <bench/Benchmark.hpp>
+#include <bench/Gemm.hpp>
 #include <test/Randomize.hpp>
 
 #include <random>
