@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-find_package(Eigen3 3.2.10 REQUIRED)
+find_package(Eigen3 3.3.7 REQUIRED)
 find_package(Threads REQUIRED)
 
 

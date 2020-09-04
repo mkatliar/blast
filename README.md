@@ -1,11 +1,17 @@
+# BlazeFEO
+**BlazeFEO** is an extension to [Blaze](https://bitbucket.org/blaze-lib/blaze) library that provides a highly efficient implementation of linear algebra routines.
+It combines the ideas of another high-performance linear algebra library [BLASFEO](https://github.com/giaf/blasfeo), such as register blocking and efficient usage of cache memory, with the C++ template programming approach.
+Unlike the **Blaze** syntax based on expression templates, **BlazeFEO** provides a BLAS-like function-based interface, such that the computational complexity and the overhead of the performed operations can be easily inferred.
+The **BlazeFEO** implementation is single-threaded and intended for the matrices of small and medium size (a few hundred rows/columns), which is common for embedded control applications.
+
 ## Installing dependencies
-- *CMake 3.9.0 or higher*. Note that Ubuntu 17.04 comes with CMake 3.7, therefore you may need to install latest CMake manually from https://cmake.org/download/
+- *CMake 3.10 or higher*.
 - *Boost* `sudo apt install libboost-dev`.
-- *Eigen3 3.3.3 or higher*. Ubuntu 17.04 comes with Eigen3 3.3.2-1, therefore an up-to-date Eigen3 must be downloaded from http://eigen.tuxfamily.org and installed so that CMake can find it.
 - *Blaze 3.3 or higher* https://bitbucket.org/blaze-lib/blaze.
 - *BLASFEO* https://github.com/giaf/blasfeo (optional, only if `BLAZEFEO_WITH_BLASFEO` is selected). Select a proper target architecture by setting the `TARGET` variable in `Makefile.rule` or in `CMake`. Build and install as usual. The build system searches for BLASFEO in `/opt/blasfeo` by default.
 - *Google Test* https://github.com/google/googletest must be installed and findable by the CMake build system (optional, only if `BLAZEFEO_WITH_TEST` is selected).
 - *Google Benchmark* https://github.com/google/benchmark must be installed and findable by the CMake build system (optional, only if `BLAZEFEO_WITH_BENCHMARK` is selected).
+- *Eigen3 3.3.7 or higher* (optional, only for benchmarks).
 
 ## Building
 1. Install the dependencies.
