@@ -10,8 +10,15 @@ The **BlazeFEO** implementation is single-threaded and intended for the matrices
 - *Blaze 3.3 or higher* https://bitbucket.org/blaze-lib/blaze.
 - *BLASFEO* https://github.com/giaf/blasfeo (optional, only if `BLAZEFEO_WITH_BLASFEO` is selected). Select a proper target architecture by setting the `TARGET` variable in `Makefile.rule` or in `CMake`. Build and install as usual. The build system searches for BLASFEO in `/opt/blasfeo` by default.
 - *Google Test* https://github.com/google/googletest must be installed and findable by the CMake build system (optional, only if `BLAZEFEO_WITH_TEST` is selected).
+
+If you want to run benchmarks, you will also need:
 - *Google Benchmark* https://github.com/google/benchmark must be installed and findable by the CMake build system (optional, only if `BLAZEFEO_WITH_BENCHMARK` is selected).
-- *Eigen3 3.3.7 or higher* (optional, only for benchmarks).
+- *Eigen3 3.3.7 or higher* (optional, if you want to benchmark it).
+- *MKL* (optional, if you want to benchmark it).
+- *OpenBLAS* (optional, if you want to benchmark it).
+- Python3 `sudo apt install python3`
+- Matplotlib `sudo apt install python3-matplotlib`
+
 
 ## Building
 1. Install the dependencies.
@@ -32,3 +39,13 @@ make -j 10
 ```bash
 ctest
 ```
+
+## Running benchmarks
+Run `dgemm` benchmarks:
+```bash
+make dgemm-benchmarks
+```
+
+Make `dgemm` benchmark plots:
+```bash
+make bench_result/image/dgemm_performance.png bench_result/image/dgemm_performance_ratio.png
