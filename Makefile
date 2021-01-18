@@ -94,6 +94,8 @@ ${BENCH_DATA}/sgemm-libxsmm.json: $(BENCH_LIBXSMM)
 		--benchmark_out=${BENCH_DATA}/sgemm-libxsmm.json
 
 dgemm-benchmarks: \
+	${BENCH_DATA}/dgemm-openblas.json \
+	${BENCH_DATA}/dgemm-mkl.json \
 	${BENCH_DATA}/dgemm-libxsmm.json \
 	${BENCH_DATA}/dgemm-blasfeo.json \
 	${BENCH_DATA}/dgemm-blaze-static.json \
@@ -102,7 +104,7 @@ dgemm-benchmarks: \
 	${BENCH_DATA}/dgemm-blazefeo-dynamic-panel.json \
 	${BENCH_DATA}/dgemm-blazefeo-static-plain.json \
 	${BENCH_DATA}/dgemm-blazefeo-dynamic-plain.json
-	
+
 
 #
 # DPOTRF benchmark data

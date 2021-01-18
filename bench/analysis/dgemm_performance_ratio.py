@@ -27,7 +27,7 @@ plots = [
     # {'data_file': 'dgemm-eigen-dynamic.json', 'label': 'Eigen (D)'},
     # {'data_file': 'dgemm-eigen-static.json', 'label': 'Eigen (S)'},
     # {'data_file': 'dgemm-blaze-dynamic.json', 'label': 'Blaze (D)'},
-    # {'data_file': 'dgemm-blaze-static.json', 'label': 'Blaze (S)'},
+    {'data_file': 'dgemm-blaze-static.json', 'label': 'Blaze (S)'},
 ]
 
 reference = [

@@ -6,7 +6,7 @@ The **BlazeFEO** implementation is single-threaded and intended for the matrices
 
 ## Installing dependencies
 - *CMake 3.10 or higher*.
-- *Boost* `sudo apt install libboost-dev`.
+- *Boost libraries* `sudo apt install libboost-exception-dev`.
 - *Blaze 3.3 or higher* https://bitbucket.org/blaze-lib/blaze.
 - *BLASFEO* https://github.com/giaf/blasfeo (optional, only if `BLAZEFEO_WITH_BLASFEO` is selected). Select a proper target architecture by setting the `TARGET` variable in `Makefile.rule` or in `CMake`. Build and install as usual. The build system searches for BLASFEO in `/opt/blasfeo` by default.
 - *Google Test* https://github.com/google/googletest must be installed and findable by the CMake build system (optional, only if `BLAZEFEO_WITH_TEST` is selected).
@@ -49,3 +49,13 @@ make dgemm-benchmarks
 Make `dgemm` benchmark plots:
 ```bash
 make bench_result/image/dgemm_performance.png bench_result/image/dgemm_performance_ratio.png
+```
+
+## Docker image
+To automate building and running benchmarks, a [Dockerfile](Dockerfile) is provided. Use the following commands to build a Docker image and run benchmarks in a Docker container:
+```bash
+cd blazefeo
+docker build --tag blazefeo_bench .
+docker run -v `pwd`/bench_result/docker:/root/blazefeo/bench_result blazefeo_bench
+```
+The benchmark results will be put in `/bench_result/docker`. 
