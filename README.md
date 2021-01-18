@@ -4,6 +4,11 @@ It combines the ideas of another high-performance linear algebra library [BLASFE
 Unlike the **Blaze** syntax based on expression templates, **BlazeFEO** provides a BLAS-like function-based interface, such that the computational complexity and the overhead of the performed operations can be easily inferred.
 The **BlazeFEO** implementation is single-threaded and intended for the matrices of small and medium size (a few hundred rows/columns), which is common for embedded control applications.
 
+The figures below shows the performance of BLAS *dgemm* routine for different LA implementations on an
+*Intel(R) Core(TM) i7-9850H CPU @ 2.60GHz*:
+![dgemm_performance](doc/dgemm_performance.png)
+![dgemm_performance_ratio](doc/dgemm_performance_ratio.png)
+
 ## Installing dependencies
 - *CMake 3.10 or higher*.
 - *Boost libraries* `sudo apt install libboost-exception-dev`.

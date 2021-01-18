@@ -22,7 +22,7 @@ plots = [
     # {'data_file': 'dgemm-eigen-dynamic.json', 'label': 'Eigen (D)'},
     # {'data_file': 'dgemm-eigen-static.json', 'label': 'Eigen (S)'},
     # {'data_file': 'dgemm-blaze-dynamic.json', 'label': 'Blaze (D)'},
-    # {'data_file': 'dgemm-blaze-static.json', 'label': 'Blaze (S)'},
+    {'data_file': 'dgemm-blaze-static.json', 'label': 'Blaze (S)'},
     {'data_file': 'dgemm-blazefeo-static-panel.json', 'label': 'BlazeFEO (S)'},
     # {'data_file': 'dgemm-blazefeo-dynamic-panel.json', 'label': 'BlazeFEO (D)'},
 ]
@@ -39,5 +39,6 @@ ax.grid(True)
 ax.legend()
 ax.set_xlabel('matrix size')
 ax.set_ylabel('performance [Gflops]')
+ax.set_title('dgemm performance')
 
 fig.savefig('bench_result/image/dgemm_performance.png')

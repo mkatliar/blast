@@ -19,7 +19,7 @@ line_width = 1
 # c = prop_cycle.by_key()['color']
 
 plots = [
-    {'data_file': 'dgemm-openblas.json', 'label': 'OpenBLAS'},
+    # {'data_file': 'dgemm-openblas.json', 'label': 'OpenBLAS'},
     {'data_file': 'dgemm-mkl.json', 'label': 'MKL'},
     {'data_file': 'dgemm-blasfeo.json', 'label': 'BLASFEO'},
     # {'data_file': 'dgemm-blasfeo-blas.json', 'label': 'BLASFEO*'},
@@ -28,6 +28,7 @@ plots = [
     # {'data_file': 'dgemm-eigen-static.json', 'label': 'Eigen (S)'},
     # {'data_file': 'dgemm-blaze-dynamic.json', 'label': 'Blaze (D)'},
     {'data_file': 'dgemm-blaze-static.json', 'label': 'Blaze (S)'},
+    {'data_file': 'dgemm-blazefeo-static-panel.json', 'label': 'BlazeFEO (S)'},
 ]
 
 reference = [
@@ -61,5 +62,6 @@ ax.grid(True)
 ax.legend()
 ax.set_xlabel('matrix size')
 ax.set_ylabel('performance ratio')
+ax.set_title('dgemm performance relative to Blazefeo (S)')
 
 fig.savefig('bench_result/image/dgemm_performance_ratio.png')
