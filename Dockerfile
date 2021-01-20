@@ -15,7 +15,7 @@ RUN cd benchmark && cmake -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_GTEST_TE
 
 # Install Blaze
 RUN git clone https://bitbucket.org/blaze-lib/blaze.git
-RUN cd blaze && cmake -DBLAZE_BLAS_MODE=True -DBLAZE_BLAS_USE_MATRIX_MATRIX_MULTIPLICATION=False \\
+RUN cd blaze && cmake -DBLAZE_BLAS_MODE=True -DBLAZE_BLAS_USE_MATRIX_MATRIX_MULTIPLICATION=False \
     -DBLAZE_BLAS_USE_MATRIX_VECTOR_MULTIPLICATION=False -DBLAZE_VECTORIZATION=True -DCMAKE_INSTALL_PREFIX=/usr/local/ . && make install
 
 # Install Eigen3
@@ -40,7 +40,7 @@ RUN apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
 RUN rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
 RUN wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list
 RUN apt-get update
-RUN apt-get install -y intel-mkl-64bit-2020.4-912 2020.4-912
+RUN apt-get install -y intel-mkl-64bit-2020.4-912
 
 # Build blazefeo
 COPY bench blazefeo/bench
