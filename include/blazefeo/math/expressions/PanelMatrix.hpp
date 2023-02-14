@@ -105,7 +105,7 @@ namespace blazefeo
 
         using ET1 = ElementType_t<MT1>;
         using ET2 = ElementType_t<MT2>;
-        static size_t constexpr SS = SIMDTrait<ET2>::size;
+        static size_t constexpr SS = Simd<ET2>::size;
         static size_t constexpr PANEL_SIZE = PanelSize_v<ET2>;
         static_assert(PANEL_SIZE % SS == 0);
 
@@ -119,7 +119,7 @@ namespace blazefeo
             size_t const m = (*rhs).rows();
             size_t const n = (*rhs).columns();
             size_t const s = spacing(lhs);
-			
+
 			for (size_t i = 0; i + SS <= m; i += SS)
             {
                 ET2 const * pr = ptr(rhs, i, 0);
@@ -139,7 +139,7 @@ namespace blazefeo
                 for (size_t j = 0; j < n; ++j)
                     maskstore(pl + s * j, mask, load<SS>(pr + PANEL_SIZE * j));
             }
-			
+
 		#if 0
             RegisterMatrix<ET2, SS, SS, SS> ker;
 
@@ -193,13 +193,13 @@ namespace blazefeo
         size_t const m = (*rhs).rows();
         size_t const n = (*rhs).columns();
         size_t const s = spacing(rhs);
-        
+
         BLAZE_INTERNAL_ASSERT((*lhs).rows() == m, "Invalid number of rows");
         BLAZE_INTERNAL_ASSERT((*lhs).columns() == n, "Invalid number of columns");
 
         using ET1 = ElementType_t<MT1>;
         using ET2 = ElementType_t<MT2>;
-        static size_t constexpr SS = SIMDTrait<ET2>::size;
+        static size_t constexpr SS = Simd<ET2>::size;
         static size_t constexpr PANEL_SIZE = PanelSize_v<ET2>;
         static_assert(PANEL_SIZE % SS == 0);
 

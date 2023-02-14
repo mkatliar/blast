@@ -2,29 +2,30 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-find_package(Eigen3 3.3.7 REQUIRED)
-find_package(Threads REQUIRED)
+find_package(Eigen3 3.3.7 REQUIRED CONFIG)
 
+if (TARGET Eigen3::Eigen)
+    message(STATUS "Found Eigen3, benchmark for Eigen3 will be built")
 
-#~~~~~~~~~~~~~~~~
-add_executable(bench-eigen
-    Main.cpp
-    Potrf.cpp
-    Syrk.cpp
-    Gemm.cpp
-)
+    find_package(Threads REQUIRED)
 
+    #~~~~~~~~~~~~~~~~
+    add_executable(bench-eigen
+        Main.cpp
+        Potrf.cpp
+        Syrk.cpp
+        Gemm.cpp
+    )
 
-target_include_directories(bench-eigen
-    PUBLIC ${EIGEN3_INCLUDE_DIR}
-)
+    target_link_libraries(bench-eigen
+        bench-blazefeo-common
+        Eigen3::Eigen
+        ${CMAKE_THREAD_LIBS_INIT}
+    )
 
-
-target_link_libraries(bench-eigen
-    bench-blazefeo-common
-    ${CMAKE_THREAD_LIBS_INIT}
-)
-
-target_compile_options(bench-eigen
-    PRIVATE "-Wno-deprecated-anon-enum-enum-conversion"
-)
+    target_compile_options(bench-eigen
+        PRIVATE "-Wno-deprecated-anon-enum-enum-conversion"
+    )
+else ()
+    message(STATUS "Not found Eigen3, benchmark for Eigen3 will NOT be built")
+endif ()

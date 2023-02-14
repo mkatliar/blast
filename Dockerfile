@@ -1,9 +1,9 @@
-FROM ubuntu:groovy
+FROM ubuntu:kinetic
 WORKDIR /root
 RUN apt-get update
 RUN apt-get upgrade -y
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y \
-    build-essential clang-11 cmake git libopenblas-dev libboost-exception-dev pkg-config python3-matplotlib
+    build-essential clang-15 cmake git libopenblas-dev libboost-exception-dev pkg-config python3-matplotlib
 
 # Install GTest
 RUN git clone https://github.com/google/googletest.git
@@ -12,6 +12,9 @@ RUN cd googletest && cmake -DCMAKE_BUILD_TYPE=Release . && make -j `nproc` insta
 # Install Google benchmark
 RUN git clone https://github.com/google/benchmark.git
 RUN cd benchmark && cmake -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_GTEST_TESTS=False . && make -j `nproc` install
+
+# Install OpenMP
+RUN apt install -y libomp-dev
 
 # Install Blaze
 RUN git clone https://bitbucket.org/blaze-lib/blaze.git
@@ -52,9 +55,9 @@ COPY Makefile blazefeo/Makefile
 ENV PKG_CONFIG_PATH=/usr/local/lib
 RUN mkdir -p blazefeo/build && cd blazefeo/build \
     && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-        -DCMAKE_CXX_COMPILER="clang++-11" \
-        -DCMAKE_CXX_FLAGS="-march=native -mfma -mavx -mavx2 -msse4 -fno-math-errno" .. \
-        -DCMAKE_CXX_FLAGS_RELEASE="-O3 -g -DNDEBUG -ffast-math" \
+        -DCMAKE_CXX_COMPILER="clang++-15" \
+        -DCMAKE_CXX_FLAGS="-march=native -mfma -mavx -mavx2 -msse4 -fno-math-errno" \
+        -DCMAKE_CXX_FLAGS_RELEASE="-O3 -g -DNDEBUG -ffast-math" .. \
     && make -j `nproc` VERBOSE=1
 
 # Run tests

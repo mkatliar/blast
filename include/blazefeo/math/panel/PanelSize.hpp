@@ -8,14 +8,11 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/math/simd/SIMDTrait.h>
+#include <blazefeo/math/simd/Simd.hpp>
 
 
 namespace blazefeo
 {
-    using namespace blaze;
-
-
     template <typename T>
-    size_t constexpr PanelSize_v = SIMDTrait<T>::size;
+    size_t constexpr PanelSize_v = Simd<T>::size;
 }
