@@ -76,7 +76,7 @@ if (BLAZEFEO_WITH_TEST)
 endif()
 
 # BLAZEFEO_WITH_BENCHMARK
-set(BLAZEFEO_WITH_BENCHMARK ON CACHE BOOL "Build blazefeo benchmarks")
+option(BLAZEFEO_WITH_BENCHMARK "Build blazefeo benchmarks")
 
 if (BLAZEFEO_WITH_BENCHMARK)
     include_directories(${PROJECT_INCLUDE_DIR})
