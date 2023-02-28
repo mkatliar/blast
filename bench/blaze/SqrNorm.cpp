@@ -14,13 +14,14 @@ namespace blazefeo :: benchmark
     {
         blaze::StaticMatrix<Real, N, N, SO> A;
         randomize(A);
-        
+
         for (auto _ : state)
         {
             for (size_t k = 0; k < N; ++k)
             {
                 auto const A10 = submatrix(A, k, 0, 1, k);
-                ::benchmark::DoNotOptimize(sqrNorm(A10));
+                Real norm;;
+                ::benchmark::DoNotOptimize(norm = sqrNorm(A10));
             }
         }
     }
@@ -31,7 +32,7 @@ namespace blazefeo :: benchmark
     {
         blaze::StaticMatrix<Real, N, N, SO> A;
         randomize(A);
-        
+
         for (auto _ : state)
         {
             for (size_t k = 0; k < N; ++k)
@@ -46,7 +47,7 @@ namespace blazefeo :: benchmark
 
     BENCHMARK_TEMPLATE(BM_sqrNorm, double, 35, blaze::columnMajor);
     BENCHMARK_TEMPLATE(BM_sqrNorm, double, 35, blaze::rowMajor);
-    
+
     BENCHMARK_TEMPLATE(BM_dotProductWithSelf, double, 35, blaze::columnMajor);
     BENCHMARK_TEMPLATE(BM_dotProductWithSelf, double, 35, blaze::rowMajor);
 }
