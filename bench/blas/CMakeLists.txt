@@ -13,7 +13,7 @@ foreach (BLA_VENDOR OpenBLAS Intel10_64lp_seq Intel10_64_dyn)
         add_executable(bench-blas-${BLA_VENDOR}
             Main.cpp
             Gemm.cpp
-            # Getrf.cpp
+            Getrf.cpp
             Potrf.cpp
             Cholesky.cpp
             Syrk.cpp

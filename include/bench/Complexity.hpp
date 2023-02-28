@@ -23,14 +23,31 @@ namespace blazefeo :: benchmark
             throw std::invalid_argument("Cannot calculate complexity of potrf for m < n");
 
         return {
-            // Calculated as \sum _{k=0}^{n-1} \sum _{j=0}^{k-1} \sum _{i=k}^{m-1} 1
+            // Calculated as \sum_{k=0}^{n-1} \sum _{j=0}^{k-1} \sum _{i=k}^{m-1} 1
             {"add", (1 + 3 * m - 2 * n) * (n - 1) * n / 6},
-            // Calculated as \sum _{k=0}^{n-1} \sum _{j=0}^{k-1} \sum _{i=k}^{m-1} 1
+            // Calculated as \sum_{k=0}^{n-1} \sum _{j=0}^{k-1} \sum _{i=k}^{m-1} 1
             {"mul", (1 + 3 * m - 2 * n) * (n - 1) * n / 6},
-            // Calculated as \sum _{k=0}^{n-1} \sum _{i=k}^{m-1} 1
+            // Calculated as \sum_{k=0}^{n-1} \sum _{i=k}^{m-1} 1
             {"div", n * (1 + 2 * m - n) / 2},
-            // Calculated as \sum _{k=0}^{n-1} 1
+            // Calculated as \sum_{k=0}^{n-1} 1
             {"sqrt", n}
+        };
+    }
+
+
+    /// @brief Algorithmic complexity of getrf
+    inline Complexity complexityGetrf(std::size_t m, std::size_t n)
+    {
+        if (m < n)
+            std::swap(m, n);
+
+        return {
+            // Calculated as \sum_{k=0}^{m-1} \sum_{i=k+1}^{m-1} (n-k)
+            {"add", (2 - m + 3 * n) * (m - 1) * m / 6},
+            // Calculated as \sum_{k=0}^{m-1} \sum_{i=k+1}^{m-1} (n-k)
+            {"mul", (2 - m + 3 * n) * (m - 1) * m / 6},
+            // Calculated as \sum_{k=0}^{n-1} \sum_{i=k}^{m-1} 1
+            {"div", m * (m - 1) / 2}
         };
     }
 
@@ -39,11 +56,11 @@ namespace blazefeo :: benchmark
     inline Complexity complexityTrsm(std::size_t m, std::size_t n)
     {
         return {
-            // Calculated as \sum _{j=0}^{n-1} \sum _{k=0}^{j-1} \sum _{i=0}^{m-1} 1
+            // Calculated as \sum_{j=0}^{n-1} \sum _{k=0}^{j-1} \sum _{i=0}^{m-1} 1
             {"add", m * (n - 1) * n / 2},
-            // Calculated as \sum _{j=0}^{n-1} \sum _{k=0}^{j-1} \sum _{i=0}^{m-1} 1
+            // Calculated as \sum_{j=0}^{n-1} \sum _{k=0}^{j-1} \sum _{i=0}^{m-1} 1
             {"mul", m * (n - 1) * n / 2},
-            // Calculated as \sum _{k=0}^{n-1} \sum _{i=k}^{m-1} 1
+            // Calculated as \sum_{k=0}^{n-1} \sum _{i=k}^{m-1} 1
             {"div", n * (1 + 2 * m - n) / 2}
         };
     }
