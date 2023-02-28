@@ -21,6 +21,36 @@ namespace blazefeo :: testing
     class DenseGetrfTest
     :   public Test
     {
+    protected:
+        using Real = T;
+        using DMat = DynamicMatrix<Real, rowMajor>;
+
+        template <typename MT, bool SO>
+        static DMat luRestore(Matrix<MT, SO> const& LU, int * ipiv)
+        {
+            auto const M = rows(LU);
+            auto const N = columns(LU);
+            auto const K = std::min(M, N);
+
+            DMat L(M, K, 0.);
+            for (size_t i = 0; i < M; ++i)
+            {
+                for (size_t j = 0; j < i && j < K; ++j)
+                    L(i, j) = (*LU)(i, j);
+
+                if (i < K)
+                    L(i, i) = 1.;
+            }
+
+            DMat U(K, N, 0.);
+            for (size_t i = 0; i < K; ++i)
+            {
+                for (size_t j = i; j < N; ++j)
+                    U(i, j) = (*LU)(i, j);
+            }
+
+            return L * U;
+        }
     };
 
 
@@ -29,49 +59,26 @@ namespace blazefeo :: testing
 
     TYPED_TEST_P(DenseGetrfTest, testDynamic)
     {
-        using Real = TypeParam;
-        using DMat = DynamicMatrix<Real, rowMajor>;
-
-        for (size_t M = 0; M <= 5; ++M)
+        for (size_t M = 0; M <= 50; ++M)
         {
-            for (size_t N = 0; N <= 5; ++N)
+            for (size_t N = 0; N <= 50; ++N)
             {
                 size_t const K = std::min(M, N);
 
                 // Init matrices
                 //
-                DMat A(M, N);
+                typename TestFixture::DMat A(M, N);
                 randomize(A);
-                std::cout << "A=\n" << A;
-                DMat const A_orig = A;
+                typename TestFixture::DMat const A_orig = A;
 
                 // Do getrf
                 std::vector<int> ipiv(K);
                 blazefeo::getrf(A, ipiv.data());
 
                 // Check result
-                DMat L(M, K, 0.);
-                for (size_t i = 0; i < M; ++i)
-                {
-                    for (size_t j = 0; j < i && j < K; ++j)
-                        L(i, j) = A(i, j);
-
-                    if (i < K)
-                        L(i, i) = 1.;
-                }
-
-                DMat U(K, N, 0.);
-                for (size_t i = 0; i < K; ++i)
-                {
-                    for (size_t j = i; j < N; ++j)
-                        U(i, j) = A(i, j);
-                }
-
-                // std::cout << "L=\n" << L;
-                // std::cout << "U=\n" << U;
-                // std::cout << "A-L*U=\n" << A_orig - L * U;
-
-                BLAZEFEO_EXPECT_APPROX_EQ(A_orig, L * U, absTol<Real>(), relTol<Real>()) << "getrf error for size " << M;
+                BLAZEFEO_EXPECT_APPROX_EQ(A_orig, TestFixture::luRestore(A, ipiv.data()),
+                    absTol<typename TestFixture::Real>(), relTol<typename TestFixture::Real>())
+                    << "getrf() error for size (" << M << ", " << N << ")";
             }
         }
     }
