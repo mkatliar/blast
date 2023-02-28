@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+#include <bench/Complexity.hpp>
+
 #include <blazefeo/Blaze.hpp>
 
 #include <benchmark/benchmark.h>
@@ -22,7 +24,7 @@ namespace blazefeo :: benchmark
         //
         blaze::DynamicMatrix<T, blaze::columnMajor> A(m, m), L(m, m);
         makePositiveDefinite(A);
-        
+
         // Do potrf
         for (auto _ : state)
         {
@@ -32,8 +34,7 @@ namespace blazefeo :: benchmark
             blaze::potrf('L', m, data(L), spacing(L), &info);
         }
 
-        // Calculated as \sum _{k=0}^{n-1} \sum _{j=0}^{k-1} \sum _{i=k}^{m-1} 2
-        state.counters["flops"] = Counter((1 + 3 * m - 2 * n) * (n - 1) * n / 3, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityPotrf(m, n));
         state.counters["m"] = m;
     }
 
