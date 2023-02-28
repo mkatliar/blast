@@ -9,8 +9,7 @@ add_library(bench-blazefeo-common STATIC
 )
 
 target_link_libraries(bench-blazefeo-common
-    PUBLIC benchmark
-    ${CMAKE_THREAD_LIBS_INIT}
+    PUBLIC benchmark::benchmark
 )
 
 

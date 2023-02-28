@@ -21,12 +21,12 @@ ${BENCH_DATA}/loop-naive.json:
 #
 # DGEMM/SGEMM bechmarks data
 #
-${BENCH_DATA}/dgemm-openblas.json: $(BENCH_BLAS)-openblas
-	$(BENCH_BLAS)-openblas --benchmark_filter="BM_gemm<double>*" $(BENCHMARK_OPTIONS) \
+${BENCH_DATA}/dgemm-openblas.json: $(BENCH_BLAS)-OpenBLAS
+	$(BENCH_BLAS)-OpenBLAS --benchmark_filter="BM_gemm<double>*" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/dgemm-openblas.json
 
-${BENCH_DATA}/dgemm-mkl.json: $(BENCH_BLAS)-mkl_rt
-	$(BENCH_BLAS)-mkl_rt --benchmark_filter="BM_gemm<double>*" $(BENCHMARK_OPTIONS) \
+${BENCH_DATA}/dgemm-mkl.json: $(BENCH_BLAS)-Intel10_64lp_seq
+	$(BENCH_BLAS)-Intel10_64lp_seq --benchmark_filter="BM_gemm<double>*" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/dgemm-mkl.json
 
 ${BENCH_DATA}/dgemm-blasfeo-blas.json: $(BENCH_BLAS)-blasfeo
@@ -113,8 +113,8 @@ ${BENCH_DATA}/dpotrf-blasfeo.json: $(BENCH_BLASFEO)
 	$(BENCH_BLASFEO) --benchmark_filter="BM_potrf<double>" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/dpotrf-blasfeo.json
 
-${BENCH_DATA}/dpotrf-blas-mkl_rt.json: $(BENCH_BLAS)-mkl_rt
-	$(BENCH_BLAS)-mkl_rt --benchmark_filter="BM_potrf<double>" $(BENCHMARK_OPTIONS) \
+${BENCH_DATA}/dpotrf-blas-mkl_rt.json: $(BENCH_BLAS)-Intel10_64lp_seq
+	$(BENCH_BLAS)-Intel10_64lp_seq --benchmark_filter="BM_potrf<double>" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/dpotrf-blas-mkl_rt.json
 
 ${BENCH_DATA}/dpotrf-blazefeo-static.json: $(BENCH_BLAZEFEO)
@@ -129,13 +129,13 @@ ${BENCH_DATA}/dpotrf-blazefeo-dynamic.json: $(BENCH_BLAZEFEO)
 #
 # SPOTRF benchmark data
 #
-		
+
 ${BENCH_DATA}/spotrf-blasfeo.json: $(BENCH_BLASFEO)
 	$(BENCH_BLASFEO) --benchmark_filter="BM_potrf<float>" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/spotrf-blasfeo.json
 
-${BENCH_DATA}/spotrf-blas-mkl_rt.json: $(BENCH_BLAS)-mkl_rt
-	$(BENCH_BLAS)-mkl_rt --benchmark_filter="BM_potrf<float>" $(BENCHMARK_OPTIONS) \
+${BENCH_DATA}/spotrf-blas-mkl_rt.json: $(BENCH_BLAS)-Intel10_64lp_seq
+	$(BENCH_BLAS)-Intel10_64lp_seq --benchmark_filter="BM_potrf<float>" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/spotrf-blas-mkl_rt.json
 
 ${BENCH_DATA}/spotrf-blazefeo-static.json: $(BENCH_BLAZEFEO)
@@ -154,8 +154,8 @@ ${BENCH_DATA}/dsyrk-blasfeo.json: $(BENCH_BLASFEO)
 	$(BENCH_BLASFEO) --benchmark_filter="BM_syrk<double>" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/dsyrk-blasfeo.json
 
-${BENCH_DATA}/dsyrk-blas-mkl_rt.json: $(BENCH_BLAS)-mkl_rt
-	$(BENCH_BLAS)-mkl_rt --benchmark_filter="BM_syrk<double>" $(BENCHMARK_OPTIONS) \
+${BENCH_DATA}/dsyrk-blas-mkl_rt.json: $(BENCH_BLAS)-Intel10_64lp_seq
+	$(BENCH_BLAS)-Intel10_64lp_seq --benchmark_filter="BM_syrk<double>" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/dsyrk-blas-mkl_rt.json
 
 ${BENCH_DATA}/dsyrk-blazefeo-static-plain.json: $(BENCH_BLAZEFEO)
@@ -213,7 +213,7 @@ ${BENCH_IMAGE}/dpotrf_performance.tex: make_figure_performance.m \
 	${BENCH_DATA}/dpotrf-blas-mkl_rt.json \
 	${BENCH_DATA}/dpotrf-blazefeo-dynamic.json
 	$(RUN_MATLAB) "make_figure_performance('dpotrf'); quit"
-	
+
 ${BENCH_IMAGE}/spotrf_performance.tex: make_figure_performance.m \
 	${BENCH_DATA}/spotrf-blazefeo-static.json \
 	${BENCH_DATA}/spotrf-blasfeo.json \

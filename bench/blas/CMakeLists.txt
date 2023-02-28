@@ -4,19 +4,16 @@
 
 find_package(Threads REQUIRED)
 
-foreach (BLAS_LIB openblas mkl_rt)
-    find_library(BLAS_LIB_PATH_${BLAS_LIB} ${BLAS_LIB} 
-        PATHS 
-            "/opt/intel/mkl/lib/intel64_lin" "/opt/intel/mkl/lib/intel64"
-            "/opt/blasfeo/lib"
-    )
+foreach (BLA_VENDOR OpenBLAS Intel10_64lp_seq Intel10_64_dyn)
+    find_package(BLAS)
 
-    if (BLAS_LIB_PATH_${BLAS_LIB})
-        message(STATUS "${BLAS_LIB} found at ${BLAS_LIB_PATH_${BLAS_LIB}}. Benchmark for ${BLAS_LIB} will be built.")
+    if (BLAS_FOUND)
+        message(STATUS "${BLA_VENDOR} libraries found. Benchmark for ${BLA_VENDOR} will be built.")
 
-        add_executable(bench-blas-${BLAS_LIB}
+        add_executable(bench-blas-${BLA_VENDOR}
             Main.cpp
             Gemm.cpp
+            # Getrf.cpp
             Potrf.cpp
             Cholesky.cpp
             Syrk.cpp
@@ -26,13 +23,16 @@ foreach (BLAS_LIB openblas mkl_rt)
             SyrkPotrf.cpp
         )
 
-        target_link_libraries(bench-blas-${BLAS_LIB}
+        target_link_libraries(bench-blas-${BLA_VENDOR}
             bench-blazefeo-common
             blaze::blaze
-            ${BLAS_LIB_PATH_${BLAS_LIB}}
-            ${CMAKE_THREAD_LIBS_INIT}
+            ${BLAS_LIBRARIES}
+        )
+
+        target_link_options(bench-blas-${BLA_VENDOR}
+            PRIVATE ${BLAS_LINKER_FLAGS}
         )
     else ()
-        message(STATUS "${BLAS_LIB} not found. Benchmark for ${BLAS_LIB} will NOT be built.")
+        message(STATUS "${BLA_VENDOR} not found. Benchmark for ${BLA_VENDOR} will NOT be built.")
     endif ()
 endforeach ()
