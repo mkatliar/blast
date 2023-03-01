@@ -28,7 +28,7 @@ namespace blazefeo
 
     /**
      * @brief Computes an LU factorization of a general M-by-N matrix A
-       using partial pivoting with row interchanges.
+       using partial pivoting with row interchanges (column-major storage order).
 
        The factorization has the form
            A = P * L * U
@@ -105,5 +105,48 @@ namespace blazefeo
 
         //     ipiv[k] = k;
         // }
+    }
+
+
+    /**
+     * @brief Computes an LU factorization of a general M-by-N matrix A
+       using partial pivoting with row interchanges (row-major storage order).
+
+       The factorization has the form
+           A = P * L * U
+       where P is a permutation matrix, L is lower triangular with unit
+       diagonal elements (lower trapezoidal if m > n), and U is upper
+       triangular (upper trapezoidal if m < n).
+     *
+     * @tparam MT matrix type
+     *
+     * @param A on entry, the M-by-N matrix to be factored.
+       On exit, the factors L and U from the factorization
+       A = P*L*U; the unit diagonal elements of L are not stored.
+     * @param ipiv integer array, dimension (min(M,N))
+       The pivot indices; for 0 <= i < min(M,N), row i of the
+       matrix was interchanged with row IPIV(i).
+     */
+    template <typename MT>
+    inline void getrf(DenseMatrix<MT, rowMajor>& A, int * ipiv)
+    {
+        using ET = ElementType_t<MT>;
+
+        size_t const M = rows(A);
+        size_t const N = columns(A);
+
+        for (size_t k = 0; k < M && k < N; ++k)
+        {
+            // subvector(column(A, k), k + 1, M - k - 1) /= (*A)(k, k);
+            submatrix(A, k + 1, k, M - k - 1, 1) /= (*A)(k, k);
+            // for (size_t i = k + 1; i < M; ++i)
+            //     (*A)(i, k) /= (*A)(k, k);
+
+            for (size_t j = k + 1; j < N; ++j)
+                for (size_t i = k + 1; i < M; ++i)
+                    (*A)(i, j) -= (*A)(i, k) * (*A)(k, j);
+
+            ipiv[k] = k;
+        }
     }
 }

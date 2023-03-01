@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+#include <blaze/math/StorageOrder.h>
 #include <blaze/math/adaptors/lowermatrix/BaseTemplate.h>
 #include <blaze/math/dense/DynamicMatrix.h>
 #include <blazefeo/Blaze.hpp>
@@ -23,16 +24,15 @@ namespace blazefeo :: testing
     {
     protected:
         using Real = T;
-        using DMat = DynamicMatrix<Real, columnMajor>;
 
         template <typename MT, bool SO>
-        static DMat luRestore(Matrix<MT, SO> const& LU, int * ipiv)
+        static DynamicMatrix<Real> luRestore(Matrix<MT, SO> const& LU, int * ipiv)
         {
             auto const M = rows(LU);
             auto const N = columns(LU);
             auto const K = std::min(M, N);
 
-            DMat L(M, K, 0.);
+            DynamicMatrix<Real> L(M, K, 0.);
             for (size_t i = 0; i < M; ++i)
             {
                 for (size_t j = 0; j < i && j < K; ++j)
@@ -42,7 +42,7 @@ namespace blazefeo :: testing
                     L(i, i) = 1.;
             }
 
-            DMat U(K, N, 0.);
+            DynamicMatrix<Real> U(K, N, 0.);
             for (size_t i = 0; i < K; ++i)
             {
                 for (size_t j = i; j < N; ++j)
@@ -51,36 +51,48 @@ namespace blazefeo :: testing
 
             return L * U;
         }
+
+
+        template <bool SO>
+        void testDynamic()
+        {
+            for (size_t M = 0; M <= 20; ++M)
+            {
+                for (size_t N = 0; N <= 20; ++N)
+                {
+                    size_t const K = std::min(M, N);
+
+                    // Init matrices
+                    //
+                    DynamicMatrix<Real, SO> A(M, N);
+                    randomize(A);
+                    DynamicMatrix<Real, SO> const A_orig = A;
+
+                    // Do getrf
+                    std::vector<int> ipiv(K);
+                    blazefeo::getrf(A, ipiv.data());
+
+                    // Check result
+                    BLAZEFEO_EXPECT_APPROX_EQ(A_orig, luRestore(A, ipiv.data()), absTol<Real>(), relTol<Real>())
+                        << "getrf() error for size (" << M << ", " << N << ")";
+                }
+            }
+        }
     };
 
 
     TYPED_TEST_SUITE_P(DenseGetrfTest);
 
 
-    TYPED_TEST_P(DenseGetrfTest, testDynamic)
+    TYPED_TEST_P(DenseGetrfTest, testDynamicRowMajor)
     {
-        for (size_t M = 0; M <= 20; ++M)
-        {
-            for (size_t N = 0; N <= 20; ++N)
-            {
-                size_t const K = std::min(M, N);
+        this->template testDynamic<rowMajor>();
+    }
 
-                // Init matrices
-                //
-                typename TestFixture::DMat A(M, N);
-                randomize(A);
-                typename TestFixture::DMat const A_orig = A;
 
-                // Do getrf
-                std::vector<int> ipiv(K);
-                blazefeo::getrf(A, ipiv.data());
-
-                // Check result
-                BLAZEFEO_EXPECT_APPROX_EQ(A_orig, TestFixture::luRestore(A, ipiv.data()),
-                    absTol<typename TestFixture::Real>(), relTol<typename TestFixture::Real>())
-                    << "getrf() error for size (" << M << ", " << N << ")";
-            }
-        }
+    TYPED_TEST_P(DenseGetrfTest, testDynamicColumnMajor)
+    {
+        this->template testDynamic<columnMajor>();
     }
 
 
@@ -108,7 +120,8 @@ namespace blazefeo :: testing
 
 
     REGISTER_TYPED_TEST_SUITE_P(DenseGetrfTest
-        , testDynamic
+        , testDynamicRowMajor
+        , testDynamicColumnMajor
         // , testStatic
     );
 
