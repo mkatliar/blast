@@ -2,16 +2,12 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-find_package(Threads REQUIRED)
-
-
-#~~~~~~~~~~~~~~~~
 add_executable(bench-blazefeo
     Main.cpp
 
     math/expressions/AssignDensePanel.cpp
     math/expressions/AssignPanelDense.cpp
-    
+
     math/simd/Ger.cpp
     math/simd/Store.cpp
     math/simd/PartialStore.cpp
@@ -25,17 +21,16 @@ add_executable(bench-blazefeo
     math/dense/DynamicGemm.cpp
     math/dense/StaticGemm.cpp
     math/dense/StaticPotrf.cpp
+    math/dense/StaticGetrf.cpp
     math/dense/StaticTrmm.cpp
 
     math/panel/StaticGemm.cpp
-    math/panel/DynamicGemm.cpp    
+    math/panel/DynamicGemm.cpp
     math/panel/StaticPotrf.cpp
     math/panel/DynamicPotrf.cpp
 )
 
-
 target_link_libraries(bench-blazefeo
     blazefeo
     bench-blazefeo-common
-    Threads::Threads
 )
