@@ -23,6 +23,7 @@ add_executable(test-blazefeo
     math/dense/GetrfTest.cpp
     math/dense/TrmmTest.cpp
     math/dense/TrsvTest.cpp
+    math/dense/TrsmTest.cpp
 
     math/panel/StaticPanelMatrixTest.cpp
     math/panel/DynamicPanelMatrixTest.cpp
