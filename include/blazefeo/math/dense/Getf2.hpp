@@ -14,7 +14,11 @@
 
 #pragma once
 
+#include <blazefeo/Exception.hpp>
 #include <blazefeo/Blaze.hpp>
+#include <blazefeo/math/dense/Swap.hpp>
+
+#include <cmath>
 
 
 namespace blazefeo
@@ -40,10 +44,10 @@ namespace blazefeo
            A = P*L*U; the unit diagonal elements of L are not stored.
      * @param ipiv array of dimension (min(M,N))
           The pivot indices; for 0 <= i < min(M,N), row i of the
-          matrix was interchanged with row IPIV(i).
+          matrix was interchanged with row ipiv[i].
      */
     template <typename MT, bool SO>
-    inline void getf2(DenseMatrix<MT, SO>& A, int * ipiv)
+    inline void getf2(DenseMatrix<MT, SO>& A, size_t * ipiv)
     {
         using ET = ElementType_t<MT>;
 
@@ -52,6 +56,31 @@ namespace blazefeo
 
         for (size_t k = 0; k < M && k < N; ++k)
         {
+            // Find pivot and test for singularity.
+            size_t ip = k;
+            auto vp = std::abs((*A)(k, k));
+            for (size_t i = k + 1; i < M; ++i)
+            {
+                auto const v = std::abs((*A)(i, k));
+                if (v > vp)
+                {
+                    vp = v;
+                    ip = i;
+                }
+            }
+
+            if (!vp)
+                BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Matrix is singular"});
+
+            // Exchange rows k and ip
+            ipiv[k] = ip;
+            if (ip != k)
+            {
+                auto x = row(*A, k);
+                auto y = row(*A, ip);
+                swap(x, y);
+            }
+
             for (size_t i = k + 1; i < M; ++i)
             {
                 ET const l = (*A)(i, k) / (*A)(k, k);
@@ -60,8 +89,6 @@ namespace blazefeo
                 for (size_t j = k + 1; j < N; ++j)
                     (*A)(i, j) -= l * (*A)(k, j);
             }
-
-            ipiv[k] = k;
         }
     }
 }

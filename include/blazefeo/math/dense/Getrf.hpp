@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "blazefeo/math/dense/Laswp.hpp"
 #include <blaze/math/views/Forward.h>
 #include <blaze/math/views/Submatrix.h>
 #include <blazefeo/Blaze.hpp>
@@ -49,7 +50,7 @@ namespace blazefeo
        matrix was interchanged with row IPIV(i).
      */
     template <typename MT>
-    inline void getrf(DenseMatrix<MT, columnMajor>& A, int * ipiv)
+    inline void getrf(DenseMatrix<MT, columnMajor>& A, size_t * ipiv)
     {
         using ET = ElementType_t<MT>;
         size_t constexpr NB = TileSize_v<ET>;
@@ -63,8 +64,24 @@ namespace blazefeo
         {
             // Apply the LU factorization on an M x NB column panel of A (i.e., A11 and A12).
             {
-                auto A11A12 = submatrix(A, k, k, M - k, NB);
-                getf2(A11A12, ipiv + k);
+                auto AA = submatrix(A, k, k, M - k, NB);
+                getf2(AA, ipiv + k);
+            }
+
+            // Adjust the pivot indices.
+            for (size_t i = k; i < k + NB; ++i)
+                ipiv[i] += k;
+
+            // // Apply interchanges to columns 0 ... k-1
+            {
+                auto AA = submatrix(A, 0, 0, M, k);
+                laswp(AA, k, k + NB, ipiv);
+            }
+
+            // Apply interchanges to columns k+NB ... N-1
+            {
+                auto AA = submatrix(A, 0, k + NB, M, N - k - NB);
+                laswp(AA, k, k + NB, ipiv);
             }
 
             // Compute the NB x (N - NB) row panel of U:
@@ -89,6 +106,16 @@ namespace blazefeo
             auto AA = submatrix(A, k, k, M - k, N - k);
             getf2(AA, ipiv + k);
         }
+
+        // Adjust the pivot indices.
+        for (size_t i = k; i < M && i < N; ++i)
+            ipiv[i] += k;
+
+        // Apply interchanges to columns 0 ... k-1
+        {
+            auto AA = submatrix(A, 0, 0, M, k);
+            laswp(AA, k, std::min(M, N), ipiv);
+        }
     }
 
 
@@ -112,7 +139,7 @@ namespace blazefeo
        matrix was interchanged with row IPIV(i).
      */
     template <typename MT>
-    inline void getrf(DenseMatrix<MT, rowMajor>& A, int * ipiv)
+    inline void getrf(DenseMatrix<MT, rowMajor>& A, size_t * ipiv)
     {
         using ET = ElementType_t<MT>;
 

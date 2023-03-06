@@ -19,7 +19,7 @@ namespace blazefeo :: benchmark
     static void BM_getrf_static_plain(State& state)
     {
         StaticMatrix<Real, M, M, columnMajor> A = IdentityMatrix<Real>(M);
-        std::vector<int> ipiv(M);
+        std::vector<size_t> ipiv(M);
 
         for (auto _ : state)
         {

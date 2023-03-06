@@ -4,15 +4,18 @@
 
 #include <blazefeo/math/dense/Trsm.hpp>
 
+#include <cstddef>
 #include <test/Testing.hpp>
 
 
 namespace blazefeo :: testing
 {
+    static size_t constexpr MAX_SIZE = 50;
+
     TEST(DenseTrsmTest, testLeftLowerNonUnit)
     {
-        for (size_t m = 1; m <= 20; ++m)
-            for (size_t n = 1; n <= 20; ++n)
+        for (size_t m = 1; m <= MAX_SIZE; ++m)
+            for (size_t n = 1; n <= MAX_SIZE; ++n)
             {
                 // Init Blaze matrices
                 //
@@ -34,8 +37,8 @@ namespace blazefeo :: testing
 
     TEST(DenseTrsmTest, testLeftUpperNonUnit)
     {
-        for (size_t m = 1; m <= 20; ++m)
-            for (size_t n = 1; n <= 20; ++n)
+        for (size_t m = 1; m <= MAX_SIZE; ++m)
+            for (size_t n = 1; n <= MAX_SIZE; ++n)
             {
                 // Init Blaze matrices
                 //
@@ -57,8 +60,8 @@ namespace blazefeo :: testing
 
     TEST(DenseTrsmTest, testLeftLowerUnit)
     {
-        for (size_t m = 1; m <= 20; ++m)
-            for (size_t n = 1; n <= 20; ++n)
+        for (size_t m = 1; m <= MAX_SIZE; ++m)
+            for (size_t n = 1; n <= MAX_SIZE; ++n)
             {
                 // Init Blaze matrices
                 //
@@ -80,8 +83,8 @@ namespace blazefeo :: testing
 
     TEST(DenseTrsmTest, testLeftUpperUnit)
     {
-        for (size_t m = 1; m <= 20; ++m)
-            for (size_t n = 1; n <= 20; ++n)
+        for (size_t m = 1; m <= MAX_SIZE; ++m)
+            for (size_t n = 1; n <= MAX_SIZE; ++n)
             {
                 // Init Blaze matrices
                 //

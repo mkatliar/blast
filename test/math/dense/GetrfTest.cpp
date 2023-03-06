@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+#include "blazefeo/math/dense/Laswp.hpp"
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/adaptors/lowermatrix/BaseTemplate.h>
 #include <blaze/math/dense/DynamicMatrix.h>
@@ -26,7 +27,7 @@ namespace blazefeo :: testing
         using Real = T;
 
         template <typename MT, bool SO>
-        static DynamicMatrix<Real> luRestore(Matrix<MT, SO> const& LU, int * ipiv)
+        static DynamicMatrix<Real> luRestore(Matrix<MT, SO> const& LU, size_t * ipiv)
         {
             auto const M = rows(LU);
             auto const N = columns(LU);
@@ -66,13 +67,14 @@ namespace blazefeo :: testing
                     //
                     DynamicMatrix<Real, SO> A(M, N);
                     randomize(A);
-                    DynamicMatrix<Real, SO> const A_orig = A;
+                    DynamicMatrix<Real, SO> A_orig = A;
 
                     // Do getrf
-                    std::vector<int> ipiv(K);
+                    std::vector<size_t> ipiv(K);
                     blazefeo::getrf(A, ipiv.data());
 
                     // Check result
+                    laswp(A_orig, 0, K, ipiv.data());
                     BLAZEFEO_EXPECT_APPROX_EQ(A_orig, luRestore(A, ipiv.data()), absTol<Real>(), relTol<Real>())
                         << "getrf() error for size (" << M << ", " << N << ")";
                 }
