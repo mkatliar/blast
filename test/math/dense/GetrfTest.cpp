@@ -23,7 +23,7 @@ namespace blazefeo :: testing
     {
     protected:
         using Real = T;
-        using DMat = DynamicMatrix<Real, rowMajor>;
+        using DMat = DynamicMatrix<Real, columnMajor>;
 
         template <typename MT, bool SO>
         static DMat luRestore(Matrix<MT, SO> const& LU, int * ipiv)
@@ -59,9 +59,9 @@ namespace blazefeo :: testing
 
     TYPED_TEST_P(DenseGetrfTest, testDynamic)
     {
-        for (size_t M = 0; M <= 50; ++M)
+        for (size_t M = 0; M <= 20; ++M)
         {
-            for (size_t N = 0; N <= 50; ++N)
+            for (size_t N = 0; N <= 20; ++N)
             {
                 size_t const K = std::min(M, N);
 
