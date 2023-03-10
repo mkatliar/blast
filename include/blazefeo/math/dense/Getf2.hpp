@@ -65,11 +65,7 @@ namespace blazefeo
 
             // Exchange rows k and ip
             if (ip != k)
-            {
-                auto x = row(*A, k);
-                auto y = row(*A, ip);
-                swap(x, y);
-            }
+                swap(row(*A, k), row(*A, ip));
 
             if (!(*A)(k, k))
                 BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Matrix is singular"});

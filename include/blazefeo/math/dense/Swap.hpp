@@ -37,7 +37,7 @@ namespace blazefeo
         typename VT1,
         bool TF
     >
-    inline void swap(DenseVector<VT0, TF>& x, DenseVector<VT1, TF>& y)
+    inline void swap(DenseVector<VT0, TF>&& x, DenseVector<VT1, TF>&& y)
     {
         auto const N = size(x);
         if (size(y) != N)
