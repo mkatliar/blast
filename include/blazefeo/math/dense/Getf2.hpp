@@ -73,13 +73,11 @@ namespace blazefeo
                 BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Matrix is singular"});
 
             for (size_t i = k + 1; i < M; ++i)
-            {
-                ET const l = (*A)(i, k) / (*A)(k, k);
-                (*A)(i, k) = l;
+                (*A)(i, k) /= (*A)(k, k);
 
-                for (size_t j = k + 1; j < N; ++j)
-                    (*A)(i, j) -= l * (*A)(k, j);
-            }
+            for (size_t j = k + 1; j < N; ++j)
+                for (size_t i = k + 1; i < M; ++i)
+                    (*A)(i, j) -= (*A)(i, k) * (*A)(k, j);
         }
     }
 }
