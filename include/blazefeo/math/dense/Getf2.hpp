@@ -17,6 +17,7 @@
 #include <blazefeo/Exception.hpp>
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/math/dense/Swap.hpp>
+#include <blazefeo/math/dense/Idamax.hpp>
 
 #include <cmath>
 
@@ -57,29 +58,19 @@ namespace blazefeo
         for (size_t k = 0; k < M && k < N; ++k)
         {
             // Find pivot and test for singularity.
-            size_t ip = k;
-            auto vp = std::abs((*A)(k, k));
-            for (size_t i = k + 1; i < M; ++i)
-            {
-                auto const v = std::abs((*A)(i, k));
-                if (v > vp)
-                {
-                    vp = v;
-                    ip = i;
-                }
-            }
-
-            if (!vp)
-                BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Matrix is singular"});
+            size_t const ip = idamax(subvector(column(*A, k), k, M - k)) + k;
+            ipiv[k] = ip;
 
             // Exchange rows k and ip
-            ipiv[k] = ip;
             if (ip != k)
             {
                 auto x = row(*A, k);
                 auto y = row(*A, ip);
                 swap(x, y);
             }
+
+            if (!(*A)(k, k))
+                BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Matrix is singular"});
 
             for (size_t i = k + 1; i < M; ++i)
             {
