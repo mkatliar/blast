@@ -60,12 +60,12 @@ namespace blazefeo
         for (size_t k = 0; k < M && k < N; ++k)
         {
             // Find pivot and test for singularity.
-            size_t const ip = idamax(subvector(column(*A, k), k, M - k)) + k;
+            size_t const ip = idamax(subvector(column(*A, k, unchecked), k, M - k, unchecked)) + k;
             ipiv[k] = ip;
 
             // Exchange rows k and ip
             if (ip != k)
-                swap(row(*A, k), row(*A, ip));
+                swap(row(*A, k, unchecked), row(*A, ip, unchecked));
 
             if (!(*A)(k, k))
                 BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Matrix is singular"});

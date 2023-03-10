@@ -37,6 +37,6 @@ namespace blazefeo
     inline void laswp(DenseMatrix<MT, SO>& A, size_t k0, size_t k1, size_t * ipiv)
     {
         for (size_t k = k0; k < k1; ++k)
-            swap(row(*A, k), row(*A, ipiv[k]));
+            swap(row(*A, k, unchecked), row(*A, ipiv[k], unchecked));
     }
 }
