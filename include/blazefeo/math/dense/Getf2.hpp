@@ -19,6 +19,7 @@
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/math/dense/Swap.hpp>
 #include <blazefeo/math/dense/Idamax.hpp>
+#include <blazefeo/math/dense/Ger.hpp>
 
 #include <cmath>
 
@@ -74,10 +75,12 @@ namespace blazefeo
                 BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Matrix is singular"});
 
             submatrix(*A, k + 1, k, M - k - 1, 1, unchecked) /= (*A)(k, k);
-
-            for (size_t j = k + 1; j < N; ++j)
-                for (size_t i = k + 1; i < M; ++i)
-                    (*A)(i, j) -= (*A)(i, k) * (*A)(k, j);
+            ger(
+                ET(-1),
+                subvector(column(*A, k, unchecked), k + 1, M - k - 1, unchecked),
+                subvector(row(*A, k, unchecked), k + 1, N - k - 1, unchecked),
+                submatrix(*A, k + 1, k + 1, M - k - 1, N - k - 1, unchecked)
+            );
         }
     }
 }
