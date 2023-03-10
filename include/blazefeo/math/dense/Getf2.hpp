@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <blaze/math/views/Check.h>
 #include <blazefeo/Exception.hpp>
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/math/dense/Swap.hpp>
@@ -72,8 +73,7 @@ namespace blazefeo
             if (!(*A)(k, k))
                 BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Matrix is singular"});
 
-            for (size_t i = k + 1; i < M; ++i)
-                (*A)(i, k) /= (*A)(k, k);
+            submatrix(*A, k + 1, k, M - k - 1, 1, unchecked) /= (*A)(k, k);
 
             for (size_t j = k + 1; j < N; ++j)
                 for (size_t i = k + 1; i < M; ++i)
