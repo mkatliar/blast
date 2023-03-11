@@ -16,12 +16,15 @@ add_executable(test-blazefeo
     math/simd/HsumTest.cpp
 
     math/dense/StaticMatrixPointerTest.cpp
+    math/dense/StaticVectorPointerTest.cpp
     math/dense/DynamicMatrixPointerTest.cpp
+    math/dense/DynamicVectorPointerTest.cpp
     math/dense/GerTest.cpp
     math/dense/GemmTest.cpp
     math/dense/SyrkTest.cpp
     math/dense/PotrfTest.cpp
     math/dense/GetrfTest.cpp
+    # math/dense/Getf2Test.cpp
     math/dense/TrmmTest.cpp
     math/dense/TrsvTest.cpp
     math/dense/TrsmTest.cpp

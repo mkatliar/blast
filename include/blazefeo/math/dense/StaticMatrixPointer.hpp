@@ -108,6 +108,12 @@ namespace blazefeo
         }
 
 
+        T * get() const noexcept
+        {
+            return ptr_;
+        }
+
+
     private:
         static size_t constexpr SS = Simd<std::remove_cv_t<T>>::size;
 
@@ -198,5 +204,32 @@ namespace blazefeo
     {
         BLAZE_USER_ASSERT(i % SIMDTrait<ElementType_t<MT>>::size == 0 || !AF, "Pointer is not aligned");
         return {(*m).data() + MT::spacing() * j + i};
+    }
+
+
+    template <bool AF, typename VT, bool TF>
+        requires (IsStatic_v<VT>)
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<VT>, VT::spacing(), TF == columnVector ? columnMajor : rowMajor, AF, IsPadded_v<VT>>
+        ptr(DenseVector<VT, TF>& v, size_t i)
+    {
+        return {&(*v)[i]};
+    }
+
+
+    template <bool AF, typename VT, bool TF>
+        requires (IsStatic_v<VT>)
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<VT> const, VT::spacing(), TF == columnVector ? columnMajor : rowMajor, AF, IsPadded_v<VT>>
+        ptr(DenseVector<VT, TF> const& v, size_t i)
+    {
+        return {&(*v)[i]};
+    }
+
+
+    template <bool AF, typename VT, bool TF>
+        requires (IsStatic_v<VT>)
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<VT> const, VT::spacing(), TF == columnVector ? columnMajor : rowMajor, AF, IsPadded_v<VT>>
+        ptr(DVecTransExpr<VT, TF> const& v, size_t i)
+    {
+        return {&(*v)[i]};
     }
 }
