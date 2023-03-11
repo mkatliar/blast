@@ -23,7 +23,7 @@ namespace blazefeo
     /**
      * @brief Performs the rank 1 operation
      *
-     *     A := alpha*x*y**T + A,
+     *     B := alpha*x*y**T + A,
      *
      * where alpha is a scalar, x is an m element vector, y is an n element
      * vector and A is an m by n column-major matrix.
@@ -33,15 +33,23 @@ namespace blazefeo
      * @tparam Scalar scalar type
      * @tparam VT0 type of first vector
      * @tparam VT1 type of second vector
-     * @tparam MT type of matrix
+     * @tparam MT0 type of input matrix
+     * @tparam MT1 type of output matrix
      *
      * @param alpha scalar alpha
      * @param x first vector
      * @param y second vector
-     * @param A matrix
+     * @param A input matrix
+     * @param B output matrix
      */
-    template <typename Scalar, typename VT0, typename VT1, typename MT>
-    inline void ger(Scalar alpha, DenseVector<VT0, columnVector> const& x, DenseVector<VT1, rowVector> const& y, DenseMatrix<MT, columnMajor>&& A)
+    template <typename Scalar, typename VT0, typename VT1, typename MT0, typename MT1>
+    inline void ger(
+        Scalar alpha,
+        DenseVector<VT0, columnVector> const& x,
+        DenseVector<VT1, rowVector> const& y,
+        DenseMatrix<MT0, columnMajor> const& A,
+        DenseMatrix<MT1, columnMajor>& B
+    )
     {
         size_t const M = size(x);
         size_t const N = size(y);
@@ -51,7 +59,42 @@ namespace blazefeo
 
         for (size_t j = 0; j < N; ++j)
             for (size_t i = 0; i < M; ++i)
-                (*A)(i, j) += alpha * (*x)[i] * (*y)[j];
+                (*B)(i, j) = (*A)(i, j) + alpha * (*x)[i] * (*y)[j];
+    }
+
+
+    /**
+     * @brief Performs the rank 1 operation
+     *
+     *     B := alpha*x*y**T + A,
+     *
+     * where alpha is a scalar, x is an m element vector, y is an n element
+     * vector and A is an m by n column-major matrix.
+     *
+     * https://netlib.org/lapack/explore-html/d7/d15/group__double__blas__level2_ga458222e01b4d348e9b52b9343d52f828.html
+     *
+     * @tparam Scalar scalar type
+     * @tparam VT0 type of first vector
+     * @tparam VT1 type of second vector
+     * @tparam MT0 type of input matrix
+     * @tparam MT1 type of output matrix
+     *
+     * @param alpha scalar alpha
+     * @param x first vector
+     * @param y second vector
+     * @param A input matrix
+     * @param B output matrix
+     */
+    template <typename Scalar, typename VT0, typename VT1, typename MT0, typename MT1>
+    inline void ger(
+        Scalar alpha,
+        DenseVector<VT0, columnVector> const& x,
+        DenseVector<VT1, rowVector> const& y,
+        DenseMatrix<MT0, columnMajor> const& A,
+        DenseMatrix<MT1, columnMajor>&& B
+    )
+    {
+        ger(alpha, x, y, A, B);
     }
 
 
@@ -68,15 +111,23 @@ namespace blazefeo
      * @tparam Scalar scalar type
      * @tparam VT0 type of first vector
      * @tparam VT1 type of second vector
-     * @tparam MT type of matrix
+     * @tparam MT0 type of input matrix
+     * @tparam MT1 type of output matrix
      *
      * @param alpha scalar alpha
      * @param x first vector
      * @param y second vector
-     * @param A matrix
+     * @param A input matrix
+     * @param B output matrix
      */
-    template <typename Scalar, typename VT0, typename VT1, typename MT>
-    inline void ger(Scalar alpha, DenseVector<VT0, columnVector> const& x, DenseVector<VT1, rowVector> const& y, DenseMatrix<MT, rowMajor>&& A)
+    template <typename Scalar, typename VT0, typename VT1, typename MT0, typename MT1>
+    inline void ger(
+        Scalar alpha,
+        DenseVector<VT0, columnVector> const& x,
+        DenseVector<VT1, rowVector> const& y,
+        DenseMatrix<MT0, rowMajor> const& A,
+        DenseMatrix<MT1, rowMajor>& B
+    )
     {
         size_t const M = size(x);
         size_t const N = size(y);
@@ -86,6 +137,41 @@ namespace blazefeo
 
         for (size_t i = 0; i < M; ++i)
             for (size_t j = 0; j < N; ++j)
-                (*A)(i, j) += alpha * (*x)[i] * (*y)[j];
+                (*B)(i, j) = (*A)(i, j) + alpha * (*x)[i] * (*y)[j];
+    }
+
+
+    /**
+     * @brief Performs the rank 1 operation
+     *
+     *     A := alpha*x*y**T + A,
+     *
+     * where alpha is a scalar, x is an m element vector, y is an n element
+     * vector and A is an m by n row-major matrix.
+     *
+     * https://netlib.org/lapack/explore-html/d7/d15/group__double__blas__level2_ga458222e01b4d348e9b52b9343d52f828.html
+     *
+     * @tparam Scalar scalar type
+     * @tparam VT0 type of first vector
+     * @tparam VT1 type of second vector
+     * @tparam MT0 type of input matrix
+     * @tparam MT1 type of output matrix
+     *
+     * @param alpha scalar alpha
+     * @param x first vector
+     * @param y second vector
+     * @param A input matrix
+     * @param B output matrix
+     */
+    template <typename Scalar, typename VT0, typename VT1, typename MT0, typename MT1>
+    inline void ger(
+        Scalar alpha,
+        DenseVector<VT0, columnVector> const& x,
+        DenseVector<VT1, rowVector> const& y,
+        DenseMatrix<MT0, rowMajor> const& A,
+        DenseMatrix<MT1, rowMajor>&& B
+    )
+    {
+        ger(alpha, x, y, A, B);
     }
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <blaze/math/StorageOrder.h>
-#include <blaze/math/views/Submatrix.h>
 #define BLAZE_USER_ASSERTION 1
 
 #include <blazefeo/math/dense/Gemm.hpp>

@@ -75,6 +75,7 @@ namespace blazefeo
                 ET(-1),
                 subvector(column(*A, k, unchecked), k + 1, M - k - 1, unchecked),
                 subvector(row(*A, k, unchecked), k + 1, N - k - 1, unchecked),
+                submatrix(*A, k + 1, k + 1, M - k - 1, N - k - 1, unchecked),
                 submatrix(*A, k + 1, k + 1, M - k - 1, N - k - 1, unchecked)
             );
         }
