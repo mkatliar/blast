@@ -170,11 +170,6 @@ namespace blazefeo
 
         template <typename P>
             requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
-        void load(P p, size_t m, size_t n) noexcept;
-
-
-        template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(T beta, P p, size_t m, size_t n) noexcept;
 
 
@@ -433,19 +428,6 @@ namespace blazefeo
             #pragma unroll
             for (size_t j = 0; j < N; ++j) if (j < n)
                 v_[i][j] = beta * blazefeo::load<aligned, SS>(ptr + spacing * i + SS * j);
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
-    template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
-    inline void RegisterMatrix<T, M, N, SO>::load(P p, size_t m, size_t n) noexcept
-    {
-        #pragma unroll
-        for (size_t j = 0; j < N; ++j) if (j < n)
-            #pragma unroll
-            for (size_t i = 0; i < RM; ++i)
-                v_[i][j] = p.load(SS * i, j);
     }
 
 
