@@ -126,7 +126,7 @@ namespace blazefeo
                 ET1 * pl = data(lhs) + i;
 
                 for (size_t j = 0; j < n; ++j)
-                    store(pl + s * j, load<aligned, SS>(pr + PANEL_SIZE * j));
+                    store<aligned>(pl + s * j, load<aligned, SS>(pr + PANEL_SIZE * j));
             }
 
             if (IntType const rem = m % SS)
@@ -214,7 +214,7 @@ namespace blazefeo
                 ET1 * pl = ptr(lhs, i, 0);
 
                 for (size_t j = 0; j < n; ++j)
-                    store(pl + PANEL_SIZE * j, load<aligned, SS>(pr + s * j));
+                    store<aligned>(pl + PANEL_SIZE * j, load<aligned, SS>(pr + s * j));
             }
 
             if (IntType const rem = m % SS)

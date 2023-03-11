@@ -265,16 +265,39 @@ namespace blazefeo
     // STORE
     //
     //*******************************************************
+    template <bool AF>
+    void store(double * ptr, __m256d a);
 
-    inline void store(double * ptr, __m256d a)
+
+    template <>
+    inline void store<aligned>(double * ptr, __m256d a)
     {
         _mm256_store_pd(ptr, a);
     }
 
 
-    inline void store(float * ptr, __m256 a)
+    template <>
+    inline void store<unaligned>(double * ptr, __m256d a)
+    {
+        _mm256_storeu_pd(ptr, a);
+    }
+
+
+    template <bool AF>
+    void store(float * ptr, __m256 a);
+
+
+    template <>
+    inline void store<aligned>(float * ptr, __m256 a)
     {
         _mm256_store_ps(ptr, a);
+    }
+
+
+    template <>
+    inline void store<unaligned>(float * ptr, __m256 a)
+    {
+        _mm256_storeu_ps(ptr, a);
     }
 
 

@@ -62,7 +62,7 @@ namespace blazefeo
 
         void store(ptrdiff_t i, ptrdiff_t j, IntrinsicType val) const noexcept
         {
-            blazefeo::store(ptrOffset(i, j), val);
+            blazefeo::store<AF>(ptrOffset(i, j), val);
         }
 
 

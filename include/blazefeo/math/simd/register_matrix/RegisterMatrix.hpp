@@ -466,7 +466,7 @@ namespace blazefeo
         for (size_t i = 0; i < RM; ++i)
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
-                blazefeo::store(ptr + spacing * i + SS * j, v_[i][j]);
+                blazefeo::store<aligned>(ptr + spacing * i + SS * j, v_[i][j]);
     }
 
 
@@ -497,7 +497,7 @@ namespace blazefeo
                 // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
                 #pragma unroll
                 for (size_t j = 0; j < N; ++j) if (j < n)
-                    blazefeo::store(ptr + spacing * i + SS * j, v_[i][j]);
+                    blazefeo::store<aligned>(ptr + spacing * i + SS * j, v_[i][j]);
 
             MaskType const mask = SIMD::index() < rem;
             size_t constexpr i = RM - 1;
@@ -514,7 +514,7 @@ namespace blazefeo
                 // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
                 #pragma unroll
                 for (size_t j = 0; j < N; ++j) if (j < n)
-                    blazefeo::store(ptr + spacing * i + SS * j, v_[i][j]);
+                    blazefeo::store<aligned>(ptr + spacing * i + SS * j, v_[i][j]);
         }
     }
 

@@ -195,7 +195,7 @@ namespace blazefeo
             BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
 
             // We never use maskstore here because we have padding
-            blazefeo::store(v_ + elementIndex(i, j), val);
+            blazefeo::store<aligned>(v_ + elementIndex(i, j), val);
         }
 
 
