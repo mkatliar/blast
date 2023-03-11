@@ -457,12 +457,22 @@ namespace blazefeo
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
-            #pragma unroll
-            for (size_t i = 0; i < RM; ++i) if (SS * i + SS <= m)
-                v_[i][j] = beta * p.load(SS * i, j);
+            if constexpr (P::aligned && P::padded)
+            {
+                // If the storage is both aligned and padded, it should be safe to use unmasked loads, which are faster.
+                #pragma unroll
+                for (size_t i = 0; i < RM; ++i) if (SS * i < m)
+                    v_[i][j] = beta * p.load(SS * i, j);
+            }
+            else
+            {
+                #pragma unroll
+                for (size_t i = 0; i < RM; ++i) if (SS * i + SS <= m)
+                    v_[i][j] = beta * p.load(SS * i, j);
 
-            if (size_t const rem = m % SS)
-                v_[m / SS][j] = beta * p.maskLoad(m - rem, j, SIMD::index() < rem);
+                if (size_t const rem = m % SS)
+                    v_[m / SS][j] = beta * p.maskLoad(m - rem, j, SIMD::index() < rem);
+            }
         }
     }
 
