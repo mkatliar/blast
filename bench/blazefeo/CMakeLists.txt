@@ -9,7 +9,9 @@ add_executable(bench-blazefeo
     math/expressions/AssignPanelDense.cpp
 
     math/simd/Ger.cpp
+    math/simd/Load.cpp
     math/simd/Store.cpp
+    math/simd/PartialLoad.cpp
     math/simd/PartialStore.cpp
     math/simd/Potrf.cpp
     math/simd/Trsm.cpp
