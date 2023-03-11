@@ -10,7 +10,7 @@
 
 namespace blazefeo
 {
-    template <typename T, size_t S, bool SO, bool AF>
+    template <typename T, size_t S, bool SO, bool AF, bool PF>
     class StaticMatrixPointer
     {
     public:
@@ -19,6 +19,8 @@ namespace blazefeo
         using MaskType = typename Simd<std::remove_cv_t<T>>::MaskType;
 
         static bool constexpr storageOrder = SO;
+        static bool constexpr aligned = AF;
+        static bool constexpr padded = PF;
 
 
         constexpr StaticMatrixPointer(T * ptr) noexcept
@@ -31,7 +33,7 @@ namespace blazefeo
 
 
         template <typename Other>
-        constexpr StaticMatrixPointer(StaticMatrixPointer<Other, S, SO, AF> const& other) noexcept
+        constexpr StaticMatrixPointer(StaticMatrixPointer<Other, S, SO, AF, PF> const& other) noexcept
         :   ptr_ {other.ptr_}
         {
         }
@@ -76,7 +78,7 @@ namespace blazefeo
         }
 
 
-        StaticMatrixPointer<T, S, !SO, AF> constexpr trans() const noexcept
+        StaticMatrixPointer<T, S, !SO, AF, PF> constexpr trans() const noexcept
         {
             return {ptr_};
         }
@@ -123,8 +125,8 @@ namespace blazefeo
     };
 
 
-    template <typename T, size_t S, bool SO, bool AF>
-    BLAZE_ALWAYS_INLINE auto trans(StaticMatrixPointer<T, S, SO, AF> const& p) noexcept
+    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    BLAZE_ALWAYS_INLINE auto trans(StaticMatrixPointer<T, S, SO, AF, PF> const& p) noexcept
     {
         return p.trans();
     }
@@ -141,7 +143,7 @@ namespace blazefeo
 
     template <bool AF, typename MT>
         requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), columnMajor, AF>
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), columnMajor, AF, IsPadded_v<MT>>
         ptr(DenseMatrix<MT, columnMajor>& m, size_t i, size_t j)
     {
         BLAZE_USER_ASSERT(i % SIMDTrait<ElementType_t<MT>>::size == 0 || !AF, "Pointer is not aligned");
@@ -151,7 +153,7 @@ namespace blazefeo
 
     template <bool AF, typename MT>
         requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), rowMajor, AF>
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), rowMajor, AF, IsPadded_v<MT>>
         ptr(DenseMatrix<MT, rowMajor>& m, size_t i, size_t j)
     {
         BLAZE_USER_ASSERT(j % SIMDTrait<ElementType_t<MT>>::size == 0 || !AF, "Pointer is not aligned");
@@ -161,7 +163,7 @@ namespace blazefeo
 
     template <bool AF, typename MT>
         requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), columnMajor, AF>
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), columnMajor, AF, IsPadded_v<MT>>
         ptr(DenseMatrix<MT, columnMajor> const& m, size_t i, size_t j)
     {
         BLAZE_USER_ASSERT(i % SIMDTrait<ElementType_t<MT>>::size == 0 || !AF, "Pointer is not aligned");
@@ -171,7 +173,7 @@ namespace blazefeo
 
     template <bool AF, typename MT>
         requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), rowMajor, AF>
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), rowMajor, AF, IsPadded_v<MT>>
         ptr(DenseMatrix<MT, rowMajor> const& m, size_t i, size_t j)
     {
         BLAZE_USER_ASSERT(j % SIMDTrait<ElementType_t<MT>>::size == 0 || !AF, "Pointer is not aligned");
@@ -181,7 +183,7 @@ namespace blazefeo
 
     template <bool AF, typename MT>
         requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), columnMajor, AF>
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), columnMajor, AF, IsPadded_v<MT>>
         ptr(DMatTransExpr<MT, columnMajor> const& m, size_t i, size_t j)
     {
         BLAZE_USER_ASSERT(j % SIMDTrait<ElementType_t<MT>>::size == 0 || !AF, "Pointer is not aligned");
@@ -191,7 +193,7 @@ namespace blazefeo
 
     template <bool AF, typename MT>
         requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), rowMajor, AF>
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), rowMajor, AF, IsPadded_v<MT>>
         ptr(DMatTransExpr<MT, rowMajor> const& m, size_t i, size_t j)
     {
         BLAZE_USER_ASSERT(i % SIMDTrait<ElementType_t<MT>>::size == 0 || !AF, "Pointer is not aligned");

@@ -23,7 +23,7 @@ namespace blazefeo :: testing
         using Matrix = MT;
         static bool constexpr storageOrder = MT::storageOrder;
         using Real = ElementType_t<MT>;
-        using Pointer = StaticMatrixPointer<Real, MT::spacing(), storageOrder, IsAligned_v<MT>>;
+        using Pointer = StaticMatrixPointer<Real, MT::spacing(), storageOrder, IsAligned_v<MT>, IsPadded_v<MT>>;
         static size_t constexpr SS = Simd<Real>::size;
 
         Matrix m_;
