@@ -23,7 +23,7 @@ namespace blazefeo :: testing
         using Matrix = MT;
         static bool constexpr storageOrder = MT::storageOrder;
         using Real = ElementType_t<MT>;
-        using Pointer = StaticMatrixPointer<Real, MT::spacing(), storageOrder>;        
+        using Pointer = StaticMatrixPointer<Real, MT::spacing(), storageOrder, IsAligned_v<MT>>;
         static size_t constexpr SS = Simd<Real>::size;
 
         Matrix m_;
@@ -36,15 +36,15 @@ namespace blazefeo :: testing
         StaticMatrix<float, 20, 20, columnMajor>,
         StaticMatrix<float, 20, 20, rowMajor>
     >;
-        
-        
+
+
     TYPED_TEST_SUITE(StaticMatrixPointerTest, MyTypes);
 
 
     TYPED_TEST(StaticMatrixPointerTest, testSpacing)
     {
         typename TestFixture::Pointer p {this->m_.data()};
-        
+
         size_t constexpr s = p.spacing();
         EXPECT_EQ(s, this->m_.spacing());
     }
@@ -65,9 +65,9 @@ namespace blazefeo :: testing
     TYPED_TEST(StaticMatrixPointerTest, testPtr)
     {
         size_t const i = 0, j = 0;
-        typename TestFixture::Pointer p = ptr(this->m_, 0, 0);
+        auto p = ptr<aligned>(this->m_, 0, 0);
         auto const val = p.load(i, j);
-        
+
         EXPECT_EQ(p.spacing(), this->m_.spacing());
 
         for (size_t k = 0; k < this->SS; ++k)
@@ -79,9 +79,9 @@ namespace blazefeo :: testing
     TYPED_TEST(StaticMatrixPointerTest, testPtrTrans)
     {
         size_t const i = 0, j = 0;
-        auto p = ptr(trans(this->m_), 0, 0);
+        auto p = ptr<aligned>(trans(this->m_), 0, 0);
         auto const val = p.load(i, j);
-        
+
         ASSERT_EQ(p.storageOrder, !this->storageOrder);
         EXPECT_EQ(p.spacing(), this->m_.spacing());
 

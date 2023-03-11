@@ -54,8 +54,8 @@ namespace blazefeo
 
         using Iterator      = DenseIterator<Type, aligned>;        //!< Iterator over non-constant elements.
         using ConstIterator = DenseIterator<const Type, aligned>;  //!< Iterator over constant elements.
-   
-        
+
+
         StaticPanelMatrix()
         {
             // Initialize padding elements to 0 to prevent denorms in calculations.
@@ -67,7 +67,7 @@ namespace blazefeo
         constexpr StaticPanelMatrix(std::initializer_list<std::initializer_list<Type>> list)
         {
             std::fill_n(v_, capacity_, Type {});
-            
+
             if (list.size() != M || determineColumns(list) > N)
                 BLAZE_THROW_INVALID_ARGUMENT("Invalid setup of static panel matrix");
 
@@ -76,7 +76,7 @@ namespace blazefeo
             for (auto const& row : list)
             {
                 size_t j = 0;
-                
+
                 for (const auto& element : row)
                 {
                     v_[elementIndex(i, j)] = element;
@@ -182,7 +182,7 @@ namespace blazefeo
             BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
             BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
 
-            return blazefeo::load<SS>(v_ + elementIndex(i, j));
+            return blazefeo::load<aligned, SS>(v_ + elementIndex(i, j));
         }
 
 
@@ -217,7 +217,7 @@ namespace blazefeo
 
         size_t elementIndex(size_t i, size_t j) const
         {
-            return SO == columnMajor 
+            return SO == columnMajor
                 ? i / panelSize_ * spacing_ + i % panelSize_ + j * panelSize_
                 : j / panelSize_ * spacing_ + j % panelSize_ + i * panelSize_;
         }

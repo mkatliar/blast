@@ -10,7 +10,7 @@
 
 namespace blazefeo
 {
-    template <typename T, bool SO>
+    template <typename T, bool SO, bool AF>
     class DynamicMatrixPointer
     {
     public:
@@ -20,7 +20,7 @@ namespace blazefeo
 
         static bool constexpr storageOrder = SO;
 
-        
+
         constexpr DynamicMatrixPointer(T * ptr, size_t spacing) noexcept
         :   ptr_ {ptr}
         ,   spacing_ {spacing}
@@ -32,7 +32,7 @@ namespace blazefeo
 
 
         template <typename Other>
-        constexpr DynamicMatrixPointer(DynamicMatrixPointer<Other, SO> const& other) noexcept
+        constexpr DynamicMatrixPointer(DynamicMatrixPointer<Other, SO, AF> const& other) noexcept
         :   ptr_ {other.ptr_}
         ,   spacing_ {other.spacing_}
         {
@@ -44,7 +44,7 @@ namespace blazefeo
 
         IntrinsicType load(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
-            return blazefeo::load<SS>(ptrOffset(i, j));
+            return blazefeo::load<AF, SS>(ptrOffset(i, j));
         }
 
 
@@ -84,7 +84,7 @@ namespace blazefeo
         }
 
 
-        DynamicMatrixPointer<T, !SO> constexpr trans() const noexcept
+        DynamicMatrixPointer<T, !SO, AF> constexpr trans() const noexcept
         {
             return {ptr_, spacing_};
         }
@@ -111,7 +111,7 @@ namespace blazefeo
     private:
         static size_t constexpr SS = Simd<std::remove_cv_t<T>>::size;
 
-        
+
         T * ptrOffset(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
             if (SO == columnMajor)
@@ -126,42 +126,42 @@ namespace blazefeo
     };
 
 
-    template <bool SO, typename T>
-    BLAZE_ALWAYS_INLINE auto trans(DynamicMatrixPointer<T, SO> const& p) noexcept
+    template <bool SO, typename T, bool AF>
+    BLAZE_ALWAYS_INLINE auto trans(DynamicMatrixPointer<T, SO, AF> const& p) noexcept
     {
         return p.trans();
     }
 
 
-    template <typename MT, bool SO>
+    template <bool AF, typename MT, bool SO>
         requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT>, SO> 
+    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT>, SO, AF>
         ptr(DenseMatrix<MT, SO>& m, size_t i, size_t j)
     {
         return {&(*m)(i, j), spacing(m)};
     }
 
 
-    template <typename MT, bool SO>
+    template <bool AF, typename MT, bool SO>
         requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO>
+    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO, AF>
         ptr(DenseMatrix<MT, SO> const& m, size_t i, size_t j)
     {
         return {&(*m)(i, j), spacing(m)};
     }
 
 
-    template <typename MT, bool SO>
+    template <bool AF, typename MT, bool SO>
         requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO>
+    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO, AF>
         ptr(DMatTransExpr<MT, SO> const& m, size_t i, size_t j)
     {
         return {&(*m)(i, j), spacing(m)};
     }
 
 
-    template <bool SO, typename T>
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<T, SO> ptr(T * p, size_t spacing)
+    template <bool AF, bool SO, typename T>
+    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<T, SO, AF> ptr(T * p, size_t spacing)
     {
         return {p, spacing};
     }

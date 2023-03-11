@@ -27,7 +27,7 @@ namespace blazefeo
     {
         using ET = ElementType_t<MT1>;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;
-        
+
         size_t const M = rows(A);
         size_t const N = columns(A);
 
@@ -36,10 +36,10 @@ namespace blazefeo
 
         RegisterMatrix<ET, KM, KN, columnMajor> ker;
 
-        ker.load(1., ptr(A, i, k));
+        ker.load(1., ptr<aligned>(A, i, k));
 
-        auto a = ptr(L, i, 0);
-        auto b = ptr(L, k, 0);
+        auto a = ptr<aligned>(L, i, 0);
+        auto b = ptr<aligned>(L, k, 0);
 
         for (size_t l = 0; l < k; ++l)
             ker.ger(ET(-1.), a.offset(0, l), trans(b).offset(l, 0));
@@ -50,19 +50,19 @@ namespace blazefeo
             ker.potrf();
 
             if (k + KN <= N)
-                ker.storeLower(ptr(L, i, k));
+                ker.storeLower(ptr<aligned>(L, i, k));
             else
-                ker.storeLower(ptr(L, i, k), std::min(M - i, KM), N - k);
+                ker.storeLower(ptr<aligned>(L, i, k), std::min(M - i, KM), N - k);
         }
         else
         {
             // Off-diagonal blocks
-            ker.trsmRightUpper(trans(ptr(L, k, k)));
+            ker.trsmRightUpper(trans(ptr<aligned>(L, k, k)));
 
             if (k + KN <= N)
-                ker.store(ptr(L, i, k));
+                ker.store(ptr<aligned>(L, i, k));
             else
-                ker.store(ptr(L, i, k), std::min(M - i, KM), N - k);
+                ker.store(ptr<aligned>(L, i, k), std::min(M - i, KM), N - k);
         }
     }
 

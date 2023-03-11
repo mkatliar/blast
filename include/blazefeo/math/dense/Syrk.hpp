@@ -47,46 +47,46 @@ namespace blazefeo
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(beta, ptr(C, i, j));
-                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)));
+                ker.load(beta, ptr<aligned>(C, i, j));
+                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)));
                 if (i == j)
-                    ker.storeLower(ptr(D, i, j));
+                    ker.storeLower(ptr<aligned>(D, i, j));
                 else
-                    ker.store(ptr(D, i, j));
+                    ker.store(ptr<aligned>(D, i, j));
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(beta, ptr(C, i, j));
-                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)));
+                ker.load(beta, ptr<aligned>(C, i, j));
+                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)));
                 if (i == j)
-                    ker.storeLower(ptr(D, i, j));
+                    ker.storeLower(ptr<aligned>(D, i, j));
                 else
-                    ker.store(ptr(D, i, j));
+                    ker.store(ptr<aligned>(D, i, j));
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(beta, ptr(C, i, j));
-                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)));
+                ker.load(beta, ptr<aligned>(C, i, j));
+                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)));
                 if (i == j)
-                    ker.storeLower(ptr(D, i, j));
+                    ker.storeLower(ptr<aligned>(D, i, j));
                 else
-                    ker.store(ptr(D, i, j));
+                    ker.store(ptr<aligned>(D, i, j));
             }
 
             // Bottom edge
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(beta, ptr(C, i, j), M - i, ker.columns());
-                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)), M - i, ker.columns());
+                ker.load(beta, ptr<aligned>(C, i, j), M - i, ker.columns());
+                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), M - i, ker.columns());
                 if (i == j)
-                    ker.storeLower(ptr(D, i, j), M - i, ker.columns());
+                    ker.storeLower(ptr<aligned>(D, i, j), M - i, ker.columns());
                 else
-                    ker.store(ptr(D, i, j), M - i, ker.columns());
+                    ker.store(ptr<aligned>(D, i, j), M - i, ker.columns());
             }
         }
 
@@ -101,47 +101,47 @@ namespace blazefeo
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(beta, ptr(C, i, j), ker.rows(), M - j);
-                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)), ker.rows(), M - j);
+                ker.load(beta, ptr<aligned>(C, i, j), ker.rows(), M - j);
+                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), ker.rows(), M - j);
 
                 if (i == j)
-                    ker.storeLower(ptr(D, i, j), ker.rows(), M - j);
+                    ker.storeLower(ptr<aligned>(D, i, j), ker.rows(), M - j);
                 else
-                    ker.store(ptr(D, i, j), ker.rows(), M - j);
+                    ker.store(ptr<aligned>(D, i, j), ker.rows(), M - j);
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(beta, ptr(C, i, j), ker.rows(), M - j);
-                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)), ker.rows(), M - j);
+                ker.load(beta, ptr<aligned>(C, i, j), ker.rows(), M - j);
+                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), ker.rows(), M - j);
                 if (i == j)
-                    ker.storeLower(ptr(D, i, j), ker.rows(), M - j);
+                    ker.storeLower(ptr<aligned>(D, i, j), ker.rows(), M - j);
                 else
-                    ker.store(ptr(D, i, j), ker.rows(), M - j);
+                    ker.store(ptr<aligned>(D, i, j), ker.rows(), M - j);
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(beta, ptr(C, i, j), ker.rows(), M - j);
-                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)), ker.rows(), M - j);
+                ker.load(beta, ptr<aligned>(C, i, j), ker.rows(), M - j);
+                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), ker.rows(), M - j);
                 if (i == j)
-                    ker.storeLower(ptr(D, i, j), ker.rows(), M - j);
+                    ker.storeLower(ptr<aligned>(D, i, j), ker.rows(), M - j);
                 else
-                    ker.store(ptr(D, i, j), ker.rows(), M - j);
+                    ker.store(ptr<aligned>(D, i, j), ker.rows(), M - j);
             }
 
             // Bottom-right corner
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(beta, ptr(C, i, j), ker.rows(), M - j);
-                ker.gemm(K, alpha, ptr(A, i, 0), trans(ptr(A, j, 0)), M - i, M - j);
+                ker.load(beta, ptr<aligned>(C, i, j), ker.rows(), M - j);
+                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), M - i, M - j);
                 if (i == j)
-                    ker.storeLower(ptr(D, i, j), M - i, M - j);
+                    ker.storeLower(ptr<aligned>(D, i, j), M - i, M - j);
                 else
-                    ker.store(ptr(D, i, j), M - i, M - j);
+                    ker.store(ptr<aligned>(D, i, j), M - i, M - j);
             }
         }
     }

@@ -17,7 +17,7 @@ namespace blazefeo :: benchmark
     static void BM_RegisterMatrix_partialGemm_static(State& state)
     {
         size_t constexpr K = 5;
-        
+
         StaticMatrix<T, M, K, SO> A;
         StaticMatrix<T, K, N, SO> B;
         StaticMatrix<T, M, N, SO> C, D;
@@ -29,7 +29,7 @@ namespace blazefeo :: benchmark
         RegisterMatrix<T, M, N, SO> ker;
         for (auto _ : state)
         {
-            gemm(ker, K, 1., ptr(A, 0, 0), ptr(B, 0, 0), 1., ptr(C, 0, 0), ptr(D, 0, 0), MM, NN);
+            gemm(ker, K, 1., ptr<aligned>(A, 0, 0), ptr<aligned>(B, 0, 0), 1., ptr<aligned>(C, 0, 0), ptr<aligned>(D, 0, 0), MM, NN);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);

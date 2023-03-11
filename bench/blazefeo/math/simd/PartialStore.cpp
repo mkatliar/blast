@@ -10,7 +10,7 @@
 
 #include <test/Randomize.hpp>
 
-#include <functional> 
+#include <functional>
 
 
 namespace blazefeo :: benchmark
@@ -23,15 +23,15 @@ namespace blazefeo :: benchmark
         size_t const n = state.range(1);
 
         Kernel ker;
-        
+
         DynamicPanelMatrix<T> c(ker.rows(), ker.columns()), d(ker.rows(), ker.columns());
-        randomize(c);        
+        randomize(c);
 
         load(ker, c.ptr(0, 0), c.spacing());
         for (auto _ : state)
         {
             store(ker, d.ptr(0, 0), d.spacing(), m, n);
-            DoNotOptimize(d);   
+            DoNotOptimize(d);
         }
 
         state.counters["flops"] = Counter(m * n, Counter::kIsIterationInvariantRate);
@@ -50,15 +50,15 @@ namespace blazefeo :: benchmark
         size_t const n = state.range(1);
 
         Kernel ker;
-        
-        StaticMatrix<T, M, N, SO> C, D;
-        randomize(C);        
 
-        ker.load(1., ptr(C, 0, 0));
+        StaticMatrix<T, M, N, SO> C, D;
+        randomize(C);
+
+        ker.load(1., ptr<aligned>(C, 0, 0));
         for (auto _ : state)
         {
-            ker.store(ptr(D, 0, 0), m, n);
-            DoNotOptimize(D);   
+            ker.store(ptr<aligned>(D, 0, 0), m, n);
+            DoNotOptimize(D);
         }
 
         state.counters["flops"] = Counter(m * n, Counter::kIsIterationInvariantRate);
@@ -73,15 +73,15 @@ namespace blazefeo :: benchmark
     static void BM_RegisterMatrix_partialStore_static(State& state)
     {
         RegisterMatrix<T, M, N, SO> ker;
-        
-        StaticMatrix<T, M, N, SO> C, D;
-        randomize(C);        
 
-        ker.load(1., ptr(C, 0, 0));
+        StaticMatrix<T, M, N, SO> C, D;
+        randomize(C);
+
+        ker.load(1., ptr<aligned>(C, 0, 0));
         for (auto _ : state)
         {
-            ker.store(ptr(D, 0, 0), MM, NN);
-            DoNotOptimize(D);   
+            ker.store(ptr<aligned>(D, 0, 0), MM, NN);
+            DoNotOptimize(D);
         }
 
         state.counters["flops"] = Counter(MM * NN, Counter::kIsIterationInvariantRate);
@@ -97,17 +97,17 @@ namespace blazefeo :: benchmark
     // {
     //     using Kernel = RegisterMatrix<T, M, N, SS>;
     //     Kernel ker;
-        
-    //     DynamicPanelMatrix<double, rowMajor> c(ker.rows(), ker.columns()), d(ker.rows(), ker.columns());
-    //     randomize(c);        
 
-    //     load(ker, c.ptr(0, 0), c.spacing());
+    //     DynamicPanelMatrix<double, rowMajor> c(ker.rows(), ker.columns()), d(ker.rows(), ker.columns());
+    //     randomize(c);
+
+    //     load(ker, c.ptr<aligned>(0, 0), c.spacing());
 
     //     for (int m = 1; m <= ker.rows(); ++m)
     //         for (int n = 1; n <= ker.columns(); ++n)
     //             for (auto _ : state)
-    //             {                    
-    //                 store(ker, d.ptr(0, 0), d.spacing(), m, n);
+    //             {
+    //                 store(ker, d.ptr<aligned>(0, 0), d.spacing(), m, n);
     //                 DoNotOptimize(d);
     //             }
 
@@ -115,7 +115,7 @@ namespace blazefeo :: benchmark
     // }
 
 
-    static void args(internal::Benchmark * b, size_t M, size_t N) 
+    static void args(internal::Benchmark * b, size_t M, size_t N)
     {
         for (int i = 1; i <= M; ++i)
             for (int j = 1; j <= N; ++j)
@@ -123,31 +123,31 @@ namespace blazefeo :: benchmark
     }
 
 
-    static void args_4_4(internal::Benchmark * b) 
+    static void args_4_4(internal::Benchmark * b)
     {
         args(b, 4, 4);
     }
 
 
-    static void args_8_4(internal::Benchmark * b) 
+    static void args_8_4(internal::Benchmark * b)
     {
         args(b, 8, 4);
     }
 
 
-    static void args_12_4(internal::Benchmark * b) 
+    static void args_12_4(internal::Benchmark * b)
     {
         args(b, 12, 4);
     }
 
 
-    static void args_16_4(internal::Benchmark * b) 
+    static void args_16_4(internal::Benchmark * b)
     {
         args(b, 16, 4);
     }
 
 
-    static void args_24_4(internal::Benchmark * b) 
+    static void args_24_4(internal::Benchmark * b)
     {
         args(b, 24, 4);
     }

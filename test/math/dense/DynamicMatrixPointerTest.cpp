@@ -30,13 +30,13 @@ namespace blazefeo :: testing
 
 
     using MyTypes = Types<
-        DynamicMatrixPointer<double, columnMajor>,
-        DynamicMatrixPointer<double, rowMajor>,
-        DynamicMatrixPointer<float, columnMajor>,
-        DynamicMatrixPointer<float, rowMajor>
+        DynamicMatrixPointer<double, columnMajor, aligned>,
+        DynamicMatrixPointer<double, rowMajor, aligned>,
+        DynamicMatrixPointer<float, columnMajor, aligned>,
+        DynamicMatrixPointer<float, rowMajor, aligned>
     >;
-        
-        
+
+
     TYPED_TEST_SUITE(DynamicMatrixPointerTest, MyTypes);
 
 
@@ -50,7 +50,7 @@ namespace blazefeo :: testing
     TYPED_TEST(DynamicMatrixPointerTest, testPtr)
     {
         size_t const i = 1, j = 2;
-        typename TestFixture::Pointer p = ptr(this->m_, i, j);
+        typename TestFixture::Pointer p = ptr<aligned>(this->m_, i, j);
         EXPECT_EQ(p.spacing(), this->m_.spacing());
     }
 }

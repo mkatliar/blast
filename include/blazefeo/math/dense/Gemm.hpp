@@ -21,7 +21,7 @@ namespace blazefeo
     >
     inline void gemm(
         ST1 alpha,
-        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, SO2> const& B, 
+        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, SO2> const& B,
         ST2 beta, DenseMatrix<MT3, columnMajor> const& C, DenseMatrix<MT4, columnMajor>& D)
     {
         using ET = ElementType_t<MT1>;
@@ -56,26 +56,26 @@ namespace blazefeo
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, ptr(*A, i, 0), ptr(*B, 0, j), beta, ptr(*C, i, j), ptr(*D, i, j));
+                gemm(ker, K, alpha, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), beta, ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j));
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, ptr(*A, i, 0), ptr(*B, 0, j), beta, ptr(*C, i, j), ptr(*D, i, j));
+                gemm(ker, K, alpha, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), beta, ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j));
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, ptr(*A, i, 0), ptr(*B, 0, j), beta, ptr(*C, i, j), ptr(*D, i, j));
+                gemm(ker, K, alpha, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), beta, ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j));
             }
 
             // Bottom edge
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, ptr(*A, i, 0), ptr(*B, 0, j), beta, ptr(*C, i, j), ptr(*D, i, j), M - i, ker.columns());
+                gemm(ker, K, alpha, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), beta, ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j), M - i, ker.columns());
             }
         }
 
@@ -90,26 +90,26 @@ namespace blazefeo
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, ptr(*A, i, 0), ptr(*B, 0, j), beta, ptr(*C, i, j), ptr(*D, i, j), ker.rows(), N - j);
+                gemm(ker, K, alpha, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), beta, ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j), ker.rows(), N - j);
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, ptr(*A, i, 0), ptr(*B, 0, j), beta, ptr(*C, i, j), ptr(*D, i, j), ker.rows(), N - j);
+                gemm(ker, K, alpha, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), beta, ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j), ker.rows(), N - j);
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, ptr(*A, i, 0), ptr(*B, 0, j), beta, ptr(*C, i, j), ptr(*D, i, j), ker.rows(), N - j);
+                gemm(ker, K, alpha, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), beta, ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j), ker.rows(), N - j);
             }
 
             // Bottom-right corner
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, ptr(*A, i, 0), ptr(*B, 0, j), beta, ptr(*C, i, j), ptr(*D, i, j), M - i, N - j);
+                gemm(ker, K, alpha, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), beta, ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j), M - i, N - j);
             }
         }
     }
@@ -120,7 +120,7 @@ namespace blazefeo
         typename MT3, typename MT4
     >
     inline void gemm(
-        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, SO2> const& B, 
+        DenseMatrix<MT1, columnMajor> const& A, DenseMatrix<MT2, SO2> const& B,
         DenseMatrix<MT3, columnMajor> const& C, DenseMatrix<MT4, columnMajor>& D)
     {
         using ET = ElementType_t<MT1>;
@@ -155,26 +155,26 @@ namespace blazefeo
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, ptr(*A, i, 0), ptr(*B, 0, j), ptr(*C, i, j), ptr(*D, i, j));
+                gemm(ker, K, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j));
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, ptr(*A, i, 0), ptr(*B, 0, j), ptr(*C, i, j), ptr(*D, i, j));
+                gemm(ker, K, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j));
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, ptr(*A, i, 0), ptr(*B, 0, j), ptr(*C, i, j), ptr(*D, i, j));
+                gemm(ker, K, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j));
             }
 
             // Bottom edge
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, ptr(*A, i, 0), ptr(*B, 0, j), ptr(*C, i, j), ptr(*D, i, j), M - i, ker.columns());
+                gemm(ker, K, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j), M - i, ker.columns());
             }
         }
 
@@ -189,26 +189,26 @@ namespace blazefeo
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, ptr(*A, i, 0), ptr(*B, 0, j), ptr(*C, i, j), ptr(*D, i, j), ker.rows(), N - j);
+                gemm(ker, K, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j), ker.rows(), N - j);
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, ptr(*A, i, 0), ptr(*B, 0, j), ptr(*C, i, j), ptr(*D, i, j), ker.rows(), N - j);
+                gemm(ker, K, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j), ker.rows(), N - j);
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, ptr(*A, i, 0), ptr(*B, 0, j), ptr(*C, i, j), ptr(*D, i, j), ker.rows(), N - j);
+                gemm(ker, K, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j), ker.rows(), N - j);
             }
 
             // Bottom-right corner
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, ptr(*A, i, 0), ptr(*B, 0, j), ptr(*C, i, j), ptr(*D, i, j), M - i, N - j);
+                gemm(ker, K, ptr<aligned>(*A, i, 0), ptr<aligned>(*B, 0, j), ptr<aligned>(*C, i, j), ptr<aligned>(*D, i, j), M - i, N - j);
             }
         }
     }

@@ -56,7 +56,7 @@ namespace blazefeo
         /// @brief Copying prohibited
         RegisterMatrix(RegisterMatrix const&) = delete;
 
-        
+
         /// @brief Assignment prohibited
         RegisterMatrix& operator=(RegisterMatrix const&) = delete;
 
@@ -157,7 +157,7 @@ namespace blazefeo
         template <typename P>
             requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(P p) noexcept;
-        
+
 
         template <typename P>
             requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
@@ -167,12 +167,12 @@ namespace blazefeo
         /// @brief load from memory with specified size
         void load(T beta, T const * ptr, size_t spacing, size_t m, size_t n);
 
-        
+
         template <typename P>
             requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(P p, size_t m, size_t n) noexcept;
 
-        
+
         template <typename P>
             requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(T beta, P p, size_t m, size_t n) noexcept;
@@ -181,7 +181,7 @@ namespace blazefeo
         /// @brief store to memory
         void store(T * ptr, size_t spacing) const;
 
-        
+
         /// @brief Store matrix at location pointed by \a p
         template <typename P>
             requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
@@ -301,7 +301,7 @@ namespace blazefeo
         ///
         /// R += alpha*A*B,
         ///
-        /// where alpha is a scalar, B is an m by n matrix, 
+        /// where alpha is a scalar, B is an m by n matrix,
         /// A is an upper triangular matrix.
         ///
         /// @tparam P1 matrix A pointer type.
@@ -321,7 +321,7 @@ namespace blazefeo
         ///
         /// R += alpha*B*A,
         ///
-        /// where alpha is a scalar, B is an m by n matrix, 
+        /// where alpha is a scalar, B is an m by n matrix,
         /// A is a lower triangular matrix.
         ///
         /// @tparam P1 matrix A pointer type.
@@ -352,7 +352,7 @@ namespace blazefeo
         BLAZE_STATIC_ASSERT_MSG((RN > 0), "Number of columns must be positive");
         BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
         BLAZE_STATIC_ASSERT_MSG((RM * RN <= RegisterCapacity_v<T>), "Not enough registers for a RegisterMatrix");
-        
+
         IntrinsicType v_[RM][RN];
 
 
@@ -383,7 +383,7 @@ namespace blazefeo
         static size_t constexpr rows = M;
         static size_t constexpr columns = N;
         static size_t constexpr elementCount = rows * columns;
-        
+
         using ElementType = T;
     };
 
@@ -395,7 +395,7 @@ namespace blazefeo
         for (size_t i = 0; i < RM; ++i)
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
-                v_[i][j] = beta * blazefeo::load<SS>(ptr + spacing * i + SS * j);
+                v_[i][j] = beta * blazefeo::load<aligned, SS>(ptr + spacing * i + SS * j);
     }
 
 
@@ -432,7 +432,7 @@ namespace blazefeo
         for (size_t i = 0; i < RM; ++i)
             #pragma unroll
             for (size_t j = 0; j < N; ++j) if (j < n)
-                v_[i][j] = beta * blazefeo::load<SS>(ptr + spacing * i + SS * j);
+                v_[i][j] = beta * blazefeo::load<aligned, SS>(ptr + spacing * i + SS * j);
     }
 
 
@@ -456,9 +456,14 @@ namespace blazefeo
     {
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
+        {
             #pragma unroll
-            for (size_t i = 0; i < RM; ++i)
+            for (size_t i = 0; i < RM; ++i) if (SS * i + SS <= m)
                 v_[i][j] = beta * p.load(SS * i, j);
+
+            if (size_t const rem = m % SS)
+                v_[m / SS][j] = beta * p.maskLoad(m - rem, j, SIMD::index() < rem);
+        }
     }
 
 
@@ -501,10 +506,10 @@ namespace blazefeo
                 #pragma unroll
                 for (size_t j = 0; j < N; ++j) if (j < n)
                     blazefeo::store(ptr + spacing * i + SS * j, v_[i][j]);
-                    
+
             MaskType const mask = SIMD::index() < rem;
             size_t constexpr i = RM - 1;
-        
+
             #pragma unroll
             for (size_t j = 0; j < N; ++j) if (j < n)
                 maskstore(ptr + spacing * i + SS * j, mask, v_[i][j]);
@@ -560,7 +565,7 @@ namespace blazefeo
                 p.maskStore(SS * ri, j, mask, v_[ri][j]);
                 ++ri;
             }
-            
+
             for(; ri < RM; ++ri)
                 p.store(SS * ri, j, v_[ri][j]);
         }
@@ -607,7 +612,7 @@ namespace blazefeo
             }
 
             IntrinsicType const l_jj = broadcast<SS>(l + (j / SS) * sl + j % SS + j * SS);
-            
+
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
                 v_[i][j] /= l_jj;
@@ -636,7 +641,7 @@ namespace blazefeo
                 }
 
                 IntrinsicType const a_jj = a.broadcast(j, j);
-                
+
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i)
                     v_[i][j] /= a_jj;
@@ -661,7 +666,7 @@ namespace blazefeo
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                ax[i] = alpha * blazefeo::load<SS>(a + i * sa);
+                ax[i] = alpha * blazefeo::load<aligned, SS>(a + i * sa);
 
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
@@ -676,7 +681,7 @@ namespace blazefeo
         else
         {
             BLAZE_THROW_LOGIC_ERROR("Not implemented");
-        }        
+        }
     }
 
 
@@ -686,13 +691,13 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b) noexcept
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
-            
+
         IntrinsicType ax[RM];
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
             ax[i] = alpha * a.load(i * SS, 0);
-        
+
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
         {
@@ -701,7 +706,7 @@ namespace blazefeo
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
                 v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
-        }        
+        }
     }
 
 
@@ -711,13 +716,13 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b) noexcept
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
-            
+
         IntrinsicType ax[RM];
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
             ax[i] = a.load(i * SS, 0);
-        
+
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
         {
@@ -726,7 +731,7 @@ namespace blazefeo
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
                 v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
-        }        
+        }
     }
 
 
@@ -742,8 +747,8 @@ namespace blazefeo
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                ax[i] = alpha * blazefeo::load<SS>(a + i * sa);
-            
+                ax[i] = alpha * blazefeo::load<aligned, SS>(a + i * sa);
+
             #pragma unroll
             for (size_t j = 0; j < N; ++j) if (j < n)
             {
@@ -757,7 +762,7 @@ namespace blazefeo
         else
         {
             BLAZE_THROW_LOGIC_ERROR("Not implemented");
-        }        
+        }
     }
 
 
@@ -771,7 +776,7 @@ namespace blazefeo
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
             ax[i] = alpha * a.load(i * SS, 0);
-        
+
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
@@ -780,7 +785,7 @@ namespace blazefeo
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
                 v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
-        }        
+        }
     }
 
 
@@ -794,7 +799,7 @@ namespace blazefeo
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
             ax[i] = a.load(i * SS, 0);
-        
+
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
@@ -803,7 +808,7 @@ namespace blazefeo
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
                 v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
-        }        
+        }
     }
 
 
@@ -850,7 +855,7 @@ namespace blazefeo
     {
         static_assert(M >= N, "potrf() not implemented for register matrices with columns more than rows");
         static_assert(RM * RN + 2 <= RegisterCapacity_v<T>, "Not enough registers");
-        
+
         #pragma unroll
         for (size_t k = 0; k < N; ++k)
         {
@@ -865,16 +870,16 @@ namespace blazefeo
             }
 
             T const sqrt_a_kk = std::sqrt(v_[k / SS][k][k % SS]);
-            
+
             #pragma unroll
-            for (size_t i = 0; i < RM; ++i) 
+            for (size_t i = 0; i < RM; ++i)
             {
                 if (i < k / SS)
                     v_[i][k] = setzero<T, SS>();
                 else
                     v_[i][k] /= sqrt_a_kk;
             }
-        }     
+        }
     }
 
 
@@ -889,14 +894,14 @@ namespace blazefeo
             IntrinsicType ax[RM];
             size_t const ii = (k + 1) / SS;
             size_t const rem = (k + 1) % SS;
-            
+
             #pragma unroll
             for (size_t i = 0; i < ii; ++i)
                 ax[i] = alpha * a.load(i * SS, 0);
 
             if (rem)
                 ax[ii] = alpha * a.maskLoad(ii * SS, 0, SIMD::index() < rem);
-            
+
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
             {
@@ -908,8 +913,8 @@ namespace blazefeo
 
                 if (rem)
                     v_[ii][j] = fmadd(ax[ii], bx, v_[ii][j]);
-            } 
-            
+            }
+
             a.hmove(1);
             b.vmove(1);
         }
@@ -932,11 +937,11 @@ namespace blazefeo
             for (size_t k = 0; k < N; ++k)
             {
                 IntrinsicType bx[RM];
-                
+
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i)
                     bx[i] = alpha * b.load(i * SS, 0);
-                
+
                 #pragma unroll
                 for (size_t j = 0; j <= k; ++j)
                 {
@@ -945,8 +950,8 @@ namespace blazefeo
                     #pragma unroll
                     for (size_t i = 0; i < RM; ++i)
                         v_[i][j] = fmadd(bx[i], ax, v_[i][j]);
-                } 
-                
+                }
+
                 b.hmove(1);
                 a.vmove(1);
             }
@@ -1130,7 +1135,7 @@ namespace blazefeo
             a.hmove(1);
             b.vmove(1);
         }
-        
+
         ker.store(d, md, nd);
     }
 }

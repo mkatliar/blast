@@ -17,7 +17,7 @@ namespace blazefeo :: benchmark
     {
         using Kernel = RegisterMatrix<T, M, N, SO>;
         size_t constexpr K = 100;
-        
+
         StaticMatrix<T, Kernel::rows(), Kernel::rows(), SO> A;
         StaticMatrix<T, Kernel::rows(), Kernel::columns(), columnMajor> B;
 
@@ -25,10 +25,10 @@ namespace blazefeo :: benchmark
         randomize(B);
 
         Kernel ker;
-        
+
         for (auto _ : state)
         {
-            ker.trmmLeftUpper(T(1.), ptr(A, 0, 0), ptr(B, 0, 0));
+            ker.trmmLeftUpper(T(1.), ptr<aligned>(A, 0, 0), ptr<aligned>(B, 0, 0));
             DoNotOptimize(ker);
         }
 
@@ -41,7 +41,7 @@ namespace blazefeo :: benchmark
     {
         using Kernel = RegisterMatrix<T, M, N, SO>;
         size_t constexpr K = 100;
-        
+
         StaticMatrix<T, Kernel::columns(), Kernel::columns(), SO> A;
         StaticMatrix<T, Kernel::rows(), Kernel::columns(), columnMajor> B;
 
@@ -49,10 +49,10 @@ namespace blazefeo :: benchmark
         randomize(B);
 
         Kernel ker;
-        
+
         for (auto _ : state)
         {
-            ker.trmmRightLower(T(1.), ptr(A, 0, 0), ptr(B, 0, 0));
+            ker.trmmRightLower(T(1.), ptr<aligned>(A, 0, 0), ptr<aligned>(B, 0, 0));
             DoNotOptimize(ker);
         }
 

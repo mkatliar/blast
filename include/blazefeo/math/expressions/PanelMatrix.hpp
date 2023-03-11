@@ -126,7 +126,7 @@ namespace blazefeo
                 ET1 * pl = data(lhs) + i;
 
                 for (size_t j = 0; j < n; ++j)
-                    store(pl + s * j, load<SS>(pr + PANEL_SIZE * j));
+                    store(pl + s * j, load<aligned, SS>(pr + PANEL_SIZE * j));
             }
 
             if (IntType const rem = m % SS)
@@ -137,7 +137,7 @@ namespace blazefeo
                 ET1 * pl = data(lhs) + i;
 
                 for (size_t j = 0; j < n; ++j)
-                    maskstore(pl + s * j, mask, load<SS>(pr + PANEL_SIZE * j));
+                    maskstore(pl + s * j, mask, load<aligned, SS>(pr + PANEL_SIZE * j));
             }
 
 		#if 0
@@ -214,7 +214,7 @@ namespace blazefeo
                 ET1 * pl = ptr(lhs, i, 0);
 
                 for (size_t j = 0; j < n; ++j)
-                    store(pl + PANEL_SIZE * j, load<SS>(pr + s * j));
+                    store(pl + PANEL_SIZE * j, load<aligned, SS>(pr + s * j));
             }
 
             if (IntType const rem = m % SS)
@@ -236,7 +236,7 @@ namespace blazefeo
             //     ET1 * pl = data(lhs) + i;
 
             //     for (size_t j = 0; j < n; ++j)
-            //         maskstore(pl + PANEL_SIZE * j, mask, load<SS>(pr + s * j));
+            //         maskstore(pl + PANEL_SIZE * j, mask, load<aligned, SS>(pr + s * j));
             // }
         }
         else if constexpr (SO1 == columnMajor && SO2 == rowMajor)
