@@ -31,7 +31,7 @@ namespace blazefeo :: testing
         {
             DynamicVector<Real, TF> v(3);
             size_t const i = 1;
-            auto p = ptr<aligned>(v, i);
+            auto p = ptr<unaligned>(v, i);
             EXPECT_EQ(p.get(), &v[i]);
         }
 
@@ -42,16 +42,16 @@ namespace blazefeo :: testing
             DynamicVector<Real, TF> v(5);
             size_t const i = 1;
             size_t const delta = 2;
-            auto p = ptr<aligned>(v, i);
+            auto p = ptr<unaligned>(v, i);
 
             if constexpr (TF == columnVector)
             {
-                auto po = p.offset(delta, 0);
+                auto po = p(delta, 0);
                 EXPECT_EQ(po.get(), &v[i + delta]);
             }
             else
             {
-                auto po = p.offset(0, delta);
+                auto po = p(0, delta);
                 EXPECT_EQ(po.get(), &v[i + delta]);
             }
         }
@@ -63,7 +63,7 @@ namespace blazefeo :: testing
             DynamicVector<Real, TF> v(5);
             size_t const i = 1;
             size_t const delta = 2;
-            auto p = ptr<aligned>(v, i);
+            auto p = ptr<unaligned>(v, i);
 
             if constexpr (TF == columnVector)
             {

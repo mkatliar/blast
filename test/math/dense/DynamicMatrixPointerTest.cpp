@@ -30,10 +30,10 @@ namespace blazefeo :: testing
 
 
     using MyTypes = Types<
-        DynamicMatrixPointer<double, columnMajor, aligned, padded>,
-        DynamicMatrixPointer<double, rowMajor, aligned, padded>,
-        DynamicMatrixPointer<float, columnMajor, aligned, padded>,
-        DynamicMatrixPointer<float, rowMajor, aligned, padded>
+        DynamicMatrixPointer<double, columnMajor, unaligned, padded>,
+        DynamicMatrixPointer<double, rowMajor, unaligned, padded>,
+        DynamicMatrixPointer<float, columnMajor, unaligned, padded>,
+        DynamicMatrixPointer<float, rowMajor, unaligned, padded>
     >;
 
 

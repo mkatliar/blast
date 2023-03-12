@@ -15,7 +15,7 @@ namespace blazefeo
     concept MatrixPointer = requires(P p, ptrdiff_t i, ptrdiff_t j)
     {
         p.load(i, j);
-        p.offset(i, j);
+        p(i, j);
         p.vmove(i);
         p.hmove(j);
         p.spacing();

@@ -42,7 +42,7 @@ namespace blazefeo
         auto b = ptr<aligned>(L, k, 0);
 
         for (size_t l = 0; l < k; ++l)
-            ker.ger(ET(-1.), a.offset(0, l), trans(b).offset(l, 0));
+            ker.ger(ET(-1.), a(0, l), trans(b)(l, 0));
 
         if (i == k)
         {

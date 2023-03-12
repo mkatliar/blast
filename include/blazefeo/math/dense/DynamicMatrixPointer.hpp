@@ -25,10 +25,18 @@ namespace blazefeo
         static bool constexpr padded = PF;
 
 
+        /**
+         * @brief Create a pointer pointing to a specified element of a statically-sized matrix.
+         *
+         * @param ptr matrix element to be pointed.
+         * @param spacing stride of the matrix.
+         *
+         */
         constexpr DynamicMatrixPointer(T * ptr, size_t spacing) noexcept
         :   ptr_ {ptr}
         ,   spacing_ {spacing}
         {
+            BLAZE_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
         }
 
 
@@ -82,7 +90,15 @@ namespace blazefeo
         }
 
 
-        DynamicMatrixPointer offset(ptrdiff_t i, ptrdiff_t j) const noexcept
+        /**
+         * @brief Offset pointer by specified number of rows and columns
+         *
+         * @param i row offset
+         * @param j column offset
+         *
+         * @return offset pointer
+         */
+        DynamicMatrixPointer operator()(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
             return {ptrOffset(i, j), spacing_};
         }

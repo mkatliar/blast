@@ -24,21 +24,21 @@ namespace blazefeo
         if (KM <= M)
         {
             size_t j = 0;
-            
+
             for (; j + KN <= N; j += KN)
             {
                 ker.reset();
-                ker.trmmLeftUpper(alpha, a, b.offset(0, j));
-                ker.gemm(M - KM, alpha, a.offset(0, KM), b.offset(KM, j));
-                ker.store(c.offset(0, j));
+                ker.trmmLeftUpper(alpha, a, b(0, j));
+                ker.gemm(M - KM, alpha, a(0, KM), b(KM, j));
+                ker.store(c(0, j));
             }
 
             if (j < N)
             {
                 auto const md = KM, nd = N - j;
                 ker.reset();
-                ker.gemm(M, alpha, a, b.offset(0, j), md, nd);
-                ker.store(c.offset(0, j), md, nd);
+                ker.gemm(M, alpha, a, b(0, j), md, nd);
+                ker.store(c(0, j), md, nd);
             }
         }
         else
@@ -50,16 +50,16 @@ namespace blazefeo
             {
                 auto const md = M, nd = KN;
                 ker.reset();
-                ker.gemm(M, alpha, a, b.offset(0, j), md, nd);
-                ker.store(c.offset(0, j), md, nd);
+                ker.gemm(M, alpha, a, b(0, j), md, nd);
+                ker.store(c(0, j), md, nd);
             }
 
             if (j < N)
             {
                 auto const md = M, nd = N - j;
                 ker.reset();
-                ker.gemm(M, alpha, a, b.offset(0, j), md, nd);
-                ker.store(c.offset(0, j), md, nd);
+                ker.gemm(M, alpha, a, b(0, j), md, nd);
+                ker.store(c(0, j), md, nd);
             }
         }
     }

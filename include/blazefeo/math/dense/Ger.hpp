@@ -76,34 +76,34 @@ namespace blazefeo
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(ET(1.), A.offset(i, j));
-                ker.ger(alpha, x.offset(i, 0), y.offset(0, j));
-                ker.store(B.offset(i, j));
+                ker.load(ET(1.), A(i, j));
+                ker.ger(alpha, x(i, 0), y(0, j));
+                ker.store(B(i, j));
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(ET(1.), A.offset(i, j));
-                ker.ger(alpha, x.offset(i, 0), y.offset(0, j));
-                ker.store(B.offset(i, j));
+                ker.load(ET(1.), A(i, j));
+                ker.ger(alpha, x(i, 0), y(0, j));
+                ker.store(B(i, j));
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(ET(1.), A.offset(i, j));
-                ker.ger(alpha, x.offset(i, 0), y.offset(0, j));
-                ker.store(B.offset(i, j));
+                ker.load(ET(1.), A(i, j));
+                ker.ger(alpha, x(i, 0), y(0, j));
+                ker.store(B(i, j));
             }
 
             // Bottom edge
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(ET(1.), A.offset(i, j), M - i, ker.columns());
-                ker.ger(alpha, x.offset(i, 0), y.offset(0, j), M - i, ker.columns());
-                ker.store(B.offset(i, j), M - i, ker.columns());
+                ker.load(ET(1.), A(i, j), M - i, ker.columns());
+                ker.ger(alpha, x(i, 0), y(0, j), M - i, ker.columns());
+                ker.store(B(i, j), M - i, ker.columns());
             }
         }
 
@@ -118,34 +118,34 @@ namespace blazefeo
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(ET(1.), A.offset(i, j), ker.rows(), N - j);
-                ker.ger(alpha, x.offset(i, 0), y.offset(0, j), ker.rows(), N - j);
-                ker.store(B.offset(i, j), ker.rows(), N - j);
+                ker.load(ET(1.), A(i, j), ker.rows(), N - j);
+                ker.ger(alpha, x(i, 0), y(0, j), ker.rows(), N - j);
+                ker.store(B(i, j), ker.rows(), N - j);
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(ET(1.), A.offset(i, j), ker.rows(), N - j);
-                ker.ger(alpha, x.offset(i, 0), y.offset(0, j), ker.rows(), N - j);
-                ker.store(B.offset(i, j), ker.rows(), N - j);
+                ker.load(ET(1.), A(i, j), ker.rows(), N - j);
+                ker.ger(alpha, x(i, 0), y(0, j), ker.rows(), N - j);
+                ker.store(B(i, j), ker.rows(), N - j);
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(ET(1.), A.offset(i, j), ker.rows(), N - j);
-                ker.ger(alpha, x.offset(i, 0), y.offset(0, j), ker.rows(), N - j);
-                ker.store(B.offset(i, j), ker.rows(), N - j);
+                ker.load(ET(1.), A(i, j), ker.rows(), N - j);
+                ker.ger(alpha, x(i, 0), y(0, j), ker.rows(), N - j);
+                ker.store(B(i, j), ker.rows(), N - j);
             }
 
             // Bottom-right corner
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.load(ET(1.), A.offset(i, j), M - i, N - j);
-                ker.ger(alpha, x.offset(i, 0), y.offset(0, j), M - i, N - j);
-                ker.store(B.offset(i, j), M - i, N - j);
+                ker.load(ET(1.), A(i, j), M - i, N - j);
+                ker.ger(alpha, x(i, 0), y(0, j), M - i, N - j);
+                ker.store(B(i, j), M - i, N - j);
             }
         }
     }
