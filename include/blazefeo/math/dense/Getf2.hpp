@@ -71,13 +71,30 @@ namespace blazefeo
                 BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Matrix is singular"});
 
             submatrix(*A, k + 1, k, M - k - 1, 1, unchecked) /= (*A)(k, k);
-            ger(
-                ET(-1),
-                subvector(column(*A, k, unchecked), k + 1, M - k - 1, unchecked),
-                subvector(row(*A, k, unchecked), k + 1, N - k - 1, unchecked),
-                submatrix(*A, k + 1, k + 1, M - k - 1, N - k - 1, unchecked),
-                submatrix(*A, k + 1, k + 1, M - k - 1, N - k - 1, unchecked)
-            );
+
+            if constexpr (IsColumnMajorMatrix_v<MT>)
+            {
+                if (k + 1 < M && k + 1 < N)
+                    ger(
+                        M - k - 1,
+                        N - k - 1,
+                        ET(-1),
+                        ptr<unaligned>(*A, k + 1, k),
+                        ptr<unaligned>(*A, k, k + 1),
+                        ptr<unaligned>(*A, k + 1, k + 1),
+                        ptr<unaligned>(*A, k + 1, k + 1)
+                    );
+            }
+            else
+            {
+                ger(
+                    ET(-1),
+                    subvector(column(*A, k, unchecked), k + 1, M - k - 1, unchecked),
+                    subvector(row(*A, k, unchecked), k + 1, N - k - 1, unchecked),
+                    submatrix(*A, k + 1, k + 1, M - k - 1, N - k - 1, unchecked),
+                    submatrix(*A, k + 1, k + 1, M - k - 1, N - k - 1, unchecked)
+                );
+            }
         }
     }
 }

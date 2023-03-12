@@ -16,10 +16,141 @@
 
 #include <blazefeo/Exception.hpp>
 #include <blazefeo/Blaze.hpp>
+#include <blazefeo/system/Tile.hpp>
+#include <blazefeo/math/simd/RegisterMatrix.hpp>
+#include <blazefeo/math/simd/MatrixPointer.hpp>
+#include <blazefeo/math/dense/DynamicMatrixPointer.hpp>
+#include <blazefeo/math/dense/StaticMatrixPointer.hpp>
 
 
 namespace blazefeo
 {
+    /**
+     * @brief Performs the rank 1 operation
+     *
+     *     B := alpha*x*y**T + A,
+     *
+     * where alpha is a scalar, x is an m element vector, y is an n element
+     * vector and A is an m by n column-major matrix.
+     *
+     * https://netlib.org/lapack/explore-html/d7/d15/group__double__blas__level2_ga458222e01b4d348e9b52b9343d52f828.html
+     *
+     * @tparam Scalar scalar type
+     * @tparam VT0 type of first vector
+     * @tparam VT1 type of second vector
+     * @tparam MT0 type of input matrix
+     * @tparam MT1 type of output matrix
+     *
+     * @param M the number of rows of the matrix A
+     * @param N the number of columns of the matrix A
+     * @param alpha scalar alpha
+     * @param x first vector
+     * @param y second vector
+     * @param A input matrix
+     * @param B output matrix
+     */
+    template <typename Scalar, typename MPX, typename MPY, typename MPA, typename MPB>
+    requires
+        MatrixPointer<MPX, Scalar> && (StorageOrder_v<MPX> == columnMajor) &&
+        MatrixPointer<MPY, Scalar> &&
+        MatrixPointer<MPA, Scalar> && (StorageOrder_v<MPA> == columnMajor) &&
+        MatrixPointer<MPB, Scalar> && (StorageOrder_v<MPB> == columnMajor)
+    inline void ger(size_t M, size_t N, Scalar alpha, MPX x, MPY y, MPA A, MPB B)
+    {
+        using ET = ElementType_t<MPB>;
+        size_t constexpr TILE_SIZE = TileSize_v<ET>;
+
+        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MPX>, ET);
+        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MPY>, ET);
+        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MPA>, ET);
+
+        size_t j = 0;
+
+        // Main part
+        for (; j + TILE_SIZE <= N; j += TILE_SIZE)
+        {
+            size_t i = 0;
+
+            // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
+            // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
+            for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(ET(1.), A.offset(i, j));
+                ker.ger(alpha, x.offset(i, 0), y.offset(0, j));
+                ker.store(B.offset(i, j));
+            }
+
+            for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(ET(1.), A.offset(i, j));
+                ker.ger(alpha, x.offset(i, 0), y.offset(0, j));
+                ker.store(B.offset(i, j));
+            }
+
+            for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(ET(1.), A.offset(i, j));
+                ker.ger(alpha, x.offset(i, 0), y.offset(0, j));
+                ker.store(B.offset(i, j));
+            }
+
+            // Bottom edge
+            if (i < M)
+            {
+                RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(ET(1.), A.offset(i, j), M - i, ker.columns());
+                ker.ger(alpha, x.offset(i, 0), y.offset(0, j), M - i, ker.columns());
+                ker.store(B.offset(i, j), M - i, ker.columns());
+            }
+        }
+
+
+        // Right edge
+        if (j < N)
+        {
+            size_t i = 0;
+
+            // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
+            // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
+            for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(ET(1.), A.offset(i, j), ker.rows(), N - j);
+                ker.ger(alpha, x.offset(i, 0), y.offset(0, j), ker.rows(), N - j);
+                ker.store(B.offset(i, j), ker.rows(), N - j);
+            }
+
+            for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(ET(1.), A.offset(i, j), ker.rows(), N - j);
+                ker.ger(alpha, x.offset(i, 0), y.offset(0, j), ker.rows(), N - j);
+                ker.store(B.offset(i, j), ker.rows(), N - j);
+            }
+
+            for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
+            {
+                RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(ET(1.), A.offset(i, j), ker.rows(), N - j);
+                ker.ger(alpha, x.offset(i, 0), y.offset(0, j), ker.rows(), N - j);
+                ker.store(B.offset(i, j), ker.rows(), N - j);
+            }
+
+            // Bottom-right corner
+            if (i < M)
+            {
+                RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
+                ker.load(ET(1.), A.offset(i, j), M - i, N - j);
+                ker.ger(alpha, x.offset(i, 0), y.offset(0, j), M - i, N - j);
+                ker.store(B.offset(i, j), M - i, N - j);
+            }
+        }
+    }
+
+
     /**
      * @brief Performs the rank 1 operation
      *
@@ -51,15 +182,34 @@ namespace blazefeo
         DenseMatrix<MT1, columnMajor>& B
     )
     {
+        using ET = ElementType_t<MT1>;
+        size_t constexpr TILE_SIZE = TileSize_v<ET>;
+
+        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<VT0>, ET);
+        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<VT1>, ET);
+        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT0>, ET);
+
         size_t const M = size(x);
         size_t const N = size(y);
 
-        if (rows(A) != M || columns(A) != N)
-            BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Inconsistent argument sizes"});
+        bool constexpr x_aligned = IsAligned_v<VT0>;
+        bool constexpr y_aligned = IsAligned_v<VT1>;
+        bool constexpr A_aligned = IsAligned_v<MT0>;
+        bool constexpr B_aligned = IsAligned_v<MT1>;
 
-        for (size_t j = 0; j < N; ++j)
-            for (size_t i = 0; i < M; ++i)
-                (*B)(i, j) = (*A)(i, j) + alpha * (*x)[i] * (*y)[j];
+        if (rows(A) != M)
+            BLAZE_THROW_INVALID_ARGUMENT("Inconsistent argument sizes");
+
+        if (columns(A) != N)
+            BLAZE_THROW_INVALID_ARGUMENT("Inconsistent argument sizes");
+
+        if (rows(B) != M)
+            BLAZE_THROW_INVALID_ARGUMENT("Inconsistent argument sizes");
+
+        if (columns(B) != N)
+            BLAZE_THROW_INVALID_ARGUMENT("Inconsistent argument sizes");
+
+        ger(M, N, alpha, ptr<x_aligned>(*x, 0), ptr<y_aligned>(*y, 0), ptr<A_aligned>(*A, 0, 0), ptr<B_aligned>(*B, 0, 0));
     }
 
 
