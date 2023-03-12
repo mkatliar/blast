@@ -76,6 +76,19 @@ namespace blazefeo :: testing
                 EXPECT_EQ(p.get(), &v[i + delta]);
             }
         }
+
+
+        template <bool SO>
+        void testMatrixRowSubvectorImpl()
+        {
+            StaticMatrix<Real, 5, 5, SO> A;
+
+            size_t constexpr i = 1, j = 2;
+            auto p = ptr<unaligned>(blaze::subvector<j, columns(A) - j>(blaze::row<i>(A)), 0);
+            ASSERT_EQ(p.get(), &A(i, j));
+            ASSERT_EQ(p.spacing(), A.spacing());
+            ASSERT_EQ(p.storageOrder, SO);
+        }
     };
 
 
@@ -130,5 +143,17 @@ namespace blazefeo :: testing
     TYPED_TEST(StaticVectorPointerTest, testMoveRow)
     {
         this->template testMoveImpl<rowVector>();
+    }
+
+
+    TYPED_TEST(StaticVectorPointerTest, testMatrixRowSubvectorRowMajor)
+    {
+        this->template testMatrixRowSubvectorImpl<rowMajor>();
+    }
+
+
+    TYPED_TEST(StaticVectorPointerTest, testMatrixRowSubvectorColumnMajor)
+    {
+        this->template testMatrixRowSubvectorImpl<columnMajor>();
     }
 }

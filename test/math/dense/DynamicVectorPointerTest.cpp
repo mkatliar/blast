@@ -76,6 +76,78 @@ namespace blazefeo :: testing
                 EXPECT_EQ(p.get(), &v[i + delta]);
             }
         }
+
+
+        template <bool SO>
+        void testMatrixRowImpl()
+        {
+            DynamicMatrix<Real, SO> A(5, 5);
+
+            for (size_t i = 0; i < rows(A); ++i)
+            {
+                for (size_t j = 0; j < columns(A); ++j)
+                {
+                    auto p = ptr<unaligned>(row(A, i), j);
+                    ASSERT_EQ(p.get(), &A(i, j));
+                    ASSERT_EQ(p.spacing(), A.spacing());
+                    ASSERT_EQ(p.storageOrder, SO);
+                }
+            }
+        }
+
+
+        template <bool SO>
+        void testMatrixRowSubvectorImpl()
+        {
+            DynamicMatrix<Real, SO> A(5, 5);
+
+            for (size_t i = 0; i < rows(A); ++i)
+            {
+                for (size_t j = 0; j < columns(A); ++j)
+                {
+                    auto p = ptr<unaligned>(subvector(row(A, i), j, columns(A) - j), 0);
+                    ASSERT_EQ(p.get(), &A(i, j));
+                    ASSERT_EQ(p.spacing(), A.spacing());
+                    ASSERT_EQ(p.storageOrder, SO);
+                }
+            }
+        }
+
+
+        template <bool SO>
+        void testMatrixColumnImpl()
+        {
+            DynamicMatrix<Real, SO> A(5, 5);
+
+            for (size_t i = 0; i < rows(A); ++i)
+            {
+                for (size_t j = 0; j < columns(A); ++j)
+                {
+                    auto p = ptr<unaligned>(column(A, j), i);
+                    ASSERT_EQ(p.get(), &A(i, j));
+                    ASSERT_EQ(p.spacing(), A.spacing());
+                    ASSERT_EQ(p.storageOrder, SO);
+                }
+            }
+        }
+
+
+        template <bool SO>
+        void testMatrixColumnSubvectorImpl()
+        {
+            DynamicMatrix<Real, SO> A(5, 5);
+
+            for (size_t i = 0; i < rows(A); ++i)
+            {
+                for (size_t j = 0; j < columns(A); ++j)
+                {
+                    auto p = ptr<unaligned>(subvector(column(A, j), i, rows(A) - i), 0);
+                    ASSERT_EQ(p.get(), &A(i, j));
+                    ASSERT_EQ(p.spacing(), A.spacing());
+                    ASSERT_EQ(p.storageOrder, SO);
+                }
+            }
+        }
     };
 
 
@@ -130,5 +202,53 @@ namespace blazefeo :: testing
     TYPED_TEST(DynamicVectorPointerTest, testMoveRow)
     {
         this->template testMoveImpl<rowVector>();
+    }
+
+
+    TYPED_TEST(DynamicVectorPointerTest, testMatrixRowRowMajor)
+    {
+        this->template testMatrixRowImpl<rowMajor>();
+    }
+
+
+    TYPED_TEST(DynamicVectorPointerTest, testMatrixRowColumnMajor)
+    {
+        this->template testMatrixRowImpl<columnMajor>();
+    }
+
+
+    TYPED_TEST(DynamicVectorPointerTest, testMatrixRowSubvectorRowMajor)
+    {
+        this->template testMatrixRowSubvectorImpl<rowMajor>();
+    }
+
+
+    TYPED_TEST(DynamicVectorPointerTest, testMatrixRowSubvectorColumnMajor)
+    {
+        this->template testMatrixRowSubvectorImpl<columnMajor>();
+    }
+
+
+    TYPED_TEST(DynamicVectorPointerTest, testMatrixColumnRowMajor)
+    {
+        this->template testMatrixColumnImpl<rowMajor>();
+    }
+
+
+    TYPED_TEST(DynamicVectorPointerTest, testMatrixColumnColumnMajor)
+    {
+        this->template testMatrixColumnImpl<columnMajor>();
+    }
+
+
+    TYPED_TEST(DynamicVectorPointerTest, testMatrixColumnSubvectorRowMajor)
+    {
+        this->template testMatrixColumnSubvectorImpl<rowMajor>();
+    }
+
+
+    TYPED_TEST(DynamicVectorPointerTest, testMatrixColumnSubvectorColumnMajor)
+    {
+        this->template testMatrixColumnSubvectorImpl<columnMajor>();
     }
 }
