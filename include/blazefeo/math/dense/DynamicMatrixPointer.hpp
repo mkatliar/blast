@@ -5,6 +5,8 @@
 #pragma once
 
 #include <blazefeo/Blaze.hpp>
+#include <blazefeo/math/dense/StorageOrder.hpp>
+#include <blazefeo/math/dense/StorageStride.hpp>
 #include <blazefeo/math/simd/Simd.hpp>
 
 
@@ -170,28 +172,28 @@ namespace blazefeo
 
     template <bool AF, typename VT, bool TF>
         requires (!IsStatic_v<VT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<VT>, TF == columnVector ? columnMajor : rowMajor, AF, IsPadded_v<VT>>
+    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<VT>, StorageOrder_v<VT>, AF, IsPadded_v<VT>>
         ptr(DenseVector<VT, TF>& v, size_t i)
     {
-        return {&(*v)[i], (*v).spacing()};
+        return {&(*v)[i], storageStride(*v)};
     }
 
 
     template <bool AF, typename VT, bool TF>
         requires (!IsStatic_v<VT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<VT> const, TF == columnVector ? columnMajor : rowMajor, AF, IsPadded_v<VT>>
+    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<VT> const, StorageOrder_v<VT>, AF, IsPadded_v<VT>>
         ptr(DenseVector<VT, TF> const& v, size_t i)
     {
-        return {&(*v)[i], (*v).spacing()};
+        return {&(*v)[i], storageStride(*v)};
     }
 
 
     template <bool AF, typename VT, bool TF>
         requires (!IsStatic_v<VT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<VT> const, TF == columnVector ? columnMajor : rowMajor, AF, IsPadded_v<VT>>
+    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<VT> const, StorageOrder_v<VT>, AF, IsPadded_v<VT>>
         ptr(DVecTransExpr<VT, TF> const& v, size_t i)
     {
-        return {&(*v)[i], (*v).spacing()};
+        return {&(*v)[i], storageStride(*v)};
     }
 
 
