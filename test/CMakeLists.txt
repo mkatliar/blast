@@ -24,7 +24,7 @@ add_executable(test-blazefeo
     math/dense/SyrkTest.cpp
     math/dense/PotrfTest.cpp
     math/dense/GetrfTest.cpp
-    # math/dense/Getf2Test.cpp
+    math/dense/Getf2Test.cpp
     math/dense/TrmmTest.cpp
     math/dense/TrsvTest.cpp
     math/dense/TrsmTest.cpp
