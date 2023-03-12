@@ -26,7 +26,7 @@ namespace blazefeo :: testing
                 A += IdentityMatrix<double>(m); // Improve conditioning
                 randomize(B);
 
-                // Do trsv
+                // Do trsm
                 trsm<UpLo::Lower, false>(A, B, X);
 
                 BLAZEFEO_ASSERT_APPROX_EQ(evaluate(A * X), B, 1e-10, 1e-10)
