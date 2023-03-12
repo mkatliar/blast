@@ -95,6 +95,37 @@ namespace blazefeo
         }
 
 
+        /**
+         * @brief Get reference to the pointed value.
+         *
+         * @return reference to the pointed value
+         */
+        ElementType& operator*() noexcept
+        {
+            return *ptr_;
+        }
+
+
+        /**
+         * @brief Get const reference to the pointed value.
+         *
+         * @return const reference to the pointed value
+         */
+        ElementType& operator*() const noexcept
+        {
+            return *ptr_;
+        }
+
+
+        /**
+        * @brief Convert aligned matrix pointer to unaligned.
+        */
+        StaticMatrixPointer<T, S, SO, false, PF> constexpr operator~() const noexcept
+        {
+            return {ptr_};
+        }
+
+
         StaticMatrixPointer<T, S, !SO, AF, PF> constexpr trans() const noexcept
         {
             return {ptr_};
@@ -164,62 +195,35 @@ namespace blazefeo
     // See this issue: https://bitbucket.org/blaze-lib/blaze/issues/368
     //
 
-    template <bool AF, typename MT>
-        requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), columnMajor, AF, IsPadded_v<MT>>
-        ptr(DenseMatrix<MT, columnMajor>& m, size_t i, size_t j)
+    template <bool AF, typename MT, bool TF>
+    requires IsStatic_v<MT>
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), TF, AF, IsPadded_v<MT>>
+        ptr(DenseMatrix<MT, TF>& m, size_t i, size_t j)
     {
-        return {(*m).data() + i + MT::spacing() * j};
+        return {&(*m)(i, j)};
     }
 
 
-    template <bool AF, typename MT>
-        requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), rowMajor, AF, IsPadded_v<MT>>
-        ptr(DenseMatrix<MT, rowMajor>& m, size_t i, size_t j)
+    template <bool AF, typename MT, bool TF>
+    requires IsStatic_v<MT>
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), TF, AF, IsPadded_v<MT>>
+        ptr(DenseMatrix<MT, TF> const& m, size_t i, size_t j)
     {
-        return {(*m).data() + MT::spacing() * i + j};
+        return {&(*m)(i, j)};
     }
 
 
-    template <bool AF, typename MT>
-        requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), columnMajor, AF, IsPadded_v<MT>>
-        ptr(DenseMatrix<MT, columnMajor> const& m, size_t i, size_t j)
+    template <bool AF, typename MT, bool TF>
+    requires IsStatic_v<MT>
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), TF, AF, IsPadded_v<MT>>
+        ptr(DMatTransExpr<MT, TF> const& m, size_t i, size_t j)
     {
-        return {(*m).data() + i + MT::spacing() * j};
-    }
-
-
-    template <bool AF, typename MT>
-        requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), rowMajor, AF, IsPadded_v<MT>>
-        ptr(DenseMatrix<MT, rowMajor> const& m, size_t i, size_t j)
-    {
-        return {(*m).data() + MT::spacing() * i + j};
-    }
-
-
-    template <bool AF, typename MT>
-        requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), columnMajor, AF, IsPadded_v<MT>>
-        ptr(DMatTransExpr<MT, columnMajor> const& m, size_t i, size_t j)
-    {
-        return {(*m).data() + j + MT::spacing() * i};
-    }
-
-
-    template <bool AF, typename MT>
-        requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), rowMajor, AF, IsPadded_v<MT>>
-        ptr(DMatTransExpr<MT, rowMajor> const& m, size_t i, size_t j)
-    {
-        return {(*m).data() + MT::spacing() * j + i};
+        return {&(*m)(i, j)};
     }
 
 
     template <bool AF, typename VT, bool TF>
-        requires (IsStatic_v<VT>)
+    requires (IsStatic_v<VT>)
     BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<VT>, storageStride_v<VT>, StorageOrder_v<VT>, AF, IsPadded_v<VT>>
         ptr(DenseVector<VT, TF>& v, size_t i)
     {
@@ -228,7 +232,7 @@ namespace blazefeo
 
 
     template <bool AF, typename VT, bool TF>
-        requires (IsStatic_v<VT>)
+    requires (IsStatic_v<VT>)
     BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<VT> const, storageStride_v<VT>, StorageOrder_v<VT>, AF, IsPadded_v<VT>>
         ptr(DenseVector<VT, TF> const& v, size_t i)
     {
@@ -237,7 +241,7 @@ namespace blazefeo
 
 
     template <bool AF, typename VT, bool TF>
-        requires (IsStatic_v<VT>)
+    requires (IsStatic_v<VT>)
     BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<VT> const, storageStride_v<VT>, StorageOrder_v<VT>, AF, IsPadded_v<VT>>
         ptr(DVecTransExpr<VT, TF> const& v, size_t i)
     {

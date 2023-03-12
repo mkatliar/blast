@@ -101,6 +101,7 @@ namespace blazefeo
             );
         }
 
+        if (k < M && k < N)
         {
             // Process the remaining part of the matrix with unblocked algorithm
             auto AA = submatrix(A, k, k, M - k, N - k);

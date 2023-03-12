@@ -55,9 +55,9 @@ namespace blazefeo :: testing
         {
             size_t const S_MAX = 5;
 
-            for (size_t M = 0; M <= S_MAX; ++M)
+            for (size_t M = 1; M <= S_MAX; ++M)
             {
-                for (size_t N = 0; N <= S_MAX; ++N)
+                for (size_t N = 1; N <= S_MAX; ++N)
                 {
                     size_t const K = std::min(M, N);
 

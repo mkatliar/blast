@@ -14,9 +14,9 @@
 
 #pragma once
 
-#include <blaze/math/Aliases.h>
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/Exception.hpp>
+#include <blazefeo/math/dense/MatrixPointer.hpp>
 
 #include <cmath>
 #include <tuple>
@@ -24,6 +24,41 @@
 
 namespace blazefeo
 {
+    /**
+     * @brief Finds the index of the first element in a vector having maximum absolute value.
+     *
+     * https://netlib.org/lapack/explore-html/d0/d73/group__aux__blas_ga285793254ff0adaf58c605682efb880c.html
+     *
+     * @tparam TF vector orientation
+     * @tparam MP matrix pointer type
+     *
+     * @param n size of the vector
+     * @param x matrix pointer to the vector
+     *
+     * @return index of the first element in @a x having maximum absolute value.
+     */
+    template <bool TF, typename MP>
+    requires MatrixPointer<MP>
+    inline size_t idamax(size_t n, MP x)
+    {
+        BLAZE_USER_ASSERT(n > 0, "Vector must be non-empty");
+
+        auto value = std::abs(*x);
+        size_t index = 0;
+        for (size_t i = 1; i < n; ++i)
+        {
+            auto const v = std::abs(TF == columnVector ? *x(i, 0) : *x(0, i));
+            if (v > value)
+            {
+                value = v;
+                index = i;
+            }
+        }
+
+        return index;
+    }
+
+
     /**
      * @brief Finds the index of the first element in a vector having maximum absolute value.
      *
@@ -42,18 +77,6 @@ namespace blazefeo
         if (N == 0)
             BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Vector is empty"});
 
-        auto value = std::abs((*x)[0]);
-        size_t index = 0;
-        for (size_t i = 1; i < N; ++i)
-        {
-            auto const v = std::abs((*x)[i]);
-            if (v > value)
-            {
-                value = v;
-                index = i;
-            }
-        }
-
-        return index;
+        return idamax<TF>(N, ptr(x));
     }
 }

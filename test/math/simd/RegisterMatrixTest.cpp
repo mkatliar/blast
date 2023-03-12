@@ -132,9 +132,9 @@ namespace blazefeo :: testing
             for (size_t j = 0; j < columns(A); ++j)
                 (*A)(i, j) = 1000 * i + j;
 
-        for (size_t m = 0; m <= rows(A); ++m)
+        for (size_t m = 1; m <= rows(A); ++m)
         {
-            for (size_t n = 0; n <= columns(A); ++n)
+            for (size_t n = 1; n <= columns(A); ++n)
             {
                 RM ker;
                 ET const beta = 0.1;

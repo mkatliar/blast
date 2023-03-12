@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <blaze/math/Aliases.h>
 #include <blazefeo/Blaze.hpp>
 
 #include <type_traits>
@@ -11,7 +12,7 @@
 
 namespace blazefeo
 {
-    template <typename P, typename T>
+    template <typename P, typename T = ElementType_t<P>>
     concept MatrixPointer = requires(P p, ptrdiff_t i, ptrdiff_t j)
     {
         p.load(i, j);
@@ -21,6 +22,8 @@ namespace blazefeo
         p.spacing();
         p.trans();
         trans(p);
+        ~p;
+        *p;
 
         // {p.get()} -> std::same_as<T *>;
     };

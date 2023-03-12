@@ -16,12 +16,40 @@
 
 #include <blazefeo/Exception.hpp>
 #include <blazefeo/Blaze.hpp>
+#include <blazefeo/math/dense/MatrixPointer.hpp>
 
 #include <algorithm>
 
 
 namespace blazefeo
 {
+    /**
+     * @brief Interchanges two vectors
+     *
+     * @tparam TF specifies orientation of the vectors (row or column)
+     * @tparam MPX type of matrix pointer to the first vector
+     * @tparam MPY type of matrix pointer to the second vector
+     *
+     * @param n size of both vectors
+     * @param x matrix pointer to the first vector
+     * @param y matrix pointer to the second vector
+     */
+    template <
+        bool TF,
+        typename MPX,
+        typename MPY
+    >
+    requires (MatrixPointer<MPX> && MatrixPointer<MPY>)
+    inline void swap(size_t n, MPX x, MPY y)
+    {
+        for (size_t i = 0; i < n; ++i)
+            if constexpr(TF == columnVector)
+                std::swap(*(~x)(i, 0), *(~y)(i, 0));
+            else
+                std::swap(*(~x)(0, i), *(~y)(0, i));
+    }
+
+
     /**
      * @brief Interchanges two vectors
      *
@@ -43,7 +71,7 @@ namespace blazefeo
         if (size(y) != N)
             BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Vector sizes must be equal"});
 
-        for (size_t i = 0; i < N; ++i)
-            std::swap((*x)[i], (*y)[i]);
+        if (N > 0)
+            swap<TF>(N, ptr(x), ptr(y));
     }
 }

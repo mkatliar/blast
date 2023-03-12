@@ -104,6 +104,37 @@ namespace blazefeo
         }
 
 
+        /**
+         * @brief Get reference to the pointed value.
+         *
+         * @return reference to the pointed value
+         */
+        ElementType& operator*() noexcept
+        {
+            return *ptr_;
+        }
+
+
+        /**
+         * @brief Get const reference to the pointed value.
+         *
+         * @return const reference to the pointed value
+         */
+        ElementType& operator*() const noexcept
+        {
+            return *ptr_;
+        }
+
+
+        /**
+        * @brief Convert aligned matrix pointer to unaligned.
+        */
+        DynamicMatrixPointer<T, SO, false, PF> constexpr operator~() const noexcept
+        {
+            return {ptr_, spacing_};
+        }
+
+
         DynamicMatrixPointer<T, !SO, AF, PF> constexpr trans() const noexcept
         {
             return {ptr_, spacing_};
