@@ -41,16 +41,6 @@ namespace blazefeo
 
 
         DynamicMatrixPointer(DynamicMatrixPointer const&) = default;
-
-
-        template <typename Other>
-        constexpr DynamicMatrixPointer(DynamicMatrixPointer<Other, SO, AF, PF> const& other) noexcept
-        :   ptr_ {other.ptr_}
-        ,   spacing_ {other.spacing_}
-        {
-        }
-
-
         DynamicMatrixPointer& operator=(DynamicMatrixPointer const&) = default;
 
 

@@ -40,15 +40,6 @@ namespace blazefeo
 
 
         StaticMatrixPointer(StaticMatrixPointer const&) = default;
-
-
-        template <typename Other>
-        constexpr StaticMatrixPointer(StaticMatrixPointer<Other, S, SO, AF, PF> const& other) noexcept
-        :   ptr_ {other.ptr_}
-        {
-        }
-
-
         StaticMatrixPointer& operator=(StaticMatrixPointer const&) = default;
 
 
