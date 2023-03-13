@@ -56,4 +56,19 @@ namespace blaze
      */
     template <typename VT, AlignmentFlag AF, bool TF, bool DF, size_t... CSAs >
     bool constexpr StorageOrder_v<Subvector<VT, AF, TF, DF, CSAs...>> = StorageOrder_v<VT>;
+
+
+    /**
+     * @brief Check if a vector orientation matches the major direction
+     * of the matrix with the specified storage order.
+     *
+     * @tparam vector orientation
+     * @tparam matrix storage order
+     *
+     * @return true if @a TF == columnVector and @a SO == columnMajor
+     * or @a TF == rowVector and @a SO == rowMajor, false otherwise.
+     *
+     */
+    template <bool TF, bool SO>
+    bool constexpr IsMajorOriented_v = TF == columnVector && SO == columnMajor || TF == rowVector && SO == rowMajor;
 }

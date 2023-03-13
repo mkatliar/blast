@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <blazefeo/math/dense/StaticMatrixPointer.hpp>
+#include <blazefeo/math/dense/StaticVectorPointer.hpp>
 
 #include <test/Testing.hpp>
 
@@ -22,7 +22,7 @@ namespace blazefeo :: testing
         {
             StaticVector<Real, 3, TF> v;
             auto p = ptr<aligned>(v, 0);
-            EXPECT_EQ(p.spacing(), v.spacing());
+            EXPECT_EQ(p.spacing(), 1);
         }
 
 
@@ -44,37 +44,8 @@ namespace blazefeo :: testing
             size_t const delta = 2;
             auto p = ptr<unaligned>(v, i);
 
-            if constexpr (TF == columnVector)
-            {
-                auto po = p(delta, 0);
-                EXPECT_EQ(po.get(), &v[i + delta]);
-            }
-            else
-            {
-                auto po = p(0, delta);
-                EXPECT_EQ(po.get(), &v[i + delta]);
-            }
-        }
-
-
-        template <bool TF>
-        void testMoveImpl()
-        {
-            StaticVector<Real, 5, TF> v;
-            size_t const i = 1;
-            size_t const delta = 2;
-            auto p = ptr<unaligned>(v, i);
-
-            if constexpr (TF == columnVector)
-            {
-                p.vmove(delta);
-                EXPECT_EQ(p.get(), &v[i + delta]);
-            }
-            else
-            {
-                p.hmove(delta);
-                EXPECT_EQ(p.get(), &v[i + delta]);
-            }
+            auto po = p(delta);
+            EXPECT_EQ(po.get(), &v[i + delta]);
         }
 
 
@@ -86,8 +57,7 @@ namespace blazefeo :: testing
             size_t constexpr i = 1, j = 2;
             auto p = ptr<unaligned>(blaze::subvector<j, columns(A) - j>(blaze::row<i>(A)), 0);
             ASSERT_EQ(p.get(), &A(i, j));
-            ASSERT_EQ(p.spacing(), A.spacing());
-            ASSERT_EQ(p.storageOrder, SO);
+            ASSERT_EQ(p.spacing(), SO == columnMajor ? A.spacing() : 1);
         }
     };
 
@@ -131,18 +101,6 @@ namespace blazefeo :: testing
     TYPED_TEST(StaticVectorPointerTest, testOffsetRow)
     {
         this->template testOffsetImpl<rowVector>();
-    }
-
-
-    TYPED_TEST(StaticVectorPointerTest, testMoveColumn)
-    {
-        this->template testMoveImpl<columnVector>();
-    }
-
-
-    TYPED_TEST(StaticVectorPointerTest, testMoveRow)
-    {
-        this->template testMoveImpl<rowVector>();
     }
 
 

@@ -64,7 +64,7 @@ namespace blazefeo
      */
     template <typename VT>
     requires (IsStatic_v<VT> && IsDenseVector_v<VT>)
-    size_t constexpr storageStride_v = VT::spacing();
+    size_t constexpr storageStride_v = 0;
 
 
     /**
