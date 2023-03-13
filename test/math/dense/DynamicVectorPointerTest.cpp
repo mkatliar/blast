@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <blazefeo/math/dense/DynamicMatrixPointer.hpp>
+#include <blazefeo/math/dense/VectorPointer.hpp>
 
 #include <test/Testing.hpp>
 
@@ -22,7 +22,7 @@ namespace blazefeo :: testing
         {
             DynamicVector<Real, TF> v(3);
             auto p = ptr<aligned>(v, 0);
-            EXPECT_EQ(p.spacing(), v.spacing());
+            EXPECT_EQ(p.spacing(), 1);
         }
 
 
@@ -44,37 +44,8 @@ namespace blazefeo :: testing
             size_t const delta = 2;
             auto p = ptr<unaligned>(v, i);
 
-            if constexpr (TF == columnVector)
-            {
-                auto po = p(delta, 0);
-                EXPECT_EQ(po.get(), &v[i + delta]);
-            }
-            else
-            {
-                auto po = p(0, delta);
-                EXPECT_EQ(po.get(), &v[i + delta]);
-            }
-        }
-
-
-        template <bool TF>
-        void testMoveImpl()
-        {
-            DynamicVector<Real, TF> v(5);
-            size_t const i = 1;
-            size_t const delta = 2;
-            auto p = ptr<unaligned>(v, i);
-
-            if constexpr (TF == columnVector)
-            {
-                p.vmove(delta);
-                EXPECT_EQ(p.get(), &v[i + delta]);
-            }
-            else
-            {
-                p.hmove(delta);
-                EXPECT_EQ(p.get(), &v[i + delta]);
-            }
+            auto po = p(delta);
+            EXPECT_EQ(po.get(), &v[i + delta]);
         }
 
 
@@ -89,8 +60,8 @@ namespace blazefeo :: testing
                 {
                     auto p = ptr<unaligned>(row(A, i), j);
                     ASSERT_EQ(p.get(), &A(i, j));
-                    ASSERT_EQ(p.spacing(), A.spacing());
-                    ASSERT_EQ(p.storageOrder, SO);
+                    ASSERT_EQ(p.spacing(), (SO == rowMajor) ? 1 : A.spacing());
+                    ASSERT_EQ(p.transposeFlag, rowVector);
                 }
             }
         }
@@ -107,8 +78,8 @@ namespace blazefeo :: testing
                 {
                     auto p = ptr<unaligned>(subvector(row(A, i), j, columns(A) - j), 0);
                     ASSERT_EQ(p.get(), &A(i, j));
-                    ASSERT_EQ(p.spacing(), A.spacing());
-                    ASSERT_EQ(p.storageOrder, SO);
+                    ASSERT_EQ(p.spacing(), (SO == rowMajor) ? 1 : A.spacing());
+                    ASSERT_EQ(p.transposeFlag, rowVector);
                 }
             }
         }
@@ -125,8 +96,8 @@ namespace blazefeo :: testing
                 {
                     auto p = ptr<unaligned>(column(A, j), i);
                     ASSERT_EQ(p.get(), &A(i, j));
-                    ASSERT_EQ(p.spacing(), A.spacing());
-                    ASSERT_EQ(p.storageOrder, SO);
+                    ASSERT_EQ(p.spacing(), (SO == columnMajor) ? 1 : A.spacing());
+                    ASSERT_EQ(p.transposeFlag, columnVector);
                 }
             }
         }
@@ -143,8 +114,8 @@ namespace blazefeo :: testing
                 {
                     auto p = ptr<unaligned>(subvector(column(A, j), i, rows(A) - i), 0);
                     ASSERT_EQ(p.get(), &A(i, j));
-                    ASSERT_EQ(p.spacing(), A.spacing());
-                    ASSERT_EQ(p.storageOrder, SO);
+                    ASSERT_EQ(p.spacing(), (SO == columnMajor) ? 1 : A.spacing());
+                    ASSERT_EQ(p.transposeFlag, columnVector);
                 }
             }
         }
@@ -190,18 +161,6 @@ namespace blazefeo :: testing
     TYPED_TEST(DynamicVectorPointerTest, testOffsetRow)
     {
         this->template testOffsetImpl<rowVector>();
-    }
-
-
-    TYPED_TEST(DynamicVectorPointerTest, testMoveColumn)
-    {
-        this->template testMoveImpl<columnVector>();
-    }
-
-
-    TYPED_TEST(DynamicVectorPointerTest, testMoveRow)
-    {
-        this->template testMoveImpl<rowVector>();
     }
 
 

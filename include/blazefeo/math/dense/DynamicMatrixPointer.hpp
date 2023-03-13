@@ -5,8 +5,6 @@
 #pragma once
 
 #include <blazefeo/Blaze.hpp>
-#include <blazefeo/math/dense/StorageOrder.hpp>
-#include <blazefeo/math/dense/StorageStride.hpp>
 #include <blazefeo/math/simd/Simd.hpp>
 
 
@@ -26,7 +24,7 @@ namespace blazefeo
 
 
         /**
-         * @brief Create a pointer pointing to a specified element of a statically-sized matrix.
+         * @brief Create a pointer pointing to a specified element of a dynamically-sized matrix.
          *
          * @param ptr matrix element to be pointed.
          * @param spacing stride of the matrix.
@@ -137,6 +135,8 @@ namespace blazefeo
                 ptr_ += spacing_ * inc;
             else
                 ptr_ += inc;
+
+            BLAZE_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
         }
 
 
@@ -146,6 +146,8 @@ namespace blazefeo
                 ptr_ += spacing_ * inc;
             else
                 ptr_ += inc;
+
+            BLAZE_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
         }
 
 
@@ -213,33 +215,6 @@ namespace blazefeo
             return {(*m).data() + i + spacing(m) * j, spacing(m)};
         else
             return {(*m).data() + spacing(m) * i + j, spacing(m)};
-    }
-
-
-    template <bool AF, typename VT, bool TF>
-        requires (!IsStatic_v<VT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<VT>, StorageOrder_v<VT>, AF, IsPadded_v<VT>>
-        ptr(DenseVector<VT, TF>& v, size_t i)
-    {
-        return {&(*v)[i], storageStride(*v)};
-    }
-
-
-    template <bool AF, typename VT, bool TF>
-        requires (!IsStatic_v<VT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<VT> const, StorageOrder_v<VT>, AF, IsPadded_v<VT>>
-        ptr(DenseVector<VT, TF> const& v, size_t i)
-    {
-        return {&(*v)[i], storageStride(*v)};
-    }
-
-
-    template <bool AF, typename VT, bool TF>
-        requires (!IsStatic_v<VT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<VT> const, StorageOrder_v<VT>, AF, IsPadded_v<VT>>
-        ptr(DVecTransExpr<VT, TF> const& v, size_t i)
-    {
-        return {&(*v)[i], storageStride(*v)};
     }
 
 

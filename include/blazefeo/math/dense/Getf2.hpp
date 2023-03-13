@@ -20,6 +20,7 @@
 #include <blazefeo/math/dense/Idamax.hpp>
 #include <blazefeo/math/dense/Ger.hpp>
 #include <blazefeo/math/dense/MatrixPointer.hpp>
+#include <blazefeo/math/dense/VectorPointer.hpp>
 
 #include <cmath>
 
@@ -60,12 +61,12 @@ namespace blazefeo
         for (size_t k = 0; k < m && k < n; ++k)
         {
             // Find pivot and test for singularity.
-            size_t const ip = idamax<columnVector>(m - k, (~A)(k, k)) + k;
+            size_t const ip = idamax(m - k, column((~A)(k, k))) + k;
             ipiv[k] = ip;
 
             // Exchange rows k and ip
             if (ip != k)
-                swap<rowVector>(n, (~A)(k, 0), (~A)(ip, 0));
+                swap(n, row((~A)(k, 0)), row((~A)(ip, 0)));
 
             if (!*(~A)(k, k))
                 BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Matrix is singular"});
@@ -74,7 +75,7 @@ namespace blazefeo
                 *(~A)(i, k) /= *(~A)(k, k);
 
             if (k + 1 < m && k + 1 < n)
-                ger(m - k - 1, n - k - 1, ET(-1), (~A)(k + 1, k), (~A)(k, k + 1), (~A)(k + 1, k + 1), (~A)(k + 1, k + 1));
+                ger(m - k - 1, n - k - 1, ET(-1), column((~A)(k + 1, k)), row((~A)(k, k + 1)), (~A)(k + 1, k + 1), (~A)(k + 1, k + 1));
         }
     }
 

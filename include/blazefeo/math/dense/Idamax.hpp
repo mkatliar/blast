@@ -16,7 +16,7 @@
 
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/Exception.hpp>
-#include <blazefeo/math/dense/MatrixPointer.hpp>
+#include <blazefeo/math/dense/VectorPointer.hpp>
 
 #include <cmath>
 #include <tuple>
@@ -37,9 +37,9 @@ namespace blazefeo
      *
      * @return index of the first element in @a x having maximum absolute value.
      */
-    template <bool TF, typename MP>
-    requires MatrixPointer<MP>
-    inline size_t idamax(size_t n, MP x)
+    template <typename VP>
+    requires VectorPointer<VP>
+    inline size_t idamax(size_t n, VP x)
     {
         BLAZE_USER_ASSERT(n > 0, "Vector must be non-empty");
 
@@ -47,7 +47,7 @@ namespace blazefeo
         size_t index = 0;
         for (size_t i = 1; i < n; ++i)
         {
-            auto const v = std::abs(TF == columnVector ? *x(i, 0) : *x(0, i));
+            auto const v = std::abs(*x(i));
             if (v > value)
             {
                 value = v;
@@ -77,6 +77,6 @@ namespace blazefeo
         if (N == 0)
             BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Vector is empty"});
 
-        return idamax<TF>(N, ptr(x));
+        return idamax(N, ptr(*x));
     }
 }

@@ -12,20 +12,21 @@
 
 #include <iostream>
 #include <cmath>
+#include <type_traits>
 
 
 namespace blazefeo :: testing
 {
 	using namespace ::testing;
-	
+
 
 	namespace detail
 	{
 		template <typename T>
 		class ForcePrintImpl
-		: 	public T 
+		: 	public T
 		{
-			friend void PrintTo(const ForcePrintImpl &m, ::std::ostream *o) 
+			friend void PrintTo(const ForcePrintImpl &m, ::std::ostream *o)
 			{
 				*o << "\n" << m;
 			}
@@ -39,13 +40,13 @@ namespace blazefeo :: testing
 	* Taken from this post: http://stackoverflow.com/questions/25146997/teach-google-test-how-to-print-eigen-matrix
 	*/
 	template <typename T>
-	decltype(auto) forcePrint(T const& val) 
+	decltype(auto) forcePrint(T const& val)
 	{
 		return static_cast<detail::ForcePrintImpl<T> const&>(val);
 	}
 
 
-	MATCHER_P(FloatNearPointwise, tol, "Out of range") 
+	MATCHER_P(FloatNearPointwise, tol, "Out of range")
 	{
 		return (std::get<0>(arg) > std::get<1>(arg) - tol && std::get<0>(arg) < std::get<1>(arg) + tol) ;
 	}
@@ -68,10 +69,10 @@ namespace blazefeo :: testing
 				auto const b = (*rhs)(i, j);
 				auto delta = a - b;
 
-				if (std::isnan(a) != std::isnan(b) 
+				if (std::isnan(a) != std::isnan(b)
 					|| std::abs(delta) > abs_tol + rel_tol * std::abs(b))
-					return AssertionFailure() 
-						<< "Actual value:\n" << lhs 
+					return AssertionFailure()
+						<< "Actual value:\n" << lhs
 						<< "Expected value:\n" << rhs
 						<< "First mismatch at index (" << i << ", " << j << ")";
 			}
@@ -82,7 +83,7 @@ namespace blazefeo :: testing
 
 	/// @brief Blaze vector approx equality predicate
 	template <typename VT1, typename VT2, bool TF, typename Real>
-	inline std::enable_if_t<blaze::IsArithmetic_v<Real>, AssertionResult> 
+	inline std::enable_if_t<blaze::IsArithmetic_v<Real>, AssertionResult>
 		approxEqual(blaze::Vector<VT1, TF> const& lhs, blaze::Vector<VT2, TF> const& rhs, Real abs_tol, Real rel_tol = 0)
 	{
 		size_t const N = size(lhs);
@@ -93,7 +94,7 @@ namespace blazefeo :: testing
 		for (size_t j = 0; j < N; ++j)
 			if (abs((*lhs)[j] - (*rhs)[j]) > abs_tol + rel_tol * abs((*rhs)[j]))
 				return AssertionFailure()
-					<< "Actual value:\n" << lhs 
+					<< "Actual value:\n" << lhs
 					<< "Expected value:\n" << rhs
 					<< "First mismatch at index (" << j << ")";
 
@@ -114,7 +115,7 @@ namespace blazefeo :: testing
 
 		for (size_t j = 0; j < N; ++j, ++atol)
 			if (abs((*lhs)[j] - (*rhs)[j]) > *atol)
-				return AssertionFailure() << "First element mismatch at index " 
+				return AssertionFailure() << "First element mismatch at index "
 					<< j << ", lhs=" << (*lhs)[j] << ", rhs=" << (*rhs)[j] << ", abs_tol=" << *atol;
 
 		return AssertionSuccess();
@@ -132,8 +133,23 @@ namespace blazefeo :: testing
 
 		for (size_t j = 0; j < N; ++j)
 			if (abs((*lhs)[j] - (*rhs)[j]) > (*abs_tol)[j])
-				return AssertionFailure() << "First element mismatch at index " 
+				return AssertionFailure() << "First element mismatch at index "
 					<< j << ", lhs=" << (*lhs)[j] << ", rhs=" << (*rhs)[j] << ", abs_tol=" << (*abs_tol)[j];
+
+		return AssertionSuccess();
+	}
+
+
+	/// @brief Scalar type approx equality predicate with specified tolerances.
+	///
+	template <typename Scalar>
+	requires std::is_floating_point_v<Scalar>
+	inline AssertionResult approxEqual(Scalar actual, Scalar expected, Scalar abs_tol, Scalar rel_tol)
+	{
+		if (std::abs(actual - expected) > abs_tol + rel_tol * std::abs(expected))
+			return AssertionFailure()
+				<< "Floating point values differ more than by the specified tolerance." << std::endl
+				<< "Actual: " << actual << ", expected: " << expected;
 
 		return AssertionSuccess();
 	}
@@ -152,7 +168,7 @@ namespace blazefeo :: testing
 		for (size_t i = 0; i < M; ++i)
 			for (size_t j = 0; j < N; ++j)
 				if (!((*lhs)(i, j) == (*rhs)(i, j)))
-					return AssertionFailure() << "First element mismatch at index (" 
+					return AssertionFailure() << "First element mismatch at index ("
 						<< i << "," << j << "), lhs=" << (*lhs)(i, j) << ", rhs=" << (*rhs)(i, j);
 
 		return AssertionSuccess();
@@ -170,7 +186,7 @@ namespace blazefeo :: testing
 
 		for (size_t j = 0; j < N; ++j)
 			if (!((*lhs)[j] == (*rhs)[j]))
-				return AssertionFailure() << "First element mismatch at index " 
+				return AssertionFailure() << "First element mismatch at index "
 					<< j << ", lhs=" << (*lhs)[j] << ", rhs=" << (*rhs)[j];
 
 		return AssertionSuccess();

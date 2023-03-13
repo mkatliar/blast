@@ -6,6 +6,9 @@
 
 #include <blazefeo/math/simd/Simd.hpp>
 #include <blazefeo/math/simd/MatrixPointer.hpp>
+#include <blazefeo/math/simd/VectorPointer.hpp>
+#include <blazefeo/math/dense/MatrixPointer.hpp>
+#include <blazefeo/math/dense/VectorPointer.hpp>
 #include <blazefeo/math/Side.hpp>
 #include <blazefeo/math/UpLo.hpp>
 
@@ -219,7 +222,9 @@ namespace blazefeo
 
 
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        requires
+            VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
+            VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
         void ger(T alpha, PA a, PB b) noexcept;
 
 
@@ -242,7 +247,9 @@ namespace blazefeo
 
 
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        requires
+            VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
+            VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
         void ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept;
 
 
@@ -679,7 +686,9 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PA, typename PB>
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+    requires
+        VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
+        VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b) noexcept
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
@@ -688,12 +697,12 @@ namespace blazefeo
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
-            ax[i] = alpha * a(i * SS, 0).load();
+            ax[i] = alpha * a(i * SS).load();
 
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
         {
-            IntrinsicType bx = (~b)(0, j).broadcast();
+            IntrinsicType bx = (~b)(j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -760,19 +769,21 @@ namespace blazefeo
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PA, typename PB>
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+    requires
+        VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
+        VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept
     {
         IntrinsicType ax[RM];
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
-            ax[i] = alpha * a(i * SS, 0).load();
+            ax[i] = alpha * a(i * SS).load();
 
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
-            IntrinsicType bx = (~b)(0, j).broadcast();
+            IntrinsicType bx = (~b)(j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -810,11 +821,12 @@ namespace blazefeo
         && MatrixPointer<PB, T>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::gemm(size_t K, T alpha, PA a, PB b) noexcept
     {
+        auto bu = ~b;
         for (size_t k = 0; k < K; ++k)
         {
-            ger(alpha, a, b);
+            ger(alpha, column(a), row(bu));
             a.hmove(1);
-            b.vmove(1);
+            bu.vmove(1);
         }
     }
 
@@ -826,11 +838,12 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::gemm(size_t K,
         T alpha, PA a, PB b, size_t md, size_t nd) noexcept
     {
+        auto bu = ~b;
         for (size_t k = 0; k < K; ++k)
         {
-            ger(alpha, a, b, md, nd);
+            ger(alpha, column(a), row(bu), md, nd);
             a.hmove(1);
-            b.vmove(1);
+            bu.vmove(1);
         }
     }
 
@@ -880,6 +893,8 @@ namespace blazefeo
         requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmmLeftUpper(T alpha, P1 a, P2 b) noexcept
     {
+        auto bu = ~b;
+
         #pragma unroll
         for (size_t k = 0; k < rows(); ++k)
         {
@@ -897,7 +912,7 @@ namespace blazefeo
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
             {
-                IntrinsicType bx = (~b)(0, j).broadcast();
+                IntrinsicType bx = bu(0, j).broadcast();
 
                 #pragma unroll
                 for (size_t i = 0; i < ii; ++i)
@@ -908,7 +923,7 @@ namespace blazefeo
             }
 
             a.hmove(1);
-            b.vmove(1);
+            bu.vmove(1);
         }
     }
 
@@ -918,6 +933,8 @@ namespace blazefeo
         requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmmRightLower(T alpha, PB b, PA a) noexcept
     {
+        auto au = ~a;
+
         if constexpr (SO == columnMajor)
         {
             #pragma unroll
@@ -932,7 +949,7 @@ namespace blazefeo
                 #pragma unroll
                 for (size_t j = 0; j <= k; ++j)
                 {
-                    IntrinsicType ax = (~a)(0, j).broadcast();
+                    IntrinsicType ax = au(0, j).broadcast();
 
                     #pragma unroll
                     for (size_t i = 0; i < RM; ++i)
@@ -940,7 +957,7 @@ namespace blazefeo
                 }
 
                 b.hmove(1);
-                a.vmove(1);
+                au.vmove(1);
             }
         }
         else
@@ -1041,13 +1058,14 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE void gemm(RegisterMatrix<T, M, N, SO>& ker,
         size_t K, T alpha, PA a, PB b, T beta, PC c, PD d) noexcept
     {
+        auto bu = ~b;
         ker.reset();
 
         for (size_t k = 0; k < K; ++k)
         {
-            ker.ger(a, b);
+            ker.ger(a, bu);
             a.hmove(1);
-            b.vmove(1);
+            bu.vmove(1);
         }
 
         ker *= alpha;
@@ -1066,13 +1084,14 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE void gemm(RegisterMatrix<T, M, N, SO>& ker,
         size_t K, T alpha, PA a, PB b, T beta, PC c, PD d, size_t md, size_t nd) noexcept
     {
+        auto bu = ~b;
         ker.reset();
 
         for (size_t k = 0; k < K; ++k)
         {
-            ker.ger(a, b, md, nd);
+            ker.ger(a, bu, md, nd);
             a.hmove(1);
-            b.vmove(1);
+            bu.vmove(1);
         }
 
         ker *= alpha;

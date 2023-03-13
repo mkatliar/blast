@@ -41,25 +41,4 @@ namespace blazefeo
     {
         return ptr<IsAligned_v<MT>>(m, 0, 0);
     }
-
-
-    template <typename VT, bool TF>
-    BLAZE_ALWAYS_INLINE auto ptr(DenseVector<VT, TF>& v)
-    {
-        return ptr<IsAligned_v<VT>>(v, 0);
-    }
-
-
-    template <typename VT, bool TF>
-    BLAZE_ALWAYS_INLINE auto ptr(DenseVector<VT, TF> const& v)
-    {
-        return ptr<IsAligned_v<VT>>(v, 0);
-    }
-
-
-    template <typename VT, bool TF>
-    BLAZE_ALWAYS_INLINE auto ptr(DVecTransExpr<VT, TF> const& v)
-    {
-        return ptr<IsAligned_v<VT>>(v, 0);
-    }
 }

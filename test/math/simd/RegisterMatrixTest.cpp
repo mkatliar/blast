@@ -5,6 +5,7 @@
 #include <blazefeo/math/simd/RegisterMatrix.hpp>
 #include <blazefeo/math/StaticPanelMatrix.hpp>
 #include <blazefeo/math/dense/MatrixPointer.hpp>
+#include <blazefeo/math/dense/VectorPointer.hpp>
 #include <blazefeo/math/views/submatrix/Panel.hpp>
 
 #include <test/Testing.hpp>
@@ -365,51 +366,27 @@ namespace blazefeo :: testing
     }
 
 
-    TYPED_TEST(RegisterMatrixTest, testGerCc)
+    TYPED_TEST(RegisterMatrixTest, testGer)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        DynamicMatrix<ET, columnMajor> A(Traits::rows, 1);
-        DynamicMatrix<ET, columnMajor> B(1, Traits::columns);
+        DynamicVector<ET, columnVector> a(Traits::rows);
+        DynamicVector<ET, rowVector> b(Traits::columns);
         StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
 
-        randomize(A);
-        randomize(B);
-        randomize(C);
-        ET alpha {};
-        blaze::randomize(alpha);
-
-        TypeParam ker;
-        ker.load(1., ptr<aligned>(C, 0, 0));
-        ker.ger(alpha, ptr<aligned>(A, 0, 0), ptr<aligned>(B, 0, 0));
-
-        BLAZEFEO_EXPECT_APPROX_EQ(ker, evaluate(C + alpha * A * B), absTol<ET>(), relTol<ET>());
-    }
-
-
-    TYPED_TEST(RegisterMatrixTest, testGerCr)
-    {
-        using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
-        using ET = ElementType_t<RM>;
-
-        DynamicMatrix<ET, columnMajor> A(Traits::rows, 1);
-        DynamicMatrix<ET, rowMajor> B(1, Traits::columns);
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
-
-        randomize(A);
-        randomize(B);
+        randomize(a);
+        randomize(b);
         randomize(C);
         ET alpha {};
         blaze::randomize(alpha);
 
         TypeParam ker;
         ker.load(1., ptr(C));
-        ker.ger(alpha, ptr(A), ptr(B));
+        ker.ger(alpha, ptr(a), ptr(b));
 
-        BLAZEFEO_EXPECT_APPROX_EQ(ker, evaluate(C + alpha * A * B), absTol<ET>(), relTol<ET>());
+        BLAZEFEO_EXPECT_APPROX_EQ(ker, evaluate(C + alpha * a * b), absTol<ET>(), relTol<ET>());
     }
 
 
@@ -464,19 +441,15 @@ namespace blazefeo :: testing
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        DynamicMatrix<ET, columnMajor> A(Traits::rows, 1);
-        DynamicMatrix<ET, columnMajor> B(Traits::columns, 1);
+        DynamicVector<ET, columnVector> a(Traits::rows);
+        DynamicVector<ET, columnVector> b(Traits::columns);
         StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
 
-        randomize(A);
-        randomize(B);
+        randomize(a);
+        randomize(b);
         randomize(C);
 
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> const D_ref = A * trans(B) + C;
-
-        // std::cout << "A=\n" << A << std::endl;
-        // std::cout << "B=\n" << B << std::endl;
-        // std::cout << "C=\n" << C << std::endl;
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> const D_ref = a * trans(b) + C;
 
         for (size_t m = 0; m <= rows(C); ++m)
         {
@@ -484,11 +457,12 @@ namespace blazefeo :: testing
             {
                 TypeParam ker;
                 ker.load(1., ptr(C));
-                ker.ger(ET(1.), ptr(A), ptr(trans(B)), m, n);
+                ker.ger(ET(1.), ptr(a), ptr(trans(b)), m, n);
 
                 for (size_t i = 0; i < m; ++i)
                     for (size_t j = 0; j < n; ++j)
-                        ASSERT_EQ(ker(i, j), i < m && j < n ? D_ref(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), "
+                        BLAZEFEO_ASSERT_APPROX_EQ(ker(i, j), D_ref(i, j), absTol<ET>(), relTol<ET>())
+                            << "element mismatch at (" << i << ", " << j << "), "
                             << "store size = " << m << "x" << n;
             }
         }
@@ -501,20 +475,20 @@ namespace blazefeo :: testing
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        DynamicMatrix<ET, columnMajor> A(Traits::rows, 1);
-        DynamicMatrix<ET, columnMajor> B(Traits::columns, 1);
+        DynamicVector<ET, columnVector> a(Traits::rows);
+        DynamicVector<ET, columnVector> b(Traits::columns);
         StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
 
-        randomize(A);
-        randomize(B);
+        randomize(a);
+        randomize(b);
         randomize(C);
 
         TypeParam ker;
         ker.load(1., ptr(C));
-        ker.ger(ET(1.), ptr(A), ptr(trans(B)));
+        ker.ger(ET(1.), ptr(a), ptr(trans(b)));
         ker.store(ptr(D));
 
-        BLAZEFEO_EXPECT_EQ(D, evaluate(C + A * trans(B)));
+        BLAZEFEO_EXPECT_EQ(D, evaluate(C + a * trans(b)));
     }
 
 

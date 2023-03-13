@@ -18,9 +18,9 @@
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/system/Tile.hpp>
 #include <blazefeo/math/simd/RegisterMatrix.hpp>
-#include <blazefeo/math/simd/MatrixPointer.hpp>
-#include <blazefeo/math/dense/DynamicMatrixPointer.hpp>
-#include <blazefeo/math/dense/StaticMatrixPointer.hpp>
+#include <blazefeo/math/simd/VectorPointer.hpp>
+#include <blazefeo/math/dense/VectorPointer.hpp>
+#include <blazefeo/math/dense/MatrixPointer.hpp>
 
 
 namespace blazefeo
@@ -36,10 +36,10 @@ namespace blazefeo
      * https://netlib.org/lapack/explore-html/d7/d15/group__double__blas__level2_ga458222e01b4d348e9b52b9343d52f828.html
      *
      * @tparam Scalar scalar type
-     * @tparam VT0 type of first vector
-     * @tparam VT1 type of second vector
-     * @tparam MT0 type of input matrix
-     * @tparam MT1 type of output matrix
+     * @tparam VPX type of first vector
+     * @tparam VPY type of second vector
+     * @tparam MPA type of input matrix
+     * @tparam MPB type of output matrix
      *
      * @param M the number of rows of the matrix A
      * @param N the number of columns of the matrix A
@@ -49,19 +49,19 @@ namespace blazefeo
      * @param A input matrix
      * @param B output matrix
      */
-    template <typename Scalar, typename MPX, typename MPY, typename MPA, typename MPB>
+    template <typename Scalar, typename VPX, typename VPY, typename MPA, typename MPB>
     requires
-        MatrixPointer<MPX, Scalar> && (StorageOrder_v<MPX> == columnMajor) &&
-        MatrixPointer<MPY, Scalar> &&
+        VectorPointer<VPX, Scalar> && (TransposeFlag_v<VPX> == columnVector) &&
+        VectorPointer<VPY, Scalar> && (TransposeFlag_v<VPY> == rowVector) &&
         MatrixPointer<MPA, Scalar> && (StorageOrder_v<MPA> == columnMajor) &&
         MatrixPointer<MPB, Scalar> && (StorageOrder_v<MPB> == columnMajor)
-    inline void ger(size_t M, size_t N, Scalar alpha, MPX x, MPY y, MPA A, MPB B)
+    inline void ger(size_t M, size_t N, Scalar alpha, VPX x, VPY y, MPA A, MPB B)
     {
         using ET = ElementType_t<MPB>;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;
 
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MPX>, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MPY>, ET);
+        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<VPX>, ET);
+        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<VPY>, ET);
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MPA>, ET);
 
         size_t j = 0;
@@ -77,7 +77,7 @@ namespace blazefeo
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(ET(1.), A(i, j));
-                ker.ger(alpha, x(i, 0), y(0, j));
+                ker.ger(alpha, x(i), y(j));
                 ker.store(B(i, j));
             }
 
@@ -85,7 +85,7 @@ namespace blazefeo
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(ET(1.), A(i, j));
-                ker.ger(alpha, x(i, 0), y(0, j));
+                ker.ger(alpha, x(i), y(j));
                 ker.store(B(i, j));
             }
 
@@ -93,7 +93,7 @@ namespace blazefeo
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(ET(1.), A(i, j));
-                ker.ger(alpha, x(i, 0), y(0, j));
+                ker.ger(alpha, x(i), y(j));
                 ker.store(B(i, j));
             }
 
@@ -102,7 +102,7 @@ namespace blazefeo
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(ET(1.), A(i, j), M - i, ker.columns());
-                ker.ger(alpha, x(i, 0), y(0, j), M - i, ker.columns());
+                ker.ger(alpha, x(i), y(j), M - i, ker.columns());
                 ker.store(B(i, j), M - i, ker.columns());
             }
         }
@@ -119,7 +119,7 @@ namespace blazefeo
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(ET(1.), A(i, j), ker.rows(), N - j);
-                ker.ger(alpha, x(i, 0), y(0, j), ker.rows(), N - j);
+                ker.ger(alpha, x(i), y(j), ker.rows(), N - j);
                 ker.store(B(i, j), ker.rows(), N - j);
             }
 
@@ -127,7 +127,7 @@ namespace blazefeo
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(ET(1.), A(i, j), ker.rows(), N - j);
-                ker.ger(alpha, x(i, 0), y(0, j), ker.rows(), N - j);
+                ker.ger(alpha, x(i), y(j), ker.rows(), N - j);
                 ker.store(B(i, j), ker.rows(), N - j);
             }
 
@@ -135,7 +135,7 @@ namespace blazefeo
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(ET(1.), A(i, j), ker.rows(), N - j);
-                ker.ger(alpha, x(i, 0), y(0, j), ker.rows(), N - j);
+                ker.ger(alpha, x(i), y(j), ker.rows(), N - j);
                 ker.store(B(i, j), ker.rows(), N - j);
             }
 
@@ -144,7 +144,7 @@ namespace blazefeo
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(ET(1.), A(i, j), M - i, N - j);
-                ker.ger(alpha, x(i, 0), y(0, j), M - i, N - j);
+                ker.ger(alpha, x(i), y(j), M - i, N - j);
                 ker.store(B(i, j), M - i, N - j);
             }
         }
@@ -192,11 +192,6 @@ namespace blazefeo
         size_t const M = size(x);
         size_t const N = size(y);
 
-        bool constexpr x_aligned = IsAligned_v<VT0>;
-        bool constexpr y_aligned = IsAligned_v<VT1>;
-        bool constexpr A_aligned = IsAligned_v<MT0>;
-        bool constexpr B_aligned = IsAligned_v<MT1>;
-
         if (rows(A) != M)
             BLAZE_THROW_INVALID_ARGUMENT("Inconsistent argument sizes");
 
@@ -209,7 +204,7 @@ namespace blazefeo
         if (columns(B) != N)
             BLAZE_THROW_INVALID_ARGUMENT("Inconsistent argument sizes");
 
-        ger(M, N, alpha, ptr<x_aligned>(*x, 0), ptr<y_aligned>(*y, 0), ptr<A_aligned>(*A, 0, 0), ptr<B_aligned>(*B, 0, 0));
+        ger(M, N, alpha, ptr(*x), ptr(*y), ptr(*A), ptr(*B));
     }
 
 

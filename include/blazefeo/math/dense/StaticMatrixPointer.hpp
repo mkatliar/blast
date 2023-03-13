@@ -134,6 +134,8 @@ namespace blazefeo
                 ptr_ += spacing() * inc;
             else
                 ptr_ += inc;
+
+            BLAZE_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
         }
 
 
@@ -143,6 +145,8 @@ namespace blazefeo
                 ptr_ += spacing() * inc;
             else
                 ptr_ += inc;
+
+            BLAZE_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
         }
 
 

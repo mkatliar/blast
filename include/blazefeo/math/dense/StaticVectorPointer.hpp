@@ -6,8 +6,6 @@
 
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/math/simd/Simd.hpp>
-#include <blazefeo/math/dense/StorageOrder.hpp>
-#include <blazefeo/math/dense/StorageStride.hpp>
 
 
 namespace blazefeo
@@ -26,7 +24,7 @@ namespace blazefeo
 
 
         /**
-         * @brief Create a pointer pointing to a specified element of a statically-sized vector.
+         * @brief Create a pointer pointing to a specified element of a vector with static spacing between elements.
          *
          * @param ptr vector element to be pointed.
          *
@@ -44,13 +42,38 @@ namespace blazefeo
 
         IntrinsicType load() const noexcept
         {
-            return blazefeo::load<AF, SS>(ptr_);
+            if constexpr (S == 1)
+            {
+                return blazefeo::load<AF, SS>(ptr_);
+            }
+            else
+            {
+                // Non-optimized
+                IntrinsicType v;
+                for (size_t i = 0; i < SS; ++i)
+                    v[i] = ptr_[S * i];
+
+                return v;
+            }
         }
 
 
         IntrinsicType maskLoad(MaskType mask) const noexcept
         {
-            return blazefeo::maskload(ptr_, mask);
+            if constexpr (S == 1)
+            {
+                return blazefeo::maskload(ptr_, mask);
+            }
+            else
+            {
+                // Non-optimized
+                IntrinsicType v = blazefeo::setzero<ElementType, SS>();
+                for (size_t i = 0; i < SS; ++i)
+                    if (mask[i])
+                        v[i] = ptr_[S * i];
+
+                return v;
+            }
         }
 
 
@@ -62,13 +85,32 @@ namespace blazefeo
 
         void store(IntrinsicType val) const noexcept
         {
-            blazefeo::store<AF>(ptr_, val);
+            if constexpr (S == 1)
+            {
+                blazefeo::store<AF>(ptr_, val);
+            }
+            else
+            {
+                // Non-optimized
+                for (size_t i = 0; i < SS; ++i)
+                    ptr_[S * i] = val[i];
+            }
         }
 
 
         void maskStore(MaskType mask, IntrinsicType val) const noexcept
         {
-            blazefeo::maskstore(ptr_, mask, val);
+            if constexpr (S == 1)
+            {
+                blazefeo::maskstore(ptr_, mask, val);
+            }
+            else
+            {
+                // Non-optimized
+                for (size_t i = 0; i < SS; ++i)
+                    if (mask[i])
+                        ptr_[S * i] = val[i];
+            }
         }
 
 
@@ -167,38 +209,5 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE auto trans(StaticVectorPointer<T, S, TF, AF, PF> const& p) noexcept
     {
         return p.trans();
-    }
-
-
-    template <bool AF, typename VT, bool TF>
-    requires (IsStatic_v<VT>)
-    BLAZE_ALWAYS_INLINE auto ptr(DenseVector<VT, TF>& v, size_t i)
-    {
-        if constexpr (IsMajorOriented_v<TF, StorageOrder_v<VT>>)
-            return StaticVectorPointer<ElementType_t<VT>, 1, TF, AF, IsPadded_v<VT>> {&(*v)[i]};
-        else
-            return StaticVectorPointer<ElementType_t<VT>, storageStride_v<VT>, TF, AF, IsPadded_v<VT>> {&(*v)[i]};
-    }
-
-
-    template <bool AF, typename VT, bool TF>
-    requires (IsStatic_v<VT>)
-    BLAZE_ALWAYS_INLINE auto ptr(DenseVector<VT, TF> const& v, size_t i)
-    {
-        if constexpr (IsMajorOriented_v<TF, StorageOrder_v<VT>>)
-            return StaticVectorPointer<ElementType_t<VT> const, 1, TF, AF, IsPadded_v<VT>> {&(*v)[i]};
-        else
-            return StaticVectorPointer<ElementType_t<VT> const, storageStride_v<VT>, TF, AF, IsPadded_v<VT>> {&(*v)[i]};
-    }
-
-
-    template <bool AF, typename VT, bool TF>
-    requires (IsStatic_v<VT>)
-    BLAZE_ALWAYS_INLINE auto ptr(DVecTransExpr<VT, TF> const& v, size_t i)
-    {
-        if constexpr (IsMajorOriented_v<TF, StorageOrder_v<VT>>)
-            return StaticVectorPointer<ElementType_t<VT>, 1, TF, AF, IsPadded_v<VT>> {&(*v)[i]};
-        else
-            return StaticVectorPointer<ElementType_t<VT>, storageStride_v<VT>, TF, AF, IsPadded_v<VT>> {&(*v)[i]};
     }
 }
