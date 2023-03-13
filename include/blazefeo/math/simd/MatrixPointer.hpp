@@ -15,8 +15,9 @@ namespace blazefeo
     template <typename P, typename T = ElementType_t<P>>
     concept MatrixPointer = requires(P p, ptrdiff_t i, ptrdiff_t j)
     {
-        p.load(i, j);
         p(i, j);
+        p.load();
+        p.broadcast();
         p.vmove(i);
         p.hmove(j);
         p.spacing();

@@ -4,8 +4,7 @@
 
 #include <blazefeo/math/simd/RegisterMatrix.hpp>
 #include <blazefeo/math/StaticPanelMatrix.hpp>
-#include <blazefeo/math/dense/DynamicMatrixPointer.hpp>
-#include <blazefeo/math/dense/StaticMatrixPointer.hpp>
+#include <blazefeo/math/dense/MatrixPointer.hpp>
 #include <blazefeo/math/views/submatrix/Panel.hpp>
 
 #include <test/Testing.hpp>
@@ -407,8 +406,8 @@ namespace blazefeo :: testing
         blaze::randomize(alpha);
 
         TypeParam ker;
-        ker.load(1., ptr<aligned>(C, 0, 0));
-        ker.ger(alpha, ptr<aligned>(A, 0, 0), ptr<aligned>(B, 0, 0));
+        ker.load(1., ptr(C));
+        ker.ger(alpha, ptr(A), ptr(B));
 
         BLAZEFEO_EXPECT_APPROX_EQ(ker, evaluate(C + alpha * A * B), absTol<ET>(), relTol<ET>());
     }
@@ -484,8 +483,8 @@ namespace blazefeo :: testing
             for (size_t n = 0; n <= columns(C); ++n)
             {
                 TypeParam ker;
-                ker.load(1., ptr<aligned>(C, 0, 0));
-                ker.ger(ET(1.), ptr<aligned>(A, 0, 0), ptr<aligned>(trans(B), 0, 0), m, n);
+                ker.load(1., ptr(C));
+                ker.ger(ET(1.), ptr(A), ptr(trans(B)), m, n);
 
                 for (size_t i = 0; i < m; ++i)
                     for (size_t j = 0; j < n; ++j)
@@ -510,15 +509,10 @@ namespace blazefeo :: testing
         randomize(B);
         randomize(C);
 
-        // std::cout << "A=\n" << A << std::endl;
-        // std::cout << "B=\n" << B << std::endl;
-        // std::cout << "C=\n" << C << std::endl;
-
         TypeParam ker;
-        ker.load(1., ptr<aligned>(C, 0, 0));
-        // ger2<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.data(), A.spacing(), B.data(), B.spacing());
-        ker.ger(ET(1.), ptr<aligned>(A, 0, 0), ptr<aligned>(trans(B), 0, 0));
-        ker.store(ptr<aligned>(D, 0, 0));
+        ker.load(1., ptr(C));
+        ker.ger(ET(1.), ptr(A), ptr(trans(B)));
+        ker.store(ptr(D));
 
         BLAZEFEO_EXPECT_EQ(D, evaluate(C + A * trans(B)));
     }
@@ -646,8 +640,8 @@ namespace blazefeo :: testing
 
         randomize(B);
 
-        ker.load(1., ptr<aligned>(B, 0, 0));
-        ker.trsmRightUpper(trans(ptr<aligned>(L, 0, 0)));
+        ker.load(1., ptr(B));
+        ker.trsmRightUpper(trans(ptr(L)));
 
         // TODO: should be strictly equal?
         BLAZEFEO_ASSERT_APPROX_EQ(ker, evaluate(B * inv(trans(L))), absTol<ET>(), relTol<ET>());
@@ -670,7 +664,7 @@ namespace blazefeo :: testing
         blaze::randomize(alpha);
 
         RM ker;
-        ker.trmmLeftUpper(alpha, ptr<aligned>(A, 0, 0), ptr<aligned>(B, 0, 0));
+        ker.trmmLeftUpper(alpha, ptr(A), ptr(B));
 
         // Reset lower-triangular part
         for (size_t i = 0; i < A.rows(); ++i)
@@ -698,7 +692,7 @@ namespace blazefeo :: testing
         blaze::randomize(alpha);
 
         RM ker;
-        ker.trmmRightLower(alpha, ptr<aligned>(B, 0, 0), ptr<aligned>(A, 0, 0));
+        ker.trmmRightLower(alpha, ptr(B), ptr(A));
 
         // Reset upper-triangular part
         for (size_t i = 0; i < A.rows(); ++i)

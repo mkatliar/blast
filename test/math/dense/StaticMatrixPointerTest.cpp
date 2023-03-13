@@ -54,7 +54,7 @@ namespace blazefeo :: testing
     {
         typename TestFixture::Pointer p {this->m_.data()};
         ptrdiff_t constexpr i = 0, j = 0;
-        auto const val = p.load(i, j);
+        auto const val = p(i, j).load();
 
         for (size_t k = 0; k < this->SS; ++k)
             EXPECT_EQ(val[k], this->storageOrder == columnMajor ?
@@ -66,7 +66,7 @@ namespace blazefeo :: testing
     {
         size_t const i = 0, j = 0;
         auto p = ptr<aligned>(this->m_, 0, 0);
-        auto const val = p.load(i, j);
+        auto const val = p(i, j).load();
 
         EXPECT_EQ(p.spacing(), this->m_.spacing());
 
@@ -80,7 +80,7 @@ namespace blazefeo :: testing
     {
         size_t const i = 0, j = 0;
         auto p = ptr<aligned>(trans(this->m_), 0, 0);
-        auto const val = p.load(i, j);
+        auto const val = p(i, j).load();
 
         ASSERT_EQ(p.storageOrder, !this->storageOrder);
         EXPECT_EQ(p.spacing(), this->m_.spacing());

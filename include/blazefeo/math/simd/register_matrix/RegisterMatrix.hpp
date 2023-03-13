@@ -132,7 +132,7 @@ namespace blazefeo
             for (size_t j = 0; j < N; ++j)
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i)
-                    v_[i][j] += beta * a.load(SS * i, j);
+                    v_[i][j] += beta * a(SS * i, j).load();
         }
 
 
@@ -145,7 +145,7 @@ namespace blazefeo
             for (size_t j = 0; j < N; ++j) if (j < n)
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i) if (i * RM < m)
-                    v_[i][j] += beta * a.load(SS * i, j);
+                    v_[i][j] += beta * a(SS * i, j).load();
         }
 
 
@@ -403,7 +403,7 @@ namespace blazefeo
         for (size_t j = 0; j < N; ++j)
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                v_[i][j] = p.load(SS * i, j);
+                v_[i][j] = p(SS * i, j).load();
     }
 
 
@@ -416,7 +416,7 @@ namespace blazefeo
         for (size_t j = 0; j < N; ++j)
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
-                v_[i][j] = beta * p.load(SS * i, j);
+                v_[i][j] = beta * p(SS * i, j).load();
     }
 
 
@@ -444,16 +444,16 @@ namespace blazefeo
                 // If the storage is both aligned and padded, it should be safe to use unmasked loads, which are faster.
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i) if (SS * i < m)
-                    v_[i][j] = beta * p.load(SS * i, j);
+                    v_[i][j] = beta * p(SS * i, j).load();
             }
             else
             {
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i) if (SS * i + SS <= m)
-                    v_[i][j] = beta * p.load(SS * i, j);
+                    v_[i][j] = beta * p(SS * i, j).load();
 
                 if (size_t const rem = m % SS)
-                    v_[m / SS][j] = beta * p.maskLoad(m - rem, j, SIMD::index() < rem);
+                    v_[m / SS][j] = beta * p(m - rem, j).maskLoad(SIMD::index() < rem);
             }
         }
     }
@@ -477,7 +477,7 @@ namespace blazefeo
     {
         for (size_t j = 0; j < N; ++j)
             for (size_t i = 0; i < RM; ++i)
-                p.store(SS * i, j, v_[i][j]);
+                p(SS * i, j).store(v_[i][j]);
     }
 
 
@@ -528,7 +528,7 @@ namespace blazefeo
         // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
         for (size_t j = 0; j < N; ++j) if (j < n)
             for (size_t i = 0; i < RM; ++i) if (SS * (i + 1) <= m)
-                p.store(SS * i, j, v_[i][j]);
+                p(SS * i, j).store(v_[i][j]);
 
         if (IntType const rem = m % SS)
         {
@@ -536,7 +536,7 @@ namespace blazefeo
             size_t const i = m / SS;
 
             for (size_t j = 0; j < n && j < columns(); ++j)
-                p.maskStore(SS * i, j, mask, v_[i][j]);
+                p(SS * i, j).maskStore(mask, v_[i][j]);
         }
     }
 
@@ -554,12 +554,12 @@ namespace blazefeo
             if (skip && ri < RM)
             {
                 MaskType const mask = SIMD::index() >= skip;
-                p.maskStore(SS * ri, j, mask, v_[ri][j]);
+                p(SS * ri, j).maskStore(mask, v_[ri][j]);
                 ++ri;
             }
 
             for(; ri < RM; ++ri)
-                p.store(SS * ri, j, v_[ri][j]);
+                p(SS * ri, j).store(v_[ri][j]);
         }
     }
 
@@ -580,7 +580,7 @@ namespace blazefeo
                 if (skip > 0)
                     mask &= SIMD::index() >= skip;
 
-                p.maskStore(SS * ri, j, mask, v_[ri][j]);
+                p(SS * ri, j).maskStore(mask, v_[ri][j]);
             }
         }
     }
@@ -625,14 +625,14 @@ namespace blazefeo
                 #pragma unroll
                 for (size_t k = 0; k < j; ++k)
                 {
-                    IntrinsicType const a_kj = a.broadcast(k, j);
+                    IntrinsicType const a_kj = (~a)(k, j).broadcast();
 
                     #pragma unroll
                     for (size_t i = 0; i < RM; ++i)
                         v_[i][j] = fnmadd(a_kj, v_[i][k], v_[i][j]);
                 }
 
-                IntrinsicType const a_jj = a.broadcast(j, j);
+                IntrinsicType const a_jj = (~a)(j, j).broadcast();
 
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i)
@@ -688,12 +688,12 @@ namespace blazefeo
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
-            ax[i] = alpha * a.load(i * SS, 0);
+            ax[i] = alpha * a(i * SS, 0).load();
 
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
         {
-            IntrinsicType bx = b.broadcast(0, j);
+            IntrinsicType bx = (~b)(0, j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -713,12 +713,12 @@ namespace blazefeo
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
-            ax[i] = a.load(i * SS, 0);
+            ax[i] = a(i * SS, 0).load();
 
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
         {
-            IntrinsicType bx = b.broadcast(0, j);
+            IntrinsicType bx = (~b)(0, j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -767,12 +767,12 @@ namespace blazefeo
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
-            ax[i] = alpha * a.load(i * SS, 0);
+            ax[i] = alpha * a(i * SS, 0).load();
 
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
-            IntrinsicType bx = b.broadcast(0, j);
+            IntrinsicType bx = (~b)(0, j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -790,12 +790,12 @@ namespace blazefeo
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
-            ax[i] = a.load(i * SS, 0);
+            ax[i] = a(i * SS, 0).load();
 
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
-            IntrinsicType bx = b.broadcast(0, j);
+            IntrinsicType bx = (~b)(0, j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -889,15 +889,15 @@ namespace blazefeo
 
             #pragma unroll
             for (size_t i = 0; i < ii; ++i)
-                ax[i] = alpha * a.load(i * SS, 0);
+                ax[i] = alpha * a(i * SS, 0).load();
 
             if (rem)
-                ax[ii] = alpha * a.maskLoad(ii * SS, 0, SIMD::index() < rem);
+                ax[ii] = alpha * a(ii * SS, 0).maskLoad(SIMD::index() < rem);
 
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
             {
-                IntrinsicType bx = b.broadcast(0, j);
+                IntrinsicType bx = (~b)(0, j).broadcast();
 
                 #pragma unroll
                 for (size_t i = 0; i < ii; ++i)
@@ -920,11 +920,6 @@ namespace blazefeo
     {
         if constexpr (SO == columnMajor)
         {
-            // for (size_t j = 0; j < columns(); ++j)
-            // {
-            //     ger(alpha, b.offset(0, j), a.offset(j, 0));
-            // }
-
             #pragma unroll
             for (size_t k = 0; k < N; ++k)
             {
@@ -932,12 +927,12 @@ namespace blazefeo
 
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i)
-                    bx[i] = alpha * b.load(i * SS, 0);
+                    bx[i] = alpha * b(i * SS, 0).load();
 
                 #pragma unroll
                 for (size_t j = 0; j <= k; ++j)
                 {
-                    IntrinsicType ax = a.broadcast(0, j);
+                    IntrinsicType ax = (~a)(0, j).broadcast();
 
                     #pragma unroll
                     for (size_t i = 0; i < RM; ++i)

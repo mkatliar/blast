@@ -44,33 +44,33 @@ namespace blazefeo
         DynamicMatrixPointer& operator=(DynamicMatrixPointer const&) = default;
 
 
-        IntrinsicType load(ptrdiff_t i, ptrdiff_t j) const noexcept
+        IntrinsicType load() const noexcept
         {
-            return blazefeo::load<AF, SS>(ptrOffset(i, j));
+            return blazefeo::load<AF, SS>(ptr_);
         }
 
 
-        IntrinsicType maskLoad(ptrdiff_t i, ptrdiff_t j, MaskType mask) const noexcept
+        IntrinsicType maskLoad(MaskType mask) const noexcept
         {
-            return blazefeo::maskload(ptrOffset(i, j), mask);
+            return blazefeo::maskload(ptr_, mask);
         }
 
 
-        IntrinsicType broadcast(ptrdiff_t i, ptrdiff_t j) const noexcept
+        IntrinsicType broadcast() const noexcept
         {
-            return blazefeo::broadcast<SS>(ptrOffset(i, j));
+            return blazefeo::broadcast<SS>(ptr_);
         }
 
 
-        void store(ptrdiff_t i, ptrdiff_t j, IntrinsicType val) const noexcept
+        void store(IntrinsicType val) const noexcept
         {
-            blazefeo::store<AF>(ptrOffset(i, j), val);
+            blazefeo::store<AF>(ptr_, val);
         }
 
 
-        void maskStore(ptrdiff_t i, ptrdiff_t j, MaskType mask, IntrinsicType val) const noexcept
+        void maskStore(MaskType mask, IntrinsicType val) const noexcept
         {
-            blazefeo::maskstore(ptrOffset(i, j), mask, val);
+            blazefeo::maskstore(ptr_, mask, val);
         }
 
 

@@ -4,8 +4,7 @@
 
 #include <blazefeo/math/simd/RegisterMatrix.hpp>
 #include <blazefeo/math/StaticPanelMatrix.hpp>
-#include <blazefeo/math/dense/DynamicMatrixPointer.hpp>
-#include <blazefeo/math/dense/StaticMatrixPointer.hpp>
+#include <blazefeo/math/dense/MatrixPointer.hpp>
 #include <blazefeo/math/views/submatrix/Panel.hpp>
 
 #include <test/Testing.hpp>
@@ -171,8 +170,8 @@ namespace blazefeo :: testing
                 blaze::randomize(alpha);
 
                 TypeParam ker(m, n);
-                ker.load(ptr<aligned>(C, 0, 0));
-                ker.ger(alpha, ptr<aligned>(A, 0, 0), ptr<aligned>(B, 0, 0));
+                ker.load(ptr(C));
+                ker.ger(alpha, ~ptr(A), ~ptr(B));
 
                 BLAZEFEO_EXPECT_APPROX_EQ(ker,
                     evaluate(C + alpha * A * B), absTol<ET>(), relTol<ET>());
