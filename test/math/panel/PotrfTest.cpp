@@ -30,22 +30,18 @@ namespace blazefeo :: testing
         {
             // Init matrices
             //
-            DynamicMatrix<Real, columnMajor> blaze_A(M, M), blaze_L(M, M);
+            DynamicMatrix<Real, columnMajor> blaze_A(M, M);
             makePositiveDefinite(blaze_A);
-            llh(blaze_A, blaze_L);
 
             DynamicPanelMatrix<Real, columnMajor> A(M, M), L(M, M), A1(M, M);
             A = blaze_A;
-            
+
             // Do potrf
             potrf(A, L);
 
             // Check result
             A1 = 0.;
             gemm_nt(L, L, A1, A1);
-
-            // std::cout << "L=\n" << L << std::endl;
-            // std::cout << "blaze_L=\n" << blaze_L << std::endl;
 
             BLAZEFEO_EXPECT_APPROX_EQ(A1, A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
         }

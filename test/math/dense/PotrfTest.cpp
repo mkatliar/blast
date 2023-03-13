@@ -33,15 +33,12 @@ namespace blazefeo :: testing
             DynamicMatrix<Real, columnMajor> A(M, M), L(M, M);
             makePositiveDefinite(A);
             reset(L);
-            
+
             // Do potrf
             blazefeo::potrf(A, L);
-            // std::cout << "L=\n" << L << std::endl;
 
             // Check result
-            DynamicMatrix<Real> L1;
-            llh(A, L1);
-            BLAZEFEO_EXPECT_APPROX_EQ(L, L1, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
+            BLAZEFEO_EXPECT_APPROX_EQ(L * trans(L), A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
         }
     }
 
@@ -51,21 +48,18 @@ namespace blazefeo :: testing
         using Real = TypeParam;
 
         size_t const M = 20;
-        
+
         // Init matrices
         //
         StaticMatrix<Real, M, M, columnMajor> A, L;
         makePositiveDefinite(A);
         reset(L);
-        
+
         // Do potrf
         blazefeo::potrf(A, L);
-        // std::cout << "L=\n" << L << std::endl;
 
         // Check result
-        DynamicMatrix<Real> L1;
-        llh(A, L1);
-        BLAZEFEO_EXPECT_APPROX_EQ(L, L1, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
+        BLAZEFEO_EXPECT_APPROX_EQ(L * trans(L), A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
     }
 
 
@@ -74,25 +68,22 @@ namespace blazefeo :: testing
         using Real = TypeParam;
 
         size_t const M = 3;
-        
+
         // Init matrices
         //
-        StaticMatrix<Real, M, M, columnMajor> A;
-        makePositiveDefinite(A);
+        StaticMatrix<Real, M, M, columnMajor> A_orig;
+        makePositiveDefinite(A_orig);
+
+        StaticMatrix<Real, M, M, columnMajor> A = A_orig;
         for (size_t i = 0; i < M; ++i)
             for (size_t j = i + 1; j < M; ++j)
                 reset(A(i, j));
 
-        // True result
-        DynamicMatrix<Real> L1;
-        llh(A, L1);
-        
-        // Do potrf
+        // Do potrf in place
         blazefeo::potrf(A, A);
-        // std::cout << "L=\n" << L << std::endl;
 
         // Check result
-        BLAZEFEO_EXPECT_APPROX_EQ(A, L1, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
+        BLAZEFEO_EXPECT_APPROX_EQ(A * trans(A), A_orig, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
     }
 
 

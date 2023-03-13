@@ -6,7 +6,6 @@
 # test
 #
 find_package(GTest 1.9.0 REQUIRED)
-find_package(Threads REQUIRED)    # required for gtest
 find_package(blaze 3.5 REQUIRED)
 
 # ~~~~~~~~~~ Our tests ~~~~~~~~~~~~~~
@@ -48,9 +47,6 @@ target_link_libraries(test-blazefeo PRIVATE
     blaze::blaze
     GTest::GTest
     GTest::Main
-    gmock
-    openblas
-    ${CMAKE_THREAD_LIBS_INIT}    # Needed for gtest
 )
 
 target_compile_definitions(test-blazefeo
