@@ -195,7 +195,10 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT>, SO, AF, IsPadded_v<MT>>
         ptr(DenseMatrix<MT, SO>& m, size_t i, size_t j)
     {
-        return {&(*m)(i, j), spacing(m)};
+        if constexpr (SO == columnMajor)
+            return {(*m).data() + i + spacing(m) * j, spacing(m)};
+        else
+            return {(*m).data() + spacing(m) * i + j, spacing(m)};
     }
 
 
@@ -204,7 +207,10 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>
         ptr(DenseMatrix<MT, SO> const& m, size_t i, size_t j)
     {
-        return {&(*m)(i, j), spacing(m)};
+        if constexpr (SO == columnMajor)
+            return {(*m).data() + i + spacing(m) * j, spacing(m)};
+        else
+            return {(*m).data() + spacing(m) * i + j, spacing(m)};
     }
 
 
@@ -213,7 +219,10 @@ namespace blazefeo
     BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>
         ptr(DMatTransExpr<MT, SO> const& m, size_t i, size_t j)
     {
-        return {&(*m)(i, j), spacing(m)};
+        if constexpr (SO == columnMajor)
+            return {(*m).data() + i + spacing(m) * j, spacing(m)};
+        else
+            return {(*m).data() + spacing(m) * i + j, spacing(m)};
     }
 
 

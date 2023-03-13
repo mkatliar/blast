@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <blaze/math/StorageOrder.h>
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/math/simd/Simd.hpp>
 #include <blazefeo/math/dense/StorageOrder.hpp>
@@ -186,39 +187,39 @@ namespace blazefeo
     }
 
 
-    // NOTE:
-    // IsStatic_v<...> for adapted static matrix types such as
-    // e.g. SymmetricMatrix<StaticMatrix<...>> evaluates to false;
-    // therefore ptr() for these types will return a DynamicMatrixPointer,
-    // which is not performance-optimal.
-    //
-    // See this issue: https://bitbucket.org/blaze-lib/blaze/issues/368
-    //
-
-    template <bool AF, typename MT, bool TF>
+    template <bool AF, typename MT, bool SO>
     requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), TF, AF, IsPadded_v<MT>>
-        ptr(DenseMatrix<MT, TF>& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), SO, AF, IsPadded_v<MT>>
+        ptr(DenseMatrix<MT, SO>& m, size_t i, size_t j)
     {
-        return {&(*m)(i, j)};
+        if constexpr (SO == columnMajor)
+            return {(*m).data() + i + MT::spacing() * j};
+        else
+            return {(*m).data() + MT::spacing() * i + j};
     }
 
 
-    template <bool AF, typename MT, bool TF>
+    template <bool AF, typename MT, bool SO>
     requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), TF, AF, IsPadded_v<MT>>
-        ptr(DenseMatrix<MT, TF> const& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), SO, AF, IsPadded_v<MT>>
+        ptr(DenseMatrix<MT, SO> const& m, size_t i, size_t j)
     {
-        return {&(*m)(i, j)};
+        if constexpr (SO == columnMajor)
+            return {(*m).data() + i + MT::spacing() * j};
+        else
+            return {(*m).data() + MT::spacing() * i + j};
     }
 
 
-    template <bool AF, typename MT, bool TF>
+    template <bool AF, typename MT, bool SO>
     requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), TF, AF, IsPadded_v<MT>>
-        ptr(DMatTransExpr<MT, TF> const& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), SO, AF, IsPadded_v<MT>>
+        ptr(DMatTransExpr<MT, SO> const& m, size_t i, size_t j)
     {
-        return {&(*m)(i, j)};
+        if constexpr (SO == columnMajor)
+            return {(*m).data() + j + MT::spacing() * i};
+        else
+            return {(*m).data() + MT::spacing() * j + i};
     }
 
 
