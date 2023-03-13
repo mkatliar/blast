@@ -28,6 +28,7 @@ add_executable(test-blazefeo
     math/dense/TrmmTest.cpp
     math/dense/TrsvTest.cpp
     math/dense/TrsmTest.cpp
+    math/dense/Iamax.cpp
 
     math/panel/StaticPanelMatrixTest.cpp
     math/panel/DynamicPanelMatrixTest.cpp

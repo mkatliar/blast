@@ -21,6 +21,7 @@ foreach (BLA_VENDOR OpenBLAS Intel10_64lp_seq Intel10_64_dyn)
             Trmv.cpp
             Trsv.cpp
             SyrkPotrf.cpp
+            Iamax.cpp
         )
 
         target_link_libraries(bench-blas-${BLA_VENDOR}

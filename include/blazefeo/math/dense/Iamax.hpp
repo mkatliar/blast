@@ -39,7 +39,7 @@ namespace blazefeo
      */
     template <typename VP>
     requires VectorPointer<VP>
-    inline size_t idamax(size_t n, VP x)
+    inline size_t iamax(size_t n, VP x)
     {
         BLAZE_USER_ASSERT(n > 0, "Vector must be non-empty");
 
@@ -47,7 +47,7 @@ namespace blazefeo
         size_t index = 0;
         for (size_t i = 1; i < n; ++i)
         {
-            auto const v = std::abs(*x(i));
+            auto const v = std::abs(*(~x)(i));
             if (v > value)
             {
                 value = v;
@@ -71,12 +71,12 @@ namespace blazefeo
      * @return index of the first element in @a x having maximum absolute value.
      */
     template <typename VT, bool TF>
-    inline size_t idamax(DenseVector<VT, TF> const& x)
+    inline size_t iamax(DenseVector<VT, TF> const& x)
     {
         size_t const N = size(x);
         if (N == 0)
             BLAZEFEO_THROW_EXCEPTION(std::invalid_argument {"Vector is empty"});
 
-        return idamax(N, ptr(*x));
+        return iamax(N, ptr(*x));
     }
 }

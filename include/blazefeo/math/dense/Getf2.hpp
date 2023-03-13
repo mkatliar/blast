@@ -17,7 +17,7 @@
 #include <blazefeo/Exception.hpp>
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/math/dense/Swap.hpp>
-#include <blazefeo/math/dense/Idamax.hpp>
+#include <blazefeo/math/dense/Iamax.hpp>
 #include <blazefeo/math/dense/Ger.hpp>
 #include <blazefeo/math/dense/MatrixPointer.hpp>
 #include <blazefeo/math/dense/VectorPointer.hpp>
@@ -61,7 +61,7 @@ namespace blazefeo
         for (size_t k = 0; k < m && k < n; ++k)
         {
             // Find pivot and test for singularity.
-            size_t const ip = idamax(m - k, column((~A)(k, k))) + k;
+            size_t const ip = iamax(m - k, column((~A)(k, k))) + k;
             ipiv[k] = ip;
 
             // Exchange rows k and ip
@@ -144,7 +144,7 @@ namespace blazefeo
         for (size_t k = 0; k < M && k < N; ++k)
         {
             // Find pivot and test for singularity.
-            size_t const ip = idamax(subvector(column(*A, k, unchecked), k, M - k, unchecked)) + k;
+            size_t const ip = iamax(subvector(column(*A, k, unchecked), k, M - k, unchecked)) + k;
             ipiv[k] = ip;
 
             // Exchange rows k and ip
