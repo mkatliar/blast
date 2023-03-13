@@ -7,6 +7,7 @@
 #
 find_package(GTest 1.9.0 REQUIRED)
 find_package(blaze 3.5 REQUIRED)
+find_package(LAPACK REQUIRED)
 
 # ~~~~~~~~~~ Our tests ~~~~~~~~~~~~~~
 add_executable(test-blazefeo
@@ -46,6 +47,7 @@ target_link_libraries(test-blazefeo PRIVATE
     blaze::blaze
     GTest::GTest
     GTest::Main
+    LAPACK::LAPACK
 )
 
 target_compile_definitions(test-blazefeo
