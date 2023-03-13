@@ -57,22 +57,20 @@ namespace blazefeo
 
         size_t const M = rows(A);
         size_t const N = columns(A);
+        auto pA = ptr(A);
 
         size_t k = 0;
 
         for (; k + NB < M && k + NB < N; k += NB)
         {
             // Apply the LU factorization on an M x NB column panel of A (i.e., A11 and A12).
-            {
-                auto AA = submatrix(A, k, k, M - k, NB);
-                getf2(AA, ipiv + k);
-            }
+            getf2(M - k, NB, (~pA)(k, k), ipiv + k);
 
             // Adjust the pivot indices.
             for (size_t i = k; i < k + NB; ++i)
                 ipiv[i] += k;
 
-            // // Apply interchanges to columns 0 ... k-1
+            // Apply interchanges to columns 0 ... k-1
             {
                 auto AA = submatrix(A, 0, 0, M, k);
                 laswp(AA, k, k + NB, ipiv);
@@ -90,22 +88,23 @@ namespace blazefeo
             auto A12 = submatrix(A, k, k + NB, NB, N - k - NB);
             trsm<UpLo::Lower, true>(A11, A12, A12);
 
-            auto A22 = submatrix(A, k + NB, k + NB, M - k - NB, N - k - NB);
             gemm(
+                M - k - NB,
+                N - k - NB,
+                NB,
                 ET(-1),
-                submatrix(A, k + NB, k, M - k - NB, NB),
-                submatrix(A, k, k + NB, NB, N - k - NB),
+                pA(k + NB, k),
+                pA(k, k + NB),
                 ET(1),
-                A22,
-                A22
+                pA(k + NB, k + NB),
+                pA(k + NB, k + NB)
             );
         }
 
         if (k < M && k < N)
         {
             // Process the remaining part of the matrix with unblocked algorithm
-            auto AA = submatrix(A, k, k, M - k, N - k);
-            getf2(AA, ipiv + k);
+            getf2(M - k, N - k, pA(k, k), ipiv + k);
         }
 
         // Adjust the pivot indices.
