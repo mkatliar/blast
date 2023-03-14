@@ -16,6 +16,8 @@
 
 #include <blazefeo/math/simd/SimdSize.hpp>
 
+#include <cstdint>
+
 
 namespace blazefeo
 {
@@ -28,6 +30,20 @@ namespace blazefeo
 
     template <>
     struct SimdSize<double>
+    {
+        static size_t constexpr value = 4;
+    };
+
+
+    template <>
+    struct SimdSize<std::int32_t>
+    {
+        static size_t constexpr value = 8;
+    };
+
+
+    template <>
+    struct SimdSize<std::int64_t>
     {
         static size_t constexpr value = 4;
     };

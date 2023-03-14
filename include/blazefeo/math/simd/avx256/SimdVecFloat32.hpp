@@ -16,6 +16,7 @@
 
 #include <blazefeo/math/simd/SimdVec.hpp>
 #include <blazefeo/math/simd/SimdVecBase.hpp>
+#include <blazefeo/math/simd/avx256/SimdSize.hpp>
 
 #include <immintrin.h>
 

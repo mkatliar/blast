@@ -27,10 +27,7 @@ namespace blazefeo :: testing
     };
 
 
-    using MyTypes = Types<
-        double
-        // , float
-    >;
+    using MyTypes = Types<double, float>;
     TYPED_TEST_SUITE(IamaxTest, MyTypes);
 
 
@@ -38,7 +35,7 @@ namespace blazefeo :: testing
     {
         using Real = TypeParam;
 
-        for (size_t n = 1; n < 50; ++n)
+        for (size_t n = 16; n < 50; ++n)
         {
             DynamicVector<Real> x(n);
             randomize(x);

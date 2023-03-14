@@ -17,6 +17,7 @@
 #include <blazefeo/math/simd/SimdVec.hpp>
 #include <blazefeo/math/simd/SimdVecBase.hpp>
 #include <blazefeo/math/simd/SequenceTag.hpp>
+#include <blazefeo/math/simd/avx256/SimdSize.hpp>
 
 #include <immintrin.h>
 
@@ -112,7 +113,10 @@ namespace blazefeo
          */
         ValueType operator[](size_t i) const noexcept
         {
-            return value_[i];
+            alignas(IntrinsicType) ValueType v[size()];
+            _mm256_storeu_si256(reinterpret_cast<IntrinsicType *>(v), value_);
+
+            return v[i];
         }
     };
 }
