@@ -12,38 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <blazefeo/math/dense/Iamax.hpp>
-
-#include <test/Testing.hpp>
-#include <test/Randomize.hpp>
+#pragma once
 
 
-namespace blazefeo :: testing
+namespace blazefeo
 {
+    /**
+     * @brief Data-parallel type with the element type bool.
+     * The width of a given simd_mask instantiation is a constant expression, determined by the template parameter.
+     *
+     * @tparam T the element type simd_mask applies on
+     */
     template <typename T>
-    class IamaxTest
-    :   public Test
-    {
-    };
-
-
-    using MyTypes = Types<double, float>;
-    TYPED_TEST_SUITE(IamaxTest, MyTypes);
-
-
-    TYPED_TEST(IamaxTest, testIamax)
-    {
-        using Real = TypeParam;
-
-        for (size_t n = 1; n < 50; ++n)
-        {
-            DynamicVector<Real> x(n);
-            randomize(x);
-
-            size_t const ind = iamax(x);
-
-            for (auto v : x)
-                ASSERT_LE(std::abs(v), x[ind]) << "Error at size " << n;
-        }
-    }
+    class SimdMask;
 }
