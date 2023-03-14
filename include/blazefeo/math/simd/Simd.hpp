@@ -202,6 +202,13 @@ namespace blazefeo
     auto load(T const * ptr);
 
 
+    template <bool AF, typename T>
+    inline auto load(T const * ptr)
+    {
+        return load<AF, Simd<T>::size>(ptr);
+    }
+
+
     template <size_t SS, typename T>
     auto broadcast(T const * ptr);
 
@@ -341,6 +348,18 @@ namespace blazefeo
     auto set1(T a);
 
 
+    inline auto set1(double a)
+    {
+        return _mm256_set1_pd(a);
+    }
+
+
+    inline auto set1(float a)
+    {
+        return _mm256_set1_ps(a);
+    }
+
+
     template <>
     inline auto set1<4, double>(double a)
     {
@@ -414,6 +433,18 @@ namespace blazefeo
     inline auto fnmadd(__m256 a, __m256 b, __m256 c)
     {
         return _mm256_fnmadd_ps(a, b, c);
+    }
+
+
+    inline auto abs(__m256d a)
+    {
+        return _mm256_andnot_pd(set1(-0.), a);
+    }
+
+
+    inline auto abs(__m256 a)
+    {
+        return _mm256_andnot_ps(set1(-0.f), a);
     }
 
 

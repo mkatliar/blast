@@ -17,6 +17,7 @@
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/Exception.hpp>
 #include <blazefeo/math/dense/VectorPointer.hpp>
+#include <blazefeo/math/simd/Simd.hpp>
 
 #include <cmath>
 #include <tuple>
@@ -42,6 +43,19 @@ namespace blazefeo
     inline size_t iamax(size_t n, VP x)
     {
         BLAZE_USER_ASSERT(n > 0, "Vector must be non-empty");
+
+        // using ET = ElementType_t<VP>;
+        // using IntrinsicType = IntrinsicType_t<ET>;
+        // using MaskType = MaskType_t<ET>;
+        // size_t constexpr SS = SimdSize_v<ET>;
+
+        // size_t i = 0;
+        // for (; i + SS <= n; i += SS)
+        // {
+        //     IntrinsicType val = x(i * SS).load();
+        // }
+
+        // ET value {};
 
         auto value = std::abs(*x);
         size_t index = 0;
