@@ -27,7 +27,7 @@ namespace blazefeo :: benchmark
     template <typename Real>
     static void BM_iamax(State& state)
     {
-        size_t const N = 100;
+        size_t const N = state.range(0);
         DynamicVector<Real> x(N);
         randomize(x);
 
@@ -41,6 +41,6 @@ namespace blazefeo :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_iamax, double);
-    BENCHMARK_TEMPLATE(BM_iamax, float);
+    BENCHMARK_TEMPLATE(BM_iamax, double)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_iamax, float)->DenseRange(1, 50);
 }
