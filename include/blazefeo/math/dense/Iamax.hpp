@@ -46,10 +46,11 @@ namespace blazefeo
 
         using ET = std::remove_cv_t<ElementType_t<VP>>;
         size_t constexpr SS = SimdPack<ET>::size();
+        using IndexType = IntPackType_t<SS>;
 
         SimdPack<ET> a;
-        SimdPack<std::int64_t> ib {3, 2, 1, 0};
-        SimdPack<std::int64_t> ia;
+        IndexType ib {simd::sequenceTag, 0};
+        IndexType ia;
 
         ET value;
         size_t index;

@@ -22,6 +22,14 @@
 
 namespace blazefeo
 {
+    namespace simd
+    {
+        struct SequenceTag {};
+
+        inline SequenceTag constexpr sequenceTag;
+    }
+
+
     template <typename T>
     class SimdPack;
 
@@ -252,7 +260,7 @@ namespace blazefeo
         using MaskType = __m256i;
 
         /**
-         * @brief Initialize to [0, 0, 0, 0]
+         * @brief Initialize to (0, 0, 0, 0)
          */
         SimdPack() noexcept
         :   value_ {_mm256_setzero_si256()}
@@ -261,7 +269,7 @@ namespace blazefeo
 
 
         /**
-         * @brief Initialize to [a, a, a, a]
+         * @brief Initialize to (a, a, a, a)
          */
         SimdPack(ValueType a) noexcept
         :   value_ {_mm256_set1_epi64x(a)}
@@ -270,7 +278,19 @@ namespace blazefeo
 
 
         /**
-         * @brief Initialize to [a3, a2, a1, a0]
+         * @brief Initialize to (n + 3, n + 2, n + 1, n)
+         *
+         * @param n
+         */
+        SimdPack(simd::SequenceTag, ValueType n = 0)
+        :   SimdPack {n + 3, n + 2, n + 1, n}
+        {
+        }
+
+
+        /**
+         * @brief Initialize to [a3, a2, a1, a0],
+         * where a0 corresponds to the lower bits.
          */
         SimdPack(ValueType a3, ValueType a2, ValueType a1, ValueType a0) noexcept
         :   value_ {_mm256_set_epi64x(a3, a2, a1, a0)}
@@ -340,4 +360,148 @@ namespace blazefeo
     private:
         IntrinsicType value_;
     };
+
+
+    template <>
+    class SimdPack<std::int32_t>
+    {
+    public:
+        using ValueType = std::int32_t;
+        using IntrinsicType = __m256i;
+        using MaskType = __m256i;
+
+        /**
+         * @brief Initialize to (0, 0, 0, 0, 0, 0, 0, 0)
+         */
+        SimdPack() noexcept
+        :   value_ {_mm256_setzero_si256()}
+        {
+        }
+
+
+        /**
+         * @brief Initialize to (a, a, a, a, a, a, a, a)
+         */
+        SimdPack(ValueType a) noexcept
+        :   value_ {_mm256_set1_epi32(a)}
+        {
+        }
+
+
+        /**
+         * @brief Initialize to (n + 7, n + 6, n + 5, n + 4, n + 3, n + 2, n + 1, n)
+         *
+         * @param n
+         */
+        SimdPack(simd::SequenceTag, ValueType n = 0)
+        :   SimdPack {n + 7, n + 6, n + 5, n + 4, n + 3, n + 2, n + 1, n}
+        {
+        }
+
+
+        /**
+         * @brief Initialize to (a7, a6, a5, a4, a3, a2, a1, a0),
+         * where a0 corresponds to the lower bits.
+         */
+        SimdPack(ValueType a7, ValueType a6, ValueType a5, ValueType a4,
+            ValueType a3, ValueType a2, ValueType a1, ValueType a0) noexcept
+        :   value_ {_mm256_set_epi32(a7, a6, a5, a4, a3, a2, a1, a0)}
+        {
+        }
+
+
+        SimdPack(IntrinsicType value) noexcept
+        :   value_ {value}
+        {
+        }
+
+
+        operator IntrinsicType() const noexcept
+        {
+            return value_;
+        }
+
+
+        SimdPack& operator+=(ValueType x) noexcept
+        {
+            value_ = _mm256_add_epi32(value_, _mm256_set1_epi32(x));
+            return *this;
+        }
+
+
+        friend MaskType operator>(SimdPack const& a, SimdPack const& b) noexcept
+        {
+            return _mm256_cmpgt_epi32(a.value_, b.value_);
+        }
+
+
+        friend SimdPack blend(SimdPack const& a, SimdPack const& b, MaskType mask) noexcept
+        {
+            return _mm256_blendv_epi8(a.value_, b.value_, mask);
+        }
+
+
+        friend SimdPack operator+(SimdPack const& a, ValueType n) noexcept
+        {
+            return _mm256_add_epi32(a.value_, _mm256_set1_epi32(n));
+        }
+
+
+        /**
+         * @brief Number of elements in SIMD pack
+         */
+        static size_t constexpr size()
+        {
+            return 8;
+        }
+
+
+        /**
+         * @brief Access single element
+         *
+         * @param i element index
+         *
+         * @return element value
+         */
+        ValueType operator[](size_t i) const noexcept
+        {
+            return value_[i];
+        }
+
+
+    private:
+        IntrinsicType value_;
+    };
+
+
+    /**
+     * @brief Defines type of SIMD pack of integers with a given number of element.
+     *
+     * @tparam SS number of integers packed in a SIMD register.
+     */
+    template <size_t SS>
+    struct IntPackType;
+
+
+    template <>
+    struct IntPackType<4>
+    {
+        using type = SimdPack<std::int64_t>;
+    };
+
+
+    template <>
+    struct IntPackType<8>
+    {
+        using type = SimdPack<std::int32_t>;
+    };
+
+
+    /**
+     * @brief Type of SIMD pack of integers with a given number of element.
+     *
+     * @tparam SS number of integers packed in a SIMD register.
+     */
+    template <size_t SS>
+    using IntPackType_t = typename IntPackType<SS>::type;
 }
