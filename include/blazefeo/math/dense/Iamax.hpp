@@ -48,7 +48,7 @@ namespace blazefeo
         size_t constexpr SS = SimdPack<ET>::size();
 
         SimdPack<ET> a;
-        SimdPack<std::int64_t> i0 {3, 2, 1, 0};
+        SimdPack<std::int64_t> ib {3, 2, 1, 0};
         SimdPack<std::int64_t> ia;
 
         ET value;
@@ -58,15 +58,16 @@ namespace blazefeo
         if (i + 2 * SS <= n)
         {
             a = abs(x(i).load());
-            ia = i0;
+            ia = ib;
             i += SS;
+            ib += SS;
 
-            for (; i + SS <= n; i += SS)
+            for (; i + SS <= n; i += SS, ib += SS)
             {
                 SimdPack<ET> const b = abs(x(i).load());
                 auto const mask = b > a;
                 a = blend(a, b, mask);
-                ia = blend(ia, i0 + i, mask);
+                ia = blend(ia, ib, mask);
             }
 
             value = std::abs(a[0]);

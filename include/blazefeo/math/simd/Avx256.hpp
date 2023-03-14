@@ -290,6 +290,13 @@ namespace blazefeo
         }
 
 
+        SimdPack& operator+=(ValueType x) noexcept
+        {
+            value_ = _mm256_add_epi64(value_, _mm256_set1_epi64x(x));
+            return *this;
+        }
+
+
         friend MaskType operator>(SimdPack const& a, SimdPack const& b) noexcept
         {
             return _mm256_cmpgt_epi64(a.value_, b.value_);
