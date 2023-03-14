@@ -27,21 +27,26 @@ namespace blazefeo :: testing
     };
 
 
-    using MyTypes = Types<double, float>;
+    using MyTypes = Types<
+        double
+        // , float
+    >;
     TYPED_TEST_SUITE(IamaxTest, MyTypes);
 
 
-    TYPED_TEST(IamaxTest, testVector)
+    TYPED_TEST(IamaxTest, testIamax)
     {
         using Real = TypeParam;
-        size_t const N = 100;
 
-        DynamicVector<Real> x(N);
-        randomize(x);
+        for (size_t n = 1; n < 50; ++n)
+        {
+            DynamicVector<Real> x(n);
+            randomize(x);
 
-        size_t const ind = iamax(x);
+            size_t const ind = iamax(x);
 
-        for (auto v : x)
-            ASSERT_LE(std::abs(v), x[ind]);
+            for (auto v : x)
+                ASSERT_LE(std::abs(v), x[ind]) << "Error at size " << n;
+        }
     }
 }

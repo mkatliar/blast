@@ -17,7 +17,7 @@
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/Exception.hpp>
 #include <blazefeo/math/dense/VectorPointer.hpp>
-#include <blazefeo/math/simd/Simd.hpp>
+#include <blazefeo/math/simd/Avx256.hpp>
 
 #include <cmath>
 #include <tuple>
@@ -44,24 +44,50 @@ namespace blazefeo
     {
         BLAZE_USER_ASSERT(n > 0, "Vector must be non-empty");
 
-        // using ET = ElementType_t<VP>;
-        // using IntrinsicType = IntrinsicType_t<ET>;
-        // using MaskType = MaskType_t<ET>;
-        // size_t constexpr SS = SimdSize_v<ET>;
+        using ET = std::remove_cv_t<ElementType_t<VP>>;
+        size_t constexpr SS = SimdPack<ET>::size();
 
-        // size_t i = 0;
-        // for (; i + SS <= n; i += SS)
-        // {
-        //     IntrinsicType val = x(i * SS).load();
-        // }
+        SimdPack<ET> a;
+        SimdPack<std::int64_t> i0 {3, 2, 1, 0};
+        SimdPack<std::int64_t> ia;
 
-        // ET value {};
+        ET value;
+        size_t index;
+        size_t i = 0;
 
-        auto value = std::abs(*x);
-        size_t index = 0;
-        for (size_t i = 1; i < n; ++i)
+        if (i + 2 * SS <= n)
         {
-            auto const v = std::abs(*(~x)(i));
+            a = abs(x(i).load());
+            ia = i0;
+            i += SS;
+
+            for (; i + SS <= n; i += SS)
+            {
+                SimdPack<ET> const b = abs(x(i).load());
+                auto const mask = b > a;
+                a = blend(a, b, mask);
+                ia = blend(ia, i0 + i, mask);
+            }
+
+            value = std::abs(a[0]);
+            index = ia[0];
+            for (int j = 1; j < SS; ++j)
+                if (a[j] > value)
+                {
+                    value = a[j];
+                    index = ia[j];
+                }
+        }
+        else
+        {
+            value = std::abs(*x);
+            index = 0;
+            ++i;
+        }
+
+        for (; i < n; ++i)
+        {
+            ET const v = std::abs(*(~x)(i));
             if (v > value)
             {
                 value = v;
