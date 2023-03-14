@@ -56,7 +56,7 @@ namespace blazefeo
         size_t index;
         size_t i = 0;
 
-        if (i + 2 * SS <= n)
+        if (i + SS <= n)
         {
             a = abs(x(i).load());
             ia = ib;
