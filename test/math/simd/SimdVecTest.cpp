@@ -30,7 +30,7 @@ namespace blazefeo :: testing
     TYPED_TEST(SimdVecTest, testHmax)
     {
         using Scalar = TypeParam;
-        size_t constexpr SS = SimdVec<Scalar>::size();
+        size_t constexpr SS = SimdSize_v<Scalar>;
 
         std::array<Scalar, SS> a;
         for (int i = 0; i < 1000; ++i)
@@ -45,7 +45,7 @@ namespace blazefeo :: testing
     TYPED_TEST(SimdVecTest, testAbs)
     {
         using Scalar = TypeParam;
-        size_t constexpr SS = SimdVec<Scalar>::size();
+        size_t constexpr SS = SimdSize_v<Scalar>;
 
         blaze::StaticVector<Scalar, SS> a;
         randomize(a);

@@ -14,12 +14,20 @@
 
 #pragma once
 
-#include <blazefeo/math/simd/avx256/SimdSize.hpp>
-#include <blazefeo/math/simd/avx256/SimdVecFloat32.hpp>
-#include <blazefeo/math/simd/avx256/SimdVecFloat64.hpp>
-#include <blazefeo/math/simd/avx256/SimdVecInt32.hpp>
-#include <blazefeo/math/simd/avx256/SimdVecInt64.hpp>
-// #include <blazefeo/math/simd/avx256/SimdMask.hpp>
-#include <blazefeo/math/simd/avx256/IntScalarType.hpp>
+#include <cstdlib>
 
-#include <blazefeo/math/simd/IntVecType.hpp>
+
+namespace blazefeo
+{
+    template <typename T>
+    struct SimdSize;
+
+
+    /**
+     * @brief Number of elements in a SimdVec<T> object.
+     *
+     * @tparam T scalar type
+     */
+    template <typename T>
+    size_t constexpr SimdSize_v = SimdSize<T>::value;
+}

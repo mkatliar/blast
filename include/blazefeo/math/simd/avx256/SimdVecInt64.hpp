@@ -15,6 +15,7 @@
 #pragma once
 
 #include <blazefeo/math/simd/SimdVec.hpp>
+#include <blazefeo/math/simd/SimdVecBase.hpp>
 #include <blazefeo/math/simd/SequenceTag.hpp>
 
 #include <immintrin.h>
@@ -26,17 +27,16 @@ namespace blazefeo
 {
     template <>
     class SimdVec<std::int64_t>
+    :   public SimdVecBase<std::int64_t, __m256i>
     {
     public:
-        using ValueType = std::int64_t;
-        using IntrinsicType = __m256i;
         using MaskType = __m256i;
 
         /**
          * @brief Initialize to (0, 0, 0, 0)
          */
         SimdVec() noexcept
-        :   value_ {_mm256_setzero_si256()}
+        :   SimdVecBase {_mm256_setzero_si256()}
         {
         }
 
@@ -45,7 +45,7 @@ namespace blazefeo
          * @brief Initialize to (a, a, a, a)
          */
         SimdVec(ValueType a) noexcept
-        :   value_ {_mm256_set1_epi64x(a)}
+        :   SimdVecBase {_mm256_set1_epi64x(a)}
         {
         }
 
@@ -66,13 +66,13 @@ namespace blazefeo
          * where a0 corresponds to the lower bits.
          */
         SimdVec(ValueType a3, ValueType a2, ValueType a1, ValueType a0) noexcept
-        :   value_ {_mm256_set_epi64x(a3, a2, a1, a0)}
+        :   SimdVecBase {_mm256_set_epi64x(a3, a2, a1, a0)}
         {
         }
 
 
         SimdVec(IntrinsicType value) noexcept
-        :   value_ {value}
+        :   SimdVecBase {value}
         {
         }
 
@@ -109,15 +109,6 @@ namespace blazefeo
 
 
         /**
-         * @brief Number of elements in SIMD pack
-         */
-        static size_t constexpr size()
-        {
-            return 4;
-        }
-
-
-        /**
          * @brief Access single element
          *
          * @param i element index
@@ -128,9 +119,5 @@ namespace blazefeo
         {
             return value_[i];
         }
-
-
-    private:
-        IntrinsicType value_;
     };
 }

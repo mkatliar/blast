@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <blazefeo/math/simd/Avx256.hpp>
+
 #include <blaze/util/Types.h>
 #include <blaze/system/Inline.h>
 #include <blaze/math/AlignmentFlag.h>
@@ -182,10 +184,6 @@ namespace blazefeo
 
     template <typename T>
     using IntType_t = typename SimdTraits<T>::IntType;
-
-
-    template <typename T>
-    size_t constexpr SimdSize_v = SimdTraits<T>::size;
 
 
     template <typename T>

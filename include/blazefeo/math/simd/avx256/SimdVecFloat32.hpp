@@ -15,6 +15,7 @@
 #pragma once
 
 #include <blazefeo/math/simd/SimdVec.hpp>
+#include <blazefeo/math/simd/SimdVecBase.hpp>
 
 #include <immintrin.h>
 
@@ -23,42 +24,35 @@ namespace blazefeo
 {
     template <>
     class SimdVec<float>
+    :   public SimdVecBase<float, __m256>
     {
     public:
-        using ValueType = float;
-        using IntrinsicType = __m256;
         using MaskType = __m256i;
 
         /**
          * @brief Set to [0, 0, 0, ...]
          */
         SimdVec() noexcept
-        :   value_ {_mm256_setzero_ps()}
+        :   SimdVecBase {_mm256_setzero_ps()}
         {
         }
 
 
         SimdVec(IntrinsicType value) noexcept
-        :   value_ {value}
+        :   SimdVecBase {value}
         {
         }
 
 
         SimdVec(ValueType value) noexcept
-        :   value_ {_mm256_set1_ps(value)}
+        :   SimdVecBase {_mm256_set1_ps(value)}
         {
         }
 
 
         SimdVec(ValueType const * src, bool aligned) noexcept
-        :   value_ {aligned ? _mm256_load_ps(src) : _mm256_loadu_ps(src)}
+        :   SimdVecBase {aligned ? _mm256_load_ps(src) : _mm256_loadu_ps(src)}
         {
-        }
-
-
-        operator IntrinsicType() const noexcept
-        {
-            return value_;
         }
 
 
@@ -107,15 +101,6 @@ namespace blazefeo
 
 
         /**
-         * @brief Number of elements in SIMD pack
-         */
-        static size_t constexpr size()
-        {
-            return 8;
-        }
-
-
-        /**
          * @brief Access single element
          *
          * @param i element index
@@ -126,9 +111,5 @@ namespace blazefeo
         {
             return value_[i];
         }
-
-
-    private:
-        IntrinsicType value_;
     };
 }
