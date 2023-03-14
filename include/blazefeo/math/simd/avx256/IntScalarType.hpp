@@ -14,11 +14,21 @@
 
 #pragma once
 
-#include <blazefeo/math/simd/avx256/SimdVecFloat32.hpp>
-#include <blazefeo/math/simd/avx256/SimdVecFloat64.hpp>
-#include <blazefeo/math/simd/avx256/SimdVecInt32.hpp>
-#include <blazefeo/math/simd/avx256/SimdVecInt64.hpp>
-// #include <blazefeo/math/simd/avx256/SimdMask.hpp>
-#include <blazefeo/math/simd/avx256/IntScalarType.hpp>
+#include <blazefeo/math/simd/IntScalarType.hpp>
 
-#include <blazefeo/math/simd/IntVecType.hpp>
+
+namespace blazefeo
+{
+    template <>
+    struct IntScalarType<4>
+    {
+        using type = std::int64_t;
+    };
+
+
+    template <>
+    struct IntScalarType<8>
+    {
+        using type = std::int32_t;
+    };
+}

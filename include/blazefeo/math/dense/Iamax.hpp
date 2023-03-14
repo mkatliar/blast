@@ -45,10 +45,10 @@ namespace blazefeo
         BLAZE_USER_ASSERT(n > 0, "Vector must be non-empty");
 
         using ET = std::remove_cv_t<ElementType_t<VP>>;
-        size_t constexpr SS = SimdPack<ET>::size();
-        using IndexType = IntPackType_t<SS>;
+        size_t constexpr SS = SimdVec<ET>::size();
+        using IndexType = IntVecType_t<SS>;
 
-        SimdPack<ET> a;
+        SimdVec<ET> a;
         IndexType ib {simd::sequenceTag, 0};
         IndexType ia;
 
@@ -65,7 +65,7 @@ namespace blazefeo
 
             for (; i + SS <= n; i += SS, ib += SS)
             {
-                SimdPack<ET> const b = abs(x(i).load());
+                SimdVec<ET> const b = abs(x(i).load());
                 auto const mask = b > a;
                 a = blend(a, b, mask);
                 ia = blend(ia, ib, mask);

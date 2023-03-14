@@ -14,11 +14,15 @@
 
 #pragma once
 
-#include <blazefeo/math/simd/avx256/SimdVecFloat32.hpp>
-#include <blazefeo/math/simd/avx256/SimdVecFloat64.hpp>
-#include <blazefeo/math/simd/avx256/SimdVecInt32.hpp>
-#include <blazefeo/math/simd/avx256/SimdVecInt64.hpp>
-// #include <blazefeo/math/simd/avx256/SimdMask.hpp>
-#include <blazefeo/math/simd/avx256/IntScalarType.hpp>
 
-#include <blazefeo/math/simd/IntVecType.hpp>
+namespace blazefeo
+{
+    /**
+     * @brief Data-parallel type with the element type bool.
+     * The width of a given simd_mask instantiation is a constant expression, determined by the template parameter.
+     *
+     * @tparam T the element type simd_mask applies on
+     */
+    template <typename T>
+    class SimdVec;
+}

@@ -14,7 +14,7 @@ add_executable(test-blazefeo
     math/simd/RegisterMatrixTest.cpp
     math/simd/DynamicRegisterMatrixTest.cpp
     math/simd/HsumTest.cpp
-    math/simd/SimdPackTest.cpp
+    math/simd/SimdVecTest.cpp
 
     math/dense/StaticMatrixPointerTest.cpp
     math/dense/StaticVectorPointerTest.cpp

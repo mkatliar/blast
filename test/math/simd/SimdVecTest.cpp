@@ -17,42 +17,42 @@ using namespace blaze;
 namespace blazefeo :: testing
 {
     template <typename T>
-    class SimdPackTest
+    class SimdVecTest
     :   public Test
     {
     };
 
 
     using MyTypes = Types<double, float>;
-    TYPED_TEST_SUITE(SimdPackTest, MyTypes);
+    TYPED_TEST_SUITE(SimdVecTest, MyTypes);
 
 
-    TYPED_TEST(SimdPackTest, testHmax)
+    TYPED_TEST(SimdVecTest, testHmax)
     {
         using Scalar = TypeParam;
-        size_t constexpr SS = SimdPack<Scalar>::size();
+        size_t constexpr SS = SimdVec<Scalar>::size();
 
         std::array<Scalar, SS> a;
         for (int i = 0; i < 1000; ++i)
         {
             randomize(a);
-            SimdPack<Scalar> v {data(a), false};
+            SimdVec<Scalar> v {data(a), false};
             ASSERT_EQ(max(v), *std::max_element(a.begin(), a.end()));
         }
     }
 
 
-    TYPED_TEST(SimdPackTest, testAbs)
+    TYPED_TEST(SimdVecTest, testAbs)
     {
         using Scalar = TypeParam;
-        size_t constexpr SS = SimdPack<Scalar>::size();
+        size_t constexpr SS = SimdVec<Scalar>::size();
 
         blaze::StaticVector<Scalar, SS> a;
         randomize(a);
         a -= 0.5;
 
-        SimdPack<Scalar> const v {a.data(), false};
-        SimdPack<Scalar> abs_v = abs(v);
+        SimdVec<Scalar> const v {a.data(), false};
+        SimdVec<Scalar> abs_v = abs(v);
 
         for (size_t i = 0; i < SS; ++i)
             ASSERT_EQ(abs_v[i], std::abs(a[i]));
