@@ -26,6 +26,33 @@
 namespace blazefeo
 {
     /**
+     * @brief Find element-wise maximum of two SIMD vectors and keep track of indices.
+     *
+     * This is useful for finding index of a maximum element in SIMD-enabled code.
+     *
+     * @tparam Float floating point vector element type
+     * @tparam Index index vector element type
+     *
+     * @param a first floating point vector
+     * @param idxa first index vector
+     * @param b second floating point vector
+     * @param idxb second index vector
+     *
+     * @return A tuple (c, idxc) where c = max(a, b), and idxc[i] = a[i] > b[i] ? idxa[i] : idxb[i]
+     */
+    template <typename Float, typename Index>
+    requires (SimdSize_v<Float> == SimdSize_v<Index>)
+    inline std::tuple<SimdVec<Float>, SimdVec<Index>> imax(
+        SimdVec<Float> const& a, SimdVec<Index> const& idxa,
+        SimdVec<Float> const& b, SimdVec<Index> const& idxb
+    )
+    {
+        auto const mask = b > a;
+        return std::make_tuple(blend(a, b, mask), blend(idxa, idxb, mask));
+    }
+
+
+    /**
      * @brief Finds the index of the first element in a vector having maximum absolute value.
      *
      * https://netlib.org/lapack/explore-html/d0/d73/group__aux__blas_ga285793254ff0adaf58c605682efb880c.html
@@ -59,17 +86,9 @@ namespace blazefeo
 
             size_t i = SS;
             for (; i + SS <= n; i += SS, ib += SS)
-            {
-                SimdVec<ET> const b = abs(x(i).load());
-                auto const mask = b > a;
-                a = blend(a, b, mask);
-                ia = blend(ia, ib, mask);
-            }
+                std::tie(a, ia) = imax(a, ia, abs(x(i).load()), ib);
 
-            SimdVec<ET> const b = abs(x(i).maskLoad(n > ib));
-            auto const mask = b > a;
-            a = blend(a, b, mask);
-            ia = blend(ia, ib, mask);
+            std::tie(a, ia) = imax(a, ia, abs(x(i).maskLoad(n > ib)), ib);
         }
         else
         {

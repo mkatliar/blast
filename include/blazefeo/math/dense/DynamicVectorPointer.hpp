@@ -19,6 +19,7 @@ namespace blazefeo
         using ElementType = T;
         using IntrinsicType = typename Simd<std::remove_cv_t<T>>::IntrinsicType;
         using MaskType = typename Simd<std::remove_cv_t<T>>::MaskType;
+        using SimdVecType = SimdVec<std::remove_cv_t<T>>;
 
         static bool constexpr transposeFlag = TF;
         static bool constexpr aligned = AF;
@@ -45,18 +46,18 @@ namespace blazefeo
         DynamicVectorPointer& operator=(DynamicVectorPointer const&) = default;
 
 
-        IntrinsicType load() const noexcept
+        SimdVecType load() const noexcept
         {
             // Non-optimized
             IntrinsicType v;
             for (size_t i = 0; i < SS; ++i)
                 v[i] = ptr_[spacing_ * i];
 
-            return v;
+            return SimdVecType {v};
         }
 
 
-        IntrinsicType maskLoad(MaskType mask) const noexcept
+        SimdVecType maskLoad(MaskType mask) const noexcept
         {
             // Non-optimized
             IntrinsicType v = blazefeo::setzero<std::remove_cv_t<ElementType>, SS>();
@@ -64,7 +65,7 @@ namespace blazefeo
                 if (mask[i])
                     v[i] = ptr_[spacing_ * i];
 
-            return v;
+            return SimdVecType {v};
         }
 
 

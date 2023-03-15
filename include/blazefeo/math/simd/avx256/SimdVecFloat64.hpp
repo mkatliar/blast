@@ -53,8 +53,27 @@ namespace blazefeo
         }
 
 
+        /**
+         * @brief Load from location
+         *
+         * @param src memory location to load from
+         * @param aligned true if @a src is SIMD-aligned
+         */
         SimdVec(ValueType const * src, bool aligned) noexcept
         :   SimdVecBase {aligned ? _mm256_load_pd(src) : _mm256_loadu_pd(src)}
+        {
+        }
+
+
+        /**
+         * @brief Masked load from location
+         *
+         * @param src memory location to load from
+         * @param mask load mask
+         * @param aligned true if @a src is SIMD-aligned
+         */
+        SimdVec(ValueType const * src, MaskType mask, bool aligned) noexcept
+        :   SimdVecBase {_mm256_maskload_pd(src, mask)}
         {
         }
 
@@ -62,6 +81,12 @@ namespace blazefeo
         friend MaskType operator>(SimdVec const& a, SimdVec const& b) noexcept
         {
             return _mm256_cmp_pd(a.value_, b.value_, _CMP_GT_OQ);
+        }
+
+
+        friend SimdVec operator*(ValueType a, SimdVec const& x) noexcept
+        {
+            return a * x.value_;
         }
 
 
