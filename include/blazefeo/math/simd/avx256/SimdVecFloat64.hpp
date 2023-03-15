@@ -103,7 +103,21 @@ namespace blazefeo
 
 
         /**
-        * @brief Maximum across all alements
+        * @brief Vertical max (across two vectors)
+        *
+        * @param a first vector
+        * @param b second vector
+        *
+        * @return [max(a[3], b3), max(a[2], b2), max(a[1], b1), max(a[0], b0)]
+        */
+        friend SimdVec max(SimdVec const& a, SimdVec const& b)
+        {
+            return _mm256_max_pd(a, b);
+        }
+
+
+        /**
+        * @brief Horizontal max (across all alements)
         *
         * The implementation is based on
         * https://stackoverflow.com/questions/9795529/how-to-find-the-horizontal-maximum-in-a-256-bit-avx-vector

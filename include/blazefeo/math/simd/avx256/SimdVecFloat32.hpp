@@ -103,7 +103,21 @@ namespace blazefeo
 
 
         /**
-        * @brief Max across all elements
+        * @brief Vertical max (across two vectors)
+        *
+        * @param a first vector
+        * @param b second vector
+        *
+        * @return [max(a[7], b7), [max(a[6], b6), max(a[5], b5), max(a[4], b4), max(a[3], b3), max(a[2], b2), max(a[1], b1), max(a[0], b0)]
+        */
+        friend SimdVec max(SimdVec const& a, SimdVec const& b)
+        {
+            return _mm256_max_ps(a, b);
+        }
+
+
+        /**
+        * @brief Horizontal max (across all elements)
         *
         * The implementation is based on
         * https://stackoverflow.com/questions/9795529/how-to-find-the-horizontal-maximum-in-a-256-bit-avx-vector
@@ -112,7 +126,7 @@ namespace blazefeo
         *
         * @return max(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7])
         */
-        friend ValueType max(SimdVec x)
+        friend ValueType max(SimdVec const& x)
         {
             __m256 v1 = x.value_;                                          /* v1 = [H G F E | D C B A]                                                                         */
             __m256 v2 = _mm256_permute_ps(v1, 0b10'11'00'01);       /* v2 = [G H E F | C D A B]                                                                         */

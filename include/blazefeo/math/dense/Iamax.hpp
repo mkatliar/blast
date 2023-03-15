@@ -47,8 +47,7 @@ namespace blazefeo
         SimdVec<Float> const& b, SimdVec<Index> const& idxb
     )
     {
-        auto const mask = b > a;
-        return std::make_tuple(blend(a, b, mask), blend(idxa, idxb, mask));
+        return std::make_tuple(max(a, b), blend(idxa, idxb, b > a));
     }
 
 
