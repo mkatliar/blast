@@ -75,26 +75,28 @@ namespace blazefeo
         size_t constexpr SS = SimdVec<ET>::size();
         using IndexType = IntVecType_t<SS>;
 
-        SimdVec<ET> a;
+        SimdVec<ET> a {};
         IndexType ib {simd::sequenceTag, 0};
         IndexType ia = ib;
 
+        size_t i = 0;
+
+        // Load initial value
         if (SS <= n)
         {
             a = abs(x.load());
             ib += SS;
-
-            size_t i = SS;
-            for (; i + SS <= n; i += SS, ib += SS)
-                std::tie(a, ia) = imax(a, ia, abs(x(i).load()), ib);
-
-            std::tie(a, ia) = imax(a, ia, abs(x(i).maskLoad(n > ib)), ib);
-        }
-        else
-        {
-            a = abs(x.maskLoad(n > ib));
+            i += SS;
         }
 
+        // Process full SIMD chunks
+        for (; i + SS <= n; i += SS, ib += SS)
+            std::tie(a, ia) = imax(a, ia, abs(x(i).load()), ib);
+
+        // Process the remaining elements
+        std::tie(a, ia) = imax(a, ia, abs(x(i).maskLoad(n > ib)), ib);
+
+        // Compute horizontal maximum
         std::tie(a, ia) = imax(a, ia);
 
         return ia[0];
