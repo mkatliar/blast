@@ -71,7 +71,7 @@ namespace blazefeo
                 ia = blend(ia, ib, mask);
             }
 
-            value = std::abs(a[0]);
+            value = a[0];
             index = ia[0];
             for (int j = 1; j < SS; ++j)
                 if (a[j] > value)
