@@ -50,19 +50,14 @@ namespace blazefeo
 
         SimdVec<ET> a;
         IndexType ib {simd::sequenceTag, 0};
-        IndexType ia;
+        IndexType ia = ib;
 
-        ET value;
-        size_t index;
-        size_t i = 0;
-
-        if (i + SS <= n)
+        if (SS <= n)
         {
-            a = abs(x(i).load());
-            ia = ib;
-            i += SS;
+            a = abs(x.load());
             ib += SS;
 
+            size_t i = SS;
             for (; i + SS <= n; i += SS, ib += SS)
             {
                 SimdVec<ET> const b = abs(x(i).load());
@@ -71,28 +66,19 @@ namespace blazefeo
                 ia = blend(ia, ib, mask);
             }
 
-            std::tie(a, ia) = imax(a, ia);
-            value = a[0];
-            index = ia[0];
+            SimdVec<ET> const b = abs(x(i).maskLoad(n > ib));
+            auto const mask = b > a;
+            a = blend(a, b, mask);
+            ia = blend(ia, ib, mask);
         }
         else
         {
-            value = std::abs(*x);
-            index = 0;
-            ++i;
+            a = abs(x.maskLoad(n > ib));
         }
 
-        for (; i < n; ++i)
-        {
-            ET const v = std::abs(*(~x)(i));
-            if (v > value)
-            {
-                value = v;
-                index = i;
-            }
-        }
+        std::tie(a, ia) = imax(a, ia);
 
-        return index;
+        return ia[0];
     }
 
 

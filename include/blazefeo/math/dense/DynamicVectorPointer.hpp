@@ -7,6 +7,8 @@
 #include <blazefeo/Blaze.hpp>
 #include <blazefeo/math/simd/Simd.hpp>
 
+#include <type_traits>
+
 
 namespace blazefeo
 {
@@ -57,7 +59,7 @@ namespace blazefeo
         IntrinsicType maskLoad(MaskType mask) const noexcept
         {
             // Non-optimized
-            IntrinsicType v = blazefeo::setzero<ElementType, SS>();
+            IntrinsicType v = blazefeo::setzero<std::remove_cv_t<ElementType>, SS>();
             for (size_t i = 0; i < SS; ++i)
                 if (mask[i])
                     v[i] = ptr_[spacing_ * i];
