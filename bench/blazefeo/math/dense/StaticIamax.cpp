@@ -16,24 +16,24 @@
 
 #include <blaze/math/DynamicVector.h>
 
-#include <bench/Benchmark.hpp>
+#include <bench/Iamax.hpp>
 #include <bench/Complexity.hpp>
-
-#include <test/Randomize.hpp>
 
 
 namespace blazefeo :: benchmark
 {
-    template <typename Real>
-    static void BM_iamax(State& state)
+    template <typename Real, size_t N>
+    static void BM_iamax_static(State& state)
     {
-        size_t const N = state.range(0);
-        DynamicVector<Real> x(N);
+        StaticVector<Real, N> x;
         randomize(x);
+
+        size_t idx;
 
         for (auto _ : state)
         {
-            size_t idx = iamax(x);
+            x[0] = 0;
+            idx = iamax(x);
             DoNotOptimize(idx);
         }
 
@@ -41,6 +41,9 @@ namespace blazefeo :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_iamax, double)->DenseRange(1, 50);
-    BENCHMARK_TEMPLATE(BM_iamax, float)->DenseRange(1, 50);
+#define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_IAMAX)
+#define BOOST_PP_LOCAL_MACRO(n) \
+    BENCHMARK_TEMPLATE(BM_iamax_static, double, n); \
+    BENCHMARK_TEMPLATE(BM_iamax_static, float, n);
+#include BOOST_PP_LOCAL_ITERATE()
 }
