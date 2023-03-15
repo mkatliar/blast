@@ -71,14 +71,9 @@ namespace blazefeo
                 ia = blend(ia, ib, mask);
             }
 
+            std::tie(a, ia) = imax(a, ia);
             value = a[0];
             index = ia[0];
-            for (int j = 1; j < SS; ++j)
-                if (a[j] > value)
-                {
-                    value = a[j];
-                    index = ia[j];
-                }
         }
         else
         {
