@@ -30,9 +30,12 @@ namespace blazefeo :: benchmark
         DynamicVector<Real> x(N);
         randomize(x);
 
+        size_t idx;
+
         for (auto _ : state)
         {
-            size_t idx = iamax(x);
+            x[0] = 0.;
+            idx = iamax(x);
             DoNotOptimize(idx);
         }
 
