@@ -76,8 +76,12 @@ namespace blazefeo :: testing
             IntVecType_t<SS> idx_max;
             std::tie(v_max, idx_max) = imax(v, idx);
 
-            ASSERT_EQ(idx_max[0], std::distance(a.begin(), std::max_element(a.begin(), a.end())));
-            ASSERT_EQ(v_max[0], *std::max_element(a.begin(), a.end()));
+            auto const max_el = std::max_element(a.begin(), a.end());
+            for (size_t i = 0; i < idx_max.size(); ++i)
+                ASSERT_EQ(idx_max[i], std::distance(a.begin(), max_el)) << "Error at element " << i;
+
+            for (size_t i = 0; i < v_max.size(); ++i)
+                ASSERT_EQ(v_max[i], *max_el) << "Error at element " << i;
         }
     }
 }

@@ -109,7 +109,7 @@ namespace blazefeo
             SimdVec<Index> const im1 = blend(idx, iy, mask_m1);
 
             SimdVec const m2 = _mm256_permute_pd(m1, 5); // set m2[0] = m1[1], m2[1] = m1[0], etc.
-            SimdVec<Index> const im2 = _mm256_permutex_epi64(im1, 5);
+            SimdVec<Index> const im2 = _mm256_permute_pd(im1, 5);
 
             // __m256d m = _mm256_max_pd(m1, m2); // all m[0] ... m[3] contain the horizontal max(x[0], x[1], x[2], x[3])
             MaskType const mask_m = m2 > m1;
