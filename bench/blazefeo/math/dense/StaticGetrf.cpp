@@ -16,7 +16,7 @@
 namespace blazefeo :: benchmark
 {
     template <typename Real, size_t M>
-    static void BM_getrf_static_plain(State& state)
+    static void BM_getrf_static_plain_best_case(State& state)
     {
         StaticMatrix<Real, M, M, columnMajor> A = IdentityMatrix<Real>(M);
         std::vector<size_t> ipiv(M);
@@ -32,9 +32,35 @@ namespace blazefeo :: benchmark
     }
 
 
+    /**
+     * @brief Use anti-diagonal matrix, results in the maximum number of row permutations.
+     */
+    template <typename Real, size_t M>
+    static void BM_getrf_static_plain_worst_case(State& state)
+    {
+        StaticMatrix<Real, M, M, columnMajor> A;
+
+        std::vector<size_t> ipiv(M);
+
+        for (auto _ : state)
+        {
+            reset(A);
+            for (size_t i = 0; i < M; ++i)
+                A(i, M - i - 1) = 1.;
+
+            getrf(A, ipiv.data());
+            DoNotOptimize(A);
+        }
+
+        setCounters(state.counters, complexityGetrf(M, M));
+        state.counters["m"] = M;
+    }
+
+
 #define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_GETRF)
 #define BOOST_PP_LOCAL_MACRO(n) \
-    BENCHMARK_TEMPLATE(BM_getrf_static_plain, double, n);\
+    BENCHMARK_TEMPLATE(BM_getrf_static_plain_best_case, double, n);\
+    BENCHMARK_TEMPLATE(BM_getrf_static_plain_worst_case, double, n);\
     // BENCHMARK_TEMPLATE(BM_getrf_static_plain, float, n);
 #include BOOST_PP_LOCAL_ITERATE()
 }
