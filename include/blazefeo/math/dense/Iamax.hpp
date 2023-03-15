@@ -75,31 +75,60 @@ namespace blazefeo
         size_t constexpr SS = SimdVec<ET>::size();
         using IndexType = IntVecType_t<SS>;
 
-        SimdVec<ET> a {};
-        IndexType ib {simd::sequenceTag, 0};
-        IndexType ia = ib;
+        size_t constexpr M = 2;
+
+        SimdVec<ET> a[M];
+
+        IndexType ib[M], ia[M];
+
+        #pragma unroll
+        for (size_t j = 0; j < M; ++j)
+            ia[j] = ib[j] = IndexType(simd::sequenceTag, j * SS);
 
         size_t i = 0;
 
         // Load initial value
-        if (SS <= n)
+        if (M * SS <= n)
         {
-            a = abs(x.load());
-            ib += SS;
-            i += SS;
+            #pragma unroll
+            for (size_t j = 0; j < M; ++j)
+                a[j] = abs(x(j * SS).load());
+
+            #pragma unroll
+            for (size_t j = 0; j < M; ++j)
+                ib[j] += M * SS;
+
+            i += M * SS;
         }
 
-        // Process full SIMD chunks
-        for (; i + SS <= n; i += SS, ib += SS)
-            std::tie(a, ia) = imax(a, ia, abs(x(i).load()), ib);
+        #pragma unroll
+        for (size_t m = M; m > 0; --m)
+        {
+            // Process full Mx SIMD chunks
+            for (; i + m * SS <= n; i += m * SS)
+            {
+                #pragma unroll
+                for (size_t j = 0; j < m; ++j)
+                    std::tie(a[j], ia[j]) = imax(a[j], ia[j], abs(x(i + j * SS).load()), ib[j]);
+
+                #pragma unroll
+                for (size_t j = 0; j < m; ++j)
+                    ib[j] += m * SS;
+            }
+
+            // Reduce by 1 SIMD vector
+            if (m > 1)
+                std::tie(a[0], ia[0]) = imax(a[0], ia[0], a[m - 1], ia[m - 1]);
+        }
 
         // Process the remaining elements
-        std::tie(a, ia) = imax(a, ia, abs(x(i).maskLoad(n > ib)), ib);
+        if (i < n)
+            std::tie(a[0], ia[0]) = imax(a[0], ia[0], abs(x(i).maskLoad(n > ib[0])), ib[0]);
 
         // Compute horizontal maximum
-        std::tie(a, ia) = imax(a, ia);
+        std::tie(a[0], ia[0]) = imax(a[0], ia[0]);
 
-        return ia[0];
+        return ia[0][0];
     }
 
 
