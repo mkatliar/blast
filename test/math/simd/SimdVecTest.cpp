@@ -57,4 +57,27 @@ namespace blazefeo :: testing
         for (size_t i = 0; i < SS; ++i)
             ASSERT_EQ(abs_v[i], std::abs(a[i]));
     }
+
+
+    TYPED_TEST(SimdVecTest, testImax)
+    {
+        using Scalar = TypeParam;
+        size_t constexpr SS = SimdSize_v<Scalar>;
+
+        IntVecType_t<SS> idx {simd::sequenceTag};
+
+        for (int i = 0; i < 100; ++i)
+        {
+            blaze::StaticVector<Scalar, SS> a;
+            randomize(a);
+            SimdVec<Scalar> const v {a.data(), false};
+
+            SimdVec<Scalar> v_max;
+            IntVecType_t<SS> idx_max;
+            std::tie(v_max, idx_max) = imax(v, idx);
+
+            ASSERT_EQ(idx_max[0], std::distance(a.begin(), std::max_element(a.begin(), a.end())));
+            ASSERT_EQ(v_max[0], *std::max_element(a.begin(), a.end()));
+        }
+    }
 }
