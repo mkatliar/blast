@@ -58,6 +58,15 @@ RUN mkdir -p blast/build && cd blast/build \
         -DCMAKE_CXX_COMPILER="clang++-15" \
         -DCMAKE_CXX_FLAGS="-march=native -mfma -mavx -mavx2 -msse4 -fno-math-errno" \
         -DCMAKE_CXX_FLAGS_RELEASE="-O3 -g -DNDEBUG -ffast-math" .. \
+        -DBLAST_WITH_TEST=ON \
+        -DBLAST_WITH_BENCHMARK=ON \
+        -DBLAST_WITH_BLASFEO=ON \
+        -DBLAST_BUILD_BLAST_BENCHMARK=ON \
+        -DBLAST_BUILD_LIBXSMM_BENCHMARK=ON \
+        -DBLAST_BUILD_BLAS_BENCHMARK=ON \
+        -DBLAST_BUILD_BLAZE_BENCHMARK=ON \
+        -DBLAST_BUILD_EIGEN_BENCHMARK=ON \
+        -DBLAST_BUILD_BLASFEO_BENCHMARK=ON \
     && make -j `nproc` VERBOSE=1
 
 # Run tests

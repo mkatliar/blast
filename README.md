@@ -55,7 +55,17 @@ ctest
 TODO: add examples
 
 ## Benchmarks
-Specify `BLAST_WITH_BENCHMARK=ON` in *CMake* configure steps if you want to build benchmarks. Benchmarks will be built in `build/bin/bench-*`. The set of benchmarks depends on the options and the installed libraries. It might look like the following:
+Specify `BLAST_WITH_BENCHMARK=ON` in *CMake* configure steps if you want to build benchmarks. The following *CMake* variables must be switched ON to enable specific benchmarks:
+- `BLAST_BUILD_BLAST_BENCHMARK`
+- `BLAST_BUILD_LIBXSMM_BENCHMARK`
+- `BLAST_BUILD_BLAS_BENCHMARK`
+- `BLAST_BUILD_BLAZE_BENCHMARK`
+- `BLAST_BUILD_EIGEN_BENCHMARK`
+- `BLAS_BUILD_BLASFEO_BENCHMARK`
+
+For the `BLASFEO` benchmark, you also need to set `BLAST_WITH_BLASFEO=ON`.
+
+Benchmarks will be built in `build/bin/bench-*`. The set of benchmarks depends on the options and the installed libraries. It might look like the following:
 
 ```
 $ls -1 build/bin/bench*
