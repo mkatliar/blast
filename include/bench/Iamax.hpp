@@ -4,6 +4,31 @@
 
 #pragma once
 
-#include <bench/Benchmark.hpp>
+#include <bench/Complexity.hpp>
 
-#define BENCHMARK_MAX_IAMAX 50
+
+namespace blazefeo :: benchmark
+{
+    struct IamaxTag {};
+    static IamaxTag constexpr iamaxTag;
+
+    ///
+    /// @brief Algorithmic complexity of iamax
+    ///
+    inline Complexity complexity(IamaxTag, std::size_t n)
+    {
+        return {
+            {"cmp", n - 1},
+            {"abs", n}
+        };
+    }
+}
+
+
+#ifndef BENCHMARK_MAX_IAMAX_STATIC
+    #define BENCHMARK_MAX_IAMAX_STATIC 50
+#endif
+
+#ifndef BENCHMARK_MAX_IAMAX_DYNAMIC
+    #define BENCHMARK_MAX_IAMAX_DYNAMIC 50
+#endif

@@ -17,7 +17,7 @@
 #include <blaze/math/DynamicVector.h>
 
 #include <bench/Benchmark.hpp>
-#include <bench/Complexity.hpp>
+#include <bench/Iamax.hpp>
 
 #include <test/Randomize.hpp>
 
@@ -52,10 +52,10 @@ namespace blazefeo :: benchmark
             DoNotOptimize(idx);
         }
 
-        setCounters(state.counters, complexityIamax(N));
+        setCounters(state.counters, complexity(iamaxTag, N));
     }
 
 
-    BENCHMARK_TEMPLATE(BM_iamax, double)->DenseRange(1, 50);
-    BENCHMARK_TEMPLATE(BM_iamax, float)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_iamax, double)->DenseRange(1, BENCHMARK_MAX_IAMAX_DYNAMIC);
+    BENCHMARK_TEMPLATE(BM_iamax, float)->DenseRange(1, BENCHMARK_MAX_IAMAX_DYNAMIC);
 }

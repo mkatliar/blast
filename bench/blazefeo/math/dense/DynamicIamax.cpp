@@ -39,10 +39,10 @@ namespace blazefeo :: benchmark
             DoNotOptimize(idx);
         }
 
-        setCounters(state.counters, complexityIamax(N));
+        setCounters(state.counters, complexity(iamaxTag, N));
     }
 
 
-    BENCHMARK_TEMPLATE(BM_iamax_dynamic, double)->DenseRange(1, BENCHMARK_MAX_IAMAX);
-    BENCHMARK_TEMPLATE(BM_iamax_dynamic, float)->DenseRange(1, BENCHMARK_MAX_IAMAX);
+    BENCHMARK_TEMPLATE(BM_iamax_dynamic, double)->DenseRange(1, BENCHMARK_MAX_IAMAX_DYNAMIC);
+    BENCHMARK_TEMPLATE(BM_iamax_dynamic, float)->DenseRange(1, BENCHMARK_MAX_IAMAX_DYNAMIC);
 }

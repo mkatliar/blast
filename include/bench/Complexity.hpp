@@ -77,16 +77,6 @@ namespace blazefeo :: benchmark
     }
 
 
-    /// @brief Algorithmic complexity of iamax
-    inline Complexity complexityIamax(std::size_t n)
-    {
-        return {
-            {"cmp", n - 1},
-            {"abs", n}
-        };
-    }
-
-
     template <typename Map>
     void setCounters(Map& counters, Complexity const& c)
     {

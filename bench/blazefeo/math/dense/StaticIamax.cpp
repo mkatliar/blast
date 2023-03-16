@@ -37,11 +37,11 @@ namespace blazefeo :: benchmark
             DoNotOptimize(idx);
         }
 
-        setCounters(state.counters, complexityIamax(N));
+        setCounters(state.counters, complexity(iamaxTag, N));
     }
 
 
-#define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_IAMAX)
+#define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_IAMAX_STATIC)
 #define BOOST_PP_LOCAL_MACRO(n) \
     BENCHMARK_TEMPLATE(BM_iamax_static, double, n); \
     BENCHMARK_TEMPLATE(BM_iamax_static, float, n);
