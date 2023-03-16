@@ -28,11 +28,12 @@ plots = [
     # {'data_file': 'dgemm-eigen-static.json', 'label': 'Eigen (S)'},
     # {'data_file': 'dgemm-blaze-dynamic.json', 'label': 'Blaze (D)'},
     {'data_file': 'dgemm-blaze-static.json', 'label': 'Blaze (S)'},
-    {'data_file': 'dgemm-blast-static-panel.json', 'label': 'BLAST (S)'},
+    {'data_file': 'dgemm-blast-static-panel.json', 'label': 'BLAST (SP)'},
+    {'data_file': 'dgemm-blast-static-plain.json', 'label': 'BLAST (SD)'},
 ]
 
 reference = [
-    {'data_file': 'dgemm-blast-static-panel.json', 'label': 'BLAST (S)'},
+    {'data_file': 'dgemm-blast-static-panel.json', 'label': 'BLAST (SP)'},
     # {'data_file': 'dgemm-blast-dynamic-panel.json', 'label': 'BLAST (D)'},
 ]
 
