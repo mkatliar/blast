@@ -63,11 +63,7 @@ namespace blazefeo :: benchmark
     }
 
 
-BENCHMARK_TEMPLATE(BM_trmm_left_upper_static_plain, double, 20, 40);
-BENCHMARK_TEMPLATE(BM_trmm_right_lower_static_plain, double, 40, 20);
-
-
-#define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_GEMM)
+#define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_TRMM)
 #define BOOST_PP_LOCAL_MACRO(n) \
     BENCHMARK_TEMPLATE(BM_trmm_left_upper_static_plain, double, n, n); \
     BENCHMARK_TEMPLATE(BM_trmm_right_lower_static_plain, double, n, n);

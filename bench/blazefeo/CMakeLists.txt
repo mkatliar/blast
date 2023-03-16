@@ -27,6 +27,7 @@ add_executable(bench-blazefeo
     math/dense/StaticTrmm.cpp
     math/dense/StaticIamax.cpp
     math/dense/DynamicIamax.cpp
+    math/dense/StaticTrsm.cpp
 
     math/panel/StaticGemm.cpp
     math/panel/DynamicGemm.cpp

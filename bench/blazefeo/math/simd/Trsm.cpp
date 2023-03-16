@@ -6,6 +6,7 @@
 #include <blazefeo/math/simd/RegisterMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
+#include <bench/Trsm.hpp>
 
 #include <test/Randomize.hpp>
 
@@ -19,7 +20,7 @@ namespace blazefeo :: benchmark
         using Traits = RegisterMatrixTraits<Kernel>;
         size_t constexpr m = Traits::rows;
         size_t constexpr n = Traits::columns;
-        
+
         StaticPanelMatrix<double, m, n, columnMajor> L;
         randomize(L);
 
@@ -35,10 +36,7 @@ namespace blazefeo :: benchmark
             DoNotOptimize(ker);
         }
 
-        // Algorithmic complexity of triangular substitution: (n^2-n)/2 additions (subtractions)
-        // and (n^2-n)/2 multiplications, which results in n^2-n flops per row.
-        // https://algowiki-project.org/en/Backward_substitution
-        state.counters["flops"] = Counter((n * n - n) * m, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexity(trsmTag, false, m, n));
     }
 
 

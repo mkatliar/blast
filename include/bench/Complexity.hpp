@@ -16,6 +16,7 @@ namespace blazefeo :: benchmark
 {
     using Complexity = std::map<std::string, std::size_t>;
 
+
     /// @brief Algorithmic complexity of potrf
     inline Complexity complexityPotrf(std::size_t m, std::size_t n)
     {
