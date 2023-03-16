@@ -32,9 +32,9 @@ namespace blast :: benchmark
 
         for (auto _ : state)
         {
-            x[0] = 0;
             idx = iamax(x);
             DoNotOptimize(idx);
+            DoNotOptimize(x);
         }
 
         setCounters(state.counters, complexity(iamaxTag, N));
