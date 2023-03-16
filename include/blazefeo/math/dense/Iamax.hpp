@@ -70,11 +70,36 @@ namespace blazefeo
     {
         BLAZE_USER_ASSERT(n > 0, "Vector must be non-empty");
 
+#if 1
+        // Profiling shows that:
+        // 1. For N < ~20 the scalar implementation of iamax() is faster than the vectorized.
+        // 2. For big N the vectorized implementation becomes faster.
+        // 3. Using register blocking (M > 1) for the vectorized implementation
+        // helps to keep the pipeline busy and improves performance by ~30%.
+        //
+        // Ideally we would choose between scalar and vectorized implementation based by N,
+        // but for now I just disable the vectorized code.
+        //
+        auto value = std::abs(*x(0));
+        size_t index = 0;
+
+        for (size_t i = 1; i < n; ++i)
+        {
+            auto const v = std::abs(*x(i));
+            if (v > value)
+            {
+                value = v;
+                index = i;
+            }
+        }
+
+        return index;
+#else
         using ET = std::remove_cv_t<ElementType_t<VP>>;
         size_t constexpr SS = SimdVec<ET>::size();
         using IndexType = IntVecType_t<SS>;
 
-        size_t constexpr M = 2;
+        size_t constexpr M = 4;
 
         SimdVec<ET> a[M];
 
@@ -128,6 +153,7 @@ namespace blazefeo
         std::tie(a[0], ia[0]) = imax(a[0], ia[0]);
 
         return ia[0][0];
+#endif
     }
 
 
