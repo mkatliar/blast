@@ -7,6 +7,7 @@
 
 #include <bench/Benchmark.hpp>
 #include <bench/Complexity.hpp>
+#include <bench/Getrf.hpp>
 
 #include <test/Randomize.hpp>
 
@@ -59,8 +60,8 @@ namespace blazefeo :: benchmark
 
 #define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_GETRF)
 #define BOOST_PP_LOCAL_MACRO(n) \
-    BENCHMARK_TEMPLATE(BM_getrf_static_plain_best_case, double, n);\
-    BENCHMARK_TEMPLATE(BM_getrf_static_plain_worst_case, double, n);\
+    BENCHMARK_TEMPLATE(BM_getrf_static_plain_best_case, double, n); \
+    BENCHMARK_TEMPLATE(BM_getrf_static_plain_worst_case, double, n);
     // BENCHMARK_TEMPLATE(BM_getrf_static_plain, float, n);
 #include BOOST_PP_LOCAL_ITERATE()
 }

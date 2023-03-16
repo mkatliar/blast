@@ -10,7 +10,6 @@
 
 #define BENCHMARK_MAX_SYRK 50
 #define BENCHMARK_MAX_POTRF 50
-#define BENCHMARK_MAX_GETRF 50
 
 
 namespace blazefeo :: benchmark
