@@ -4,18 +4,21 @@
 
 #pragma once
 
-#include <blaze/math/StorageOrder.h>
-#include <blaze/math/typetraits/StorageOrder.h>
-#include <blaze/math/views/Forward.h>
-#include <blast/math/dense/GemmBackend.hpp>
+#include <blast/system/Inline.hpp>
+#include <blast/math/typetraits/StorageOrder.hpp>
+#include <blast/math/typetraits/MatrixPointer.hpp>
+#include <blast/math/algorithm/Tile.hpp>
 #include <blast/math/dense/MatrixPointer.hpp>
 
-#include <algorithm>
+#include <blaze/util/constraints/SameType.h>
+
+#include <cstddef>
 #include <type_traits>
 
 
 namespace blast
 {
+
     /**
      * @brief Performs the matrix-matrix operation
      *
@@ -51,83 +54,25 @@ namespace blast
         MatrixPointer<MPC> && StorageOrder_v<MPC> == columnMajor &&
         MatrixPointer<MPD> && StorageOrder_v<MPD> == columnMajor
     )
-    BLAZE_ALWAYS_INLINE void gemm(size_t M, size_t N, size_t K, ST1 alpha, MPA A, MPB B, ST2 beta, MPC C, MPD D)
+    BLAST_ALWAYS_INLINE void gemm(size_t M, size_t N, size_t K, ST1 alpha, MPA A, MPB B, ST2 beta, MPC C, MPD D)
     {
-        using ET = std::remove_cv_t<ElementType_t<MPA>>;
+        using ET = std::remove_cv_t<ElementType_t<MPD>>;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;
 
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(std::remove_cv_t<ElementType_t<MPB>>, ET);
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(std::remove_cv_t<ElementType_t<MPC>>, ET);
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(std::remove_cv_t<ElementType_t<MPD>>, ET);
 
-        size_t j = 0;
-
-        // Main part
-        for (; j + TILE_SIZE <= N; j += TILE_SIZE)
-        {
-            size_t i = 0;
-
-            // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
-            // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
-            for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
+        tile<ET, StorageOrder(StorageOrder_v<MPD>)>(M, N,
+            [&] (auto& ker, size_t i, size_t j)
             {
-                RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j));
-            }
-
-            for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
+            },
+            [&] (auto& ker, size_t i, size_t j, size_t m, size_t n)
             {
-                RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j));
+                gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j), m, n);
             }
-
-            for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
-            {
-                RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j));
-            }
-
-            // Bottom edge
-            if (i < M)
-            {
-                RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j), M - i, ker.columns());
-            }
-        }
-
-
-        // Right edge
-        if (j < N)
-        {
-            size_t i = 0;
-
-            // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
-            // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
-            for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
-            {
-                RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j), ker.rows(), N - j);
-            }
-
-            for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
-            {
-                RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j), ker.rows(), N - j);
-            }
-
-            for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
-            {
-                RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j), ker.rows(), N - j);
-            }
-
-            // Bottom-right corner
-            if (i < M)
-            {
-                RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j), M - i, N - j);
-            }
-        }
+        );
     }
 
 
