@@ -14,24 +14,15 @@
 
 #pragma once
 
-#include <blaze/math/Aliases.h>
-#include <blaze/math/AlignmentFlag.h>
-#include <blaze/math/PaddingFlag.h>
-#include <blaze/math/TransposeFlag.h>
-#include <blaze/math/typetraits/IsAligned.h>
-#include <blaze/math/typetraits/IsColumnMajorMatrix.h>
-#include <blaze/math/typetraits/IsDenseVector.h>
-#include <blaze/math/typetraits/IsStatic.h>
-#include <blaze/math/typetraits/IsSubvector.h>
-#include <blaze/math/typetraits/IsTransExpr.h>
-#include <blaze/math/typetraits/TransposeFlag.h>
-#include <blaze/system/Inline.h>
+#include <blast/math/TypeTraits.hpp>
+#include <blast/math/TransposeFlag.hpp>
 #include <blast/math/dense/DynamicVectorPointer.hpp>
 #include <blast/math/dense/StaticVectorPointer.hpp>
 #include <blast/math/dense/DynamicMatrixPointer.hpp>
 #include <blast/math/dense/StaticMatrixPointer.hpp>
 #include <blast/math/simd/VectorPointer.hpp>
 #include <blast/math/simd/MatrixPointer.hpp>
+
 #include <cstddef>
 
 
@@ -251,6 +242,20 @@ namespace blast
     BLAZE_ALWAYS_INLINE auto ptr(VT const& v)
     {
         return ptr<IsAligned_v<VT>>(v, 0);
+    }
+
+
+    /*
+    =======================================================================================
+
+    Vector pointer from raw pointer.
+
+    =======================================================================================
+    */
+    template <TransposeFlag TF, AlignmentFlag AF = unaligned, PaddingFlag PF = unpadded, typename T>
+    BLAZE_ALWAYS_INLINE auto ptr(T * data)
+    {
+        return StaticVectorPointer<T, 1, TF, AF, PF> {data};
     }
 
 
