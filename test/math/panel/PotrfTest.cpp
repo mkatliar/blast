@@ -6,6 +6,7 @@
 #include <blast/math/panel/Potrf.hpp>
 #include <blast/math/panel/Gemm.hpp>
 
+#include <blaze/math/dense/DynamicMatrix.h>
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 #include <test/Tolerance.hpp>
@@ -33,17 +34,15 @@ namespace blast :: testing
             DynamicMatrix<Real, columnMajor> blaze_A(M, M);
             makePositiveDefinite(blaze_A);
 
-            DynamicPanelMatrix<Real, columnMajor> A(M, M), L(M, M), A1(M, M);
+            DynamicPanelMatrix<Real, columnMajor> A(M, M), L(M, M);
             A = blaze_A;
 
             // Do potrf
             potrf(A, L);
 
             // Check result
-            A1 = 0.;
-            gemm_nt(L, L, A1, A1);
-
-            BLAST_EXPECT_APPROX_EQ(A1, A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
+            blaze::DynamicMatrix<Real> const L_blaze = L;
+            BLAST_EXPECT_APPROX_EQ(eval(L_blaze * trans(L_blaze)), blaze_A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
         }
     }
 

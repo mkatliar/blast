@@ -32,7 +32,9 @@ add_executable(test-blast
     math/dense/Iamax.cpp
 
     math/panel/StaticPanelMatrixTest.cpp
+    math/panel/StaticPanelMatrixPointerTest.cpp
     math/panel/DynamicPanelMatrixTest.cpp
+    math/panel/DynamicPanelMatrixPointerTest.cpp
     math/panel/GemmTest.cpp
     math/panel/PotrfTest.cpp
 

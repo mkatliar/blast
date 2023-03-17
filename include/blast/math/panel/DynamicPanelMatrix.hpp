@@ -264,4 +264,38 @@ namespace blaze
     {};
     /*! \endcond */
     //*************************************************************************************************
+
+
+    //=================================================================================================
+    //
+    //  IsStatic specialization
+    //
+    //=================================================================================================
+    template <typename T, bool SO>
+    struct IsStatic<blast::DynamicPanelMatrix<T, SO>>
+    :   public FalseType
+    {};
+
+
+    //=================================================================================================
+    //
+    //  IsAligned specialization
+    //
+    //=================================================================================================
+    template <typename T, bool SO>
+    struct IsAligned<blast::DynamicPanelMatrix<T, SO>>
+    :   public TrueType
+    {};
+
+
+    //=================================================================================================
+    //
+    //  SubmatrixTrait specialization
+    //
+    //=================================================================================================
+    template <typename T, bool SO>
+    struct SubmatrixTrait<blast::DynamicPanelMatrix<T, SO>>
+    {
+        using Type = blast::DynamicPanelMatrix<T, SO>;
+    };
 }

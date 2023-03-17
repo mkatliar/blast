@@ -10,6 +10,20 @@
 
 namespace blast :: testing
 {
+    TEST(DynamicPanelMatrixTest, testIsStatic)
+    {
+        using MatrixType = DynamicPanelMatrix<double>;
+        ASSERT_FALSE(IsStatic_v<MatrixType>);
+    }
+
+
+    TEST(DynamicPanelMatrixTest, testIsAligned)
+    {
+        using MatrixType = DynamicPanelMatrix<double>;
+        ASSERT_TRUE(IsAligned_v<MatrixType>);
+    }
+
+
     TEST(DynamicPanelMatrixTest, testSpacing)
     {
         {

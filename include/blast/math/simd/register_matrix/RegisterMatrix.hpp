@@ -229,7 +229,7 @@ namespace blast
 
 
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
         void ger(PA a, PB b) noexcept;
 
 

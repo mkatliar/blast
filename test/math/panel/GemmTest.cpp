@@ -33,7 +33,7 @@ namespace blast :: testing
 
         for (size_t M = 1; M <= M_max; ++M)
         {
-            for (size_t N = 5; N <= N_max; ++N)
+            for (size_t N = 1; N <= N_max; ++N)
             {
                 for (size_t K = 1; K <= K_max; ++K)
                 {

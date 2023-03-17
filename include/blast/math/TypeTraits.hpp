@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <blast/math/typetraits/IsPanelMatrix.hpp>
+#include <blast/math/typetraits/IsPanelSubmatrix.hpp>
+
 #include <blaze/math/TypeTraits.h>
 
 

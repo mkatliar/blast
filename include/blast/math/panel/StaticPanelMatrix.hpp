@@ -115,25 +115,25 @@ namespace blast
         }
 
 
-        size_t constexpr rows() const
+        static size_t constexpr rows()
         {
             return M;
         }
 
 
-        size_t constexpr columns() const
+        static size_t constexpr columns()
         {
             return N;
         }
 
 
-        size_t constexpr spacing() const
+        static size_t constexpr spacing()
         {
             return spacing_;
         }
 
 
-        size_t constexpr panels() const
+        static size_t constexpr panels()
         {
             return panels_;
         }
@@ -142,7 +142,7 @@ namespace blast
         /// @brief Offset of the first matrix element from the start of the panel.
         ///
         /// In rows for column-major matrices, in columns for row-major matrices.
-        size_t constexpr offset() const
+        static size_t constexpr offset()
         {
             return 0;
         }
@@ -282,4 +282,38 @@ namespace blaze
     {};
     /*! \endcond */
     //*************************************************************************************************
+
+
+    //=================================================================================================
+    //
+    //  IsStatic specialization
+    //
+    //=================================================================================================
+    template <typename T, size_t M, size_t N, bool SO>
+    struct IsStatic<blast::StaticPanelMatrix<T, M, N, SO>>
+    :   public TrueType
+    {};
+
+
+    //=================================================================================================
+    //
+    //  IsAligned specialization
+    //
+    //=================================================================================================
+    template <typename T, size_t M, size_t N, bool SO>
+    struct IsAligned<blast::StaticPanelMatrix<T, M, N, SO>>
+    :   public TrueType
+    {};
+
+
+    //=================================================================================================
+    //
+    //  SubmatrixTrait specialization
+    //
+    //=================================================================================================
+    template <typename T, size_t M, size_t N, bool SO>
+    struct SubmatrixTrait<blast::StaticPanelMatrix<T, M, N, SO>>
+    {
+        using Type = blast::StaticPanelMatrix<T, M, N, SO>;
+    };
 }

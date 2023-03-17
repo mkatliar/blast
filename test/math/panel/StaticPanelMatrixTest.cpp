@@ -27,6 +27,20 @@ namespace blast :: testing
     }
 
 
+    TYPED_TEST_P(StaticPanelMatrixTest, testIsStatic)
+    {
+        using MatrixType = StaticPanelMatrix<TypeParam, 5, 7>;
+        ASSERT_TRUE(IsStatic_v<MatrixType>);
+    }
+
+
+    TYPED_TEST_P(StaticPanelMatrixTest, testIsAligned)
+    {
+        using MatrixType = StaticPanelMatrix<TypeParam, 5, 7>;
+        ASSERT_TRUE(IsAligned_v<MatrixType>);
+    }
+
+
     TYPED_TEST_P(StaticPanelMatrixTest, testPanels)
     {
         size_t constexpr SS = PanelSize_v<TypeParam>;
@@ -160,6 +174,8 @@ namespace blast :: testing
 
 
     REGISTER_TYPED_TEST_SUITE_P(StaticPanelMatrixTest,
+        testIsStatic,
+        testIsAligned,
         testIsPanelMatrix,
         testPanels,
         testElementAccess,

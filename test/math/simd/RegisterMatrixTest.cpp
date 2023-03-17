@@ -4,6 +4,7 @@
 
 #include <blast/math/simd/RegisterMatrix.hpp>
 #include <blast/math/StaticPanelMatrix.hpp>
+#include <blast/math/panel/MatrixPointer.hpp>
 #include <blast/math/dense/MatrixPointer.hpp>
 #include <blast/math/dense/VectorPointer.hpp>
 #include <blast/math/views/submatrix/Panel.hpp>
@@ -77,7 +78,53 @@ namespace blast :: testing
     }
 
 
-    TYPED_TEST(RegisterMatrixTest, testLoad)
+    TYPED_TEST(RegisterMatrixTest, testLoadPanel)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
+        randomize(A);
+
+        RM ker;
+        ET const beta = 0.1;
+        ker.load(beta, ptr<aligned>(A, 0, 0));
+
+        for (size_t i = 0; i < Traits::rows; ++i)
+            for (size_t j = 0; j < Traits::columns; ++j)
+                EXPECT_EQ(ker(i, j), beta * A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testPartialLoadPanel)
+    {
+        using RM = TypeParam;
+        using Traits = RegisterMatrixTraits<RM>;
+        using ET = ElementType_t<RM>;
+
+        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
+        randomize(A);
+
+        for (size_t m = 0; m <= rows(A); ++m)
+        {
+            for (size_t n = 0; n <= columns(A); ++n)
+            {
+                RM ker;
+                ET const beta = 0.1;
+                ker.load(beta, ptr(A), m, n);
+
+                for (size_t i = 0; i < m; ++i)
+                    for (size_t j = 0; j < n; ++j)
+                        ASSERT_EQ(ker(i, j), beta * A(i, j))
+                        << "load error for size (" << m << ", " << n << "); "
+                        << "element mismatch at (" << i << ", " << j << ")" ;
+            }
+        }
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testLoadPanelRawPtr)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -96,7 +143,7 @@ namespace blast :: testing
     }
 
 
-    TYPED_TEST(RegisterMatrixTest, testPartialLoadPanel)
+    TYPED_TEST(RegisterMatrixTest, testPartialLoadPanelRawPtr)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -503,35 +550,22 @@ namespace blast :: testing
 
         if constexpr (m >= n)
         {
-            StaticPanelMatrix<ET, m, n, columnMajor> A, L;
-            StaticPanelMatrix<ET, m, m, columnMajor> A1;
+            StaticMatrix<ET, m, n, columnMajor> A, L;
 
             {
                 StaticMatrix<ET, n, n, columnMajor> C0;
                 makePositiveDefinite(C0);
 
-                StaticMatrix<ET, m, n, columnMajor> C;
-                submatrix(C, 0, 0, n, n) = C0;
-                randomize(submatrix(C, n, 0, m - n, n));
-
-                A = C;
+                submatrix(A, 0, 0, n, n) = C0;
+                randomize(submatrix(A, n, 0, m - n, n));
             }
 
-            {
-                TypeParam ker;
-                load(ker, A.ptr(0, 0), A.spacing());
-                ker.potrf();
-                store(ker, L.ptr(0, 0), L.spacing());
-            }
+            TypeParam ker;
+            ker.load(ptr(A));
+            ker.potrf();
+            ker.store(ptr(L));
 
-            A1 = 0.;
-            gemm_nt(L, L, A1, A1);
-
-            // std::cout << "A=\n" << A << std::endl;
-            // std::cout << "L=\n" << L << std::endl;
-            // std::cout << "A1=\n" << A1 << std::endl;
-
-            BLAST_ASSERT_APPROX_EQ(submatrix(A1, 0, 0, m, n), A, absTol<ET>(), relTol<ET>());
+            BLAST_ASSERT_APPROX_EQ(submatrix(L * trans(L), 0, 0, m, n), A, absTol<ET>(), relTol<ET>());
         }
         else
         {
