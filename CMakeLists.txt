@@ -49,7 +49,7 @@ target_compile_options(blast
 )
 
 # BLAST_WITH_BLASFEO
-set(BLAST_WITH_BLASFEO ON CACHE BOOL "Build blasfeo C++ interface")
+set(BLAST_WITH_BLASFEO CACHE BOOL "Build blasfeo C++ interface")
 
 if (BLAST_WITH_BLASFEO)
     find_package(BLASFEO REQUIRED)
