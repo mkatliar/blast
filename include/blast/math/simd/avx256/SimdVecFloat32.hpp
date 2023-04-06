@@ -80,7 +80,7 @@ namespace blast
 
         friend MaskType operator>(SimdVec const& a, SimdVec const& b) noexcept
         {
-            return _mm256_cmp_ps(a.value_, b.value_, _CMP_GT_OQ);
+            return _mm256_castps_si256(_mm256_cmp_ps(a.value_, b.value_, _CMP_GT_OQ));
         }
 
 
@@ -92,7 +92,7 @@ namespace blast
 
         friend SimdVec blend(SimdVec const& a, SimdVec const& b, MaskType mask) noexcept
         {
-            return _mm256_blendv_ps(a.value_, b.value_, mask);
+            return _mm256_blendv_ps(a.value_, b.value_, _mm256_castsi256_ps(mask));
         }
 
 
@@ -148,7 +148,7 @@ namespace blast
         {
             /* v2 = [G H E F | C D A B]                                                                         */
             SimdVec const v2 = _mm256_permute_ps(v1, 0b10'11'00'01);
-            SimdVec<Index> const iv2 = _mm256_permute_ps(idx, 0b10'11'00'01);
+            SimdVec<Index> const iv2 = _mm256_castps_si256(_mm256_permute_ps(_mm256_castsi256_ps(idx), 0b10'11'00'01));
 
             /* v3 = [W=max(G,H) W=max(G,H) Z=max(E,F) Z=max(E,F) | Y=max(C,D) Y=max(C,D) X=max(A,B) X=max(A,B)] */
             /* v3 = [W W Z Z | Y Y X X]                                                                         */
@@ -159,7 +159,7 @@ namespace blast
 
             /* v4 = [Z Z W W | X X Y Y]                                                                         */
             SimdVec const v4 = _mm256_permute_ps(v3, 0b00'00'10'10);
-            SimdVec<Index> const iv4 = _mm256_permute_ps(iv3, 0b00'00'10'10);
+            SimdVec<Index> const iv4 = _mm256_castps_si256(_mm256_permute_ps(_mm256_castsi256_ps(iv3), 0b00'00'10'10));
 
             /* v5 = [J=max(Z,W) J=max(Z,W) J=max(Z,W) J=max(Z,W) | I=max(X,Y) I=max(X,Y) I=max(X,Y) I=max(X,Y)] */
             /* v5 = [J J J J | I I I I]                                                                         */
@@ -170,7 +170,13 @@ namespace blast
 
             /* v6 = [I I I I | J J J J]                                                                         */
             SimdVec const v6 = _mm256_permute2f128_ps(v5, v5, 0b0000'0001);
-            SimdVec<Index> const iv6 = _mm256_permute2f128_ps(iv5, iv5, 0b0000'0001);
+            SimdVec<Index> const iv6 = _mm256_castps_si256(
+                _mm256_permute2f128_ps(
+                    _mm256_castsi256_ps(iv5),
+                    _mm256_castsi256_ps(iv5),
+                    0b0000'0001
+                )
+            );
 
             /* v7 = [M=max(I,J) M=max(I,J) M=max(I,J) M=max(I,J) | M=max(I,J) M=max(I,J) M=max(I,J) M=max(I,J)] */
             // __m128 v7 = _mm_max_ps(_mm256_castps256_ps128(v5), v6);

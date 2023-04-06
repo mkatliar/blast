@@ -135,7 +135,7 @@ namespace blast
             for (size_t j = 0; j < N; ++j)
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i)
-                    v_[i][j] += beta * a(SS * i, j).load();
+                    v_[i][j] += (IntrinsicType)(beta * a(SS * i, j).load());
         }
 
 
@@ -148,7 +148,7 @@ namespace blast
             for (size_t j = 0; j < N; ++j) if (j < n)
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i) if (i * RM < m)
-                    v_[i][j] += beta * a(SS * i, j).load();
+                    v_[i][j] += (IntrinsicType)(beta * a(SS * i, j).load());
         }
 
 
