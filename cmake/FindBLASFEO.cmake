@@ -18,7 +18,7 @@ ENDIF( BLASFEO_INCLUDE_DIR )
 #
 # Libraries
 #
-FIND_LIBRARY( BLASFEO_STATIC_LIB blasfeo 
+FIND_LIBRARY( BLASFEO_STATIC_LIB blasfeo
 	HINTS ${BLASFEO_DIR} $ENV{BLASFEO_DIR} "/opt/blasfeo/lib"
 )
 
@@ -35,6 +35,8 @@ ENDIF( BLASFEO_STATIC_LIB )
 #
 IF( BLASFEO_INCLUDE_DIRS_FOUND AND BLASFEO_STATIC_LIBS_FOUND )
 	SET( BLASFEO_FOUND TRUE )
+ELSEIF (BLASFEO_FIND_REQUIRED)
+	message(FATAL_ERROR "BLASFEO not found")
 ENDIF()
 
 MESSAGE( STATUS "********************************************************************************" )
