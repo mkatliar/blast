@@ -24,6 +24,13 @@ namespace blast :: testing
     }
 
 
+    TEST(DynamicPanelMatrixTest, testIsPadded)
+    {
+        using MatrixType = DynamicPanelMatrix<double>;
+        ASSERT_TRUE(IsPadded_v<MatrixType>);
+    }
+
+
     TEST(DynamicPanelMatrixTest, testSpacing)
     {
         {

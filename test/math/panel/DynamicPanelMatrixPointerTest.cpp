@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/panel/DynamicPanelMatrixPointer.hpp>
+#include <blast/math/DynamicPanelMatrix.hpp>
 
 #include <test/Testing.hpp>
 
@@ -27,7 +28,7 @@ namespace blast :: testing
         using Real = typename Pointer::ElementType;
         static bool constexpr storageOrder = Pointer::storageOrder;
 
-        blaze::DynamicMatrix<Real, storageOrder> m_;
+        DynamicPanelMatrix<Real, storageOrder> m_;
     };
 
 

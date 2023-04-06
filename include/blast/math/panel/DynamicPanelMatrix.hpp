@@ -9,6 +9,7 @@
 #include <blast/math/panel/PanelSize.hpp>
 #include <blast/system/CacheLine.hpp>
 
+#include <blaze/util/IntegralConstant.h>
 #include <blaze/util/Memory.h>
 #include <blaze/util/Types.h>
 #include <blaze/math/shims/NextMultiple.h>
@@ -285,6 +286,20 @@ namespace blaze
     template <typename T, bool SO>
     struct IsAligned<blast::DynamicPanelMatrix<T, SO>>
     :   public TrueType
+    {};
+
+
+    //=================================================================================================
+    //
+    //  IsPadded specialization
+    //
+    //=================================================================================================
+
+    //*************************************************************************************************
+    /*! \cond BLAZE_INTERNAL */
+    template <typename T, bool SO>
+    struct IsPadded<blast::DynamicPanelMatrix<T, SO>>
+    : public TrueType
     {};
 
 

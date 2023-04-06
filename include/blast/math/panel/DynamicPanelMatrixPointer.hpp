@@ -141,7 +141,7 @@ namespace blast
             if constexpr (SO == columnMajor)
                 ptr_ += SimdVecType::size() * inc;
             else
-                ptr_ += spacing_ * inc;
+                ptr_ += spacing_ * inc; // ????
 
             BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
         }
@@ -152,7 +152,7 @@ namespace blast
             if constexpr (SO == rowMajor)
                 ptr_ += SimdVecType::size() * inc;
             else
-                ptr_ += spacing_ * inc;
+                ptr_ += spacing_ * inc; // ????
 
             BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
         }
