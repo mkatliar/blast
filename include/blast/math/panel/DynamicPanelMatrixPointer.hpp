@@ -33,15 +33,17 @@ namespace blast
         /**
          * @brief Create a pointer pointing to a specified element of a dynamically-sized matrix.
          *
-         * @param ptr matrix element to be pointed.
+         * @param ptr pointer to matrix element with indices (0, 0).
          * @param spacing stride of the matrix.
+         * @param i row index of the pointed element
+         * @param j column index of the pointed element
          *
          */
-        constexpr DynamicPanelMatrixPointer(T * ptr, size_t spacing) noexcept
-        :   ptr_ {ptr}
+        constexpr DynamicPanelMatrixPointer(T * ptr, size_t spacing, ptrdiff_t i, ptrdiff_t j) noexcept
+        :   ptr_ {ptrOffset(ptr, spacing, i, j)}
         ,   spacing_ {spacing}
         {
-            BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isAligned(ptr_), "Pointer is not aligned");
         }
 
 
@@ -61,9 +63,9 @@ namespace blast
         }
 
 
-        IntrinsicType broadcast() const noexcept
+        SimdVecType broadcast() const noexcept
         {
-            return blast::broadcast<SS>(ptr_);
+            return SimdVecType {*ptr_};
         }
 
 
@@ -95,7 +97,7 @@ namespace blast
          */
         DynamicPanelMatrixPointer operator()(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
-            return {ptrOffset(i, j), spacing_};
+            return {ptr_, spacing_, i, j};
         }
 
 
@@ -111,9 +113,9 @@ namespace blast
 
 
         /**
-         * @brief Get const reference to the pointed value.
+         * @brief Get reference to the pointed value.
          *
-         * @return const reference to the pointed value
+         * @return reference to the pointed value
          */
         ElementType& operator*() const noexcept
         {
@@ -126,13 +128,13 @@ namespace blast
         */
         DynamicPanelMatrixPointer<T, SO, false, PF> constexpr operator~() const noexcept
         {
-            return {ptr_, spacing_};
+            return {ptr_, spacing_, 0, 0};
         }
 
 
         DynamicPanelMatrixPointer<T, !SO, AF, PF> constexpr trans() const noexcept
         {
-            return {ptr_, spacing_};
+            return {ptr_, spacing_, 0, 0};
         }
 
 
@@ -141,9 +143,13 @@ namespace blast
             if constexpr (SO == columnMajor)
                 ptr_ += SimdVecType::size() * inc;
             else
-                ptr_ += spacing_ * inc; // ????
+            {
+                // NOTE: this is correct only for panel-aligned pointers!
+                BLAST_USER_ASSERT(isAligned(ptr_), "Pointer is not aligned");
+                ptr_ += spacing() * (inc / SS) + inc % SS;
+            }
 
-            BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isAligned(ptr_), "Pointer is not aligned");
         }
 
 
@@ -152,9 +158,13 @@ namespace blast
             if constexpr (SO == rowMajor)
                 ptr_ += SimdVecType::size() * inc;
             else
-                ptr_ += spacing_ * inc; // ????
+            {
+                // NOTE: this is correct only for panel-aligned pointers!
+                BLAST_USER_ASSERT(isAligned(ptr_), "Pointer is not aligned");
+                ptr_ += spacing() * (inc / SS) + inc % SS;
+            }
 
-            BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isAligned(ptr_), "Pointer is not aligned");
         }
 
 
@@ -168,12 +178,18 @@ namespace blast
         static size_t constexpr SS = Simd<std::remove_cv_t<T>>::size;
 
 
-        T * ptrOffset(ptrdiff_t i, ptrdiff_t j) const noexcept
+        static T * ptrOffset(T * ptr, size_t spacing, ptrdiff_t i, ptrdiff_t j) noexcept
         {
             if constexpr (SO == columnMajor)
-                return ptr_ + (i / SS) * spacing() + i % SS + j * SS;
+                return ptr + (i / SS) * spacing + i % SS + j * SS;
             else
-                return ptr_ + i * SS + (j / SS) * spacing() + j % SS;
+                return ptr + i * SS + (j / SS) * spacing + j % SS;
+        }
+
+
+        static bool isAligned(T * ptr) noexcept
+        {
+            return reinterpret_cast<ptrdiff_t>(ptr) % (SS * sizeof(T)) == 0;
         }
 
 
@@ -191,27 +207,24 @@ namespace blast
 
     template <bool AF, typename MT, bool SO>
     requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicPanelMatrixPointer<ElementType_t<MT>, SO, AF, IsPadded_v<MT>>
-        ptr(PanelMatrix<MT, SO>& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO>& m, size_t i, size_t j)
     {
-        return {(*m).ptr(i, j), spacing(m)};
+        return DynamicPanelMatrixPointer<ElementType_t<MT>, SO, AF, IsPadded_v<MT>>((*m).data(), spacing(m), i, j);
     }
 
 
     template <bool AF, typename MT, bool SO>
     requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicPanelMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>
-        ptr(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
     {
-        return {(*m).ptr(i, j), spacing(m)};
+        return DynamicPanelMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>((*m).data(), spacing(m), i, j);
     }
 
 
     template <bool AF, typename MT, bool SO>
     requires (!IsStatic_v<MT>) && IsPanelMatrix_v<MT>
-    BLAZE_ALWAYS_INLINE DynamicPanelMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>
-        ptr(PMatTransExpr<MT, SO> const& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE auto ptr(PMatTransExpr<MT, SO> const& m, size_t i, size_t j)
     {
-        return {(*m).operand().ptr(j, i), spacing(m)};
+        return trans(ptr(m.operand(), j, i));
     }
 }
