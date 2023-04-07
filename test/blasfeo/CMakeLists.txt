@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
+find_package(GTest 1.9.0 REQUIRED)
+
 add_executable(test-blasfeo
     CustomMatrixTest.cpp
     DynamicMatrixTest.cpp

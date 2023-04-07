@@ -45,7 +45,7 @@ namespace blast :: testing
 
     TYPED_TEST(DynamicPanelMatrixPointerTest, testCtor)
     {
-        typename TestFixture::Pointer p {this->m_.data(), this->m_.spacing()};
+        typename TestFixture::Pointer p {this->m_.data(), this->m_.spacing(), 0, 0};
         EXPECT_EQ(p.spacing(), this->m_.spacing());
     }
 
