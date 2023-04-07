@@ -32,13 +32,15 @@ namespace blast
         /**
          * @brief Create a pointer pointing to a specified element of a statically-sized panel matrix.
          *
-         * @param ptr matrix element to be pointed.
+         * @param ptr pointer to the matrix element with indices (0, 0).
+         * @param i row index of the pointed element
+         * @param j column index of the pointed element
          *
          */
-        constexpr StaticPanelMatrixPointer(T * ptr) noexcept
-        :   ptr_ {ptr}
+        constexpr StaticPanelMatrixPointer(T * p00, ptrdiff_t i, ptrdiff_t j) noexcept
+        :   ptr_ {ptrOffset(p00, i, j)}
         {
-            BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isAligned(ptr_), "Pointer is not aligned");
         }
 
 
@@ -58,9 +60,9 @@ namespace blast
         }
 
 
-        IntrinsicType broadcast() const noexcept
+        SimdVecType broadcast() const noexcept
         {
-            return blast::broadcast<SS>(ptr_);
+            return SimdVecType {*ptr_};
         }
 
 
@@ -86,7 +88,7 @@ namespace blast
          */
         StaticPanelMatrixPointer constexpr operator()(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
-            return {ptrOffset(i, j)};
+            return {ptr_, i, j};
         }
 
 
@@ -102,9 +104,9 @@ namespace blast
 
 
         /**
-         * @brief Get const reference to the pointed value.
+         * @brief Get reference to the pointed value.
          *
-         * @return const reference to the pointed value
+         * @return reference to the pointed value
          */
         ElementType& operator*() const noexcept
         {
@@ -117,17 +119,17 @@ namespace blast
         */
         StaticPanelMatrixPointer<T, S, SO, false, PF> constexpr operator~() const noexcept
         {
-            return {ptr_};
+            return {ptr_, 0, 0};
         }
 
 
         StaticPanelMatrixPointer<T, S, !SO, AF, PF> constexpr trans() const noexcept
         {
-            return {ptr_};
+            return {ptr_, 0, 0};
         }
 
 
-        size_t constexpr spacing() const noexcept
+        static size_t constexpr spacing() noexcept
         {
             return S;
         }
@@ -138,9 +140,13 @@ namespace blast
             if constexpr (SO == columnMajor)
                 ptr_ += SS * inc;
             else
+            {
+                // NOTE: this is correct only for panel-aligned pointers!
+                BLAST_USER_ASSERT(isAligned(ptr_), "Pointer is not aligned");
                 ptr_ += spacing() * (inc / SS) + inc % SS;
+            }
 
-            BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isAligned(ptr_), "Pointer is not aligned");
         }
 
 
@@ -149,9 +155,13 @@ namespace blast
             if constexpr (SO == rowMajor)
                 ptr_ += SS * inc;
             else
+            {
+                // NOTE: this is correct only for panel-aligned pointers!
+                BLAST_USER_ASSERT(isAligned(ptr_), "Pointer is not aligned");
                 ptr_ += spacing() * (inc / SS) + inc % SS;
+            }
 
-            BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isAligned(ptr_), "Pointer is not aligned");
         }
 
 
@@ -165,12 +175,18 @@ namespace blast
         static size_t constexpr SS = Simd<std::remove_cv_t<T>>::size;
 
 
-        T * ptrOffset(ptrdiff_t i, ptrdiff_t j) const noexcept
+        static T * ptrOffset(T * ptr, ptrdiff_t i, ptrdiff_t j) noexcept
         {
             if constexpr (SO == columnMajor)
-                return ptr_ + (i / SS) * spacing() + i % SS + j * SS;
+                return ptr + (i / SS) * spacing() + i % SS + j * SS;
             else
-                return ptr_ + i * SS + (j / SS) * spacing() + j % SS;
+                return ptr + i * SS + (j / SS) * spacing() + j % SS;
+        }
+
+
+        static bool isAligned(T * ptr) noexcept
+        {
+            return reinterpret_cast<ptrdiff_t>(ptr) % (SS * sizeof(T)) == 0;
         }
 
 
@@ -187,34 +203,23 @@ namespace blast
 
     template <bool AF, typename MT, bool SO>
     requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticPanelMatrixPointer<ElementType_t<MT>, MT::spacing(), SO, AF, IsPadded_v<MT>>
-        ptr(PanelMatrix<MT, SO>& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO>& m, size_t i, size_t j)
     {
-        auto constexpr SS = SimdSize_v<ElementType_t<MT>>;
-        if constexpr (SO == columnMajor)
-            return {(*m).data() + i / SS * MT::spacing() + i % SS + j * SS};
-        else
-            return {(*m).data() + i * SS + j / SS * MT::spacing() + j % SS};
+        return StaticPanelMatrixPointer<ElementType_t<MT>, MT::spacing(), SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
     }
 
 
     template <bool AF, typename MT, bool SO>
     requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE StaticPanelMatrixPointer<ElementType_t<MT> const, MT::spacing(), SO, AF, IsPadded_v<MT>>
-        ptr(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
     {
-        auto constexpr SS = SimdSize_v<ElementType_t<MT>>;
-        if constexpr (SO == columnMajor)
-            return {(*m).data() + i / SS * MT::spacing() + i % SS + j * SS};
-        else
-            return {(*m).data() + i * SS + j / SS * MT::spacing() + j % SS};
+        return StaticPanelMatrixPointer<ElementType_t<MT> const, MT::spacing(), SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
     }
 
 
     template <bool AF, typename MT, bool SO>
     requires IsStatic_v<MT> && IsPanelMatrix_v<MT>
-    BLAZE_ALWAYS_INLINE StaticPanelMatrixPointer<ElementType_t<MT> const, MT::spacing(), SO, AF, IsPadded_v<MT>>
-        ptr(PMatTransExpr<MT, SO> const& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE auto ptr(PMatTransExpr<MT, SO> const& m, size_t i, size_t j)
     {
         return trans(ptr(m.operand(), j, i));
     }
