@@ -190,10 +190,11 @@ namespace blast
     BLAZE_ALWAYS_INLINE StaticPanelMatrixPointer<ElementType_t<MT>, MT::spacing(), SO, AF, IsPadded_v<MT>>
         ptr(PanelMatrix<MT, SO>& m, size_t i, size_t j)
     {
+        auto constexpr SS = SimdSize_v<ElementType_t<MT>>;
         if constexpr (SO == columnMajor)
-            return {(*m).data() + i * MT::spacing() + j * SimdSize_v<ElementType_t<MT>>};
+            return {(*m).data() + i / SS * MT::spacing() + i % SS + j * SS};
         else
-            return {(*m).data() + i * SimdSize_v<ElementType_t<MT>> + j * MT::spacing()};
+            return {(*m).data() + i * SS + j / SS * MT::spacing() + j % SS};
     }
 
 
@@ -202,10 +203,11 @@ namespace blast
     BLAZE_ALWAYS_INLINE StaticPanelMatrixPointer<ElementType_t<MT> const, MT::spacing(), SO, AF, IsPadded_v<MT>>
         ptr(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
     {
+        auto constexpr SS = SimdSize_v<ElementType_t<MT>>;
         if constexpr (SO == columnMajor)
-            return {(*m).data() + i * MT::spacing() + j * SimdSize_v<ElementType_t<MT>>};
+            return {(*m).data() + i / SS * MT::spacing() + i % SS + j * SS};
         else
-            return {(*m).data() + i * SimdSize_v<ElementType_t<MT>> + j * MT::spacing()};
+            return {(*m).data() + i * SS + j / SS * MT::spacing() + j % SS};
     }
 
 
@@ -214,9 +216,6 @@ namespace blast
     BLAZE_ALWAYS_INLINE StaticPanelMatrixPointer<ElementType_t<MT> const, MT::spacing(), SO, AF, IsPadded_v<MT>>
         ptr(PMatTransExpr<MT, SO> const& m, size_t i, size_t j)
     {
-        if constexpr (SO == columnMajor)
-            return {(*m).data() + j * MT::spacing() + i * SimdSize_v<ElementType_t<MT>>};
-        else
-            return {(*m).data() + j * SimdSize_v<ElementType_t<MT>> + i * MT::spacing()};
+        return trans(ptr(m.operand(), j, i));
     }
 }
