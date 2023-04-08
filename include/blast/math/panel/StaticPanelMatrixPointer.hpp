@@ -51,7 +51,16 @@ namespace blast
 
         SimdVecType load() const noexcept
         {
-            return SimdVecType {ptr_, AF};
+            if constexpr (AF)
+                return SimdVecType {ptr_, AF};
+            else
+            {
+                // NOTE: non-optimized!
+                ElementType tmp[SS];
+                for (size_t i = 0; i < SS; ++i)
+                    tmp[i] = storageOrder == columnMajor ? *(~*this)(i, 0) : *(~*this)(0, i);
+                return SimdVecType {tmp, false};
+            }
         }
 
 
@@ -178,6 +187,17 @@ namespace blast
 
         static T * ptrOffset(T * ptr, ptrdiff_t i, ptrdiff_t j) noexcept
         {
+            if constexpr (!AF)
+            {
+                auto const rem = reinterpret_cast<ptrdiff_t>(ptr) % (SS * sizeof(ElementType)) / sizeof(ElementType);
+                ptr -= rem;
+
+                if constexpr (SO == columnMajor)
+                    i += rem;
+                else
+                    j += rem;
+            }
+
             if constexpr (SO == columnMajor)
                 return ptr + (i / SS) * spacing() + i % SS + j * SS;
             else

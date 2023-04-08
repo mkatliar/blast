@@ -142,9 +142,9 @@ namespace blast :: testing
         DynamicPanelMatrixPointer<float, rowMajor, aligned, padded>,
         DynamicPanelMatrixPointer<float, rowMajor, unaligned, padded>,
         StaticPanelMatrixPointer<float, SimdSize_v<float> * 13, columnMajor, aligned, padded>,
-        StaticPanelMatrixPointer<float, SimdSize_v<float> * 13, rowMajor, aligned, padded>,
         StaticPanelMatrixPointer<float, SimdSize_v<float> * 13, columnMajor, unaligned, padded>,
-        StaticPanelMatrixPointer<float, SimdSize_v<float> * 13, rowMajor, unaligned, padded>
+        StaticPanelMatrixPointer<float, SimdSize_v<float> * 13, rowMajor, unaligned, padded>,
+        StaticPanelMatrixPointer<float, SimdSize_v<float> * 13, rowMajor, aligned, padded>
     >;
 
 
@@ -204,7 +204,9 @@ namespace blast :: testing
                 auto const val = p.load();
 
                 for (size_t k = 0; k < this->SS; ++k)
-                    EXPECT_EQ(val[k], this->m_(i + k * this->SIMD_DIR_I, j + k * this->SIMD_DIR_J));
+                    EXPECT_EQ(val[k], this->m_(i + k * this->SIMD_DIR_I, j + k * this->SIMD_DIR_J))
+                        << "at (i, j, k)=(" << i << ", " << j << ", " << k << ")\n"
+                        << "m=\n" << this->m_;
             }
     }
 
