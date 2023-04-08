@@ -438,7 +438,7 @@ namespace blast
                     v_[i][j] = beta * p(SS * i, j).load();
 
                 if (size_t const rem = m % SS)
-                    v_[m / SS][j] = beta * p(m - rem, j).maskLoad(SIMD::index() < rem);
+                    v_[m / SS][j] = beta * p(m - rem, j).load(SIMD::index() < rem);
             }
         }
     }
@@ -838,7 +838,7 @@ namespace blast
                 ax[i] = alpha * a(i * SS, 0).load();
 
             if (rem)
-                ax[ii] = alpha * a(ii * SS, 0).maskLoad(SIMD::index() < rem);
+                ax[ii] = alpha * a(ii * SS, 0).load(SIMD::index() < rem);
 
             #pragma unroll
             for (size_t j = 0; j < N; ++j)

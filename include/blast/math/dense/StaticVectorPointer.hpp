@@ -61,7 +61,7 @@ namespace blast
         }
 
 
-        SimdVecType maskLoad(MaskType mask) const noexcept
+        SimdVecType load(MaskType mask) const noexcept
         {
             if constexpr (S == 1)
             {

@@ -488,7 +488,7 @@ namespace blast
     //             ax[i] = alpha * a.load(i * SS, 0);
 
     //         if (rem)
-    //             ax[ii] = alpha * a.maskLoad(ii * SS, 0, SIMD::index() < rem);
+    //             ax[ii] = alpha * a.load(ii * SS, 0, SIMD::index() < rem);
 
     //         #pragma unroll
     //         for (size_t j = 0; j < N; ++j)

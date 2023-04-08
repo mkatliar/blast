@@ -67,7 +67,7 @@ namespace blast
         }
 
 
-        SimdVecType maskLoad(MaskType mask) const noexcept
+        SimdVecType load(MaskType mask) const noexcept
         {
             return SimdVecType {ptr_, mask, AF};
         }

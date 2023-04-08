@@ -147,7 +147,7 @@ namespace blast
 
         // Process the remaining elements
         if (i < n)
-            std::tie(a[0], ia[0]) = imax(a[0], ia[0], abs(x(i).maskLoad(n > ib[0])), ib[0]);
+            std::tie(a[0], ia[0]) = imax(a[0], ia[0], abs(x(i).load(n > ib[0])), ib[0]);
 
         // Compute horizontal maximum
         std::tie(a[0], ia[0]) = imax(a[0], ia[0]);

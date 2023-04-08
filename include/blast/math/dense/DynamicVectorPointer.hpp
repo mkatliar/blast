@@ -59,7 +59,7 @@ namespace blast
         }
 
 
-        SimdVecType maskLoad(MaskType mask) const noexcept
+        SimdVecType load(MaskType mask) const noexcept
         {
             // Non-optimized
             IntrinsicType v = blast::setzero<std::remove_cv_t<ElementType>, SS>();
