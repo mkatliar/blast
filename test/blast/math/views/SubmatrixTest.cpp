@@ -16,9 +16,6 @@ namespace blast :: testing
     {
         StaticPanelMatrix<double, 12, 12, columnMajor> A;
         auto B = submatrix(A, 4, 0, 8, 8);
-
-        // PanelSubmatrix<decltype(A), columnMajor> B(A, 4, 0, 8, 8);
-        std::cout << B << std::endl;
     }
 
 
@@ -26,9 +23,6 @@ namespace blast :: testing
     {
         StaticPanelMatrix<double, 12, 12, columnMajor> const A;
         auto B = submatrix(A, 4, 0, 8, 8);
-
-        // PanelSubmatrix<decltype(A), columnMajor> B(A, 4, 0, 8, 8);
-        std::cout << B << std::endl;
     }
 
 
@@ -39,9 +33,6 @@ namespace blast :: testing
 
         static_assert(std::is_same_v<decltype(B.ptr(0, 0)), double *>);
         B.ptr(0, 0);
-
-        // PanelSubmatrix<decltype(A), columnMajor> B(A, 4, 0, 8, 8);
-        std::cout << B << std::endl;
     }
 
 
@@ -52,9 +43,6 @@ namespace blast :: testing
 
         static_assert(std::is_same_v<decltype(B.ptr(0, 0)), double const *>);
         B.ptr(0, 0);
-
-        // PanelSubmatrix<decltype(A), columnMajor> B(A, 4, 0, 8, 8);
-        std::cout << B << std::endl;
     }
 
 
