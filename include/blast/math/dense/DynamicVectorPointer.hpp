@@ -25,6 +25,7 @@ namespace blast
         static bool constexpr transposeFlag = TF;
         static bool constexpr aligned = AF;
         static bool constexpr padded = PF;
+        static bool constexpr isStatic = false;
 
 
         /**

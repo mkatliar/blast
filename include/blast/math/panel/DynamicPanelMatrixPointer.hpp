@@ -28,6 +28,7 @@ namespace blast
         static bool constexpr storageOrder = SO;
         static bool constexpr aligned = AF;
         static bool constexpr padded = PF;
+        static bool constexpr isStatic = false;
 
 
         /**

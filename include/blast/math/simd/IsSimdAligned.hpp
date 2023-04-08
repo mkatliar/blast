@@ -14,24 +14,25 @@
 
 #pragma once
 
-#include <cstdlib>
+#include <blast/math/simd/SimdSize.hpp>
+
+#include <cstddef>
 
 
 namespace blast
 {
-    template <typename T>
-    struct SimdSize;
-
-
-    template <typename T>
-    struct SimdSize<T const> : SimdSize<T> {};
-
-
     /**
-     * @brief Number of elements in a SimdVec<T> object.
+     * @brief Check if a pointer is aligned at a SIMD register boundary.
      *
-     * @tparam T scalar type
+     * @tparam T SIMD element type
+     * @param ptr pointer
+     *
+     * @return true if @a ptr is a multiple of SIMD register size for type @a T
+     * @return false if @a ptr is not a multiple of SIMD register size for type @a T
      */
     template <typename T>
-    size_t constexpr SimdSize_v = SimdSize<T>::value;
+    inline bool constexpr isSimdAligned(T * ptr) noexcept
+    {
+        return reinterpret_cast<std::ptrdiff_t>(ptr) % (SimdSize_v<T> * sizeof(T)) == 0;
+    }
 }

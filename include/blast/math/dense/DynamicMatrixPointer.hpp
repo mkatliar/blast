@@ -8,6 +8,7 @@
 #include <blast/math/StorageOrder.hpp>
 #include <blast/math/TypeTraits.hpp>
 #include <blast/math/simd/Simd.hpp>
+#include <blast/math/simd/IsSimdAligned.hpp>
 #include <blast/util/Assert.hpp>
 
 
@@ -25,6 +26,7 @@ namespace blast
         static bool constexpr storageOrder = SO;
         static bool constexpr aligned = AF;
         static bool constexpr padded = PF;
+        static bool constexpr isStatic = false;
 
 
         /**
@@ -38,7 +40,7 @@ namespace blast
         :   ptr_ {ptr}
         ,   spacing_ {spacing}
         {
-            BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isSimdAligned(ptr), "Pointer is not aligned");
         }
 
 
@@ -140,7 +142,7 @@ namespace blast
             else
                 ptr_ += inc;
 
-            BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isSimdAligned(ptr_), "Pointer is not aligned");
         }
 
 
@@ -151,7 +153,7 @@ namespace blast
             else
                 ptr_ += inc;
 
-            BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr_) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isSimdAligned(ptr_), "Pointer is not aligned");
         }
 
 

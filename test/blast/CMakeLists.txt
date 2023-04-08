@@ -16,11 +16,9 @@ add_executable(test-blast
     math/simd/HsumTest.cpp
     math/simd/SimdVecTest.cpp
 
-    math/dense/StaticMatrixPointerTest.cpp
     math/dense/StaticVectorPointerTest.cpp
-    math/dense/DynamicMatrixPointerTest.cpp
     math/dense/DynamicVectorPointerTest.cpp
-    # math/dense/MatrixPointerTest.cpp
+    math/dense/MatrixPointerTest.cpp
     math/dense/GerTest.cpp
     math/dense/GemmTest.cpp
     math/dense/SyrkTest.cpp
@@ -33,9 +31,7 @@ add_executable(test-blast
     math/dense/Iamax.cpp
 
     math/panel/StaticPanelMatrixTest.cpp
-    math/panel/StaticPanelMatrixPointerTest.cpp
     math/panel/DynamicPanelMatrixTest.cpp
-    math/panel/DynamicPanelMatrixPointerTest.cpp
     math/panel/GemmTest.cpp
     math/panel/PotrfTest.cpp
 
