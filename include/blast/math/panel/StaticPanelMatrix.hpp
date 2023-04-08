@@ -201,11 +201,10 @@ namespace blast
 
     private:
         static size_t constexpr panelSize_ = PanelSize_v<Type>;
-        static size_t constexpr elementsPerTile_ = panelSize_ * panelSize_;
         static size_t constexpr tileRows_ = M / panelSize_ + (M % panelSize_ > 0);
         static size_t constexpr tileColumns_ = N / panelSize_ + (N % panelSize_ > 0);
         static size_t constexpr panels_ = SO == columnMajor ? tileRows_ : tileColumns_;
-        static size_t constexpr spacing_ = (SO == columnMajor ? tileColumns_ : tileRows_) * elementsPerTile_;
+        static size_t constexpr spacing_ = (SO == columnMajor ? N : M) * panelSize_;
         static size_t constexpr capacity_ = panels_ * spacing_;
 
         // Alignment of the data elements.

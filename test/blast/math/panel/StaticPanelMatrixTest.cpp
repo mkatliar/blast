@@ -49,6 +49,16 @@ namespace blast :: testing
     }
 
 
+    TYPED_TEST_P(StaticPanelMatrixTest, testSpacing)
+    {
+        size_t constexpr SS = SimdSize_v<TypeParam>;
+        EXPECT_EQ((StaticPanelMatrix<TypeParam, 2 * SS, 1, columnMajor>::spacing()), 1 * SS);
+        EXPECT_EQ((StaticPanelMatrix<TypeParam, 2 * SS, 2, columnMajor>::spacing()), 2 * SS);
+        EXPECT_EQ((StaticPanelMatrix<TypeParam, 1, 2 * SS, rowMajor>::spacing()), 1 * SS);
+        EXPECT_EQ((StaticPanelMatrix<TypeParam, 2, 2 * SS, rowMajor>::spacing()), 2 * SS);
+    }
+
+
     TYPED_TEST_P(StaticPanelMatrixTest, testElementAccess)
     {
         size_t constexpr SS = PanelSize_v<TypeParam>;
@@ -178,6 +188,7 @@ namespace blast :: testing
         testIsAligned,
         testIsPanelMatrix,
         testPanels,
+        testSpacing,
         testElementAccess,
         testLoad,
         testStore,
