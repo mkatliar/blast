@@ -34,21 +34,23 @@ namespace blast
 #if 1
     /// Magically, this function specialization is slightly faster than the default implementation of RegisterMatrix<>::store.
     template <>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<double, 4, 4, columnMajor>::store(double * ptr, size_t spacing, size_t m, size_t n) const
+    template <typename P>
+    requires MatrixPointer<P, double> && (P::storageOrder == columnMajor)
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<double, 4, 4, columnMajor>::store(P ptr, size_t m, size_t n) const noexcept
     {
         if (m >= 4)
         {
             if (n > 0)
-                _mm256_store_pd(ptr, v_[0][0]);
+                ptr.store(v_[0][0]);
 
             if (n > 1)
-                _mm256_store_pd(ptr + 4, v_[0][1]);
+                ptr(0, 1).store(v_[0][1]);
 
             if (n > 2)
-                _mm256_store_pd(ptr + 8, v_[0][2]);
+                ptr(0, 2).store(v_[0][2]);
 
             if (n > 3)
-                _mm256_store_pd(ptr + 12, v_[0][3]);
+                ptr(0, 3).store(v_[0][3]);
         }
         else if (m > 0)
         {
@@ -61,16 +63,16 @@ namespace blast
                 m > 0 ? 0x8000000000000000ULL : 0);
 
             if (n > 0)
-                _mm256_maskstore_pd(ptr, mask, v_[0][0]);
+                ptr.maskStore(mask, v_[0][0]);
 
             if (n > 1)
-                _mm256_maskstore_pd(ptr + 4, mask, v_[0][1]);
+                ptr(0, 1).maskStore(mask, v_[0][1]);
 
             if (n > 2)
-                _mm256_maskstore_pd(ptr + 8, mask, v_[0][2]);
+                ptr(0, 2).maskStore(mask, v_[0][2]);
 
             if (n > 3)
-                _mm256_maskstore_pd(ptr + 12, mask, v_[0][3]);
+                ptr(0, 3).maskStore(mask, v_[0][3]);
         }
     }
 #endif

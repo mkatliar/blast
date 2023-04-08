@@ -50,23 +50,26 @@ namespace blast
 
 
     template <>
-    inline void RegisterMatrix<double, 12, 4, columnMajor>::store(double * ptr, size_t spacing, size_t m, size_t n) const
+    template <typename P>
+    requires MatrixPointer<P, double> && (P::storageOrder == columnMajor)
+    inline void RegisterMatrix<double, 12, 4, columnMajor>::store(P ptr, size_t m, size_t n) const noexcept
     {
+        #pragma unroll
         for (size_t i = 0; i < 3; ++i)
         {
             if (m >= 4 * i + 4)
             {
                 if (n > 0)
-                    _mm256_store_pd(ptr + i * spacing, v_[i][0]);
+                    ptr(SS * i, 0).store(v_[i][0]);
 
                 if (n > 1)
-                    _mm256_store_pd(ptr + i * spacing + 4, v_[i][1]);
+                    ptr(SS * i, 1).store(v_[i][1]);
 
                 if (n > 2)
-                    _mm256_store_pd(ptr + i * spacing + 8, v_[i][2]);
+                    ptr(SS * i, 2).store(v_[i][2]);
 
                 if (n > 3)
-                    _mm256_store_pd(ptr + i * spacing + 12, v_[i][3]);
+                    ptr(SS * i, 3).store(v_[i][3]);
             }
             else if (m > 4 * i)
             {
@@ -77,16 +80,16 @@ namespace blast
                     m > 4 * i + 0 ? 0x8000000000000000ULL : 0);
 
                 if (n > 0)
-                    _mm256_maskstore_pd(ptr + i * spacing, mask, v_[i][0]);
+                    ptr(SS * i, 0).maskStore(mask, v_[i][0]);
 
                 if (n > 1)
-                    _mm256_maskstore_pd(ptr + i * spacing + 4, mask, v_[i][1]);
+                    ptr(SS * i, 1).maskStore(mask, v_[i][1]);
 
                 if (n > 2)
-                    _mm256_maskstore_pd(ptr + i * spacing + 8, mask, v_[i][2]);
+                    ptr(SS * i, 2).maskStore(mask, v_[i][2]);
 
                 if (n > 3)
-                    _mm256_maskstore_pd(ptr + i * spacing + 12, mask, v_[i][3]);
+                    ptr(SS * i, 3).maskStore(mask, v_[i][3]);
             }
         }
     }

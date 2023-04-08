@@ -176,13 +176,9 @@ namespace blast
         void load(T beta, P p, size_t m, size_t n) noexcept;
 
 
-        /// @brief store to memory
-        void store(T * ptr, size_t spacing) const;
-
-
         /// @brief Store matrix at location pointed by \a p
         template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void store(P p) const noexcept;
 
 
@@ -195,16 +191,20 @@ namespace blast
         /// @brief Store lower-triangular part of the matrix
         /// of size \a m by \a n at location pointed by \a p.
         template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void storeLower(P p, size_t m, size_t n) const noexcept;
 
 
-        /// @brief store to memory with specified size
-        void store(T * ptr, size_t spacing, size_t m, size_t n) const;
-
-
+        /// @brief store with specified size
+        ///
+        /// @tparam P matrix pointer type
+        ///
+        /// @param p matrix pointer to store to
+        /// @param m number of rows to store
+        /// @param n number of columns to store
+        ///
         template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void store(P p, size_t m, size_t n) const noexcept;
 
 
@@ -445,62 +445,15 @@ namespace blast
 
 
     template <typename T, size_t M, size_t N, bool SO>
-    inline void RegisterMatrix<T, M, N, SO>::store(T * ptr, size_t spacing) const
-    {
-        #pragma unroll
-        for (size_t i = 0; i < RM; ++i)
-            #pragma unroll
-            for (size_t j = 0; j < N; ++j)
-                blast::store<aligned>(ptr + spacing * i + SS * j, v_[i][j]);
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
         requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::store(P p) const noexcept
     {
+        #pragma unroll
         for (size_t j = 0; j < N; ++j)
+            #pragma unroll
             for (size_t i = 0; i < RM; ++i)
                 p(SS * i, j).store(v_[i][j]);
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
-    inline void RegisterMatrix<T, M, N, SO>::store(T * ptr, size_t spacing, size_t m, size_t n) const
-    {
-        BLAZE_STATIC_ASSERT_MSG((RM * RN + 2 <= RegisterCapacity_v<T>), "Not enough registers");
-        BLAZE_INTERNAL_ASSERT(m > M - SS && m <= M, "Invalid number of rows in partial store");
-        BLAZE_INTERNAL_ASSERT(n > 0 && n <= N, "Invalid number of columns in partial store");
-        BLAZE_INTERNAL_ASSERT(m < M || n < N, "Partial store with full size");
-
-        if (IntType const rem = m % SS)
-        {
-            #pragma unroll
-            for (size_t i = 0; i < RM - 1; ++i)
-                // The compile-time constant size of the j loop in combination with the if() expression
-                // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
-                #pragma unroll
-                for (size_t j = 0; j < N; ++j) if (j < n)
-                    blast::store<aligned>(ptr + spacing * i + SS * j, v_[i][j]);
-
-            MaskType const mask = SIMD::index() < rem;
-            size_t constexpr i = RM - 1;
-
-            #pragma unroll
-            for (size_t j = 0; j < N; ++j) if (j < n)
-                maskstore(ptr + spacing * i + SS * j, mask, v_[i][j]);
-        }
-        else
-        {
-            #pragma unroll
-            for (size_t i = 0; i < RM; ++i)
-                // The compile-time constant size of the j loop in combination with the if() expression
-                // prevent Clang from emitting memcpy() call here and produce good enough code with the loop unrolled.
-                #pragma unroll
-                for (size_t j = 0; j < N; ++j) if (j < n)
-                    blast::store<aligned>(ptr + spacing * i + SS * j, v_[i][j]);
-        }
     }
 
 
@@ -956,21 +909,6 @@ namespace blast
     BLAZE_ALWAYS_INLINE void ger(RegisterMatrix<T, M, N, SO>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
     {
         ker.template ger<SOA, SOB>(alpha, a, sa, b, sb, m, n);
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
-    BLAZE_ALWAYS_INLINE void store(RegisterMatrix<T, M, N, SO> const& ker, T * a, size_t sa)
-    {
-        ker.store(a, sa);
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
-    // [[deprecated("Use store with a matrix argument instead")]]
-    BLAZE_ALWAYS_INLINE void store(RegisterMatrix<T, M, N, SO> const& ker, T * a, size_t sa, size_t m, size_t n)
-    {
-        ker.store(a, sa, m, n);
     }
 
 

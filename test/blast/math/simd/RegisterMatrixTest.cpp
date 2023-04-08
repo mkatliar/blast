@@ -212,7 +212,7 @@ namespace blast :: testing
 
         RM ker;
         ker.load(ptr(A));
-        ker.store(B.ptr(0, 0), spacing(B));
+        ker.store(ptr(B));
 
         for (size_t i = 0; i < Traits::rows; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)
@@ -335,7 +335,7 @@ namespace blast :: testing
                 if (m != Traits::rows && n != Traits::columns)
                 {
                     B = 0.;
-                    store(ker, B.ptr(0, 0), B.spacing(), m, n);
+                    ker.store(ptr(B), m, n);
 
                     for (size_t i = 0; i < Traits::rows; ++i)
                         for (size_t j = 0; j < Traits::columns; ++j)
@@ -401,7 +401,7 @@ namespace blast :: testing
         TypeParam ker;
         ker.load(ptr(C));
         ger<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.ptr(0, 0), A.spacing(), B.ptr(0, 0), B.spacing());
-        ker.store(D.ptr(0, 0), spacing(D));
+        ker.store(ptr(D));
 
         md = D;
 
@@ -610,7 +610,7 @@ namespace blast :: testing
 
         ker.load(ptr(B));
         trsm<false, false, true>(ker, L.ptr(0, 0), spacing(L));
-        store(ker, X.ptr(0, 0), X.spacing());
+        ker.store(ptr(X));
 
         // std::cout << "X=\n" << X << std::endl;
         // std::cout << "XX=\n" << XX << std::endl;

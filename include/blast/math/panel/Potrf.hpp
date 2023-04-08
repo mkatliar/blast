@@ -49,9 +49,9 @@ namespace blast
             trsm<false, false, true>(ker, (*L).ptr(k, k), spacing(L));
 
         if (k + KN <= N)
-            store(ker, (*L).ptr(i, k), spacing(L));
+            ker.store(ptr<aligned>(*L, i, k));
         else
-            store(ker, (*L).ptr(i, k), spacing(L), std::min(M - i, KM), N - k);
+            ker.store(ptr<aligned>(*L, i, k), std::min(M - i, KM), N - k);
     }
 
 

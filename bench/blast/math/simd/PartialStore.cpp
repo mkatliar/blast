@@ -32,7 +32,7 @@ namespace blast :: benchmark
         ker.load(ptr(c));
         for (auto _ : state)
         {
-            store(ker, d.ptr(0, 0), d.spacing(), m, n);
+            ker.store(ptr(d), m, n);
             DoNotOptimize(d);
         }
 
