@@ -26,7 +26,7 @@ namespace blast :: benchmark
         randomize(a);
 
         Kernel ker;
-        load(ker, a.ptr(0, 0), a.spacing());
+        ker.load(ptr(a));
 
         for (auto _ : state)
         {

@@ -35,7 +35,7 @@ namespace blast
 
         RegisterMatrix<ET, KM, KN, columnMajor> ker;
 
-        load(ker, (*A).ptr(i, k), spacing(A));
+        ker.load(ptr<aligned>(*A, i, k));
 
         ET const * a = (*L).ptr(i, 0);
         ET const * b = (*L).ptr(k, 0);

@@ -29,12 +29,12 @@ namespace blast :: benchmark
         randomize(c);
 
         Kernel ker;
-        load(ker, c.ptr(0, 0), c.spacing());
+        ker.load(ptr(c));
 
         for (auto _ : state)
         {
             for (size_t i = 0; i < K; ++i)
-                ger<a.storageOrder, !decltype(b)::storageOrder>(ker, ET(0.1), ptr(a, 0, i), spacing(a), ptr(b, 0, i), spacing(b));
+                ger<a.storageOrder, !decltype(b)::storageOrder>(ker, ET(0.1), a.ptr(0, i), spacing(a), b.ptr(0, i), spacing(b));
 
             DoNotOptimize(ker);
         }

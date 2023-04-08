@@ -28,7 +28,7 @@ namespace blast :: benchmark
 
         for (auto _ : state)
         {
-            load(ker, c.ptr(0, 0), c.spacing());
+            ker.load(ptr(c));
             DoNotOptimize(ker);
         }
 

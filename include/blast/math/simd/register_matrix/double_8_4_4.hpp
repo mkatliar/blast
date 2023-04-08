@@ -15,30 +15,32 @@
 namespace blast
 {
     template<>
-    inline void RegisterMatrix<double, 8, 4, columnMajor>::load(double beta, double const * ptr, size_t spacing, size_t m, size_t n)
+    template <typename P>
+    requires MatrixPointer<P, double> && (P::storageOrder == columnMajor)
+    inline void RegisterMatrix<double, 8, 4, columnMajor>::load(double beta, P ptr, size_t m, size_t n) noexcept
     {
         if (n > 0)
         {
-            v_[0][0] = beta * _mm256_load_pd(ptr);
-            v_[1][0] = beta * _mm256_load_pd(ptr + spacing);
+            v_[0][0] = beta * ptr.load();
+            v_[1][0] = beta * ptr(SS, 0).load();
         }
 
         if (n > 1)
         {
-            v_[0][1] = beta * _mm256_load_pd(ptr + 4);
-            v_[1][1] = beta * _mm256_load_pd(ptr + spacing + 4);
+            v_[0][1] = beta * ptr(0, 1).load();
+            v_[1][1] = beta * ptr(SS, 1).load();
         }
 
         if (n > 2)
         {
-            v_[0][2] = beta * _mm256_load_pd(ptr + 8);
-            v_[1][2] = beta * _mm256_load_pd(ptr + spacing + 8);
+            v_[0][2] = beta * ptr(0, 2).load();
+            v_[1][2] = beta * ptr(SS, 2).load();
         }
 
         if (n > 3)
         {
-            v_[0][3] = beta * _mm256_load_pd(ptr + 12);
-            v_[1][3] = beta * _mm256_load_pd(ptr + spacing + 12);
+            v_[0][3] = beta * ptr(0, 3).load();
+            v_[1][3] = beta * ptr(SS, 3).load();
         }
     }
 

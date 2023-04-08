@@ -26,7 +26,7 @@ namespace blast :: benchmark
         DynamicPanelMatrix<double> c(ker.rows(), ker.columns()), d(ker.rows(), ker.columns());
         randomize(c);
 
-        load(ker, c.ptr(0, 0), c.spacing());
+        ker.load(ptr(c));
 
         for (auto _ : state)
         {

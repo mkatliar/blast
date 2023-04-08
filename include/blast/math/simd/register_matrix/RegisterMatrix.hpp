@@ -152,27 +152,27 @@ namespace blast
         }
 
 
-        /// @brief load from memory
-        // [[deprecated("Use load with a matrix argument instead")]]
-        void load(T beta, T const * ptr, size_t spacing);
-
-
         template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(P p) noexcept;
 
 
         template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(T beta, P p) noexcept;
 
-
-        /// @brief load from memory with specified size
-        void load(T beta, T const * ptr, size_t spacing, size_t m, size_t n);
-
-
+        /**
+         * @brief Load and multiply a matrix of specified size.
+         *
+         * @tparam P matrix pointer type
+         *
+         * @param beta multiplier
+         * @param p matrix pointer to load from
+         * @param m number of rows to load
+         * @param n number of columns to load
+         */
         template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(T beta, P p, size_t m, size_t n) noexcept;
 
 
@@ -391,19 +391,8 @@ namespace blast
 
 
     template <typename T, size_t M, size_t N, bool SO>
-    inline void RegisterMatrix<T, M, N, SO>::load(T beta, T const * ptr, size_t spacing)
-    {
-        #pragma unroll
-        for (size_t i = 0; i < RM; ++i)
-            #pragma unroll
-            for (size_t j = 0; j < N; ++j)
-                v_[i][j] = beta * blast::load<aligned, SS>(ptr + spacing * i + SS * j);
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::load(P p) noexcept
     {
         #pragma unroll
@@ -416,7 +405,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::load(T beta, P p) noexcept
     {
         #pragma unroll
@@ -428,19 +417,8 @@ namespace blast
 
 
     template <typename T, size_t M, size_t N, bool SO>
-    inline void RegisterMatrix<T, M, N, SO>::load(T beta, T const * ptr, size_t spacing, size_t m, size_t n)
-    {
-        #pragma unroll
-        for (size_t i = 0; i < RM; ++i)
-            #pragma unroll
-            for (size_t j = 0; j < N; ++j) if (j < n)
-                v_[i][j] = beta * blast::load<aligned, SS>(ptr + spacing * i + SS * j);
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::load(T beta, P p, size_t m, size_t n) noexcept
     {
         #pragma unroll
@@ -978,36 +956,6 @@ namespace blast
     BLAZE_ALWAYS_INLINE void ger(RegisterMatrix<T, M, N, SO>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
     {
         ker.template ger<SOA, SOB>(alpha, a, sa, b, sb, m, n);
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
-    // [[deprecated("Use load with a matrix argument instead")]]
-    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SO>& ker, T const * a, size_t sa)
-    {
-        ker.load(1., a, sa);
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
-    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SO>& ker, T const * a, size_t sa, size_t m, size_t n)
-    {
-        ker.load(1.0, a, sa, m, n);
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
-    // [[deprecated("Use load with a matrix argument instead")]]
-    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SO>& ker, T beta, T const * a, size_t sa)
-    {
-        ker.load(beta, a, sa);
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
-    BLAZE_ALWAYS_INLINE void load(RegisterMatrix<T, M, N, SO>& ker, T beta, T const * a, size_t sa, size_t m, size_t n)
-    {
-        ker.load(beta, a, sa, m, n);
     }
 
 

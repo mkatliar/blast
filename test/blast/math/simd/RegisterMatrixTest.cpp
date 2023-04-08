@@ -65,7 +65,7 @@ namespace blast :: testing
 
         RM ker;
         ET const beta = 0.1;
-        ker.load(beta, A.ptr(0, 0), spacing(A));
+        ker.load(beta, ptr(A));
 
         for (size_t i = 0; i < ker.rows(); ++i)
             for (size_t j = 0; j < ker.columns(); ++j)
@@ -135,7 +135,7 @@ namespace blast :: testing
 
         RM ker;
         ET const beta = 0.1;
-        ker.load(beta, A.ptr(0, 0), spacing(A));
+        ker.load(beta, ptr(A));
 
         for (size_t i = 0; i < Traits::rows; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)
@@ -158,7 +158,7 @@ namespace blast :: testing
             {
                 RM ker;
                 ET const beta = 0.1;
-                ker.load(beta, A.ptr(0, 0), spacing(A), m, n);
+                ker.load(beta, ptr(A), m, n);
 
                 for (size_t i = 0; i < m; ++i)
                     for (size_t j = 0; j < n; ++j)
@@ -211,14 +211,8 @@ namespace blast :: testing
         randomize(A);
 
         RM ker;
-        ker.load(1., A.ptr(0, 0), spacing(A));
-
-        // std::cout << "A_ref=\n" << A_ref << std::endl;
-        // std::cout << "A=\n" << A << std::endl;
-        // std::cout << "ker=\n" << ker << std::endl;
-
+        ker.load(ptr(A));
         ker.store(B.ptr(0, 0), spacing(B));
-        // std::cout << "B=\n" << B << std::endl;
 
         for (size_t i = 0; i < Traits::rows; ++i)
             for (size_t j = 0; j < Traits::columns; ++j)
@@ -333,7 +327,7 @@ namespace blast :: testing
         A = A_ref;
 
         RM ker;
-        load(ker, A.ptr(0, 0), A.spacing());
+        ker.load(ptr(A));
 
         for (size_t m = ker.rows() + 1 - ker.simdSize(); m <= Traits::rows; ++m)
             for (size_t n = 1; n <= Traits::columns; ++n)
@@ -405,7 +399,7 @@ namespace blast :: testing
         // std::cout << "C=\n" << C << std::endl;
 
         TypeParam ker;
-        ker.load(1., C.ptr(0, 0), spacing(C));
+        ker.load(ptr(C));
         ger<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.ptr(0, 0), A.spacing(), B.ptr(0, 0), B.spacing());
         ker.store(D.ptr(0, 0), spacing(D));
 
@@ -472,7 +466,7 @@ namespace blast :: testing
             for (size_t n = 0; n <= columns(C); ++n)
             {
                 TypeParam ker;
-                load(ker, C.ptr(0, 0), C.spacing());
+                ker.load(ptr(C));
                 ger<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.ptr(0, 0), A.spacing(), B.ptr(0, 0), B.spacing(), m, n);
 
                 for (size_t i = 0; i < m; ++i)
@@ -614,7 +608,7 @@ namespace blast :: testing
         // True value
         XX = evaluate(BB * inv(trans(LL)));
 
-        load(ker, B.ptr(0, 0), B.spacing());
+        ker.load(ptr(B));
         trsm<false, false, true>(ker, L.ptr(0, 0), spacing(L));
         store(ker, X.ptr(0, 0), X.spacing());
 
