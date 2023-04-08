@@ -70,11 +70,39 @@ namespace blast
          *
          * @param src memory location to load from
          * @param mask load mask
-         * @param aligned true if @a src is SIMD-aligned
+         * @param aligned true iff @a src is SIMD-aligned
          */
         SimdVec(ValueType const * src, MaskType mask, bool aligned) noexcept
         :   SimdVecBase {_mm256_maskload_pd(src, mask)}
         {
+        }
+
+
+        /**
+         * @brief Store to memory
+         *
+         * @param dst memory location to store to
+         * @param aligned true if @a dst is SIMD-aligned
+         */
+        void store(ValueType * dst, bool aligned) const noexcept
+        {
+            if (aligned)
+                _mm256_store_pd(dst, value_);
+            else
+                _mm256_storeu_pd(dst, value_);
+        }
+
+
+        /**
+         * @brief Masked store to memory
+         *
+         * @param dst memory location to store to
+         * @param mask store mask
+         * @param aligned true if @a dst is SIMD-aligned
+         */
+        void store(ValueType * dst, MaskType mask, bool aligned) const noexcept
+        {
+            _mm256_maskstore_pd(dst, mask, value_);
         }
 
 

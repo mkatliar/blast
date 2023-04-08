@@ -78,6 +78,34 @@ namespace blast
         }
 
 
+        /**
+         * @brief Store to memory
+         *
+         * @param dst memory location to store to
+         * @param aligned true if @a dst is SIMD-aligned
+         */
+        void store(ValueType * dst, bool aligned) const noexcept
+        {
+            if (aligned)
+                _mm256_store_ps(dst, value_);
+            else
+                _mm256_storeu_ps(dst, value_);
+        }
+
+
+        /**
+         * @brief Masked store to memory
+         *
+         * @param dst memory location to store to
+         * @param mask store mask
+         * @param aligned true if @a dst is SIMD-aligned
+         */
+        void store(ValueType * dst, MaskType mask, bool aligned) const noexcept
+        {
+            _mm256_maskstore_ps(dst, mask, value_);
+        }
+
+
         friend MaskType operator>(SimdVec const& a, SimdVec const& b) noexcept
         {
             return _mm256_castps_si256(_mm256_cmp_ps(a.value_, b.value_, _CMP_GT_OQ));

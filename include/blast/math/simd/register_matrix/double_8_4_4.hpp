@@ -77,16 +77,16 @@ namespace blast
                     m > 4 * i + 0 ? 0x8000000000000000ULL : 0);
 
                 if (n > 0)
-                    ptr(SS * i, 0).maskStore(mask, v_[i][0]);
+                    ptr(SS * i, 0).store(v_[i][0], mask);
 
                 if (n > 1)
-                    ptr(SS * i, 1).maskStore(mask, v_[i][1]);
+                    ptr(SS * i, 1).store(v_[i][1], mask);
 
                 if (n > 2)
-                    ptr(SS * i, 2).maskStore(mask, v_[i][2]);
+                    ptr(SS * i, 2).store(v_[i][2], mask);
 
                 if (n > 3)
-                    ptr(SS * i, 3).maskStore(mask, v_[i][3]);
+                    ptr(SS * i, 3).store(v_[i][3], mask);
             }
         }
     }

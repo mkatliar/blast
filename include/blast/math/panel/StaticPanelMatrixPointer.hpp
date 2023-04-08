@@ -76,15 +76,17 @@ namespace blast
         }
 
 
-        void store(IntrinsicType val) const noexcept
+        void store(SimdVecType const& val) const noexcept
         {
-            blast::store<AF>(ptr_, val);
+            static_assert(AF, "store() implemented only for aligned pointers");
+            val.store(ptr_, AF);
         }
 
 
-        void maskStore(MaskType mask, IntrinsicType val) const noexcept
+        void store(SimdVecType const& val, MaskType mask) const noexcept
         {
-            blast::maskstore(ptr_, mask, val);
+            static_assert(AF, "store() implemented only for aligned pointers");
+            val.store(ptr_, mask, AF);
         }
 
 

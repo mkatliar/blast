@@ -101,7 +101,7 @@ namespace blast
         }
 
 
-        void maskStore(MaskType mask, IntrinsicType val) const noexcept
+        void store(SimdVecType const& val, MaskType mask) const noexcept
         {
             if constexpr (S == 1)
             {

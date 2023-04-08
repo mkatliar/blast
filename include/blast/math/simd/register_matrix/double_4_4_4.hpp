@@ -63,16 +63,16 @@ namespace blast
                 m > 0 ? 0x8000000000000000ULL : 0);
 
             if (n > 0)
-                ptr.maskStore(mask, v_[0][0]);
+                ptr.store(v_[0][0], mask);
 
             if (n > 1)
-                ptr(0, 1).maskStore(mask, v_[0][1]);
+                ptr(0, 1).store(v_[0][1], mask);
 
             if (n > 2)
-                ptr(0, 2).maskStore(mask, v_[0][2]);
+                ptr(0, 2).store(v_[0][2], mask);
 
             if (n > 3)
-                ptr(0, 3).maskStore(mask, v_[0][3]);
+                ptr(0, 3).store(v_[0][3], mask);
         }
     }
 #endif

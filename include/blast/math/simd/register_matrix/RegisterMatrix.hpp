@@ -474,7 +474,7 @@ namespace blast
             size_t const i = m / SS;
 
             for (size_t j = 0; j < n && j < columns(); ++j)
-                p(SS * i, j).maskStore(mask, v_[i][j]);
+                p(SS * i, j).store(v_[i][j], mask);
         }
     }
 
@@ -492,7 +492,7 @@ namespace blast
             if (skip && ri < RM)
             {
                 MaskType const mask = SIMD::index() >= skip;
-                p(SS * ri, j).maskStore(mask, v_[ri][j]);
+                p(SS * ri, j).store(v_[ri][j], mask);
                 ++ri;
             }
 
@@ -518,7 +518,7 @@ namespace blast
                 if (skip > 0)
                     mask &= SIMD::index() >= skip;
 
-                p(SS * ri, j).maskStore(mask, v_[ri][j]);
+                p(SS * ri, j).store(v_[ri][j], mask);
             }
         }
     }
