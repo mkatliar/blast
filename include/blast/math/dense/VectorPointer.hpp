@@ -26,13 +26,11 @@
 #include <blaze/math/typetraits/IsTransExpr.h>
 #include <blaze/math/typetraits/TransposeFlag.h>
 #include <blaze/system/Inline.h>
+
 #include <blast/math/dense/DynamicVectorPointer.hpp>
 #include <blast/math/dense/StaticVectorPointer.hpp>
 #include <blast/math/dense/DynamicMatrixPointer.hpp>
 #include <blast/math/dense/StaticMatrixPointer.hpp>
-#include <blast/math/simd/VectorPointer.hpp>
-#include <blast/math/simd/MatrixPointer.hpp>
-#include <cstddef>
 
 
 namespace blast
@@ -251,69 +249,5 @@ namespace blast
     BLAZE_ALWAYS_INLINE auto ptr(VT const& v)
     {
         return ptr<IsAligned_v<VT>>(v, 0);
-    }
-
-
-    /**
-     * @brief Convert matrix pointer to a column vector pointer.
-     *
-     * @tparam MP matrix pointer type
-     * @param p matrix pointer
-     *
-     * @return pointer to the matrix column vector whose first element is the one that is pointed by @a p
-     */
-    template <typename MP>
-    requires MatrixPointer<MP>
-    BLAZE_ALWAYS_INLINE auto column(MP p) noexcept
-    {
-        using ET = typename MP::ElementType;
-
-        if constexpr (MP::storageOrder == columnMajor)
-        {
-            return StaticVectorPointer<ET, 1, columnVector, MP::aligned, MP::padded > {p.get()};
-        }
-        else
-        {
-            if constexpr (IsStatic_v<MP>)
-            {
-                return StaticVectorPointer<ET, MP::spacing(), columnVector, MP::aligned, MP::padded> {p.get()};
-            }
-            else
-            {
-                return DynamicVectorPointer<ET, columnVector, MP::aligned, MP::padded> {p.get(), p.spacing()};
-            }
-        }
-    }
-
-
-    /**
-     * @brief Convert matrix pointer to a row vector pointer.
-     *
-     * @tparam MP matrix pointer type
-     * @param p matrix pointer
-     *
-     * @return pointer to the matrix row vector whose first element is the one that is pointed by @a p
-     */
-    template <typename MP>
-    requires MatrixPointer<MP>
-    BLAZE_ALWAYS_INLINE auto row(MP p) noexcept
-    {
-        using ET = typename MP::ElementType;
-
-        if constexpr (MP::storageOrder == rowMajor)
-        {
-            return StaticVectorPointer<ET, 1, rowVector, MP::aligned, MP::padded> {p.get()};
-        }
-        else
-        {
-            if constexpr (IsStatic_v<MP>)
-            {
-                return StaticVectorPointer<ET, MP::spacing(), rowVector, MP::aligned, MP::padded> {p.get()};
-            }
-            else
-            {
-                return DynamicVectorPointer<ET, rowVector, MP::aligned, MP::padded> {p.get(), p.spacing()};
-            }
-        }
     }
 }

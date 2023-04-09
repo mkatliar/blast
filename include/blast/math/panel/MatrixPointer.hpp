@@ -17,7 +17,6 @@
 #include <blast/math/typetraits/IsPanelMatrix.hpp>
 #include <blast/math/panel/DynamicPanelMatrixPointer.hpp>
 #include <blast/math/panel/StaticPanelMatrixPointer.hpp>
-#include <blast/math/simd/MatrixPointer.hpp>
 #include <blast/math/TypeTraits.hpp>
 #include <blast/math/expressions/PanelMatrix.hpp>
 

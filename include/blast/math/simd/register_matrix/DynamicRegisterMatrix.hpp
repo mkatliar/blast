@@ -5,16 +5,16 @@
 #pragma once
 
 #include <blast/math/simd/Simd.hpp>
-#include <blast/math/simd/MatrixPointer.hpp>
+#include <blast/math/typetraits/MatrixPointer.hpp>
 #include <blast/math/Side.hpp>
 #include <blast/math/UpLo.hpp>
+#include <blast/util/Assert.hpp>
 
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/Matrix.h>
 #include <blaze/system/Inline.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/Exception.h>
-#include <blaze/util/Assert.h>
 #include <blaze/util/StaticAssert.h>
 
 #include <cmath>

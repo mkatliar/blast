@@ -124,52 +124,6 @@ namespace blast :: testing
     }
 
 
-    TYPED_TEST(RegisterMatrixTest, testLoadPanelRawPtr)
-    {
-        using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
-        using ET = ElementType_t<RM>;
-
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
-        randomize(A);
-
-        RM ker;
-        ET const beta = 0.1;
-        ker.load(beta, ptr(A));
-
-        for (size_t i = 0; i < Traits::rows; ++i)
-            for (size_t j = 0; j < Traits::columns; ++j)
-                EXPECT_EQ(ker(i, j), beta * A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
-    }
-
-
-    TYPED_TEST(RegisterMatrixTest, testPartialLoadPanelRawPtr)
-    {
-        using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
-        using ET = ElementType_t<RM>;
-
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
-        randomize(A);
-
-        for (size_t m = 0; m <= rows(A); ++m)
-        {
-            for (size_t n = 0; n <= columns(A); ++n)
-            {
-                RM ker;
-                ET const beta = 0.1;
-                ker.load(beta, ptr(A), m, n);
-
-                for (size_t i = 0; i < m; ++i)
-                    for (size_t j = 0; j < n; ++j)
-                        ASSERT_EQ(ker(i, j), beta * A(i, j))
-                        << "load error for size (" << m << ", " << n << "); "
-                        << "element mismatch at (" << i << ", " << j << ")" ;
-            }
-        }
-    }
-
-
     TYPED_TEST(RegisterMatrixTest, testPartialLoadDense)
     {
         using RM = TypeParam;
@@ -400,7 +354,7 @@ namespace blast :: testing
 
         TypeParam ker;
         ker.load(ptr(C));
-        ger<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.ptr(0, 0), A.spacing(), B.ptr(0, 0), B.spacing());
+        ker.ger(ET(1.), column(ptr(A)), row(ptr(B).trans()));
         ker.store(ptr(D));
 
         md = D;
@@ -457,17 +411,13 @@ namespace blast :: testing
         B = mb;
         C = mc;
 
-        // std::cout << "A=\n" << A << std::endl;
-        // std::cout << "B=\n" << B << std::endl;
-        // std::cout << "C=\n" << C << std::endl;
-
         for (size_t m = 0; m <= rows(C); ++m)
         {
             for (size_t n = 0; n <= columns(C); ++n)
             {
                 TypeParam ker;
                 ker.load(ptr(C));
-                ger<A.storageOrder, !B.storageOrder>(ker, ET(1.), A.ptr(0, 0), A.spacing(), B.ptr(0, 0), B.spacing(), m, n);
+                ker.ger(column(ptr(A)), column(ptr(B)).trans(), m, n);
 
                 for (size_t i = 0; i < m; ++i)
                     for (size_t j = 0; j < n; ++j)

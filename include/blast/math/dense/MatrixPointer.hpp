@@ -16,7 +16,6 @@
 
 #include <blast/math/dense/DynamicMatrixPointer.hpp>
 #include <blast/math/dense/StaticMatrixPointer.hpp>
-#include <blast/math/simd/MatrixPointer.hpp>
 
 #include <blaze/math/typetraits/IsAligned.h>
 #include <blaze/math/DenseMatrix.h>

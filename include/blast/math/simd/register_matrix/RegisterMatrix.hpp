@@ -5,10 +5,9 @@
 #pragma once
 
 #include <blast/math/simd/Simd.hpp>
-#include <blast/math/simd/MatrixPointer.hpp>
-#include <blast/math/simd/VectorPointer.hpp>
-#include <blast/math/dense/MatrixPointer.hpp>
-#include <blast/math/dense/VectorPointer.hpp>
+#include <blast/math/typetraits/MatrixPointer.hpp>
+#include <blast/math/typetraits/VectorPointer.hpp>
+#include <blast/math/RowColumnVectorPointer.hpp>
 #include <blast/math/Side.hpp>
 #include <blast/math/UpLo.hpp>
 
@@ -208,19 +207,18 @@ namespace blast
         void store(P p, size_t m, size_t n) const noexcept;
 
 
-        /// @brief Rank-1 update
+        /// @brief Rank-1 update with multiplier
         ///
-        /// @tparam SOA storage order of the panels of the first matrix
-        /// @tparam SOB storage order of the panels of the second matrix
+        /// m(i, j) += alpha * a(i) * b(j)
+        /// for i=0...rows()-1, j=0...columns()-1
         ///
-        /// @param a pointer to the first element of the column of the first matrix. Must be aligned on panel boundary.
-        /// @param sa pointer distance between the consecutive panels of the first matrix.
-        /// @param b pointer to the first element of the row of the second matrix. Must be aligned on panel boundary.
-        /// @param sb pointer distance between the consecutive panels of the second matrix.
-        template <bool SOA, bool SOB>
-        void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb);
-
-
+        /// @tparam PA first vector pointer type
+        /// @tparam PB second vector pointer type
+        ///
+        /// @param alpha multiplier
+        /// @param a column vector for rank-1 update
+        /// @param b row vector for rank-1 update
+        ///
         template <typename PA, typename PB>
         requires
             VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
@@ -228,24 +226,36 @@ namespace blast
         void ger(T alpha, PA a, PB b) noexcept;
 
 
+        /// @brief Rank-1 update
+        ///
+        /// m(i, j) += a(i) * b(j)
+        /// for i=0...rows()-1, j=0...columns()-1
+        ///
+        /// @tparam PA first vector pointer type
+        /// @tparam PB second vector pointer type
+        ///
+        /// @param a column vector for rank-1 update
+        /// @param b row vector for rank-1 update
+        ///
         template <typename PA, typename PB>
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        requires
+            VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
+            VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
         void ger(PA a, PB b) noexcept;
 
 
-        /// @brief Rank-1 update of specified size
+        /// @brief Rank-1 update of specified size with multiplier
         ///
-        /// @tparam SOA storage order of the panels of the first matrix
-        /// @tparam SOB storage order of the panels of the second matrix
+        /// m(i, j) += alpha * a(i) * b(j)
+        /// for i=0...m-1, j=0...n-1
         ///
-        /// @param a pointer to the first element of the column of the first matrix. Must be aligned on panel boundary.
-        /// @param sa pointer distance between the consecutive panels of the first matrix.
-        /// @param b pointer to the first element of the row of the second matrix. Must be aligned on panel boundary.
-        /// @param sb pointer distance between the consecutive panels of the second matrix.
-        template <bool SOA, bool SOB>
-        void ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n);
-
-
+        /// @tparam PA first vector pointer type
+        /// @tparam PB second vector pointer type
+        ///
+        /// @param alpha multiplier
+        /// @param a column vector for rank-1 update
+        /// @param b row vector for rank-1 update
+        ///
         template <typename PA, typename PB>
         requires
             VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
@@ -253,8 +263,22 @@ namespace blast
         void ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept;
 
 
+        /// @brief Rank-1 update of specified size
+        ///
+        /// m(i, j) += a(i) * b(j)
+        /// for i=0...m-1, j=0...n-1
+        ///
+        /// @tparam PA first vector pointer type
+        /// @tparam PB second vector pointer type
+        ///
+        /// @param alpha multiplier
+        /// @param a column vector for rank-1 update
+        /// @param b row vector for rank-1 update
+        ///
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        requires
+            VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
+            VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
         void ger(PA a, PB b, size_t m, size_t n) noexcept;
 
 
@@ -263,7 +287,7 @@ namespace blast
         /// R += alpha * A * B
         ///
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
         void gemm(size_t K, T alpha, PA a, PB b) noexcept;
 
 
@@ -272,7 +296,7 @@ namespace blast
         /// R(0:md-1, 0:nd-1) += alpha * A * B
         ///
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
         void gemm(size_t K, T alpha, PA a, PB b, size_t md, size_t nd) noexcept;
 
 
@@ -585,37 +609,6 @@ namespace blast
 
 
     template <typename T, size_t M, size_t N, bool SO>
-    template <bool SOA, bool SOB>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb)
-    {
-        if (SOA == columnMajor && SOB == rowMajor)
-        {
-            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
-
-            IntrinsicType ax[RM];
-
-            #pragma unroll
-            for (size_t i = 0; i < RM; ++i)
-                ax[i] = alpha * blast::load<aligned, SS>(a + i * sa);
-
-            #pragma unroll
-            for (size_t j = 0; j < N; ++j)
-            {
-                IntrinsicType bx = broadcast<SS>(b + (j / SS) * sb + (j % SS));
-
-                #pragma unroll
-                for (size_t i = 0; i < RM; ++i)
-                    v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
-            }
-        }
-        else
-        {
-            BLAZE_THROW_LOGIC_ERROR("Not implemented");
-        }
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
     template <typename PA, typename PB>
     requires
         VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
@@ -644,7 +637,9 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PA, typename PB>
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+    requires
+        VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
+        VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b) noexcept
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
@@ -653,47 +648,16 @@ namespace blast
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
-            ax[i] = a(i * SS, 0).load();
+            ax[i] = a(i * SS).load();
 
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
         {
-            IntrinsicType bx = (~b)(0, j).broadcast();
+            IntrinsicType bx = (~b)(j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
                 v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
-        }
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
-    template <bool SOA, bool SOB>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
-    {
-        if (SOA == columnMajor && SOB == rowMajor)
-        {
-            BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
-
-            IntrinsicType ax[RM];
-
-            #pragma unroll
-            for (size_t i = 0; i < RM; ++i)
-                ax[i] = alpha * blast::load<aligned, SS>(a + i * sa);
-
-            #pragma unroll
-            for (size_t j = 0; j < N; ++j) if (j < n)
-            {
-                IntrinsicType bx = broadcast<SS>(b + (j / SS) * sb + (j % SS));
-
-                #pragma unroll
-                for (size_t i = 0; i < RM; ++i)
-                    v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
-            }
-        }
-        else
-        {
-            BLAZE_THROW_LOGIC_ERROR("Not implemented");
         }
     }
 
@@ -725,19 +689,21 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PA, typename PB>
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+    requires
+        VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
+        VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b, size_t m, size_t n) noexcept
     {
         IntrinsicType ax[RM];
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
-            ax[i] = a(i * SS, 0).load();
+            ax[i] = a(i * SS).load();
 
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
-            IntrinsicType bx = (~b)(0, j).broadcast();
+            IntrinsicType bx = (~b)(j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -898,20 +864,6 @@ namespace blast
     }
 
 
-    template <bool SOA, bool SOB, typename T, size_t M, size_t N, bool SO>
-    BLAZE_ALWAYS_INLINE void ger(RegisterMatrix<T, M, N, SO>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb)
-    {
-        ker.template ger<SOA, SOB>(alpha, a, sa, b, sb);
-    }
-
-
-    template <bool SOA, bool SOB, typename T, size_t M, size_t N, bool SO>
-    BLAZE_ALWAYS_INLINE void ger(RegisterMatrix<T, M, N, SO>& ker, T alpha, T const * a, size_t sa, T const * b, size_t sb, size_t m, size_t n)
-    {
-        ker.template ger<SOA, SOB>(alpha, a, sa, b, sb, m, n);
-    }
-
-
     template <typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2>
     inline bool operator==(RegisterMatrix<T, M, N, SO1> const& rm, Matrix<MT, SO2> const& m)
     {
@@ -949,7 +901,7 @@ namespace blast
 
         for (size_t k = 0; k < K; ++k)
         {
-            ker.ger(a, bu);
+            ker.ger(column(a), row(bu));
             a.hmove(1);
             bu.vmove(1);
         }
@@ -964,18 +916,21 @@ namespace blast
         typename T, size_t M, size_t N, bool SO,
         typename PA, typename PB, typename PC, typename PD
     >
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
-            && MatrixPointer<PB, T>
-            && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
+    requires
+        MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) &&
+        MatrixPointer<PB, T> &&
+        MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
     BLAZE_ALWAYS_INLINE void gemm(RegisterMatrix<T, M, N, SO>& ker,
         size_t K, T alpha, PA a, PB b, T beta, PC c, PD d, size_t md, size_t nd) noexcept
     {
         auto bu = ~b;
+
+        // NOTE: ker.load(beta, c) and avoid ker.axpy()?
         ker.reset();
 
         for (size_t k = 0; k < K; ++k)
         {
-            ker.ger(a, bu, md, nd);
+            ker.ger(column(a), row(bu), md, nd);
             a.hmove(1);
             bu.vmove(1);
         }

@@ -37,11 +37,12 @@ namespace blast
 
         ker.load(ptr<aligned>(*A, i, k));
 
-        ET const * a = (*L).ptr(i, 0);
-        ET const * b = (*L).ptr(k, 0);
+        auto const a = ptr<aligned>(*L, i, 0);
+        auto const b = ptr<aligned>(*L, k, 0);
 
+        // TODO: this is a gemm(), replace by gemm()
         for (size_t l = 0; l < k; ++l)
-            ger<MT1::storageOrder, !MT2::storageOrder>(ker, ET(-1.), a + PANEL_SIZE * l, spacing(L), b + PANEL_SIZE * l, spacing(L));
+            ker.ger(ET(-1.), column(a(0, l)), column(b(0, l)).trans());
 
         if (i == k)
             ker.potrf();

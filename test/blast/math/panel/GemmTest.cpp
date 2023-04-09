@@ -9,6 +9,8 @@
 #include <blast/math/views/submatrix/Panel.hpp>
 #include <blast/math/panel/Gemm.hpp>
 
+#include <blaze/Math.h>
+
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 #include <test/Tolerance.hpp>

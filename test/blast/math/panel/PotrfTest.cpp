@@ -6,7 +6,8 @@
 #include <blast/math/panel/Potrf.hpp>
 #include <blast/math/panel/Gemm.hpp>
 
-#include <blaze/math/dense/DynamicMatrix.h>
+#include <blaze/Math.h>
+
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 #include <test/Tolerance.hpp>
@@ -31,7 +32,7 @@ namespace blast :: testing
         {
             // Init matrices
             //
-            DynamicMatrix<Real, columnMajor> blaze_A(M, M);
+            blaze::DynamicMatrix<Real, blaze::columnMajor> blaze_A(M, M);
             makePositiveDefinite(blaze_A);
 
             DynamicPanelMatrix<Real, columnMajor> A(M, M), L(M, M);
@@ -40,9 +41,15 @@ namespace blast :: testing
             // Do potrf
             potrf(A, L);
 
+            blaze::DynamicMatrix<Real, blaze::columnMajor> true_L(M, M);
+            llh(blaze_A, true_L);
+
             // Check result
             blaze::DynamicMatrix<Real> const L_blaze = L;
-            BLAST_EXPECT_APPROX_EQ(eval(L_blaze * trans(L_blaze)), blaze_A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
+            BLAST_ASSERT_APPROX_EQ(eval(L_blaze * trans(L_blaze)), blaze_A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M << "\n"
+                << "L = \n" << L
+                << "true L = \n" << true_L
+                << "L - (true L) = \n" << (L_blaze - true_L);
         }
     }
 
