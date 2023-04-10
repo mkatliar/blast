@@ -47,7 +47,7 @@ namespace blast
         if (i == k)
             ker.potrf();
         else
-            trsm<false, false, true>(ker, (*L).ptr(k, k), spacing(L));
+            ker.trsmRightUpper(ptr<aligned>(*L, k, k).trans());
 
         if (k + KN <= N)
             ker.store(ptr<aligned>(*L, i, k));

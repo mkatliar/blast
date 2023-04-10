@@ -57,7 +57,7 @@ namespace blast
         else
         {
             // Off-diagonal blocks
-            ker.trsmRightUpper(trans(ptr<aligned>(L, k, k)));
+            ker.trsmRightUpper(ptr<aligned>(L, k, k).trans());
 
             if (k + KN <= N)
                 ker.store(ptr<aligned>(L, i, k));

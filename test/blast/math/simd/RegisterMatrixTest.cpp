@@ -543,27 +543,18 @@ namespace blast :: testing
 
         randomize(B);
 
-        // std::cout << "B=\n" << B << std::endl;
-        // std::cout << "L=\n" << L << std::endl;
-
         StaticMatrix<ET, Traits::columns, Traits::columns, columnMajor> LL;
         StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> BB, XX;
 
         LL = L;
         BB = B;
 
-        // std::cout << "BB=\n" << BB << std::endl;
-        // std::cout << "LL=\n" << LL << std::endl;
-
         // True value
         XX = evaluate(BB * inv(trans(LL)));
 
         ker.load(ptr(B));
-        trsm<false, false, true>(ker, L.ptr(0, 0), spacing(L));
+        ker.trsmRightUpper(ptr(L).trans());
         ker.store(ptr(X));
-
-        // std::cout << "X=\n" << X << std::endl;
-        // std::cout << "XX=\n" << XX << std::endl;
 
         // TODO: should be strictly equal?
         BLAST_ASSERT_APPROX_EQ(X, XX, absTol<ET>(), relTol<ET>());

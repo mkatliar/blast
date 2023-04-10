@@ -301,24 +301,26 @@ namespace blast
 
 
         /// @brief In-place Cholesky decomposition
-        void potrf();
+        void potrf() noexcept;
 
 
-        /// @brief Triangular substitution, panel matrix pointer argument
+        /// @brief Triangular substitution
         ///
-        /// @brief l pointer to a triangular matrix
+        /// Solves
+        /// X * A = B
         ///
-        template <bool LeftSide, bool Upper, bool TransA>
-        void trsm(T const * l, size_t sl);
-
-
-        /// @brief Triangular substitution, matrix pointer argument
+        /// where A is upper-triangular.
         ///
-        /// @brief a pointer to a triangular matrix
+        /// On entry, the register matrix contains the matrix B.
+        /// On exit, the register matrix contains the solution matrix X.
+        ///
+        /// Only upper-triangular and diagonal elements of A are referenced.
+        ///
+        /// @brief pointer to matrix A
         ///
         template <typename P>
-            requires MatrixPointer<P, T>
-        void trsmRightUpper(P a);
+        requires MatrixPointer<P, T>
+        void trsmRightUpper(P a) noexcept;
 
 
         /// @brief Triangular matrix multiplication
@@ -337,7 +339,7 @@ namespace blast
         /// @param b general matrix.
         ///
         template <typename P1, typename P2>
-            requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
+        requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
         void trmmLeftUpper(T alpha, P1 a, P2 b) noexcept;
 
 
@@ -357,7 +359,7 @@ namespace blast
         /// @param b general matrix.
         ///
         template <typename P1, typename P2>
-            requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
+        requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
         void trmmRightLower(T alpha, P1 a, P2 b) noexcept;
 
 
@@ -549,35 +551,9 @@ namespace blast
 
 
     template <typename T, size_t M, size_t N, bool SO>
-    template <bool LeftSide, bool Upper, bool TransA>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsm(T const * l, size_t sl)
-    {
-        #pragma unroll
-        for (size_t j = 0; j < N; ++j)
-        {
-            #pragma unroll
-            for (size_t k = 0; k < j; ++k)
-            {
-                IntrinsicType const l_jk = broadcast<SS>(l + (j / SS) * sl + j % SS + k * SS);
-
-                #pragma unroll
-                for (size_t i = 0; i < RM; ++i)
-                    v_[i][j] = fnmadd(l_jk, v_[i][k], v_[i][j]);
-            }
-
-            IntrinsicType const l_jj = broadcast<SS>(l + (j / SS) * sl + j % SS + j * SS);
-
-            #pragma unroll
-            for (size_t i = 0; i < RM; ++i)
-                v_[i][j] /= l_jj;
-        }
-    }
-
-
-    template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsmRightUpper(P a)
+    requires MatrixPointer<P, T>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsmRightUpper(P a) noexcept
     {
         if constexpr (SO == columnMajor)
         {
@@ -745,15 +721,8 @@ namespace blast
     }
 
 
-    template <bool LeftSide, bool Upper, bool TransA, typename T, size_t M, size_t N, bool SO>
-    inline void trsm(RegisterMatrix<T, M, N, SO>& ker, T const * a, size_t sa)
-    {
-        ker.template trsm<LeftSide, Upper, TransA>(a, sa);
-    }
-
-
     template <typename T, size_t M, size_t N, bool SO>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::potrf()
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::potrf() noexcept
     {
         static_assert(M >= N, "potrf() not implemented for register matrices with columns more than rows");
         static_assert(RM * RN + 2 <= RegisterCapacity_v<T>, "Not enough registers");
@@ -945,9 +914,9 @@ namespace blast
         typename T, size_t M, size_t N, bool SO,
         typename PA, typename PB, typename PC, typename PD
     >
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
-            && MatrixPointer<PB, T>
-            && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
+    requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+        && MatrixPointer<PB, T>
+        && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
     BLAZE_ALWAYS_INLINE void gemm(RegisterMatrix<T, M, N, SO>& ker,
         size_t K, PA a, PB b, PC c, PD d) noexcept
     {
@@ -968,9 +937,9 @@ namespace blast
         typename T, size_t M, size_t N, bool SO,
         typename PA, typename PB, typename PC, typename PD
     >
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
-            && MatrixPointer<PB, T>
-            && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
+    requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+        && MatrixPointer<PB, T>
+        && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
     BLAZE_ALWAYS_INLINE void gemm(RegisterMatrix<T, M, N, SO>& ker,
         size_t K, PA a, PB b, PC c, PD d, size_t md, size_t nd) noexcept
     {
