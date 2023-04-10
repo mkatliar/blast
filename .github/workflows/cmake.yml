@@ -20,17 +20,21 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install CLang
-      run: sudo apt install clang-15 -y
-
-    - name: Install Boost
-      run: sudo apt install libboost-exception-dev -y
+    - name: Install APT packages
+      run: sudo apt install clang libboost-exception-dev -y
 
     - name: Install Blaze
       run: |
         git clone https://bitbucket.org/blaze-lib/blaze.git
-        cd blaze && cmake -DBLAZE_BLAS_MODE=True -DBLAZE_BLAS_USE_MATRIX_MATRIX_MULTIPLICATION=False \
-        -DBLAZE_BLAS_USE_MATRIX_VECTOR_MULTIPLICATION=False -DBLAZE_VECTORIZATION=True -DCMAKE_INSTALL_PREFIX=/usr/local/ . && sudo make install
+        cd blaze \
+        && cmake \
+        -DBLAZE_BLAS_MODE=True \
+        -DBLAZE_BLAS_USE_MATRIX_MATRIX_MULTIPLICATION=False \
+        -DBLAZE_BLAS_USE_MATRIX_VECTOR_MULTIPLICATION=False \
+        -DBLAZE_VECTORIZATION=True \
+        -DBLAZE_SHARED_MEMORY_PARALLELIZATION=False \
+        -DCMAKE_INSTALL_PREFIX=/usr/local/ . \
+        && sudo make install
 
     - name: Install GTest
       run: |
