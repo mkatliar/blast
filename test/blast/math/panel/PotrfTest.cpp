@@ -35,21 +35,22 @@ namespace blast :: testing
             blaze::DynamicMatrix<Real, blaze::columnMajor> blaze_A(M, M);
             makePositiveDefinite(blaze_A);
 
-            DynamicPanelMatrix<Real, columnMajor> A(M, M), L(M, M);
+            DynamicPanelMatrix<Real, columnMajor> A(M, M), L(M, M), A1(M, M);
             A = blaze_A;
 
             // Do potrf
             potrf(A, L);
 
-            blaze::DynamicMatrix<Real, blaze::columnMajor> true_L(M, M);
-            llh(blaze_A, true_L);
+            // Check that L is lower-triangular
+            for (std::size_t i = 0; i < rows(L); ++i)
+                for (std::size_t j = i + 1; j < columns(L); ++j)
+                    EXPECT_NEAR(L(i, j), Real {}, absTol<Real>());
 
-            // Check result
-            blaze::DynamicMatrix<Real> const L_blaze = L;
-            BLAST_ASSERT_APPROX_EQ(eval(L_blaze * trans(L_blaze)), blaze_A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M << "\n"
-                << "L = \n" << L
-                << "true L = \n" << true_L
-                << "L - (true L) = \n" << (L_blaze - true_L);
+            // Check A == L * trans(L)
+            A1 = 0.;
+            gemm_nt(L, L, A1, A1);
+
+            BLAST_EXPECT_APPROX_EQ(A1, A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
         }
     }
 
