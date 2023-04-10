@@ -3,11 +3,10 @@
 # license that can be found in the LICENSE file.
 
 find_package(benchmark REQUIRED)
-find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(BLAS REQUIRED)
 
 pkg_check_modules(libxsmm REQUIRED IMPORTED_TARGET libxsmm)
-pkg_check_modules(openblas REQUIRED IMPORTED_TARGET openblas)
 
 add_executable(bench-libxsmm
     Main.cpp
@@ -16,8 +15,7 @@ add_executable(bench-libxsmm
 
 target_link_libraries(bench-libxsmm
     blast
-    benchmark
-    PkgConfig::openblas
+    benchmark::benchmark
+    BLAS::BLAS
     PkgConfig::libxsmm
-    ${CMAKE_THREAD_LIBS_INIT}
 )
