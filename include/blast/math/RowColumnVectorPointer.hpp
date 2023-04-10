@@ -22,7 +22,7 @@
 
 namespace blast
 {
-    template <typename MP, bool TF>
+    template <typename MP, TransposeFlag TF>
     requires MatrixPointer<MP>
     class RowColumnVectorPointer
     {
@@ -32,7 +32,7 @@ namespace blast
         using MaskType = typename Simd<std::remove_cv_t<ElementType>>::MaskType;
         using SimdVecType = SimdVec<std::remove_cv_t<ElementType>>;
 
-        static bool constexpr transposeFlag = TF;
+        static TransposeFlag constexpr transposeFlag = TF;
         static bool constexpr aligned = MP::aligned;
         static bool constexpr padded = MP::padded;
         static bool constexpr isStatic = MP::isStatic;
@@ -56,24 +56,13 @@ namespace blast
 
         SimdVecType load() const noexcept
         {
-            // Non-optimized
-            IntrinsicType v;
-            for (size_t i = 0; i < SS; ++i)
-                v[i] = *(~*this)(i);
-
-            return SimdVecType {v};
+            return ptr_.load(transposeFlag);
         }
 
 
         SimdVecType load(MaskType mask) const noexcept
         {
-            // Non-optimized
-            IntrinsicType v = blast::setzero<std::remove_cv_t<ElementType>, SS>();
-            for (size_t i = 0; i < SS; ++i)
-                if (mask[i])
-                    v[i] = *(~*this)(i);
-
-            return SimdVecType {v};
+            return ptr_.load(transposeFlag, mask);
         }
 
 
@@ -85,18 +74,13 @@ namespace blast
 
         void store(SimdVecType const& val) const noexcept
         {
-            // Non-optimized
-            for (size_t i = 0; i < SS; ++i)
-                *(~*this)(i) = val[i];
+            ptr_.store(transposeFlag, val);
         }
 
 
         void store(SimdVecType const& val, MaskType mask) const noexcept
         {
-            // Non-optimized
-            for (size_t i = 0; i < SS; ++i)
-                if (mask[i])
-                    *(~*this)(i) = val[i];
+            ptr_.store(transposeFlag, val, mask);
         }
 
 

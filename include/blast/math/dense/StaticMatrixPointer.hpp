@@ -4,14 +4,16 @@
 
 #pragma once
 
-#include <blaze/math/StorageOrder.h>
-#include <blaze/math/StaticMatrix.h>
-
+#include <blast/math/TransposeFlag.hpp>
 #include <blast/math/simd/Simd.hpp>
 #include <blast/math/simd/SimdVec.hpp>
 #include <blast/math/simd/IsSimdAligned.hpp>
 #include <blast/math/TypeTraits.hpp>
 #include <blast/util/Assert.hpp>
+
+#include <blaze/math/StorageOrder.h>
+#include <blaze/math/StaticMatrix.h>
+#include <blaze/util/Exception.h>
 
 
 namespace blast
@@ -59,6 +61,24 @@ namespace blast
         SimdVecType load(MaskType mask) const noexcept
         {
             return SimdVecType {ptr_, mask, AF};
+        }
+
+
+        SimdVecType load(TransposeFlag orientation) const
+        {
+            if (orientation == majorOrientation)
+                return SimdVecType {ptr_, AF};
+            else
+                BLAZE_THROW_LOGIC_ERROR("Cross-load not implemented");
+        }
+
+
+        SimdVecType load(TransposeFlag orientation, MaskType mask) const
+        {
+            if (orientation == majorOrientation)
+                return SimdVecType {ptr_, mask, AF};
+            else
+                BLAZE_THROW_LOGIC_ERROR("Cross-load not implemented");
         }
 
 
@@ -167,6 +187,7 @@ namespace blast
 
     private:
         static size_t constexpr SS = Simd<std::remove_cv_t<T>>::size;
+        static TransposeFlag constexpr majorOrientation = SO == columnMajor ? columnVector : rowVector;
 
 
         static T * ptrOffset(T * ptr, ptrdiff_t i, ptrdiff_t j) noexcept

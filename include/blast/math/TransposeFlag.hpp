@@ -24,4 +24,10 @@ namespace blast
         rowVector = blaze::rowVector,
         columnVector = blaze::columnVector
     };
+
+
+    inline TransposeFlag constexpr operator!(TransposeFlag tf)
+    {
+        return tf == TransposeFlag::rowVector ? TransposeFlag::columnVector : TransposeFlag::rowVector;
+    }
 }
