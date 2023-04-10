@@ -553,7 +553,7 @@ namespace blast :: testing
         XX = evaluate(BB * inv(trans(LL)));
 
         ker.load(ptr(B));
-        ker.trsmRightUpper(ptr(L).trans());
+        ker.trsm(Side::Right, UpLo::Upper, ptr(L).trans());
         ker.store(ptr(X));
 
         // TODO: should be strictly equal?
@@ -585,8 +585,8 @@ namespace blast :: testing
 
         randomize(B);
 
-        ker.load(1., ptr(B));
-        ker.trsmRightUpper(trans(ptr(L)));
+        ker.load(ptr(B));
+        ker.trsm(Side::Right, UpLo::Upper, trans(ptr(L)));
 
         // TODO: should be strictly equal?
         BLAST_ASSERT_APPROX_EQ(ker, evaluate(B * inv(trans(L))), absTol<ET>(), relTol<ET>());

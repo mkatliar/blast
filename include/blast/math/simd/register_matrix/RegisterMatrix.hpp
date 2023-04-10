@@ -308,19 +308,22 @@ namespace blast
         ///
         /// Solves
         /// X * A = B
+        /// or
+        /// A * X = B
         ///
-        /// where A is upper-triangular.
+        /// where A is either upper-triangular or lower-triangular.
         ///
         /// On entry, the register matrix contains the matrix B.
         /// On exit, the register matrix contains the solution matrix X.
         ///
-        /// Only upper-triangular and diagonal elements of A are referenced.
-        ///
-        /// @brief pointer to matrix A
+        /// @param side specifies whether A appears on the left or right of X
+        /// @param uplo specifies whether the matrix A is an upper or lower triangular matrix
+        /// @param pointer pointer to matrix A. Depending on the @a uplo flag, onlny the diagonal
+        ///     and the upper- or lower-triangular elements of A are referenced.
         ///
         template <typename P>
         requires MatrixPointer<P, T>
-        void trsmRightUpper(P a) noexcept;
+        void trsm(Side side, UpLo uplo, P A) noexcept;
 
 
         /// @brief Triangular matrix multiplication
@@ -553,28 +556,36 @@ namespace blast
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
     requires MatrixPointer<P, T>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsmRightUpper(P a) noexcept
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsm(Side side, UpLo uplo, P A) noexcept
     {
         if constexpr (SO == columnMajor)
         {
-            #pragma unroll
-            for (size_t j = 0; j < N; ++j)
+            if (side == Side::Right && uplo == UpLo::Upper)
             {
                 #pragma unroll
-                for (size_t k = 0; k < j; ++k)
+                for (size_t j = 0; j < N; ++j)
                 {
-                    IntrinsicType const a_kj = (~a)(k, j).broadcast();
+                    #pragma unroll
+                    for (size_t k = 0; k < j; ++k)
+                    {
+                        IntrinsicType const a_kj = (~A)(k, j).broadcast();
+
+                        #pragma unroll
+                        for (size_t i = 0; i < RM; ++i)
+                            v_[i][j] = fnmadd(a_kj, v_[i][k], v_[i][j]);
+                    }
+
+                    IntrinsicType const a_jj = (~A)(j, j).broadcast();
 
                     #pragma unroll
                     for (size_t i = 0; i < RM; ++i)
-                        v_[i][j] = fnmadd(a_kj, v_[i][k], v_[i][j]);
+                        v_[i][j] /= a_jj;
                 }
-
-                IntrinsicType const a_jj = (~a)(j, j).broadcast();
-
-                #pragma unroll
-                for (size_t i = 0; i < RM; ++i)
-                    v_[i][j] /= a_jj;
+            }
+            else
+            {
+                // Not implemented
+                assert(false);
             }
         }
         else
