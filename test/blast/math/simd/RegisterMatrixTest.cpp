@@ -348,13 +348,9 @@ namespace blast :: testing
         B = mb;
         C = mc;
 
-        // std::cout << "A=\n" << A << std::endl;
-        // std::cout << "B=\n" << B << std::endl;
-        // std::cout << "C=\n" << C << std::endl;
-
         TypeParam ker;
         ker.load(ptr(C));
-        ker.ger(ET(1.), column(ptr(A)), row(ptr(B).trans()));
+        ker.ger(column(ptr(A)), row(ptr(B).trans()));
         ker.store(ptr(D));
 
         md = D;
