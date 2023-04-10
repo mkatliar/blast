@@ -32,7 +32,7 @@ namespace blast :: benchmark
 
         for (auto _ : state)
         {
-            trsm<false, false, true>(ker, L.ptr(0, 0), spacing(L));
+            ker.trsm(Side::Left, UpLo::Upper, ptr(L).trans());
             DoNotOptimize(ker);
         }
 

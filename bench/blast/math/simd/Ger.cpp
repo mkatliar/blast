@@ -34,7 +34,7 @@ namespace blast :: benchmark
         for (auto _ : state)
         {
             for (size_t i = 0; i < K; ++i)
-                ger<a.storageOrder, !decltype(b)::storageOrder>(ker, ET(0.1), a.ptr(0, i), spacing(a), b.ptr(0, i), spacing(b));
+                ker.ger(ET(0.1), column(ptr<aligned>(a, 0, i)), row(ptr<aligned>(b, 0, i).trans()));
 
             DoNotOptimize(ker);
         }
