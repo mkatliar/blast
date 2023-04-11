@@ -33,9 +33,18 @@ fig = plt.figure(figsize=[10, 6])
 ax = fig.subplots()
 
 for p in plots:
-    with open('bench_result/data/{}'.format(p['data_file'])) as f:
+    file_name = 'bench_result/data/{}'.format(p['data_file'])
+    print(f"Processing {file_name}")
+    with open(file_name) as f:
         benchmarks = filter_aggregate(json.load(f)['benchmarks'], 'mean')
-    l = ax.plot([b['m'] for b in benchmarks], [b['flops'] / factor for b in benchmarks], style, label=p['label'], linewidth=line_width)
+    l = ax.plot(
+        [b['m'] for b in benchmarks],
+        [b['flops'] / factor for b in benchmarks],
+        style,
+        label = p['label'],
+        linewidth = line_width,
+        markersize = 4
+    )
 
 ax.grid(True)
 ax.legend()
