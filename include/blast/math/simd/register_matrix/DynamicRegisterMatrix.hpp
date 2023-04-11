@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <blast/math/simd/SimdVec.hpp>
 #include <blast/math/simd/Simd.hpp>
 #include <blast/math/typetraits/MatrixPointer.hpp>
 #include <blast/math/Side.hpp>
@@ -253,6 +254,7 @@ namespace blast
         using IntrinsicType = typename SIMD::IntrinsicType;
         using MaskType = typename SIMD::MaskType;
         using IntType = typename SIMD::IntType;
+        using SimdVecType = SimdVec<T>;
 
         // SIMD size
         static size_t constexpr SS = Simd<T>::size;
@@ -397,7 +399,7 @@ namespace blast
         requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
     BLAZE_ALWAYS_INLINE void DynamicRegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b) noexcept
     {
-        IntrinsicType ax[RM];
+        SimdVecType ax[RM];
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i) // TODO: !!! check i against m
@@ -406,7 +408,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n_)
         {
-            IntrinsicType bx = b(0, j).broadcast();
+            SimdVecType bx = b(0, j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i) // TODO: !!! check i against m
@@ -420,7 +422,7 @@ namespace blast
         requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
     BLAZE_ALWAYS_INLINE void DynamicRegisterMatrix<T, M, N, SO>::ger(PA a, PB b) noexcept
     {
-        IntrinsicType ax[RM];
+        SimdVecType ax[RM];
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i) // TODO: !!! check i against m
@@ -429,7 +431,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n_)
         {
-            IntrinsicType bx = b(0, j).broadcast();
+            SimdVecType bx = b(0, j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i) // TODO: !!! check i against m

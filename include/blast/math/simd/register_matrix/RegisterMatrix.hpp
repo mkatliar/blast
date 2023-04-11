@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <blast/math/simd/SimdVec.hpp>
 #include <blast/math/simd/Simd.hpp>
 #include <blast/math/typetraits/MatrixPointer.hpp>
 #include <blast/math/typetraits/VectorPointer.hpp>
@@ -130,11 +131,13 @@ namespace blast
             requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
         void axpy(T beta, PA a) noexcept
         {
+            SimdVecType const beta_simd {beta};
+
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i)
-                    v_[i][j] += (IntrinsicType)(beta * a(SS * i, j).load());
+                    v_[i][j] = fmadd(beta_simd, a(SS * i, j).load(), v_[i][j]);
         }
 
 
@@ -143,11 +146,13 @@ namespace blast
             requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
         void axpy(T beta, PA a, size_t m, size_t n) noexcept
         {
+            SimdVecType const beta_simd {beta};
+
             #pragma unroll
             for (size_t j = 0; j < N; ++j) if (j < n)
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i) if (i * RM < m)
-                    v_[i][j] += (IntrinsicType)(beta * a(SS * i, j).load());
+                    v_[i][j] = fmadd(beta_simd, a(SS * i, j).load(), v_[i][j]);
         }
 
 
@@ -371,6 +376,7 @@ namespace blast
         using IntrinsicType = typename SIMD::IntrinsicType;
         using MaskType = typename SIMD::MaskType;
         using IntType = typename SIMD::IntType;
+        using SimdVecType = SimdVec<T>;
 
         // SIMD size
         static size_t constexpr SS = Simd<T>::size;
@@ -604,7 +610,7 @@ namespace blast
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
 
-        IntrinsicType ax[RM];
+        SimdVecType ax[RM];
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
@@ -613,7 +619,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
         {
-            IntrinsicType bx = (~b)(j).broadcast();
+            SimdVecType const bx {*(~b)(j)};
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -631,7 +637,7 @@ namespace blast
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
 
-        IntrinsicType ax[RM];
+        SimdVecType ax[RM];
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
@@ -640,7 +646,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
         {
-            IntrinsicType bx = (~b)(j).broadcast();
+            SimdVecType bx = (~b)(j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -656,7 +662,7 @@ namespace blast
         VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept
     {
-        IntrinsicType ax[RM];
+        SimdVecType ax[RM];
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
@@ -665,7 +671,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
-            IntrinsicType bx = (~b)(j).broadcast();
+            SimdVecType bx = (~b)(j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -681,7 +687,7 @@ namespace blast
         VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b, size_t m, size_t n) noexcept
     {
-        IntrinsicType ax[RM];
+        SimdVecType ax[RM];
 
         #pragma unroll
         for (size_t i = 0; i < RM; ++i)
@@ -690,7 +696,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
-            IntrinsicType bx = (~b)(j).broadcast();
+            SimdVecType bx = (~b)(j).broadcast();
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -775,7 +781,7 @@ namespace blast
         #pragma unroll
         for (size_t k = 0; k < rows(); ++k)
         {
-            IntrinsicType ax[RM];
+            SimdVecType ax[RM];
             size_t const ii = (k + 1) / SS;
             size_t const rem = (k + 1) % SS;
 
@@ -789,7 +795,7 @@ namespace blast
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
             {
-                IntrinsicType bx = bu(0, j).broadcast();
+                SimdVecType bx = bu(0, j).broadcast();
 
                 #pragma unroll
                 for (size_t i = 0; i < ii; ++i)
@@ -817,7 +823,7 @@ namespace blast
             #pragma unroll
             for (size_t k = 0; k < N; ++k)
             {
-                IntrinsicType bx[RM];
+                SimdVecType bx[RM];
 
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i)
@@ -826,7 +832,7 @@ namespace blast
                 #pragma unroll
                 for (size_t j = 0; j <= k; ++j)
                 {
-                    IntrinsicType ax = au(0, j).broadcast();
+                    SimdVecType ax = au(0, j).broadcast();
 
                     #pragma unroll
                     for (size_t i = 0; i < RM; ++i)
