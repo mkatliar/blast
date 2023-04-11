@@ -191,12 +191,12 @@ namespace blast
 
             for (; j + KN <= N; j += KN)
                 gemm_backend(ker, K, alpha, beta,
-                    a, trans(ptr<unaligned>(B, j, 0)),
+                    a, trans(ptr<aligned>(B, j, 0)),
                     ptr<aligned>(C, i, j), ptr<aligned>(D, i, j));
 
             if (j < N)
                 gemm_backend(ker, K, alpha, beta,
-                    a, trans(ptr<unaligned>(B, j, 0)),
+                    a, trans(ptr<aligned>(B, j, 0)),
                     ptr<aligned>(C, i, j), ptr<aligned>(D, i, j), KM, N - j);
         }
         else
@@ -206,12 +206,12 @@ namespace blast
 
             for (; j + KN <= N; j += KN)
                 gemm_backend(ker, K, alpha, beta,
-                    ptr<aligned>(A, i, 0), trans(ptr<unaligned>(B, j, 0)),
+                    ptr<aligned>(A, i, 0), trans(ptr<aligned>(B, j, 0)),
                     ptr<aligned>(C, i, j), ptr<aligned>(D, i, j), M - i, KN);
 
             if (j < N)
                 gemm_backend(ker, K, alpha, beta,
-                    ptr<aligned>(A, i, 0), trans(ptr<unaligned>(B, j, 0)),
+                    ptr<aligned>(A, i, 0), trans(ptr<aligned>(B, j, 0)),
                     ptr<aligned>(C, i, j), ptr<aligned>(D, i, j), M - i, N - j);
         }
     }
