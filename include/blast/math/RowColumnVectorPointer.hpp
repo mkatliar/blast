@@ -50,6 +50,18 @@ namespace blast
         }
 
 
+        /**
+         * @brief Create a row/column pointer from a matrix pointer.
+         *
+         * @param ptr matrix pointer to vector element 0.
+         *
+         */
+        constexpr RowColumnVectorPointer(MP&& ptr) noexcept
+        :   ptr_ {std::move(ptr)}
+        {
+        }
+
+
         RowColumnVectorPointer(RowColumnVectorPointer const&) = default;
         RowColumnVectorPointer& operator=(RowColumnVectorPointer const&) = default;
 
@@ -180,9 +192,25 @@ namespace blast
      */
     template <typename MP>
     requires MatrixPointer<MP>
-    BLAZE_ALWAYS_INLINE auto column(MP p) noexcept
+    BLAZE_ALWAYS_INLINE auto column(MP const& p) noexcept
     {
         return RowColumnVectorPointer<MP, columnVector> {p};
+    }
+
+
+    /**
+     * @brief Convert matrix pointer to a column vector pointer.
+     *
+     * @tparam MP matrix pointer type
+     * @param p matrix pointer
+     *
+     * @return pointer to the matrix column vector whose first element is the one that is pointed by @a p
+     */
+    template <typename MP>
+    requires MatrixPointer<MP>
+    BLAZE_ALWAYS_INLINE auto column(MP&& p) noexcept
+    {
+        return RowColumnVectorPointer<MP, columnVector> {std::move(p)};
     }
 
 
@@ -196,8 +224,24 @@ namespace blast
      */
     template <typename MP>
     requires MatrixPointer<MP>
-    BLAZE_ALWAYS_INLINE auto row(MP p) noexcept
+    BLAZE_ALWAYS_INLINE auto row(MP const& p) noexcept
     {
         return RowColumnVectorPointer<MP, rowVector> {p};
+    }
+
+
+    /**
+     * @brief Convert matrix pointer to a row vector pointer.
+     *
+     * @tparam MP matrix pointer type
+     * @param p matrix pointer
+     *
+     * @return pointer to the matrix row vector whose first element is the one that is pointed by @a p
+     */
+    template <typename MP>
+    requires MatrixPointer<MP>
+    BLAZE_ALWAYS_INLINE auto row(MP&& p) noexcept
+    {
+        return RowColumnVectorPointer<MP, rowVector> {std::move(p)};
     }
 }

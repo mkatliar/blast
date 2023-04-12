@@ -42,7 +42,7 @@ namespace blast
          *
          */
         constexpr StaticMatrixPointer(T * p00, ptrdiff_t i, ptrdiff_t j) noexcept
-        :   ptr_ {ptrOffset(p00, i, j)}
+        :   ptr_ {p00 + (SO == columnMajor ? i + spacing() * j : spacing() * i + j)}
         {
             BLAST_USER_ASSERT(!AF || isSimdAligned(ptr_), "Pointer is not aligned");
         }
@@ -188,15 +188,6 @@ namespace blast
     private:
         static size_t constexpr SS = Simd<std::remove_cv_t<T>>::size;
         static TransposeFlag constexpr majorOrientation = SO == columnMajor ? columnVector : rowVector;
-
-
-        static T * ptrOffset(T * ptr, ptrdiff_t i, ptrdiff_t j) noexcept
-        {
-            if constexpr (SO == columnMajor)
-                return ptr + i + spacing() * j;
-            else
-                return ptr + spacing() * i + j;
-        }
 
 
         T * ptr_;
