@@ -7,7 +7,7 @@
 #include <blast/math/typetraits/IsPanelMatrix.hpp>
 #include <blast/math/simd/Simd.hpp>
 #include <blast/math/panel/PanelSize.hpp>
-//#include <blast/math/simd/RegisterMatrix.hpp>
+//#include <blast/math/register_matrix/RegisterMatrix.hpp>
 
 #include <blaze/math/ReductionFlag.h>
 #include <blaze/math/Matrix.h>
