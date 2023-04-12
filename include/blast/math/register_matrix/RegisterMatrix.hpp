@@ -693,35 +693,6 @@ namespace blast
     }
 
 
-    /// @brief General matrix-matrix multiplication
-    ///
-    /// R += alpha * A * B
-    ///
-    template <typename T, size_t M, size_t N, bool SO, typename PA, typename PB>
-    requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
-        && MatrixPointer<PB, T>
-    inline void gemm(RegisterMatrix<T, M, N, SO>& r, size_t K, T alpha, PA a, PB b) noexcept
-    {
-        for (size_t k = 0; k < K; ++k)
-            r.ger(alpha, column(a(0, k)), row((~b)(k, 0)));
-    }
-
-
-    /// @brief General matrix-matrix multiplication with limited size
-    ///
-    /// R(0:md-1, 0:nd-1) += alpha * A * B
-    ///
-    template <typename T, size_t M, size_t N, bool SO, typename PA, typename PB>
-    requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
-        && MatrixPointer<PB, T>
-    inline void gemm(RegisterMatrix<T, M, N, SO>& r, size_t K,
-        T alpha, PA a, PB b, size_t md, size_t nd) noexcept
-    {
-        for (size_t k = 0; k < K; ++k)
-            r.ger(alpha, column(a(0, k)), row((~b)(k, 0)), md, nd);
-    }
-
-
     template <typename T, size_t M, size_t N, bool SO>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::potrf() noexcept
     {
@@ -757,7 +728,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P1, typename P2>
-        requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
+    requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmmLeftUpper(T alpha, P1 a, P2 b) noexcept
     {
         auto bu = ~b;
@@ -797,7 +768,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PB, typename PA>
-        requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
+    requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmmRightLower(T alpha, PB b, PA a) noexcept
     {
         auto au = ~a;
@@ -853,86 +824,5 @@ namespace blast
     inline bool operator==(Matrix<MT, SO1> const& m, RegisterMatrix<T, M, N, SO2> const& rm)
     {
         return rm == m;
-    }
-
-
-    template <
-        typename T, size_t M, size_t N, bool SO,
-        typename PA, typename PB, typename PC, typename PD
-    >
-    requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
-        && MatrixPointer<PB, T>
-        && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
-    inline void gemm(RegisterMatrix<T, M, N, SO>& ker,
-        size_t K, T alpha, PA a, PB b, T beta, PC c, PD d) noexcept
-    {
-        ker.reset();
-
-        for (size_t k = 0; k < K; ++k)
-            ker.ger(column(a(0, k)), row((~b)(k, 0)));
-
-        ker *= alpha;
-        ker.axpy(beta, c);
-        ker.store(d);
-    }
-
-
-    template <
-        typename T, size_t M, size_t N, bool SO,
-        typename PA, typename PB, typename PC, typename PD
-    >
-    requires
-        MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) &&
-        MatrixPointer<PB, T> &&
-        MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
-    inline void gemm(RegisterMatrix<T, M, N, SO>& ker,
-        size_t K, T alpha, PA a, PB b, T beta, PC c, PD d, size_t md, size_t nd) noexcept
-    {
-        ker.reset();
-
-        for (size_t k = 0; k < K; ++k)
-            ker.ger(column(a(0, k)), row((~b)(k, 0)), md, nd);
-
-        ker *= alpha;
-        ker.axpy(beta, c, md, nd);
-        ker.store(d, md, nd);
-    }
-
-
-    template <
-        typename T, size_t M, size_t N, bool SO,
-        typename PA, typename PB, typename PC, typename PD
-    >
-    requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
-        && MatrixPointer<PB, T>
-        && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
-    inline void gemm(RegisterMatrix<T, M, N, SO>& ker,
-        size_t K, PA a, PB b, PC c, PD d) noexcept
-    {
-        ker.load(c);
-
-        for (size_t k = 0; k < K; ++k)
-            ker.ger(column(a(0, k)), row((~b)(k, 0)));
-
-        ker.store(d);
-    }
-
-
-    template <
-        typename T, size_t M, size_t N, bool SO,
-        typename PA, typename PB, typename PC, typename PD
-    >
-    requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
-        && MatrixPointer<PB, T>
-        && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
-    inline void gemm(RegisterMatrix<T, M, N, SO>& ker,
-        size_t K, PA a, PB b, PC c, PD d, size_t md, size_t nd) noexcept
-    {
-        ker.load(c);
-
-        for (size_t k = 0; k < K; ++k)
-            ker.ger(column(a(0, k)), row((~b)(k, 0)), md, nd);
-
-        ker.store(d, md, nd);
     }
 }

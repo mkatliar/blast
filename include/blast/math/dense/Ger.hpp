@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include <blast/Exception.hpp>
+#include <blast/util/Exception.hpp>
 
 #include <blast/system/Tile.hpp>
 #include <blast/math/simd/RegisterMatrix.hpp>

@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <blast/math/simd/register_matrix/RegisterMatrix.hpp>
-#include <blast/Exception.hpp>
+#include <blast/math/register_matrix/RegisterMatrix.hpp>
+#include <blast/util/Exception.hpp>
 
 #include <cmath>
 
