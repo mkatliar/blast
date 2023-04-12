@@ -10,7 +10,7 @@
 
 #include <blast/math/dense/DynamicMatrixPointer.hpp>
 #include <blast/math/dense/StaticMatrixPointer.hpp>
-#include <blast/math/simd/RegisterMatrix.hpp>
+#include <blast/math/register_matrix/RegisterMatrix.hpp>
 #include <blast/math/dense/Getf2.hpp>
 #include <blast/math/dense/Trsm.hpp>
 #include <blast/math/dense/Gemm.hpp>
