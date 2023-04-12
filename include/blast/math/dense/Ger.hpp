@@ -18,7 +18,7 @@
 
 #include <blast/system/Tile.hpp>
 #include <blast/math/simd/RegisterMatrix.hpp>
-#include <blast/math/simd/VectorPointer.hpp>
+#include <blast/math/typetraits/VectorPointer.hpp>
 #include <blast/math/dense/VectorPointer.hpp>
 #include <blast/math/dense/MatrixPointer.hpp>
 

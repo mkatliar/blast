@@ -35,23 +35,24 @@ namespace blast
 
         RegisterMatrix<ET, KM, KN, columnMajor> ker;
 
-        load(ker, ptr(A, i, k), spacing(A));
+        ker.load(ptr<aligned>(*A, i, k));
 
-        ET const * a = ptr(L, i, 0);
-        ET const * b = ptr(L, k, 0);
+        auto const a = ptr<aligned>(*L, i, 0);
+        auto const b = ptr<aligned>(*L, k, 0);
 
+        // TODO: this is a gemm(), replace by gemm()
         for (size_t l = 0; l < k; ++l)
-            ger<MT1::storageOrder, !MT2::storageOrder>(ker, ET(-1.), a + PANEL_SIZE * l, spacing(L), b + PANEL_SIZE * l, spacing(L));
+            ker.ger(ET(-1.), column(a(0, l)), column(b(0, l)).trans());
 
         if (i == k)
             ker.potrf();
         else
-            trsm<false, false, true>(ker, ptr(L, k, k), spacing(L));
+            ker.trsm(Side::Right, UpLo::Upper, ptr<aligned>(*L, k, k).trans());
 
         if (k + KN <= N)
-            store(ker, ptr(L, i, k), spacing(L));
+            ker.store(ptr<aligned>(*L, i, k));
         else
-            store(ker, ptr(L, i, k), spacing(L), std::min(M - i, KM), N - k);
+            ker.store(ptr<aligned>(*L, i, k), std::min(M - i, KM), N - k);
     }
 
 

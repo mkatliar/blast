@@ -20,14 +20,21 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install Boost
-      run: sudo apt install libboost-exception-dev -y
+    - name: Install APT packages
+      run: sudo apt install clang libboost-exception-dev -y
 
     - name: Install Blaze
       run: |
         git clone https://bitbucket.org/blaze-lib/blaze.git
-        cd blaze && cmake -DBLAZE_BLAS_MODE=True -DBLAZE_BLAS_USE_MATRIX_MATRIX_MULTIPLICATION=False \
-        -DBLAZE_BLAS_USE_MATRIX_VECTOR_MULTIPLICATION=False -DBLAZE_VECTORIZATION=True -DCMAKE_INSTALL_PREFIX=/usr/local/ . && sudo make install
+        cd blaze \
+        && cmake \
+        -DBLAZE_BLAS_MODE=True \
+        -DBLAZE_BLAS_USE_MATRIX_MATRIX_MULTIPLICATION=False \
+        -DBLAZE_BLAS_USE_MATRIX_VECTOR_MULTIPLICATION=False \
+        -DBLAZE_VECTORIZATION=True \
+        -DBLAZE_SHARED_MEMORY_PARALLELIZATION=False \
+        -DCMAKE_INSTALL_PREFIX=/usr/local/ . \
+        && sudo make install
 
     - name: Install GTest
       run: |
@@ -38,7 +45,9 @@ jobs:
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: |
-        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+        cmake -B ${{github.workspace}}/build \
+        -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+        -DCMAKE_CXX_COMPILER=clang++ \
         -DCMAKE_CXX_FLAGS="-march=native -mfma -mavx -mavx2 -msse4 -fno-math-errno" \
         -DCMAKE_CXX_FLAGS_RELEASE="-O3 -g -DNDEBUG -ffast-math" \
         -DBLAST_WITH_BENCHMARK=OFF \

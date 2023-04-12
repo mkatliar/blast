@@ -23,6 +23,7 @@ namespace blast
         static bool constexpr transposeFlag = TF;
         static bool constexpr aligned = AF;
         static bool constexpr padded = PF;
+        static bool constexpr isStatic = true;
 
 
         /**
@@ -60,7 +61,7 @@ namespace blast
         }
 
 
-        SimdVecType maskLoad(MaskType mask) const noexcept
+        SimdVecType load(MaskType mask) const noexcept
         {
             if constexpr (S == 1)
             {
@@ -100,7 +101,7 @@ namespace blast
         }
 
 
-        void maskStore(MaskType mask, IntrinsicType val) const noexcept
+        void store(SimdVecType const& val, MaskType mask) const noexcept
         {
             if constexpr (S == 1)
             {

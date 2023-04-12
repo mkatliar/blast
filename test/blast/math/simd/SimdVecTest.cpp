@@ -4,6 +4,8 @@
 
 #include <blast/math/simd/Avx256.hpp>
 
+#include <blaze/Math.h>
+
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 

@@ -59,20 +59,6 @@ namespace blast
 
 
     template <typename MT, bool SO>
-    inline auto * ptr(PanelMatrix<MT, SO>& m, size_t i, size_t j)
-    {
-        return (*m).ptr(i, j);
-    }
-
-
-    template <typename MT, bool SO>
-    inline auto const * ptr(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
-    {
-        return (*m).ptr(i, j);
-    }
-
-
-    template <typename MT, bool SO>
     inline size_t spacing(PanelMatrix<MT, SO> const& m)
     {
         return (*m).spacing();
@@ -122,7 +108,7 @@ namespace blast
 
 			for (size_t i = 0; i + SS <= m; i += SS)
             {
-                ET2 const * pr = ptr(rhs, i, 0);
+                ET2 const * pr = (*rhs).ptr(i, 0);
                 ET1 * pl = data(lhs) + i;
 
                 for (size_t j = 0; j < n; ++j)
@@ -133,7 +119,7 @@ namespace blast
             {
                 MaskType const mask = SIMD::index() < rem;
                 size_t const i = m - rem;
-                ET2 const * pr = ptr(rhs, i, 0);
+                ET2 const * pr = (*rhs).ptr(i, 0);
                 ET1 * pl = data(lhs) + i;
 
                 for (size_t j = 0; j < n; ++j)
@@ -211,7 +197,7 @@ namespace blast
 			for (size_t i = 0; i + SS <= m; i += SS)
             {
                 ET2 const * pr = data(rhs) + i;
-                ET1 * pl = ptr(lhs, i, 0);
+                ET1 * pl = (*lhs).ptr(i, 0);
 
                 for (size_t j = 0; j < n; ++j)
                     store<aligned>(pl + PANEL_SIZE * j, load<aligned, SS>(pr + s * j));
@@ -221,7 +207,7 @@ namespace blast
             {
                 size_t const i = m - rem;
                 ET2 const * pr = data(rhs) + i;
-                ET1 * pl = ptr(lhs, i, 0);
+                ET1 * pl = (*lhs).ptr(i, 0);
 
                 for (size_t j = 0; j < n; ++j)
                     for (size_t i1 = 0; i1 < rem; ++i1)
@@ -244,7 +230,7 @@ namespace blast
 			for (size_t i = 0; i < m; ++i)
             {
                 ET2 const * pr = data(rhs) + s * i;
-                ET1 * pl = ptr(lhs, i, 0);
+                ET1 * pl = (*lhs).ptr(i, 0);
 
                 for (size_t j = 0; j < n; ++j)
                     pl[PANEL_SIZE * j] = pr[j];

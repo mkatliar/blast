@@ -20,7 +20,7 @@
 #include <blast/math/dense/Iamax.hpp>
 #include <blast/math/dense/Ger.hpp>
 #include <blast/math/dense/MatrixPointer.hpp>
-#include <blast/math/dense/VectorPointer.hpp>
+#include <blast/math/RowColumnVectorPointer.hpp>
 
 #include <cmath>
 

@@ -4,6 +4,8 @@
 
 #include <blast/math/StaticPanelMatrix.hpp>
 
+#include <blaze/Math.h>
+
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 
@@ -27,11 +29,35 @@ namespace blast :: testing
     }
 
 
+    TYPED_TEST_P(StaticPanelMatrixTest, testIsStatic)
+    {
+        using MatrixType = StaticPanelMatrix<TypeParam, 5, 7>;
+        ASSERT_TRUE(IsStatic_v<MatrixType>);
+    }
+
+
+    TYPED_TEST_P(StaticPanelMatrixTest, testIsAligned)
+    {
+        using MatrixType = StaticPanelMatrix<TypeParam, 5, 7>;
+        ASSERT_TRUE(IsAligned_v<MatrixType>);
+    }
+
+
     TYPED_TEST_P(StaticPanelMatrixTest, testPanels)
     {
         size_t constexpr SS = PanelSize_v<TypeParam>;
         EXPECT_EQ((StaticPanelMatrix<TypeParam, 2 * SS, 1, columnMajor>().panels()), 2);
         EXPECT_EQ((StaticPanelMatrix<TypeParam, 2 * SS + 1, 1, columnMajor>().panels()), 3);
+    }
+
+
+    TYPED_TEST_P(StaticPanelMatrixTest, testSpacing)
+    {
+        size_t constexpr SS = SimdSize_v<TypeParam>;
+        EXPECT_EQ((StaticPanelMatrix<TypeParam, 2 * SS, 1, columnMajor>::spacing()), 1 * SS);
+        EXPECT_EQ((StaticPanelMatrix<TypeParam, 2 * SS, 2, columnMajor>::spacing()), 2 * SS);
+        EXPECT_EQ((StaticPanelMatrix<TypeParam, 1, 2 * SS, rowMajor>::spacing()), 1 * SS);
+        EXPECT_EQ((StaticPanelMatrix<TypeParam, 2, 2 * SS, rowMajor>::spacing()), 2 * SS);
     }
 
 
@@ -160,8 +186,11 @@ namespace blast :: testing
 
 
     REGISTER_TYPED_TEST_SUITE_P(StaticPanelMatrixTest,
+        testIsStatic,
+        testIsAligned,
         testIsPanelMatrix,
         testPanels,
+        testSpacing,
         testElementAccess,
         testLoad,
         testStore,

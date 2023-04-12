@@ -48,7 +48,7 @@ namespace blast
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(beta, ptr<aligned>(C, i, j));
-                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)));
+                gemm(ker, K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)));
                 if (i == j)
                     ker.storeLower(ptr<aligned>(D, i, j));
                 else
@@ -59,7 +59,7 @@ namespace blast
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(beta, ptr<aligned>(C, i, j));
-                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)));
+                gemm(ker, K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)));
                 if (i == j)
                     ker.storeLower(ptr<aligned>(D, i, j));
                 else
@@ -70,7 +70,7 @@ namespace blast
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(beta, ptr<aligned>(C, i, j));
-                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)));
+                gemm(ker, K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)));
                 if (i == j)
                     ker.storeLower(ptr<aligned>(D, i, j));
                 else
@@ -82,7 +82,7 @@ namespace blast
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(beta, ptr<aligned>(C, i, j), M - i, ker.columns());
-                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), M - i, ker.columns());
+                gemm(ker, K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), M - i, ker.columns());
                 if (i == j)
                     ker.storeLower(ptr<aligned>(D, i, j), M - i, ker.columns());
                 else
@@ -102,7 +102,7 @@ namespace blast
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(beta, ptr<aligned>(C, i, j), ker.rows(), M - j);
-                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), ker.rows(), M - j);
+                gemm(ker, K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), ker.rows(), M - j);
 
                 if (i == j)
                     ker.storeLower(ptr<aligned>(D, i, j), ker.rows(), M - j);
@@ -114,7 +114,7 @@ namespace blast
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(beta, ptr<aligned>(C, i, j), ker.rows(), M - j);
-                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), ker.rows(), M - j);
+                gemm(ker, K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), ker.rows(), M - j);
                 if (i == j)
                     ker.storeLower(ptr<aligned>(D, i, j), ker.rows(), M - j);
                 else
@@ -125,7 +125,7 @@ namespace blast
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(beta, ptr<aligned>(C, i, j), ker.rows(), M - j);
-                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), ker.rows(), M - j);
+                gemm(ker, K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), ker.rows(), M - j);
                 if (i == j)
                     ker.storeLower(ptr<aligned>(D, i, j), ker.rows(), M - j);
                 else
@@ -137,7 +137,7 @@ namespace blast
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
                 ker.load(beta, ptr<aligned>(C, i, j), ker.rows(), M - j);
-                ker.gemm(K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), M - i, M - j);
+                gemm(ker, K, alpha, ptr<aligned>(A, i, 0), trans(ptr<aligned>(A, j, 0)), M - i, M - j);
                 if (i == j)
                     ker.storeLower(ptr<aligned>(D, i, j), M - i, M - j);
                 else

@@ -14,24 +14,12 @@
 
 #pragma once
 
-#include <cstdlib>
-
 
 namespace blast
 {
-    template <typename T>
-    struct SimdSize;
-
-
-    template <typename T>
-    struct SimdSize<T const> : SimdSize<T> {};
-
-
-    /**
-     * @brief Number of elements in a SimdVec<T> object.
-     *
-     * @tparam T scalar type
-     */
-    template <typename T>
-    size_t constexpr SimdSize_v = SimdSize<T>::value;
+    enum AlignmentFlag : bool
+    {
+        aligned = true,
+        unaligned = false
+    };
 }

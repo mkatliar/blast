@@ -47,6 +47,13 @@ namespace blast
         }
 
 
+        /**
+         * @brief Set to [value, value, ...]
+         *
+         * TODO: add "explicit"
+         *
+         * @param value value for each component of SIMD vector
+         */
         SimdVec(ValueType value) noexcept
         :   SimdVecBase {_mm256_set1_ps(value)}
         {
@@ -59,7 +66,7 @@ namespace blast
          * @param src memory location to load from
          * @param aligned true if @a src is SIMD-aligned
          */
-        SimdVec(ValueType const * src, bool aligned) noexcept
+        explicit SimdVec(ValueType const * src, bool aligned) noexcept
         :   SimdVecBase {aligned ? _mm256_load_ps(src) : _mm256_loadu_ps(src)}
         {
         }
@@ -72,9 +79,37 @@ namespace blast
          * @param mask load mask
          * @param aligned true if @a src is SIMD-aligned
          */
-        SimdVec(ValueType const * src, MaskType mask, bool aligned) noexcept
+        explicit SimdVec(ValueType const * src, MaskType mask, bool aligned) noexcept
         :   SimdVecBase {_mm256_maskload_ps(src, mask)}
         {
+        }
+
+
+        /**
+         * @brief Store to memory
+         *
+         * @param dst memory location to store to
+         * @param aligned true if @a dst is SIMD-aligned
+         */
+        void store(ValueType * dst, bool aligned) const noexcept
+        {
+            if (aligned)
+                _mm256_store_ps(dst, value_);
+            else
+                _mm256_storeu_ps(dst, value_);
+        }
+
+
+        /**
+         * @brief Masked store to memory
+         *
+         * @param dst memory location to store to
+         * @param mask store mask
+         * @param aligned true if @a dst is SIMD-aligned
+         */
+        void store(ValueType * dst, MaskType mask, bool aligned) const noexcept
+        {
+            _mm256_maskstore_ps(dst, mask, value_);
         }
 
 
@@ -84,9 +119,34 @@ namespace blast
         }
 
 
-        friend SimdVec operator*(ValueType a, SimdVec const& x) noexcept
+        /**
+         * @brief Multiplication
+         *
+         * @param a first multiplier
+         * @param b second multiplier
+         *
+         * @return product @a a * @a b
+         */
+        friend SimdVec operator*(SimdVec const& a, SimdVec const& b) noexcept
         {
-            return a * x.value_;
+            return _mm256_mul_ps(a.value_, b.value_);
+        }
+
+
+        /**
+         * @brief Fused multiply-add
+         *
+         * Calculate a * b + c
+         *
+         * @param a first multiplier
+         * @param b second multiplier
+         * @param c addendum
+         *
+         * @return @a a * @a b + @a c element-wise
+         */
+        friend SimdVec fmadd(SimdVec const& a, SimdVec const& b, SimdVec const& c) noexcept
+        {
+            return _mm256_fmadd_ps(a.value_, b.value_, c.value_);
         }
 
 

@@ -92,7 +92,7 @@ namespace blast
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-				ker.gemm(N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
+				gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
 				/*
                 ker.trmmRightLower(alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
                 ker.gemm(K, alpha, ptr<aligned>(B, i, j + TILE_SIZE), ptr<aligned>(A, j + TILE_SIZE, j));
@@ -103,7 +103,7 @@ namespace blast
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-				ker.gemm(N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
+				gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
 				/*
                 ker.trmmRightLower(alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
                 ker.gemm(K, alpha, ptr<aligned>(B, i, j + TILE_SIZE), ptr<aligned>(A, j + TILE_SIZE, j));
@@ -114,7 +114,7 @@ namespace blast
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-				ker.gemm(N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
+				gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
 				/*
                 ker.trmmRightLower(alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
                 ker.gemm(K, alpha, ptr<aligned>(B, i, j + TILE_SIZE), ptr<aligned>(A, j + TILE_SIZE, j));
@@ -126,7 +126,7 @@ namespace blast
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-				ker.gemm(N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), M - i, ker.columns());
+				gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), M - i, ker.columns());
 				/*
                 ker.trmmRightLower(alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
                 ker.gemm(K, alpha, ptr<aligned>(B, i, j + TILE_SIZE), ptr<aligned>(A, j + TILE_SIZE, j), M - i, ker.columns());
@@ -146,21 +146,21 @@ namespace blast
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), ker.rows(), N - j);
+                gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), ker.rows(), N - j);
                 ker.store(ptr<aligned>(C, i, j), ker.rows(), N - j);
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), ker.rows(), N - j);
+                gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), ker.rows(), N - j);
                 ker.store(ptr<aligned>(C, i, j), ker.rows(), N - j);
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), ker.rows(), N - j);
+                gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), ker.rows(), N - j);
                 ker.store(ptr<aligned>(C, i, j), ker.rows(), N - j);
             }
 
@@ -168,7 +168,7 @@ namespace blast
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                ker.gemm(N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), M - i, N - j);
+                gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), M - i, N - j);
                 ker.store(ptr<aligned>(C, i, j), M - i, N - j);
             }
         }

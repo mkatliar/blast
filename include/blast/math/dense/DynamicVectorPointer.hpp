@@ -25,6 +25,7 @@ namespace blast
         static bool constexpr transposeFlag = TF;
         static bool constexpr aligned = AF;
         static bool constexpr padded = PF;
+        static bool constexpr isStatic = false;
 
 
         /**
@@ -58,7 +59,7 @@ namespace blast
         }
 
 
-        SimdVecType maskLoad(MaskType mask) const noexcept
+        SimdVecType load(MaskType mask) const noexcept
         {
             // Non-optimized
             IntrinsicType v = blast::setzero<std::remove_cv_t<ElementType>, SS>();
@@ -84,7 +85,7 @@ namespace blast
         }
 
 
-        void maskStore(MaskType mask, IntrinsicType val) const noexcept
+        void store(SimdVecType const& val, MaskType mask) const noexcept
         {
             // Non-optimized
             for (size_t i = 0; i < SS; ++i)

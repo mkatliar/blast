@@ -29,7 +29,7 @@ namespace blast
             {
                 ker.reset();
                 ker.trmmLeftUpper(alpha, a, b(0, j));
-                ker.gemm(M - KM, alpha, a(0, KM), b(KM, j));
+                gemm(ker, M - KM, alpha, a(0, KM), b(KM, j));
                 ker.store(c(0, j));
             }
 
@@ -37,7 +37,7 @@ namespace blast
             {
                 auto const md = KM, nd = N - j;
                 ker.reset();
-                ker.gemm(M, alpha, a, b(0, j), md, nd);
+                gemm(ker, M, alpha, a, b(0, j), md, nd);
                 ker.store(c(0, j), md, nd);
             }
         }
@@ -50,7 +50,7 @@ namespace blast
             {
                 auto const md = M, nd = KN;
                 ker.reset();
-                ker.gemm(M, alpha, a, b(0, j), md, nd);
+                gemm(ker, M, alpha, a, b(0, j), md, nd);
                 ker.store(c(0, j), md, nd);
             }
 
@@ -58,7 +58,7 @@ namespace blast
             {
                 auto const md = M, nd = N - j;
                 ker.reset();
-                ker.gemm(M, alpha, a, b(0, j), md, nd);
+                gemm(ker, M, alpha, a, b(0, j), md, nd);
                 ker.store(c(0, j), md, nd);
             }
         }

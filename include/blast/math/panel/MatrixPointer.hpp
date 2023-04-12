@@ -14,32 +14,33 @@
 
 #pragma once
 
-#include <blast/math/dense/DynamicMatrixPointer.hpp>
-#include <blast/math/dense/StaticMatrixPointer.hpp>
-
-#include <blaze/math/typetraits/IsAligned.h>
-#include <blaze/math/DenseMatrix.h>
+#include <blast/math/typetraits/IsPanelMatrix.hpp>
+#include <blast/math/panel/DynamicPanelMatrixPointer.hpp>
+#include <blast/math/panel/StaticPanelMatrixPointer.hpp>
+#include <blast/math/TypeTraits.hpp>
+#include <blast/math/expressions/PanelMatrix.hpp>
 
 
 namespace blast
 {
     template <typename MT, bool SO>
-    BLAZE_ALWAYS_INLINE auto ptr(blaze::DenseMatrix<MT, SO>& m)
+    BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO>& m)
     {
-        return ptr<blaze::IsAligned_v<MT>>(m, 0, 0);
+        return ptr<IsAligned_v<MT>>(m, 0, 0);
     }
 
 
     template <typename MT, bool SO>
-    BLAZE_ALWAYS_INLINE auto ptr(blaze::DenseMatrix<MT, SO> const& m)
+    BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO> const& m)
     {
-        return ptr<blaze::IsAligned_v<MT>>(m, 0, 0);
+        return ptr<IsAligned_v<MT>>(m, 0, 0);
     }
 
 
     template <typename MT, bool SO>
+    requires IsPanelMatrix_v<MT>
     BLAZE_ALWAYS_INLINE auto ptr(blaze::DMatTransExpr<MT, SO> const& m)
     {
-        return ptr<blaze::IsAligned_v<MT>>(m, 0, 0);
+        return ptr<IsAligned_v<MT>>(m, 0, 0);
     }
 }

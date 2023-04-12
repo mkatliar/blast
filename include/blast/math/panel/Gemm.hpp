@@ -7,7 +7,9 @@
 #include <blast/math/PanelMatrix.hpp>
 #include <blast/math/simd/RegisterMatrix.hpp>
 #include <blast/math/panel/PanelSize.hpp>
+#include <blast/math/panel/MatrixPointer.hpp>
 
+#include <blaze/math/AlignmentFlag.h>
 #include <blaze/util/Exception.h>
 #include <blaze/util/constraints/SameType.h>
 
@@ -19,21 +21,31 @@ namespace blast
     using namespace blaze;
 
 
-    template <bool SOA, bool SOB, typename T, size_t M, size_t N>
-    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, columnMajor>& ker, size_t K, T alpha, T beta,
-        T const * a, size_t sa, T const * b, size_t sb, T const * c, size_t sc, T * d, size_t sd)
+    template <
+        typename T, size_t M, size_t N,
+        typename MPA, typename MPB, typename MPC, typename MPD
+    >
+    requires
+        MatrixPointer<MPA> &&
+        MatrixPointer<MPB> &&
+        MatrixPointer<MPC> &&
+        MatrixPointer<MPD>
+    BLAZE_ALWAYS_INLINE void gemm_backend(
+        RegisterMatrix<T, M, N, columnMajor>& ker,
+        size_t K, T alpha, T beta,
+        MPA a, MPB b, MPC c, MPD d)
     {
-        load(ker, beta, c, sc);
+        ker.load(beta, c);
 
         for (size_t k = 0; k < K; ++k)
         {
-            ger<SOA, SOB>(ker, alpha, a, sa, b, sb);
+            ker.ger(alpha, column(a), row(b));
 
-            a += SOA == rowMajor ? ker.panels() * sa : Simd<T>::size;
-            b += SOB == rowMajor ? Simd<T>::size : N * sb;
+            a.hmove(1);
+            b.vmove(1);
         }
 
-        store(ker, d, sd);
+        ker.store(d);
     }
 
 
@@ -54,22 +66,32 @@ namespace blast
     }
 
 
-    template <bool SOA, bool SOB, typename T, size_t M, size_t N>
-    BLAZE_ALWAYS_INLINE void gemm_backend(RegisterMatrix<T, M, N, columnMajor>& ker, size_t K, T alpha, T beta,
-        T const * a, size_t sa, T const * b, size_t sb, T const * c, size_t sc, T * d, size_t sd,
+    template <
+        typename T, size_t M, size_t N,
+        typename MPA, typename MPB, typename MPC, typename MPD
+    >
+    requires
+        MatrixPointer<MPA> &&
+        MatrixPointer<MPB> &&
+        MatrixPointer<MPC> &&
+        MatrixPointer<MPD>
+    BLAZE_ALWAYS_INLINE void gemm_backend(
+        RegisterMatrix<T, M, N, columnMajor>& ker,
+        size_t K, T alpha, T beta,
+        MPA a, MPB b, MPC c, MPD d,
         size_t md, size_t nd)
     {
-        load(ker, beta, c, sc, md, nd);
+        ker.load(beta, c, md, nd);
 
         for (size_t k = 0; k < K; ++k)
         {
-            ger<SOA, SOB>(ker, alpha, a, sa, b, sb, md, nd);
+            ker.ger(alpha, column(a), row(b), md, nd);
 
-            a += SOA == rowMajor ? ker.panels() * sa : Simd<T>::size;
-            b += SOB == rowMajor ? Simd<T>::size : N * sb;
+            a.hmove(1);
+            b.vmove(1);
         }
 
-        store(ker, d, sd, md, nd);
+        ker.store(d, md, nd);
     }
 
 
@@ -165,17 +187,17 @@ namespace blast
         if (i + KM <= M)
         {
             size_t j = 0;
-            ET const * a = ptr(A, i, 0);
+            auto a = ptr<aligned>(A, i, 0);
 
             for (; j + KN <= N; j += KN)
-                gemm_backend<columnMajor, rowMajor>(ker, K, alpha, beta,
-                    a, spacing(A), ptr(B, j, 0), spacing(B),
-                    ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D));
+                gemm_backend(ker, K, alpha, beta,
+                    a, trans(ptr<unaligned>(B, j, 0)),
+                    ptr<aligned>(C, i, j), ptr<aligned>(D, i, j));
 
             if (j < N)
-                gemm_backend<columnMajor, rowMajor>(ker, K, alpha, beta,
-                    a, spacing(A), ptr(B, j, 0), spacing(B),
-                    ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D), KM, N - j);
+                gemm_backend(ker, K, alpha, beta,
+                    a, trans(ptr<unaligned>(B, j, 0)),
+                    ptr<aligned>(C, i, j), ptr<aligned>(D, i, j), KM, N - j);
         }
         else
         {
@@ -183,14 +205,14 @@ namespace blast
             size_t j = 0;
 
             for (; j + KN <= N; j += KN)
-                gemm_backend<columnMajor, rowMajor>(ker, K, alpha, beta,
-                    ptr(A, i, 0), spacing(A), ptr(B, j, 0), spacing(B),
-                    ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D), M - i, KN);
+                gemm_backend(ker, K, alpha, beta,
+                    ptr<aligned>(A, i, 0), trans(ptr<unaligned>(B, j, 0)),
+                    ptr<aligned>(C, i, j), ptr<aligned>(D, i, j), M - i, KN);
 
             if (j < N)
-                gemm_backend<columnMajor, rowMajor>(ker, K, alpha, beta,
-                    ptr(A, i, 0), spacing(A), ptr(B, j, 0), spacing(B),
-                    ptr(C, i, j), spacing(C), ptr(D, i, j), spacing(D), M - i, N - j);
+                gemm_backend(ker, K, alpha, beta,
+                    ptr<aligned>(A, i, 0), trans(ptr<unaligned>(B, j, 0)),
+                    ptr<aligned>(C, i, j), ptr<aligned>(D, i, j), M - i, N - j);
         }
     }
 }

@@ -5,21 +5,18 @@
 #pragma once
 
 #include <blast/math/TransposeFlag.hpp>
-#include <blast/math/simd/Simd.hpp>
-#include <blast/math/simd/SimdVec.hpp>
-#include <blast/math/simd/IsSimdAligned.hpp>
 #include <blast/math/TypeTraits.hpp>
+#include <blast/math/simd/SimdSize.hpp>
+#include <blast/math/simd/Simd.hpp>
+#include <blast/math/expressions/PanelMatrix.hpp>
+#include <blast/math/expressions/PMatTransExpr.hpp>
 #include <blast/util/Assert.hpp>
-
-#include <blaze/math/StorageOrder.h>
-#include <blaze/math/StaticMatrix.h>
-#include <blaze/util/Exception.h>
 
 
 namespace blast
 {
     template <typename T, size_t S, bool SO, bool AF, bool PF>
-    class StaticMatrixPointer
+    class StaticPanelMatrixPointer
     {
     public:
         using ElementType = T;
@@ -34,27 +31,36 @@ namespace blast
 
 
         /**
-         * @brief Create a pointer pointing to a specified element of a statically-sized matrix.
+         * @brief Create a pointer pointing to a specified element of a statically-sized panel matrix.
          *
-         * @param p00 pointer to matrix element (0, 0).
+         * @param ptr pointer to the matrix element with indices (0, 0).
          * @param i row index of the pointed element
          * @param j column index of the pointed element
          *
          */
-        constexpr StaticMatrixPointer(T * p00, ptrdiff_t i, ptrdiff_t j) noexcept
-        :   ptr_ {p00 + (SO == columnMajor ? i + spacing() * j : spacing() * i + j)}
+        constexpr StaticPanelMatrixPointer(T * p00, ptrdiff_t i, ptrdiff_t j) noexcept
+        :   ptr_ {ptrOffset(p00, i, j)}
         {
-            BLAST_USER_ASSERT(!AF || isSimdAligned(ptr_), "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isAligned(ptr_), "Pointer is not aligned");
         }
 
 
-        StaticMatrixPointer(StaticMatrixPointer const&) = default;
-        StaticMatrixPointer& operator=(StaticMatrixPointer const&) = default;
+        StaticPanelMatrixPointer(StaticPanelMatrixPointer const&) = default;
+        StaticPanelMatrixPointer& operator=(StaticPanelMatrixPointer const&) = default;
 
 
         SimdVecType load() const noexcept
         {
-            return SimdVecType {ptr_, AF};
+            if constexpr (AF)
+                return SimdVecType {ptr_, AF};
+            else
+            {
+                // NOTE: non-optimized!
+                ElementType tmp[SS];
+                for (size_t i = 0; i < SS; ++i)
+                    tmp[i] = storageOrder == columnMajor ? *(~*this)(i, 0) : *(~*this)(0, i);
+                return SimdVecType {tmp, false};
+            }
         }
 
 
@@ -90,12 +96,14 @@ namespace blast
 
         void store(SimdVecType const& val) const noexcept
         {
+            static_assert(AF, "store() implemented only for aligned pointers");
             val.store(ptr_, AF);
         }
 
 
         void store(SimdVecType const& val, MaskType mask) const noexcept
         {
+            static_assert(AF, "store() implemented only for aligned pointers");
             val.store(ptr_, mask, AF);
         }
 
@@ -108,7 +116,7 @@ namespace blast
          *
          * @return offset pointer
          */
-        StaticMatrixPointer constexpr operator()(ptrdiff_t i, ptrdiff_t j) const noexcept
+        StaticPanelMatrixPointer constexpr operator()(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
             return {ptr_, i, j};
         }
@@ -139,13 +147,13 @@ namespace blast
         /**
         * @brief Convert aligned matrix pointer to unaligned.
         */
-        StaticMatrixPointer<T, S, SO, false, PF> constexpr operator~() const noexcept
+        StaticPanelMatrixPointer<T, S, SO, false, PF> constexpr operator~() const noexcept
         {
             return {ptr_, 0, 0};
         }
 
 
-        StaticMatrixPointer<T, S, !SO, AF, PF> constexpr trans() const noexcept
+        StaticPanelMatrixPointer<T, S, !SO, AF, PF> constexpr trans() const noexcept
         {
             return {ptr_, 0, 0};
         }
@@ -160,22 +168,30 @@ namespace blast
         void hmove(ptrdiff_t inc) noexcept
         {
             if constexpr (SO == columnMajor)
-                ptr_ += spacing() * inc;
+                ptr_ += SS * inc;
             else
-                ptr_ += inc;
+            {
+                // NOTE: this is correct only for panel-aligned pointers!
+                BLAST_USER_ASSERT(isAligned(ptr_), "Pointer is not aligned");
+                ptr_ += spacing() * (inc / SS) + inc % SS;
+            }
 
-            BLAST_USER_ASSERT(!AF || isSimdAligned(ptr_), "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isAligned(ptr_), "Pointer is not aligned");
         }
 
 
         void vmove(ptrdiff_t inc) noexcept
         {
             if constexpr (SO == rowMajor)
-                ptr_ += spacing() * inc;
+                ptr_ += SS * inc;
             else
-                ptr_ += inc;
+            {
+                // NOTE: this is correct only for panel-aligned pointers!
+                BLAST_USER_ASSERT(isAligned(ptr_), "Pointer is not aligned");
+                ptr_ += spacing() * (inc / SS) + inc % SS;
+            }
 
-            BLAST_USER_ASSERT(!AF || isSimdAligned(ptr_), "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isAligned(ptr_), "Pointer is not aligned");
         }
 
 
@@ -190,12 +206,38 @@ namespace blast
         static TransposeFlag constexpr majorOrientation = SO == columnMajor ? columnVector : rowVector;
 
 
+        static T * ptrOffset(T * ptr, ptrdiff_t i, ptrdiff_t j) noexcept
+        {
+            if constexpr (!AF)
+            {
+                auto const rem = reinterpret_cast<ptrdiff_t>(ptr) % (SS * sizeof(ElementType)) / sizeof(ElementType);
+                ptr -= rem;
+
+                if constexpr (SO == columnMajor)
+                    i += rem;
+                else
+                    j += rem;
+            }
+
+            if constexpr (SO == columnMajor)
+                return ptr + (i / SS) * spacing() + i % SS + j * SS;
+            else
+                return ptr + i * SS + (j / SS) * spacing() + j % SS;
+        }
+
+
+        static bool isAligned(T * ptr) noexcept
+        {
+            return reinterpret_cast<ptrdiff_t>(ptr) % (SS * sizeof(T)) == 0;
+        }
+
+
         T * ptr_;
     };
 
 
     template <typename T, size_t S, bool SO, bool AF, bool PF>
-    BLAZE_ALWAYS_INLINE auto trans(StaticMatrixPointer<T, S, SO, AF, PF> const& p) noexcept
+    BLAZE_ALWAYS_INLINE auto trans(StaticPanelMatrixPointer<T, S, SO, AF, PF> const& p) noexcept
     {
         return p.trans();
     }
@@ -203,24 +245,24 @@ namespace blast
 
     template <bool AF, typename MT, bool SO>
     requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE auto ptr(blaze::DenseMatrix<MT, SO>& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO>& m, size_t i, size_t j)
     {
-        return StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
+        return StaticPanelMatrixPointer<ElementType_t<MT>, MT::spacing(), SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
     }
 
 
     template <bool AF, typename MT, bool SO>
     requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE auto ptr(blaze::DenseMatrix<MT, SO> const& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
     {
-        return StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
+        return StaticPanelMatrixPointer<ElementType_t<MT> const, MT::spacing(), SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
     }
 
 
     template <bool AF, typename MT, bool SO>
-    requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE auto ptr(blaze::DMatTransExpr<MT, SO> const& m, size_t i, size_t j)
+    requires IsStatic_v<MT> && IsPanelMatrix_v<MT>
+    BLAZE_ALWAYS_INLINE auto ptr(PMatTransExpr<MT, SO> const& m, size_t i, size_t j)
     {
-        return trans(ptr<AF>(m.operand(), j, i));
+        return trans(ptr(m.operand(), j, i));
     }
 }

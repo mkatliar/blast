@@ -51,7 +51,7 @@ namespace blast
         MatrixPointer<MPC> && StorageOrder_v<MPC> == columnMajor &&
         MatrixPointer<MPD> && StorageOrder_v<MPD> == columnMajor
     )
-    inline void gemm(size_t M, size_t N, size_t K, ST1 alpha, MPA A, MPB B, ST2 beta, MPC C, MPD D)
+    BLAZE_ALWAYS_INLINE void gemm(size_t M, size_t N, size_t K, ST1 alpha, MPA A, MPB B, ST2 beta, MPC C, MPD D)
     {
         using ET = std::remove_cv_t<ElementType_t<MPA>>;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;

@@ -14,24 +14,20 @@
 
 #pragma once
 
-#include <cstdlib>
+#include <blaze/math/TransposeFlag.h>
 
 
 namespace blast
 {
-    template <typename T>
-    struct SimdSize;
+    enum TransposeFlag : bool
+    {
+        rowVector = blaze::rowVector,
+        columnVector = blaze::columnVector
+    };
 
 
-    template <typename T>
-    struct SimdSize<T const> : SimdSize<T> {};
-
-
-    /**
-     * @brief Number of elements in a SimdVec<T> object.
-     *
-     * @tparam T scalar type
-     */
-    template <typename T>
-    size_t constexpr SimdSize_v = SimdSize<T>::value;
+    inline TransposeFlag constexpr operator!(TransposeFlag tf)
+    {
+        return tf == TransposeFlag::rowVector ? TransposeFlag::columnVector : TransposeFlag::rowVector;
+    }
 }

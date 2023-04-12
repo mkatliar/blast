@@ -4,6 +4,8 @@
 
 #include <blast/math/StaticPanelMatrix.hpp>
 
+#include <blaze/Math.h>
+
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 
@@ -22,7 +24,7 @@ namespace blast :: testing
             size_t constexpr M = 2 * SS + 1;
             size_t constexpr N = 3 * SS + 2;
 
-            StaticMatrix<Real, M, N, SO2> rhs;
+            blaze::StaticMatrix<Real, M, N, SO2> rhs;
             randomize(rhs);
 
             StaticPanelMatrix<Real, M, N, SO1> lhs;

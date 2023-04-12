@@ -14,14 +14,11 @@
 
 #pragma once
 
-#include <blaze/math/TypeTraits.h>
-
-
-namespace blast
-{
-    using blaze::IsStatic_v;
-    using blaze::IsPadded_v;
-
-    using blaze::ElementType_t;
-    using blaze::StorageOrder_v;
-}
+#include <blast/math/typetraits/IsStatic.hpp>
+#include <blast/math/typetraits/IsPadded.hpp>
+#include <blast/math/typetraits/ElementType.hpp>
+#include <blast/math/typetraits/StorageOrder.hpp>
+#include <blast/math/typetraits/IsPanelMatrix.hpp>
+#include <blast/math/typetraits/IsPanelSubmatrix.hpp>
+#include <blast/math/typetraits/VectorPointer.hpp>
+#include <blast/math/typetraits/MatrixPointer.hpp>

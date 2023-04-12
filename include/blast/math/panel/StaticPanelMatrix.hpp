@@ -115,25 +115,25 @@ namespace blast
         }
 
 
-        size_t constexpr rows() const
+        static size_t constexpr rows()
         {
             return M;
         }
 
 
-        size_t constexpr columns() const
+        static size_t constexpr columns()
         {
             return N;
         }
 
 
-        size_t constexpr spacing() const
+        static size_t constexpr spacing()
         {
             return spacing_;
         }
 
 
-        size_t constexpr panels() const
+        static size_t constexpr panels()
         {
             return panels_;
         }
@@ -142,7 +142,7 @@ namespace blast
         /// @brief Offset of the first matrix element from the start of the panel.
         ///
         /// In rows for column-major matrices, in columns for row-major matrices.
-        size_t constexpr offset() const
+        static size_t constexpr offset()
         {
             return 0;
         }
@@ -201,11 +201,10 @@ namespace blast
 
     private:
         static size_t constexpr panelSize_ = PanelSize_v<Type>;
-        static size_t constexpr elementsPerTile_ = panelSize_ * panelSize_;
         static size_t constexpr tileRows_ = M / panelSize_ + (M % panelSize_ > 0);
         static size_t constexpr tileColumns_ = N / panelSize_ + (N % panelSize_ > 0);
         static size_t constexpr panels_ = SO == columnMajor ? tileRows_ : tileColumns_;
-        static size_t constexpr spacing_ = (SO == columnMajor ? tileColumns_ : tileRows_) * elementsPerTile_;
+        static size_t constexpr spacing_ = (SO == columnMajor ? N : M) * panelSize_;
         static size_t constexpr capacity_ = panels_ * spacing_;
 
         // Alignment of the data elements.
@@ -282,4 +281,52 @@ namespace blaze
     {};
     /*! \endcond */
     //*************************************************************************************************
+
+
+    //=================================================================================================
+    //
+    //  IsStatic specialization
+    //
+    //=================================================================================================
+    template <typename T, size_t M, size_t N, bool SO>
+    struct IsStatic<blast::StaticPanelMatrix<T, M, N, SO>>
+    :   public TrueType
+    {};
+
+
+    //=================================================================================================
+    //
+    //  IsAligned specialization
+    //
+    //=================================================================================================
+    template <typename T, size_t M, size_t N, bool SO>
+    struct IsAligned<blast::StaticPanelMatrix<T, M, N, SO>>
+    :   public TrueType
+    {};
+
+
+    //=================================================================================================
+    //
+    //  IsPadded specialization
+    //
+    //=================================================================================================
+
+    //*************************************************************************************************
+    /*! \cond BLAZE_INTERNAL */
+    template <typename T, size_t M, size_t N, bool SO>
+    struct IsPadded<blast::StaticPanelMatrix<T, M, N, SO>>
+    : public TrueType
+    {};
+
+
+    //=================================================================================================
+    //
+    //  SubmatrixTrait specialization
+    //
+    //=================================================================================================
+    template <typename T, size_t M, size_t N, bool SO>
+    struct SubmatrixTrait<blast::StaticPanelMatrix<T, M, N, SO>>
+    {
+        using Type = blast::StaticPanelMatrix<T, M, N, SO>;
+    };
 }

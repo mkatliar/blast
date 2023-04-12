@@ -28,11 +28,11 @@ namespace blast :: benchmark
         randomize(A);
 
         Kernel ker;
-        load(ker, A.ptr(0, 0), A.spacing());
+        ker.load(ptr(A));
 
         for (auto _ : state)
         {
-            trsm<false, false, true>(ker, L.ptr(0, 0), spacing(L));
+            ker.trsm(Side::Left, UpLo::Upper, ptr(L).trans());
             DoNotOptimize(ker);
         }
 

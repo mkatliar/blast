@@ -29,10 +29,10 @@ namespace blast :: benchmark
         DynamicPanelMatrix<T> c(ker.rows(), ker.columns()), d(ker.rows(), ker.columns());
         randomize(c);
 
-        load(ker, c.ptr(0, 0), c.spacing());
+        ker.load(ptr(c));
         for (auto _ : state)
         {
-            store(ker, d.ptr(0, 0), d.spacing(), m, n);
+            ker.store(ptr(d), m, n);
             DoNotOptimize(d);
         }
 

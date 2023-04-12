@@ -6,7 +6,7 @@
 
 
 #include <blast/math/dense/MatrixPointer.hpp>
-#include <blast/math/dense/VectorPointer.hpp>
+#include <blast/math/RowColumnVectorPointer.hpp>
 #include <blast/math/simd/RegisterMatrix.hpp>
 #include <blast/system/Tile.hpp>
 
@@ -57,7 +57,7 @@ namespace blast
         else
         {
             // Off-diagonal blocks
-            ker.trsmRightUpper(trans(ptr<aligned>(L, k, k)));
+            ker.trsm(Side::Right, UpLo::Upper, ptr<aligned>(L, k, k).trans());
 
             if (k + KN <= N)
                 ker.store(ptr<aligned>(L, i, k));
