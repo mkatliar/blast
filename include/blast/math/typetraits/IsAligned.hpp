@@ -14,12 +14,15 @@
 
 #pragma once
 
-#include <blast/math/typetraits/IsStatic.hpp>
-#include <blast/math/typetraits/IsAligned.hpp>
-#include <blast/math/typetraits/IsPadded.hpp>
-#include <blast/math/typetraits/ElementType.hpp>
-#include <blast/math/typetraits/StorageOrder.hpp>
-#include <blast/math/typetraits/IsPanelMatrix.hpp>
-#include <blast/math/typetraits/IsPanelSubmatrix.hpp>
-#include <blast/math/typetraits/VectorPointer.hpp>
-#include <blast/math/typetraits/MatrixPointer.hpp>
+#include <blaze/math/typetraits/IsAligned.h>
+
+
+namespace blast
+{
+    template <typename T>
+    struct IsAligned : blaze::IsAligned<T> {};
+
+
+    template <typename T>
+    bool constexpr IsAligned_v = IsAligned<T>::value;
+}

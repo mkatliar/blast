@@ -24,6 +24,7 @@ namespace blast
         trans(p);
         ~p;
         *p;
+        p.cachePreferredTraversal;
 
         // {p.get()} -> std::same_as<T *>;
     };

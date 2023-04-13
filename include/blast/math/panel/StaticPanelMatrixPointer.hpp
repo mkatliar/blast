@@ -5,6 +5,7 @@
 #pragma once
 
 #include <blast/math/TransposeFlag.hpp>
+#include <blast/math/StorageOrder.hpp>
 #include <blast/math/TypeTraits.hpp>
 #include <blast/math/simd/SimdSize.hpp>
 #include <blast/math/simd/Simd.hpp>
@@ -28,6 +29,7 @@ namespace blast
         static bool constexpr aligned = AF;
         static bool constexpr padded = PF;
         static bool constexpr isStatic = true;
+        static StorageOrder constexpr cachePreferredTraversal = SO == columnMajor ? rowMajor : columnMajor;
 
 
         /**
