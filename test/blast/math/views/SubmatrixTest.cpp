@@ -16,6 +16,7 @@ namespace blast :: testing
     {
         StaticPanelMatrix<double, 12, 12, columnMajor> A;
         auto B = submatrix(A, 4, 0, 8, 8);
+        EXPECT_EQ(IsAligned_v<decltype(B)>, false);
     }
 
 
@@ -23,6 +24,7 @@ namespace blast :: testing
     {
         StaticPanelMatrix<double, 12, 12, columnMajor> const A;
         auto B = submatrix(A, 4, 0, 8, 8);
+        EXPECT_EQ(IsAligned_v<decltype(B)>, false);
     }
 
 
@@ -33,6 +35,8 @@ namespace blast :: testing
 
         static_assert(std::is_same_v<decltype(B.ptr(0, 0)), double *>);
         B.ptr(0, 0);
+
+        EXPECT_EQ(IsAligned_v<decltype(B)>, false);
     }
 
 
@@ -43,6 +47,8 @@ namespace blast :: testing
 
         static_assert(std::is_same_v<decltype(B.ptr(0, 0)), double const *>);
         B.ptr(0, 0);
+
+        EXPECT_EQ(IsAligned_v<decltype(B)>, false);
     }
 
 
@@ -74,5 +80,7 @@ namespace blast :: testing
                 ASSERT_EQ(B1(i, j), val);
                 ASSERT_EQ(A(i + B1.row(), j + B1.column()), val);
             }
+
+        EXPECT_EQ(IsAligned_v<decltype(B)>, false);
     }
 }
