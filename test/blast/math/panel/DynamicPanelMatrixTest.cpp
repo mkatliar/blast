@@ -37,7 +37,7 @@ namespace blast :: testing
     {
         {
             DynamicPanelMatrix<double> m(5, 2);
-            EXPECT_EQ(m.spacing(), 4 * 4);
+            EXPECT_EQ(m.spacing(), 4 * 2);
         }
 
         {
@@ -47,7 +47,7 @@ namespace blast :: testing
 
         {
             DynamicPanelMatrix<double> m(5, 7);
-            EXPECT_EQ(m.spacing(), 4 * 8);
+            EXPECT_EQ(m.spacing(), 4 * 7);
         }
     }
 
