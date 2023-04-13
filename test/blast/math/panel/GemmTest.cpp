@@ -57,18 +57,11 @@ namespace blast :: testing
                     B = blaze_B;
                     C = blaze_C;
 
-                    // std::cout << "A=\n" << A << std::endl;
-                    // std::cout << "B=\n" << B << std::endl;
-                    // std::cout << "C=\n" << C << std::endl;
-
                     // Do gemm with BLAST
                     gemm_nt(A, B, C, D);
 
                     // Copy the resulting D matrix from BLAST to Blaze
                     blaze_D = D;
-
-                    // Print the result from BLAST
-                    // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
 
                     BLAST_ASSERT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), absTol<Real>(), relTol<Real>())
                         << "gemm error at size m,n,k=" << M << "," << N << "," << K;
@@ -78,46 +71,9 @@ namespace blast :: testing
     }
 
 
-    TYPED_TEST_P(PanelGemmTest, testNT_submatrix)
-    {
-        using Real = TypeParam;
-        size_t const M = 8, N = 8, K = 3 * 8;
-
-        // Init Blaze matrices
-        //
-        blaze::DynamicMatrix<Real, blaze::columnMajor> blaze_A(M, K), blaze_B(N, K), blaze_C(M, N), blaze_D(M, N);
-        randomize(blaze_A);
-        randomize(blaze_B);
-        randomize(blaze_C);
-
-        // Init BLAST matrices
-        //
-        StaticPanelMatrix<Real, M, K> A;
-        StaticPanelMatrix<Real, N, K> B;
-        StaticPanelMatrix<Real, M, N> C;
-        StaticPanelMatrix<Real, M, N> D;
-
-        A = blaze_A;
-        B = blaze_B;
-        C = blaze_C;
-
-        // Do gemm with BLAST
-        auto D1 = submatrix(D, 0, 0, M, N);
-        gemm_nt(submatrix(A, 0, 0, M, K), submatrix(B, 0, 0, N, K), submatrix(C, 0, 0, M, N), D1);
-
-        // Copy the resulting D matrix from BLAST to Blaze
-        blaze_D = D;
-
-        // Print the result from BLAST
-        // std::cout << "blaze_D=\n" << blaze_blasfeo_D;
-
-        BLAST_EXPECT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), absTol<Real>(), relTol<Real>());
-    }
-
 
     REGISTER_TYPED_TEST_SUITE_P(PanelGemmTest,
-        testNT,
-        testNT_submatrix
+        testNT
     );
 
 

@@ -162,6 +162,24 @@ namespace blast :: testing
     }
 
 
+    TYPED_TEST(MatrixPointerTest, testIsAlignedByDefault)
+    {
+        auto const p = ptr(this->m_);
+        EXPECT_EQ(p.aligned, IsAligned_v<decltype(this->m_)>);
+    }
+
+
+    TYPED_TEST(MatrixPointerTest, testIsAligned)
+    {
+        for (size_t i = 0; i < rows(this->m_); i += this->incI_)
+            for (size_t j = 0; j < columns(this->m_); j += this->incJ_)
+            {
+                auto const p = ptr<TestFixture::isAligned>(this->m_, i, j);
+                EXPECT_EQ(p.aligned, TestFixture::isAligned);
+            }
+    }
+
+
     TYPED_TEST(MatrixPointerTest, testGet)
     {
         for (size_t i = 0; i < rows(this->m_); i += this->incI_)
