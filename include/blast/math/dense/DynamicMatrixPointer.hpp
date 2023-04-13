@@ -31,6 +31,7 @@ namespace blast
         static bool constexpr aligned = AF;
         static bool constexpr padded = PF;
         static bool constexpr isStatic = false;
+        static StorageOrder constexpr cachePreferredTraversal = SO == columnMajor ? columnMajor : rowMajor;
 
 
         /**

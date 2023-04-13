@@ -13,6 +13,8 @@
 #include <blast/math/expressions/PMatTransExpr.hpp>
 #include <blast/util/Assert.hpp>
 
+#include <type_traits>
+
 
 namespace blast
 {
@@ -29,6 +31,7 @@ namespace blast
         static bool constexpr aligned = AF;
         static bool constexpr padded = PF;
         static bool constexpr isStatic = false;
+        static StorageOrder constexpr cachePreferredTraversal = SO == columnMajor ? rowMajor : columnMajor;
 
 
         /**
@@ -59,7 +62,7 @@ namespace blast
             else
             {
                 // NOTE: non-optimized!
-                ElementType tmp[SS];
+                std::remove_cv_t<ElementType> tmp[SS];
                 for (size_t i = 0; i < SS; ++i)
                     tmp[i] = storageOrder == columnMajor ? *(~*this)(i, 0) : *(~*this)(0, i);
                 return SimdVecType {tmp, false};
@@ -76,7 +79,10 @@ namespace blast
         SimdVecType load(TransposeFlag orientation) const
         {
             if (orientation == majorOrientation)
-                return SimdVecType {ptr_, AF};
+                if constexpr (AF)
+                    return SimdVecType {ptr_, AF};
+                else
+                    static_assert(AF, "load() crossing panel boundary not implemented");
             else
                 BLAZE_THROW_LOGIC_ERROR("Cross-load not implemented");
         }
