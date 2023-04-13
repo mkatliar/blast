@@ -61,7 +61,9 @@ namespace blast
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(std::remove_cv_t<ElementType_t<MPC>>, ET);
         BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(std::remove_cv_t<ElementType_t<MPD>>, ET);
 
-        tile<ET, StorageOrder(StorageOrder_v<MPD>)>(M, N,
+        tile<ET, StorageOrder(StorageOrder_v<MPD>)>(
+            D.cachePreferredTraversal,
+            M, N,
             [&] (auto& ker, size_t i, size_t j)
             {
                 gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j));
