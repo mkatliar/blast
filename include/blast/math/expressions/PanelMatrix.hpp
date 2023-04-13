@@ -108,7 +108,7 @@ namespace blast
 
 			for (size_t i = 0; i + SS <= m; i += SS)
             {
-                ET2 const * pr = (*rhs).ptr(i, 0);
+                ET2 const * pr = &(*rhs)(i, 0);
                 ET1 * pl = data(lhs) + i;
 
                 for (size_t j = 0; j < n; ++j)
@@ -119,7 +119,7 @@ namespace blast
             {
                 MaskType const mask = SIMD::index() < rem;
                 size_t const i = m - rem;
-                ET2 const * pr = (*rhs).ptr(i, 0);
+                ET2 const * pr = &(*rhs)(i, 0);
                 ET1 * pl = data(lhs) + i;
 
                 for (size_t j = 0; j < n; ++j)
@@ -197,7 +197,7 @@ namespace blast
 			for (size_t i = 0; i + SS <= m; i += SS)
             {
                 ET2 const * pr = data(rhs) + i;
-                ET1 * pl = (*lhs).ptr(i, 0);
+                ET1 * pl = &(*lhs)(i, 0);
 
                 for (size_t j = 0; j < n; ++j)
                     store<aligned>(pl + PANEL_SIZE * j, load<aligned, SS>(pr + s * j));
@@ -207,7 +207,7 @@ namespace blast
             {
                 size_t const i = m - rem;
                 ET2 const * pr = data(rhs) + i;
-                ET1 * pl = (*lhs).ptr(i, 0);
+                ET1 * pl = &(*lhs)(i, 0);
 
                 for (size_t j = 0; j < n; ++j)
                     for (size_t i1 = 0; i1 < rem; ++i1)
@@ -230,7 +230,7 @@ namespace blast
 			for (size_t i = 0; i < m; ++i)
             {
                 ET2 const * pr = data(rhs) + s * i;
-                ET1 * pl = (*lhs).ptr(i, 0);
+                ET1 * pl = &(*lhs)(i, 0);
 
                 for (size_t j = 0; j < n; ++j)
                     pl[PANEL_SIZE * j] = pr[j];

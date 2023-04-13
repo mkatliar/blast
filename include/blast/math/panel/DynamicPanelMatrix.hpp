@@ -146,23 +146,6 @@ namespace blast
         }
 
 
-        /// @brief Offset of the first matrix element from the start of the panel.
-        ///
-        /// In rows for column-major matrices, in columns for row-major matrices.
-        size_t constexpr offset() const
-        {
-            return 0;
-        }
-
-
-        void unpackLower(Type * data, size_t lda) const
-        {
-            for (size_t i = 0; i < m_; ++i)
-                for (size_t j = 0; j <= i; ++j)
-                    data[i + lda * j] = (*this)(i, j);
-        }
-
-
         Type * data() noexcept
         {
             return v_;
@@ -172,32 +155,6 @@ namespace blast
         Type const * data() const noexcept
         {
             return v_;
-        }
-
-
-        Type * ptr(size_t i, size_t j)
-        {
-            // BLAST_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
-            return v_ + elementIndex(i, j);
-        }
-
-
-        Type const * ptr(size_t i, size_t j) const
-        {
-            // BLAST_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
-            return v_ + elementIndex(i, j);
-        }
-
-
-        template <size_t SS>
-        auto load(size_t i, size_t j) const
-        {
-            BLAZE_INTERNAL_ASSERT(i < m_, "Invalid row access index");
-            BLAZE_INTERNAL_ASSERT(j < n_, "Invalid column access index");
-            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
-            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
-
-            return blast::load<SS>(v_ + elementIndex(i, j));
         }
 
 
