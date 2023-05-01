@@ -75,7 +75,6 @@ build/bin/bench-blas-OpenBLAS
 build/bin/bench-blasfeo
 build/bin/bench-blast
 build/bin/bench-blaze
-build/bin/bench-blazefeo
 build/bin/bench-eigen
 build/bin/bench-libxsmm
 ```
