@@ -17,6 +17,7 @@
 #include <blast/math/typetraits/IsStatic.hpp>
 #include <blast/math/typetraits/IsPadded.hpp>
 #include <blast/math/typetraits/ElementType.hpp>
+#include <blast/math/typetraits/Spacing.hpp>
 #include <blast/math/typetraits/StorageOrder.hpp>
 #include <blast/math/typetraits/IsPanelMatrix.hpp>
 #include <blast/math/typetraits/IsPanelSubmatrix.hpp>

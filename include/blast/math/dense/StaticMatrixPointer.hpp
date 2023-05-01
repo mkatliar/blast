@@ -205,7 +205,7 @@ namespace blast
     requires IsStatic_v<MT>
     BLAZE_ALWAYS_INLINE auto ptr(blaze::DenseMatrix<MT, SO>& m, size_t i, size_t j)
     {
-        return StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
+        return StaticMatrixPointer<ElementType_t<MT>, Spacing_v<MT>, SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
     }
 
 
@@ -213,7 +213,7 @@ namespace blast
     requires IsStatic_v<MT>
     BLAZE_ALWAYS_INLINE auto ptr(blaze::DenseMatrix<MT, SO> const& m, size_t i, size_t j)
     {
-        return StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
+        return StaticMatrixPointer<ElementType_t<MT> const, Spacing_v<MT>, SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
     }
 
 
