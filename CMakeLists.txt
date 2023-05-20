@@ -25,9 +25,6 @@ set(CMAKE_DEBUG_POSTFIX d)
 
 # find_package(LAPACK REQUIRED)
 
-# Find boost.
-find_package(Boost REQUIRED COMPONENTS exception)
-
 # Find Blaze.
 find_package(blaze REQUIRED)
 
