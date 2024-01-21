@@ -4,7 +4,6 @@
 
 find_package(Threads REQUIRED)
 
-
 add_executable(bench-blasfeo
     Main.cpp
     Trmm.cpp
@@ -14,6 +13,11 @@ add_executable(bench-blasfeo
     Potrf.cpp
 )
 
+target_compile_definitions(bench-blasfeo
+    # Use Blaze without linking to a BLAS library.
+    # Blaze is used to prepare data in some of the benchmarks.
+    PRIVATE BLAZE_BLAS_MODE=0
+)
 
 target_link_libraries(bench-blasfeo
     blast-blasfeo

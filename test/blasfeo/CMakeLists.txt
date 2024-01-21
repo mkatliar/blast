@@ -13,6 +13,12 @@ add_executable(test-blasfeo
     GemmTest.cpp
 )
 
+target_compile_definitions(test-blasfeo
+    # Use Blaze without linking to a BLAS library.
+    # Blaze is used to prepare data in some of the tests.
+    PRIVATE BLAZE_BLAS_MODE=0
+)
+
 target_link_libraries(test-blasfeo
     blast-blasfeo
     GTest::GTest
