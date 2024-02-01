@@ -79,7 +79,7 @@ namespace blast
                 f_full(ker, i, j);
             }
 
-            // Bottom edge
+            // Bottom side
             if (i < m)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
@@ -88,7 +88,7 @@ namespace blast
         }
 
 
-        // Right edge
+        // Right side
         if (j < n)
         {
             size_t i = 0;

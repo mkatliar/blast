@@ -77,7 +77,7 @@ namespace blast
                     ker.store(ptr<aligned>(D, i, j));
             }
 
-            // Bottom edge
+            // Bottom side
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
@@ -91,7 +91,7 @@ namespace blast
         }
 
 
-        // Right edge
+        // Right side
         if (j < M)
         {
             size_t i = j;
