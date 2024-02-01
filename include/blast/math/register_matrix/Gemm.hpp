@@ -19,9 +19,10 @@
 
 namespace blast
 {
-    /// @brief General matrix-matrix multiplication
+    /// @brief General matrix-matrix multiplication performed in-place
     ///
-    /// R += alpha * A * B
+    /// R += alpha * A * B,
+    /// where R is M by N, A is M by K, and B is K by N.
     ///
     template <typename T, size_t M, size_t N, bool SO, typename PA, typename PB>
     requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
@@ -33,9 +34,10 @@ namespace blast
     }
 
 
-    /// @brief General matrix-matrix multiplication with limited size
+    /// @brief General matrix-matrix multiplication for a sub-matrix performed in-place
     ///
-    /// R(0:md-1, 0:nd-1) += alpha * A * B
+    /// R(0:md-1, 0:nd-1) += alpha * A * B,
+    /// where R is M by N, A is md by K, and B is K by nd.
     ///
     template <typename T, size_t M, size_t N, bool SO, typename PA, typename PB>
     requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
@@ -48,6 +50,16 @@ namespace blast
     }
 
 
+    /// @brief General matrix-matrix multiplication
+    ///
+    /// D = alpha * A * B + beta * C,
+    /// where D and C are M by N, A is M by K, and B is K by N.
+    ///
+    /// The @a RegisterMatrix @a ker is used for intermediate calculations and has undefined value on return.
+    ///
+    /// TODO: the @a ker argument could be removed and M, N passed as the function template parameters.
+    /// T and SO could be inferred from the argument types.
+    ///
     template <
         typename T, size_t M, size_t N, bool SO,
         typename PA, typename PB, typename PC, typename PD
@@ -69,6 +81,16 @@ namespace blast
     }
 
 
+    /// @brief General matrix-matrix multiplication for a sub-matrix
+    ///
+    /// D = alpha * A * B + beta * C,
+    /// where D and C are M by N, A is M by K, and B is K by N.
+    ///
+    /// The @a RegisterMatrix @a ker is used for intermediate calculations and has undefined value on return.
+    ///
+    /// TODO: the @a ker argument could be removed and M, N passed as the function template parameters.
+    /// T and SO could be inferred from the argument types.
+    ///
     template <
         typename T, size_t M, size_t N, bool SO,
         typename PA, typename PB, typename PC, typename PD
@@ -91,6 +113,16 @@ namespace blast
     }
 
 
+    /// @brief Matrix-matrix multiplication
+    ///
+    /// D = alpha * A * B + beta * C,
+    /// where D and C are M by N, A is M by K, and B is K by N.
+    ///
+    /// The @a RegisterMatrix @a ker is used for intermediate calculations and has undefined value on return.
+    ///
+    /// TODO: the @a ker argument could be removed and M, N passed as the function template parameters.
+    /// T and SO could be inferred from the argument types.
+    ///
     template <
         typename T, size_t M, size_t N, bool SO,
         typename PA, typename PB, typename PC, typename PD
@@ -110,6 +142,16 @@ namespace blast
     }
 
 
+    /// @brief Matrix-matrix multiplication for a sub-matrix
+    ///
+    /// D = alpha * A * B + beta * C,
+    /// where D and C are md by nd, A is md by K, and B is K by nd.
+    ///
+    /// The @a RegisterMatrix @a ker is used for intermediate calculations and has undefined value on return.
+    ///
+    /// TODO: the @a ker argument could be removed and M, N passed as the function template parameters.
+    /// T and SO could be inferred from the argument types.
+    ///
     template <
         typename T, size_t M, size_t N, bool SO,
         typename PA, typename PB, typename PC, typename PD

@@ -19,7 +19,7 @@ namespace blast
 {
 
     /**
-     * @brief Performs the matrix-matrix operation
+     * @brief Matrix-matrix multiplication with @a MatrixPointer arguments
      *
      * D := alpha*A*B + beta*C
      *

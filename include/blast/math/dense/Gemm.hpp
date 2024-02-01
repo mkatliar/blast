@@ -16,16 +16,13 @@
 namespace blast
 {
     /**
-     * @brief Performs the matrix-matrix operation
+     * @brief Matrix-matrix multiplication for @a DenseMatrix arguments
      *
      * D := alpha*A*B + beta*C
      *
      * alpha and beta are scalars, and A, B and C are matrices, with A
      * an m by k matrix, B a k by n matrix and C an m by n matrix.
      *
-     * @param M the number of rows of the matrices A, C, and D.
-     * @param N the number of columns of the matrices B and C.
-     * @param K the number of columns of the matrix A and the number of rows of the matrix B.
      * @param alpha the scalar alpha
      * @param A the matrix A
      * @param B the matrix B
@@ -59,6 +56,19 @@ namespace blast
     }
 
 
+    /**
+     * @brief Matrix-matrix multiplication for @a DenseMatrix arguments
+     *
+     * D := A*B + C
+     *
+     * A, B and C are matrices, with A
+     * an m by k matrix, B a k by n matrix and C an m by n matrix.
+     *
+     * @param A the matrix A
+     * @param B the matrix B
+     * @param C the matrix C
+     * @param D the output matrix D
+     */
     template <
         typename MT1, typename MT2, bool SO2,
         typename MT3, typename MT4
