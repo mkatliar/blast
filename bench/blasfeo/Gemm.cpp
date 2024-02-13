@@ -53,7 +53,7 @@ namespace blast :: benchmark
         for (auto _ : state)
             gemm_nt(m, n, k, 1., A, 0, 0, B, 0, 0, 1., C, 0, 0, C, 0, 0);
 
-        state.counters["flops"] = Counter(2 * m * m * m, Counter::kIsIterationInvariantRate);
+        state.counters["flops"] = Counter(2 * m * n * k + 3 * m * n, Counter::kIsIterationInvariantRate);
         state.counters["m"] = m;
     }
 
