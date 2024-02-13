@@ -26,7 +26,7 @@ namespace blast
      * @brief Cover a matrix with tiles of different sizes in a performance-efficient way.
      *
      * The tile sizes and positions are chosen based on matrix element type, storage order, and current system architecture.
-     * Positions and sizes of the tiles are such that the entire matrix is coveren and tiles do not overlap.
+     * Positions and sizes of the tiles are such that the entire matrix is covered and tiles do not overlap.
      *
      * This function is helpful in implementing register-blocked matrix algorithms.
      *
