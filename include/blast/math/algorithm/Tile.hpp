@@ -16,7 +16,7 @@
 #include <blast/system/Inline.hpp>
 #include <blast/math/simd/SimdSize.hpp>
 #include <blast/math/StorageOrder.hpp>
-#include <blast/math/register_matrix/RegisterMatrix.hpp>
+#include <blast/math/RegisterMatrix.hpp>
 
 #include <cstdlib>
 
