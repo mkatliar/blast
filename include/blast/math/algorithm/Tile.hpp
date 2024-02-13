@@ -15,7 +15,7 @@
 #include <blast/system/Tile.hpp>
 #include <blast/system/Inline.hpp>
 #include <blast/math/StorageOrder.hpp>
-#include <blast/math/register_matrix/RegisterMatrix.hpp>
+#include <blast/math/RegisterMatrix.hpp>
 
 #include <cstdlib>
 

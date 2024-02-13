@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/DynamicPanelMatrix.hpp>
-#include <blast/math/register_matrix/RegisterMatrix.hpp>
+#include <blast/math/RegisterMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
 

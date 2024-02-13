@@ -5,7 +5,7 @@
 #pragma once
 
 #include <blast/math/PanelMatrix.hpp>
-#include <blast/math/register_matrix/RegisterMatrix.hpp>
+#include <blast/math/RegisterMatrix.hpp>
 #include <blast/math/register_matrix/Gemm.hpp>
 #include <blast/math/panel/PanelSize.hpp>
 #include <blast/math/panel/MatrixPointer.hpp>
