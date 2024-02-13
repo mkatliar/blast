@@ -1,8 +1,6 @@
 # BLAST
-*BLAST* is a high-performance linear algebra library that combines a BLAS-like nterface with modern C++ template metaprogramming.
+*BLAST* (**BLAS** **T**emplates) is a high-performance linear algebra library that combines a BLAS-like nterface with modern C++ template metaprogramming.
 *BLAST* implementation is single-threaded and intended for matrices of small and medium size (a few hundred rows/columns), which is common for embedded control applications.
-
-The name stands for **BLAS** **T**emplates.
 
 The figures below shows the performance of BLAS *dgemm* routine for different LA implementations on an
 *Intel(R) Core(TM) i7-9850H CPU @ 2.60GHz*:

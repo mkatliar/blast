@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/dense/StaticMatrixPointer.hpp>
-#include <blast/math/simd/RegisterMatrix.hpp>
+#include <blast/math/RegisterMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
 

@@ -32,15 +32,14 @@ namespace blast :: benchmark
 
         for (auto _ : state)
         {
-            // gemm(1., A, trans(B), 1., C, D);
-            gemm(A, B, C, D);
+            gemm(0.5, A, B, 0.1, C, D);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);
             DoNotOptimize(D);
         }
 
-        state.counters["flops"] = Counter(2 * M * N * K, Counter::kIsIterationInvariantRate);
+        state.counters["flops"] = Counter(2 * M * N * K + 3 * M * N, Counter::kIsIterationInvariantRate);
         state.counters["m"] = M;
     }
 

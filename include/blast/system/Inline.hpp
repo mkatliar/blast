@@ -14,12 +14,6 @@
 
 #pragma once
 
-#include <blast/math/typetraits/IsStatic.hpp>
-#include <blast/math/typetraits/IsAligned.hpp>
-#include <blast/math/typetraits/IsPadded.hpp>
-#include <blast/math/typetraits/ElementType.hpp>
-#include <blast/math/typetraits/StorageOrder.hpp>
-#include <blast/math/typetraits/IsPanelMatrix.hpp>
-#include <blast/math/typetraits/IsPanelSubmatrix.hpp>
-#include <blast/math/typetraits/VectorPointer.hpp>
-#include <blast/math/typetraits/MatrixPointer.hpp>
+#include <blaze/system/Inline.h>
+
+#define BLAST_ALWAYS_INLINE BLAZE_ALWAYS_INLINE
