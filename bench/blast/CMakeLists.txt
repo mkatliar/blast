@@ -35,6 +35,12 @@ add_executable(bench-blast
     math/panel/DynamicPotrf.cpp
 )
 
+target_compile_definitions(bench-blast
+    # Use Blaze without linking to a BLAS library.
+    # Blaze is used to prepare data in some of the benchmarks.
+    PRIVATE BLAZE_BLAS_MODE=0
+)
+
 target_link_libraries(bench-blast
     blast
     bench-blast-common
