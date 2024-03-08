@@ -5,6 +5,7 @@
 #pragma once
 
 #include <blast/math/dense/SyrkBackend.hpp>
+#include <blast/math/register_matrix/Gemm.hpp>
 #include <blast/system/Tile.hpp>
 
 #include <blaze/util/Exception.h>

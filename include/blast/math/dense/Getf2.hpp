@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include <blast/Exception.hpp>
+#include <blast/util/Exception.hpp>
 
 #include <blast/math/dense/Swap.hpp>
 #include <blast/math/dense/Iamax.hpp>
