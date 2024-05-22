@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>blast</name>
+  <version>0.1.0</version>
+  <description>BLAS Templates</description>
+  <maintainer email="mikhail.katliar@imtek.uni-freiburg.de">Mikhail Katliar</maintainer>
+  <license>BSD 3-Clause License</license>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
