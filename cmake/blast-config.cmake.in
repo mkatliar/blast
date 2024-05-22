@@ -1,0 +1,11 @@
+#---------------------------------------------------------------------------
+#
+# blast-config.cmake - CMake configuration file for external projects.
+# Use this by invoking
+#
+#   find_package(blast)
+#
+# The module defines blast::blast IMPORTED target
+
+include("${CMAKE_CURRENT_LIST_DIR}/blast-targets.cmake")
+message(STATUS "Found blast")
