@@ -6,7 +6,7 @@
 
 #include <blast/math/PanelMatrix.hpp>
 #include <blast/math/views/submatrix/BaseTemplate.hpp>
-#include <blast/math/panel/PanelSize.hpp>
+#include <blast/math/simd/SimdSize.hpp>
 #include <blast/system/CacheLine.hpp>
 
 #include <blaze/util/IntegralConstant.h>
@@ -53,17 +53,14 @@ namespace blast
 
 
         explicit DynamicPanelMatrix(size_t m, size_t n)
-        :   m_(m)
-        ,   n_(n)
-        ,   spacing_(
-                SO == columnMajor
-                ? panelSize_ * nextMultiple(n, panelSize_)
-                : nextMultiple(m, panelSize_) * panelSize_
-            )
-        ,   capacity_(nextMultiple(m, panelSize_) * nextMultiple(n, panelSize_))
+        :   m_ {m}
+        ,   n_ {n}
+        ,   spacing_ {SS * (SO == columnMajor ? n : m)}
+        ,   capacity_ {spacing_ * nextMultiple(SO == columnMajor ? m : n, SS)}
+        // Initialize padding elements to 0 to prevent denorms in calculations.
         // Initialize padding elements to 0 to prevent denorms in calculations.
         // Denorms can significantly impair performance, see https://github.com/giaf/blasfeo/issues/103
-        ,   v_(new(std::align_val_t {alignment_}) Type[capacity_] {})
+        ,   v_ {new(std::align_val_t {alignment_}) Type[capacity_] {}}
         {
         }
 
@@ -114,36 +111,7 @@ namespace blast
             , bool SO2 >      // Storage order of the right-hand side matrix
         DynamicPanelMatrix& operator=(Matrix<MT, SO2> const& rhs)
         {
-            // using blaze::assign;
-
-            // using TT = decltype( trans( *this ) );
-            // using CT = decltype( ctrans( *this ) );
-            // using IT = decltype( inv( *this ) );
-
-            // if( (*rhs).rows() != M || (*rhs).columns() != N ) {
-            //     BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to static matrix" );
-            // }
-
-            // if( IsSame_v<MT,TT> && (*rhs).isAliased( this ) ) {
-            //     transpose( typename IsSquare<This>::Type() );
-            // }
-            // else if( IsSame_v<MT,CT> && (*rhs).isAliased( this ) ) {
-            //     ctranspose( typename IsSquare<This>::Type() );
-            // }
-            // else if( !IsSame_v<MT,IT> && (*rhs).canAlias( this ) ) {
-            //     StaticPanelMatrix tmp( *rhs );
-            //     assign( *this, tmp );
-            // }
-            // else {
-            //     if( IsSparseMatrix_v<MT> )
-            //         reset();
-            //     assign( *this, *rhs );
-            // }
-
-            // BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
-
             assign(*this, *rhs);
-
             return *this;
         }
 
@@ -178,23 +146,6 @@ namespace blast
         }
 
 
-        /// @brief Offset of the first matrix element from the start of the panel.
-        ///
-        /// In rows for column-major matrices, in columns for row-major matrices.
-        size_t constexpr offset() const
-        {
-            return 0;
-        }
-
-
-        void unpackLower(Type * data, size_t lda) const
-        {
-            for (size_t i = 0; i < m_; ++i)
-                for (size_t j = 0; j <= i; ++j)
-                    data[i + lda * j] = (*this)(i, j);
-        }
-
-
         Type * data() noexcept
         {
             return v_;
@@ -207,35 +158,9 @@ namespace blast
         }
 
 
-        Type * ptr(size_t i, size_t j)
-        {
-            // BLAST_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
-            return v_ + elementIndex(i, j);
-        }
-
-
-        Type const * ptr(size_t i, size_t j) const
-        {
-            // BLAST_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
-            return v_ + elementIndex(i, j);
-        }
-
-
-        template <size_t SS>
-        auto load(size_t i, size_t j) const
-        {
-            BLAZE_INTERNAL_ASSERT(i < m_, "Invalid row access index");
-            BLAZE_INTERNAL_ASSERT(j < n_, "Invalid column access index");
-            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
-            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
-
-            return blast::load<SS>(v_ + elementIndex(i, j));
-        }
-
-
     private:
         static size_t constexpr alignment_ = CACHE_LINE_SIZE;
-        static size_t constexpr panelSize_ = PanelSize_v<Type>;
+        static size_t constexpr SS = SimdSize_v<Type>;
 
         size_t m_;
         size_t n_;
@@ -248,8 +173,8 @@ namespace blast
         size_t elementIndex(size_t i, size_t j) const noexcept
         {
             return SO == columnMajor
-                ? i / panelSize_ * spacing_ + i % panelSize_ + j * panelSize_
-                : j / panelSize_ * spacing_ + j % panelSize_ + i * panelSize_;
+                ? i / SS * spacing_ + i % SS + j * SS
+                : j / SS * spacing_ + j % SS + i * SS;
         }
     };
 }

@@ -24,4 +24,10 @@ namespace blast
         rowMajor = blaze::rowMajor,
         columnMajor = blaze::columnMajor
     };
+
+
+    inline constexpr StorageOrder operator!(StorageOrder so)
+    {
+        return so == rowMajor ? columnMajor : rowMajor;
+    }
 }

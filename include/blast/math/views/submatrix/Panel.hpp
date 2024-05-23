@@ -91,7 +91,7 @@ namespace blast
         ,   j_(j)
         ,   m_(m)
         ,   n_(n)
-        ,   data_(matrix_.ptr(row(), column()))
+        ,   data_(&matrix_(row(), column()))
         {
             if( !Contains_v< TypeList<RSAs...>, Unchecked > )
             {
@@ -204,19 +204,6 @@ namespace blast
         }
 
 
-        template <size_t SS>
-        auto load(size_t i, size_t j) const
-        {
-            if( i >= rows() ) {
-                BLAZE_THROW_OUT_OF_RANGE( "Invalid row access index" );
-            }
-            if( j >= columns() ) {
-                BLAZE_THROW_OUT_OF_RANGE( "Invalid column access index" );
-            }
-            return matrix_.template load<SS>(row() + i, column() + j);
-        }
-
-
         Reference at( size_t i, size_t j )
         {
             if( i >= rows() ) {
@@ -250,18 +237,6 @@ namespace blast
         ConstPointer data() const noexcept
         {
             return data_;
-        }
-
-
-        Pointer ptr(size_t i, size_t j)
-        {
-            return matrix_.ptr(i + row(), j + column());
-        }
-
-
-        ConstPointer ptr(size_t i, size_t j) const
-        {
-            return matrix_.ptr(i + row(), j + column());
         }
 
 
