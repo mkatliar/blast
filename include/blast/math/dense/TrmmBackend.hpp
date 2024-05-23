@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <blast/math/simd/RegisterMatrix.hpp>
+#include <blast/math/RegisterMatrix.hpp>
 #include <blast/math/dense/DynamicMatrixPointer.hpp>
 #include <blast/math/dense/StaticMatrixPointer.hpp>
 #include <blast/system/Tile.hpp>

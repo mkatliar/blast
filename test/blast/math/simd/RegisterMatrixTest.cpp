@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <blast/math/simd/RegisterMatrix.hpp>
+#include <blast/math/RegisterMatrix.hpp>
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/panel/MatrixPointer.hpp>
 #include <blast/math/dense/MatrixPointer.hpp>

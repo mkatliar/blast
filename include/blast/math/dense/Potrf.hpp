@@ -7,7 +7,7 @@
 
 #include <blast/math/dense/MatrixPointer.hpp>
 #include <blast/math/RowColumnVectorPointer.hpp>
-#include <blast/math/simd/RegisterMatrix.hpp>
+#include <blast/math/RegisterMatrix.hpp>
 #include <blast/system/Tile.hpp>
 
 #include <blaze/util/Exception.h>
