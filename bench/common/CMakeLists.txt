@@ -12,7 +12,6 @@ target_link_libraries(bench-blast-common
     PUBLIC benchmark::benchmark
 )
 
-
 target_compile_options(bench-blast-common
     PUBLIC "-mllvm" "-inline-threshold=1000"
 )
