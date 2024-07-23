@@ -196,47 +196,9 @@ namespace blast
     //
     //*******************************************************
 
-    template <bool AF, size_t SS, typename T>
-    auto load(T const * ptr);
-
-
-    template <bool AF, typename T>
-    inline auto load(T const * ptr)
-    {
-        return load<AF, Simd<T>::size>(ptr);
-    }
-
 
     template <size_t SS, typename T>
     auto broadcast(T const * ptr);
-
-
-    template <>
-    inline auto load<aligned, 4, double>(double const * ptr)
-    {
-        return _mm256_load_pd(ptr);
-    }
-
-
-    template <>
-    inline auto load<unaligned, 4, double>(double const * ptr)
-    {
-        return _mm256_loadu_pd(ptr);
-    }
-
-
-    template <>
-    inline auto load<aligned, 8, float>(float const * ptr)
-    {
-        return _mm256_load_ps(ptr);
-    }
-
-
-    template <>
-    inline auto load<unaligned, 8, float>(float const * ptr)
-    {
-        return _mm256_loadu_ps(ptr);
-    }
 
 
     inline auto maskload(double const * ptr, __m256i mask)
