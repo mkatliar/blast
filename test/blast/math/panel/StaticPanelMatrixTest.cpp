@@ -3,9 +3,11 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/StaticPanelMatrix.hpp>
+#include <blast/math/panel/MatrixPointer.hpp>
 
 #include <blaze/Math.h>
 
+#include <blaze/math/AlignmentFlag.h>
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 
@@ -98,7 +100,7 @@ namespace blast :: testing
         for (size_t i = 0; i < M; i += SS)
             for (size_t j = 0; j < N; ++j)
             {
-                auto const xmm = A.template load<SS>(i, j);
+                auto const xmm = ptr<aligned>(A, i, j).load();
 
                 for (size_t k = 0; k < SS; ++k)
                     ASSERT_EQ(xmm[k], A(i + k, j)) << "element mismatch at i,j,k=" << i << "," << j << "," << k;
@@ -122,7 +124,7 @@ namespace blast :: testing
             for (size_t j = 0; j < N; ++j)
             {
                 A = TypeParam(0.);
-                A.store(i, j, val);
+                ptr<aligned>(A, i, j).store(val);
 
                 for (size_t k = 0; k < SS && i + k < rows(A); ++k)
                     ASSERT_EQ(A(i + k, j), val[k]) << "element mismatch at i,j,k=" << i << "," << j << "," << k;

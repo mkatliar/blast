@@ -160,45 +160,6 @@ namespace blast
         }
 
 
-        Type * ptr(size_t i, size_t j)
-        {
-            // BLAST_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
-            return v_ + elementIndex(i, j);
-        }
-
-
-        Type const * ptr(size_t i, size_t j) const
-        {
-            // BLAST_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
-            return v_ + elementIndex(i, j);
-        }
-
-
-        template <size_t SS>
-        auto load(size_t i, size_t j) const
-        {
-            BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
-            BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
-            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
-            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
-
-            return blast::load<aligned, SS>(v_ + elementIndex(i, j));
-        }
-
-
-        template <typename T>
-        void store(size_t i, size_t j, T val)
-        {
-            BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
-            BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
-            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
-            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
-
-            // We never use maskstore here because we have padding
-            blast::store<aligned>(v_ + elementIndex(i, j), val);
-        }
-
-
     private:
         static size_t constexpr panelSize_ = PanelSize_v<Type>;
         static size_t constexpr tileRows_ = M / panelSize_ + (M % panelSize_ > 0);
