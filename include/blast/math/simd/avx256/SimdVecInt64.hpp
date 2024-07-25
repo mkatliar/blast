@@ -107,18 +107,5 @@ namespace blast
         {
             return _mm256_add_epi64(a.value_, _mm256_set1_epi64x(n));
         }
-
-
-        /**
-         * @brief Access single element
-         *
-         * @param i element index
-         *
-         * @return element value
-         */
-        ValueType operator[](size_t i) const noexcept
-        {
-            return value_.get(i);
-        }
     };
 }

@@ -217,18 +217,5 @@ namespace blast
 
             return std::make_tuple(m, im);
         }
-
-
-        /**
-         * @brief Access single element
-         *
-         * @param i element index
-         *
-         * @return element value
-         */
-        ValueType operator[](size_t i) const noexcept
-        {
-            return value_.get(i);
-        }
     };
 }
