@@ -27,8 +27,8 @@
 namespace blast
 {
     template <>
-    class SimdVec<std::int32_t>
-    :   public SimdVecBase<std::int32_t, __m256i>
+    class SimdVec<std::int32_t, xsimd::avx2>
+    :   public SimdVecBase<std::int32_t, xsimd::avx2>
     {
     public:
         using MaskType = __m256i;
@@ -113,10 +113,7 @@ namespace blast
          */
         ValueType operator[](size_t i) const noexcept
         {
-            alignas(IntrinsicType) ValueType v[size()];
-            _mm256_storeu_si256(reinterpret_cast<IntrinsicType *>(v), value_);
-
-            return v[i];
+            return value_.get(i);
         }
     };
 }

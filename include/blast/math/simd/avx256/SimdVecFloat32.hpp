@@ -26,8 +26,8 @@
 namespace blast
 {
     template <>
-    class SimdVec<float>
-    :   public SimdVecBase<float, __m256>
+    class SimdVec<float, xsimd::avx2>
+    :   public SimdVecBase<float, xsimd::avx2>
     {
     public:
         using MaskType = __m256i;
@@ -204,33 +204,33 @@ namespace blast
 
         template <typename Index>
         requires (SimdSize_v<Index> == size())
-        friend std::tuple<SimdVec, SimdVec<Index>> imax(SimdVec const& v1, SimdVec<Index> const& idx)
+        friend std::tuple<SimdVec, SimdVec<Index, xsimd::avx2>> imax(SimdVec const& v1, SimdVec<Index, xsimd::avx2> const& idx)
         {
             /* v2 = [G H E F | C D A B]                                                                         */
             SimdVec const v2 = _mm256_permute_ps(v1, 0b10'11'00'01);
-            SimdVec<Index> const iv2 = _mm256_castps_si256(_mm256_permute_ps(_mm256_castsi256_ps(idx), 0b10'11'00'01));
+            SimdVec<Index, xsimd::avx2> const iv2 = _mm256_castps_si256(_mm256_permute_ps(_mm256_castsi256_ps(idx), 0b10'11'00'01));
 
             /* v3 = [W=max(G,H) W=max(G,H) Z=max(E,F) Z=max(E,F) | Y=max(C,D) Y=max(C,D) X=max(A,B) X=max(A,B)] */
             /* v3 = [W W Z Z | Y Y X X]                                                                         */
             // __m256 v3 = _mm256_max_ps(v1, v2);
             MaskType const mask_v3 = v2 > v1;
             SimdVec const v3 = blend(v1, v2, mask_v3);
-            SimdVec<Index> const iv3 = blend(idx, iv2, mask_v3);
+            SimdVec<Index, xsimd::avx2> const iv3 = blend(idx, iv2, mask_v3);
 
             /* v4 = [Z Z W W | X X Y Y]                                                                         */
             SimdVec const v4 = _mm256_permute_ps(v3, 0b00'00'10'10);
-            SimdVec<Index> const iv4 = _mm256_castps_si256(_mm256_permute_ps(_mm256_castsi256_ps(iv3), 0b00'00'10'10));
+            SimdVec<Index, xsimd::avx2> const iv4 = _mm256_castps_si256(_mm256_permute_ps(_mm256_castsi256_ps(iv3), 0b00'00'10'10));
 
             /* v5 = [J=max(Z,W) J=max(Z,W) J=max(Z,W) J=max(Z,W) | I=max(X,Y) I=max(X,Y) I=max(X,Y) I=max(X,Y)] */
             /* v5 = [J J J J | I I I I]                                                                         */
             // __m256 v5 = _mm256_max_ps(v3, v4);
             MaskType const mask_v5 = v4 > v3;
             SimdVec const v5 = blend(v3, v4, mask_v5);
-            SimdVec<Index> const iv5 = blend(iv3, iv4, mask_v5);
+            SimdVec<Index, xsimd::avx2> const iv5 = blend(iv3, iv4, mask_v5);
 
             /* v6 = [I I I I | J J J J]                                                                         */
             SimdVec const v6 = _mm256_permute2f128_ps(v5, v5, 0b0000'0001);
-            SimdVec<Index> const iv6 = _mm256_castps_si256(
+            SimdVec<Index, xsimd::avx2> const iv6 = _mm256_castps_si256(
                 _mm256_permute2f128_ps(
                     _mm256_castsi256_ps(iv5),
                     _mm256_castsi256_ps(iv5),
@@ -242,7 +242,7 @@ namespace blast
             // __m128 v7 = _mm_max_ps(_mm256_castps256_ps128(v5), v6);
             MaskType const mask_v7 = v6 > v5;
             SimdVec const v7 = blend(v5, v6, mask_v7);
-            SimdVec<Index> const iv7 = blend(iv5, iv6, mask_v7);
+            SimdVec<Index, xsimd::avx2> const iv7 = blend(iv5, iv6, mask_v7);
 
             return std::make_tuple(v7, iv7);
         }
@@ -251,13 +251,15 @@ namespace blast
         /**
          * @brief Access single element
          *
+         * TODO: move to SimdVecBase
+         *
          * @param i element index
          *
          * @return element value
          */
         ValueType operator[](size_t i) const noexcept
         {
-            return value_[i];
+            return value_.get(i);
         }
     };
 }

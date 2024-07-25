@@ -25,6 +25,7 @@ set(CMAKE_DEBUG_POSTFIX d)
 
 find_package(Boost REQUIRED COMPONENTS exception)
 find_package(blaze REQUIRED)
+find_package(xsimd REQUIRED)
 
 add_library(blast INTERFACE)
 
@@ -35,6 +36,7 @@ target_include_directories(blast INTERFACE
 
 target_link_libraries(blast
     INTERFACE blaze::blaze
+    INTERFACE xsimd
 )
 
 target_compile_options(blast
@@ -42,6 +44,10 @@ target_compile_options(blast
     # Enable SIMD instruction sets, otherwise it does not compile.
     # This will change when we support multiple architectures.
     INTERFACE "-march=native" "-mfma" "-mavx" "-mavx2" "-msse4"
+)
+
+target_compile_definitions(blast
+    INTERFACE "XSIMD_DEFAULT_ARCH=avx2"
 )
 
 # BLAST_WITH_BLASFEO

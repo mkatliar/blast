@@ -26,8 +26,8 @@
 namespace blast
 {
     template <>
-    class SimdVec<double>
-    :   public SimdVecBase<double, __m256d>
+    class SimdVec<double, xsimd::avx2>
+    :   public SimdVecBase<double, xsimd::avx2>
     {
     public:
         using MaskType = __m256i;
@@ -197,23 +197,23 @@ namespace blast
 
         template <typename Index>
         requires (SimdSize_v<Index> == size())
-        friend std::tuple<SimdVec, SimdVec<Index>> imax(SimdVec const& x, SimdVec<Index> const& idx)
+        friend std::tuple<SimdVec, SimdVec<Index, xsimd::avx2>> imax(SimdVec const& x, SimdVec<Index, xsimd::avx2> const& idx)
         {
             SimdVec const y = _mm256_permute2f128_pd(x.value_, x.value_, 1); // permute 128-bit values
-            SimdVec<Index> const iy = _mm256_permute2f128_si256(idx, idx, 1);
+            SimdVec<Index, xsimd::avx2> const iy = _mm256_permute2f128_si256(idx, idx, 1);
 
             // __m256d m1 = _mm256_max_pd(x.value_, y); // m1[0] = max(x[0], x[2]), m1[1] = max(x[1], x[3]), etc.
             MaskType const mask_m1 = y > x;
             SimdVec const m1 = blend(x, y, mask_m1);
-            SimdVec<Index> const im1 = blend(idx, iy, mask_m1);
+            SimdVec<Index, xsimd::avx2> const im1 = blend(idx, iy, mask_m1);
 
             SimdVec const m2 = _mm256_permute_pd(m1, 5); // set m2[0] = m1[1], m2[1] = m1[0], etc.
-            SimdVec<Index> const im2 = _mm256_castpd_si256(_mm256_permute_pd(_mm256_castsi256_pd(im1), 5));
+            SimdVec<Index, xsimd::avx2> const im2 = _mm256_castpd_si256(_mm256_permute_pd(_mm256_castsi256_pd(im1), 5));
 
             // __m256d m = _mm256_max_pd(m1, m2); // all m[0] ... m[3] contain the horizontal max(x[0], x[1], x[2], x[3])
             MaskType const mask_m = m2 > m1;
             SimdVec const m = blend(m1, m2, mask_m);
-            SimdVec<Index> const im = blend(im1, im2, mask_m);
+            SimdVec<Index, xsimd::avx2> const im = blend(im1, im2, mask_m);
 
             return std::make_tuple(m, im);
         }
@@ -228,7 +228,7 @@ namespace blast
          */
         ValueType operator[](size_t i) const noexcept
         {
-            return value_[i];
+            return value_.get(i);
         }
     };
 }

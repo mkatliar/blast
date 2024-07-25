@@ -16,17 +16,21 @@
 
 #include <blast/math/simd/SimdSize.hpp>
 
+#include <xsimd/xsimd.hpp>
+
 #include <cstdlib>
 
 
 namespace blast
 {
-    template <typename T, typename I>
+    template <typename T, typename Arch>
     class SimdVecBase
     {
+        using XSimdType = xsimd::batch<T, Arch>;
+
     public:
         using ValueType = T;
-        using IntrinsicType = I;
+        using IntrinsicType = typename XSimdType::register_type;
 
 
         /**
@@ -34,7 +38,7 @@ namespace blast
          */
         static size_t constexpr size()
         {
-            return SimdSize_v<T>;
+            return XSimdType::size;
         }
 
 
@@ -49,6 +53,6 @@ namespace blast
         {
         }
 
-        IntrinsicType value_;
+        XSimdType value_;
     };
 }

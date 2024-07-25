@@ -27,8 +27,8 @@
 namespace blast
 {
     template <>
-    class SimdVec<std::int64_t>
-    :   public SimdVecBase<std::int64_t, __m256i>
+    class SimdVec<std::int64_t, xsimd::avx2>
+    :   public SimdVecBase<std::int64_t, xsimd::avx2>
     {
     public:
         using MaskType = __m256i;
@@ -118,7 +118,7 @@ namespace blast
          */
         ValueType operator[](size_t i) const noexcept
         {
-            return value_[i];
+            return value_.get(i);
         }
     };
 }

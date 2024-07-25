@@ -14,15 +14,16 @@
 
 #pragma once
 
+#include <xsimd/xsimd.hpp>
+
 
 namespace blast
 {
     /**
-     * @brief Data-parallel type with the element type bool.
-     * The width of a given simd_mask instantiation is a constant expression, determined by the template parameter.
+     * @brief Data-parallel type with a given element type.
      *
-     * @tparam T the element type simd_mask applies on
+     * @tparam T element type
      */
-    template <typename T>
+    template <typename T, typename Arch = xsimd::default_arch>
     class SimdVec;
 }

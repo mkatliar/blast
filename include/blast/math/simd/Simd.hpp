@@ -10,10 +10,9 @@
 #include <blaze/system/Inline.h>
 #include <blaze/math/AlignmentFlag.h>
 
-#include <immintrin.h>
+#include <xsimd/xsimd.hpp>
 
-#include <cstdint>
-#include <type_traits>
+#include <immintrin.h>
 
 
 namespace blast
@@ -21,12 +20,12 @@ namespace blast
     using namespace blaze;
 
 
-    template <typename T>
+    template <typename T, typename Arch = xsimd::default_arch>
     struct Simd;
 
 
     template <>
-    struct Simd<double>
+    struct Simd<double, xsimd::avx2>
     {
     private:
         class Index;
@@ -87,7 +86,7 @@ namespace blast
 
 
     template <>
-    struct Simd<float>
+    struct Simd<float, xsimd::avx2>
     {
     private:
         class Index;
@@ -147,8 +146,8 @@ namespace blast
     };
 
 
-    template <typename T>
-    using IntrinsicType_t = typename Simd<T>::IntrinsicType;
+    template <typename T, typename Arch = xsimd::default_arch>
+    using IntrinsicType_t = typename Simd<T, Arch>::IntrinsicType;
 
 
     template <typename T>
@@ -186,8 +185,8 @@ namespace blast
     using IntType_t = typename SimdTraits<T>::IntType;
 
 
-    template <typename T>
-    size_t constexpr RegisterCapacity_v = Simd<T>::registerCapacity;
+    template <typename T, typename Arch = xsimd::default_arch>
+    size_t constexpr RegisterCapacity_v = Simd<T, Arch>::registerCapacity;
 
 
     //*******************************************************
