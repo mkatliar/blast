@@ -72,7 +72,7 @@ namespace blast
     T max(SimdVec<T, Arch> const& x) noexcept;
 
     template <typename T, typename Arch>
-    SimdVec<T, Arch>::MaskType operator>(SimdVec<T, Arch> const& a, SimdVec<T, Arch> const& b) noexcept;
+    typename SimdVec<T, Arch>::MaskType operator>(SimdVec<T, Arch> const& a, SimdVec<T, Arch> const& b) noexcept;
 
     /**
     * @brief Multiplication
@@ -272,7 +272,7 @@ namespace blast
 
 
     template <typename T, typename Arch>
-    inline SimdVec<T, Arch>::MaskType operator>(SimdVec<T, Arch> const& a, SimdVec<T, Arch> const& b) noexcept
+    inline typename SimdVec<T, Arch>::MaskType operator>(SimdVec<T, Arch> const& a, SimdVec<T, Arch> const& b) noexcept
     {
         return xsimd::gt(a.value_, b.value_);
     }
