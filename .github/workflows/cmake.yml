@@ -39,9 +39,9 @@ jobs:
     - name: Install xsimd
       run: |
         git clone https://github.com/xtensor-stack/xsimd.git
-        cd xsimd \
-        && cmake -B build -DCMAKE_INSTALL_PREFIX=/usr/local/ . \
-        && sudo cmake --build build --target install
+        cd xsimd
+        cmake -B build -DCMAKE_INSTALL_PREFIX=/usr/local/ .
+        sudo cmake --build build --target install
 
     - name: Install GTest
       run: |
