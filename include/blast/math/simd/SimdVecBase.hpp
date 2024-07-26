@@ -26,10 +26,9 @@ namespace blast
     template <typename T, typename Arch>
     class SimdVecBase
     {
-        using XSimdType = xsimd::batch<T, Arch>;
-
     public:
         using ValueType = T;
+        using XSimdType = xsimd::batch<T, Arch>;
         using IntrinsicType = typename XSimdType::register_type;
 
 
@@ -66,6 +65,13 @@ namespace blast
         :   value_ {value}
         {
         }
+
+
+        SimdVecBase(ValueType const& value)
+        :   value_ {value}
+        {
+        }
+
 
         XSimdType value_;
     };

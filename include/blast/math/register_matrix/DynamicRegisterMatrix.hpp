@@ -268,7 +268,7 @@ namespace blast
         BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
         BLAZE_STATIC_ASSERT_MSG((RM * RN <= RegisterCapacity_v<T>), "Not enough registers for a DynamicRegisterMatrix");
 
-        IntrinsicType v_[RM][RN];
+        SimdVecType v_[RM][RN];
         size_t const m_;
         size_t const n_;
 

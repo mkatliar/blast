@@ -26,196 +26,131 @@
 namespace blast
 {
     template <>
-    class SimdVec<double, xsimd::avx2>
-    :   public SimdVecBase<double, xsimd::avx2>
+    inline SimdVec<double, xsimd::avx2>::SimdVec() noexcept
+    :   SimdVecBase {_mm256_setzero_pd()}
     {
-    public:
-        using MaskType = __m256i;
-
-        /**
-         * @brief Set to [0, 0, 0, ...]
-         */
-        SimdVec() noexcept
-        :   SimdVecBase {_mm256_setzero_pd()}
-        {
-        }
+    }
 
 
-        SimdVec(IntrinsicType value) noexcept
-        :   SimdVecBase {value}
-        {
-        }
+    template <>
+    inline SimdVec<double, xsimd::avx2>::SimdVec(IntrinsicType value) noexcept
+    :   SimdVecBase {value}
+    {
+    }
 
 
-        /**
-         * @brief Set to [value, value, ...]
-         *
-         * TODO: add "explicit"
-         *
-         * @param value value for each component of SIMD vector
-         */
-        SimdVec(ValueType value) noexcept
-        :   SimdVecBase {_mm256_set1_pd(value)}
-        {
-        }
+    template <>
+    inline SimdVec<double, xsimd::avx2>::SimdVec(ValueType value) noexcept
+    :   SimdVecBase {_mm256_set1_pd(value)}
+    {
+    }
 
 
-        /**
-         * @brief Load from location
-         *
-         * @param src memory location to load from
-         * @param aligned true if @a src is SIMD-aligned
-         */
-        explicit SimdVec(ValueType const * src, bool aligned) noexcept
-        :   SimdVecBase {aligned ? _mm256_load_pd(src) : _mm256_loadu_pd(src)}
-        {
-        }
+    template <>
+    inline SimdVec<double, xsimd::avx2>::SimdVec(ValueType const * src, bool aligned) noexcept
+    :   SimdVecBase {aligned ? _mm256_load_pd(src) : _mm256_loadu_pd(src)}
+    {
+    }
 
 
-        /**
-         * @brief Masked load from location
-         *
-         * @param src memory location to load from
-         * @param mask load mask
-         * @param aligned true if @a src is SIMD-aligned
-         */
-        explicit SimdVec(ValueType const * src, MaskType mask, bool aligned) noexcept
-        :   SimdVecBase {_mm256_maskload_pd(src, mask)}
-        {
-        }
+    template <>
+    inline SimdVec<double, xsimd::avx2>::SimdVec(ValueType const * src, MaskType mask, bool aligned) noexcept
+    :   SimdVecBase {_mm256_maskload_pd(src, mask)}
+    {
+    }
 
 
-        /**
-         * @brief Store to memory
-         *
-         * @param dst memory location to store to
-         * @param aligned true if @a dst is SIMD-aligned
-         */
-        void store(ValueType * dst, bool aligned) const noexcept
-        {
-            if (aligned)
-                _mm256_store_pd(dst, value_);
-            else
-                _mm256_storeu_pd(dst, value_);
-        }
+    template <>
+    inline void SimdVec<double, xsimd::avx2>::store(ValueType * dst, bool aligned) const noexcept
+    {
+        if (aligned)
+            _mm256_store_pd(dst, value_);
+        else
+            _mm256_storeu_pd(dst, value_);
+    }
 
 
-        /**
-         * @brief Masked store to memory
-         *
-         * @param dst memory location to store to
-         * @param mask store mask
-         * @param aligned true if @a dst is SIMD-aligned
-         */
-        void store(ValueType * dst, MaskType mask, bool aligned) const noexcept
-        {
-            _mm256_maskstore_pd(dst, mask, value_);
-        }
+    template <>
+    inline void SimdVec<double, xsimd::avx2>::store(ValueType * dst, MaskType mask, bool aligned) const noexcept
+    {
+        _mm256_maskstore_pd(dst, mask, value_);
+    }
 
 
-        friend MaskType operator>(SimdVec const& a, SimdVec const& b) noexcept
-        {
-            return _mm256_castpd_si256(_mm256_cmp_pd(a.value_, b.value_, _CMP_GT_OQ));
-        }
+    template <>
+    inline SimdVec<double, xsimd::avx2>::MaskType operator>(SimdVec<double, xsimd::avx2> const& a, SimdVec<double, xsimd::avx2> const& b) noexcept
+    {
+        return _mm256_castpd_si256(_mm256_cmp_pd(a.value_, b.value_, _CMP_GT_OQ));
+    }
 
 
-        /**
-         * @brief Multiplication
-         *
-         * @param a first multiplier
-         * @param b second multiplier
-         *
-         * @return product @a a * @a b
-         */
-        friend SimdVec operator*(SimdVec const& a, SimdVec const& b) noexcept
-        {
-            return _mm256_mul_pd(a.value_, b.value_);
-        }
+    template <>
+    inline SimdVec<double, xsimd::avx2> operator*(SimdVec<double, xsimd::avx2> const& a, SimdVec<double, xsimd::avx2> const& b) noexcept
+    {
+        return _mm256_mul_pd(a.value_, b.value_);
+    }
 
 
-        /**
-         * @brief Fused multiply-add
-         *
-         * Calculate a * b + c
-         *
-         * @param a first multiplier
-         * @param b second multiplier
-         * @param c addendum
-         *
-         * @return @a a * @a b + @a c element-wise
-         */
-        friend SimdVec fmadd(SimdVec const& a, SimdVec const& b, SimdVec const& c) noexcept
-        {
-            return _mm256_fmadd_pd(a.value_, b.value_, c.value_);
-        }
+    template <>
+    inline SimdVec<double, xsimd::avx2> fmadd(SimdVec<double, xsimd::avx2> const& a, SimdVec<double, xsimd::avx2> const& b, SimdVec<double, xsimd::avx2> const& c) noexcept
+    {
+        return _mm256_fmadd_pd(a.value_, b.value_, c.value_);
+    }
 
 
-        friend SimdVec blend(SimdVec const& a, SimdVec const& b, MaskType mask) noexcept
-        {
-            return _mm256_blendv_pd(a.value_, b.value_, _mm256_castsi256_pd(mask));
-        }
+    template <>
+    inline SimdVec<double, xsimd::avx2> blend(SimdVec<double, xsimd::avx2> const& a, SimdVec<double, xsimd::avx2> const& b, SimdVec<double, xsimd::avx2>::MaskType mask) noexcept
+    {
+        return _mm256_blendv_pd(a.value_, b.value_, _mm256_castsi256_pd(mask));
+    }
 
 
-        friend SimdVec abs(SimdVec const& a) noexcept
-        {
-            return _mm256_andnot_pd(SimdVec {-0.}, a.value_);
-        }
+    template <>
+    inline SimdVec<double, xsimd::avx2> abs(SimdVec<double, xsimd::avx2> const& a) noexcept
+    {
+        return _mm256_andnot_pd(_mm256_set1_pd(-0.), a.value_);
+    }
 
 
-        /**
-        * @brief Vertical max (across two vectors)
-        *
-        * @param a first vector
-        * @param b second vector
-        *
-        * @return [max(a[3], b3), max(a[2], b2), max(a[1], b1), max(a[0], b0)]
-        */
-        friend SimdVec max(SimdVec const& a, SimdVec const& b)
-        {
-            return _mm256_max_pd(a, b);
-        }
+    template <>
+    inline SimdVec<double, xsimd::avx2> max(SimdVec<double, xsimd::avx2> const& a, SimdVec<double, xsimd::avx2> const& b) noexcept
+    {
+        return _mm256_max_pd(a, b);
+    }
 
 
-        /**
-        * @brief Horizontal max (across all alements)
-        *
-        * The implementation is based on
-        * https://stackoverflow.com/questions/9795529/how-to-find-the-horizontal-maximum-in-a-256-bit-avx-vector
-        *
-        * @return max(x[0], x[1], x[2], x[3])
-        */
-        friend ValueType max(SimdVec x) noexcept
-        {
-            __m256d y = _mm256_permute2f128_pd(x.value_, x.value_, 1); // permute 128-bit values
-            __m256d m1 = _mm256_max_pd(x.value_, y); // m1[0] = max(x[0], x[2]), m1[1] = max(x[1], x[3]), etc.
-            __m256d m2 = _mm256_permute_pd(m1, 5); // set m2[0] = m1[1], m2[1] = m1[0], etc.
-            __m256d m = _mm256_max_pd(m1, m2); // all m[0] ... m[3] contain the horizontal max(x[0], x[1], x[2], x[3])
+    template <>
+    inline double max(SimdVec<double, xsimd::avx2> const& x) noexcept
+    {
+        __m256d y = _mm256_permute2f128_pd(x.value_, x.value_, 1); // permute 128-bit values
+        __m256d m1 = _mm256_max_pd(x.value_, y); // m1[0] = max(x[0], x[2]), m1[1] = max(x[1], x[3]), etc.
+        __m256d m2 = _mm256_permute_pd(m1, 5); // set m2[0] = m1[1], m2[1] = m1[0], etc.
+        __m256d m = _mm256_max_pd(m1, m2); // all m[0] ... m[3] contain the horizontal max(x[0], x[1], x[2], x[3])
 
-            return m[0];
-        }
+        return m[0];
+    }
 
 
-        template <typename Index>
-        requires (SimdSize_v<Index> == size())
-        friend std::tuple<SimdVec, SimdVec<Index, xsimd::avx2>> imax(SimdVec const& x, SimdVec<Index, xsimd::avx2> const& idx)
-        {
-            SimdVec const y = _mm256_permute2f128_pd(x.value_, x.value_, 1); // permute 128-bit values
-            SimdVec<Index, xsimd::avx2> const iy = _mm256_permute2f128_si256(idx, idx, 1);
+    template <typename Index>
+    requires (SimdSize_v<Index> == SimdVec<double, xsimd::avx2>::size())
+    inline std::tuple<SimdVec<double, xsimd::avx2>, SimdVec<Index, xsimd::avx2>> imax(SimdVec<double, xsimd::avx2> const& x, SimdVec<Index, xsimd::avx2> const& idx) noexcept
+    {
+        SimdVec<double, xsimd::avx2> const y = _mm256_permute2f128_pd(x, x, 1); // permute 128-bit values
+        SimdVec<Index, xsimd::avx2> const iy = _mm256_permute2f128_si256(idx, idx, 1);
 
-            // __m256d m1 = _mm256_max_pd(x.value_, y); // m1[0] = max(x[0], x[2]), m1[1] = max(x[1], x[3]), etc.
-            MaskType const mask_m1 = y > x;
-            SimdVec const m1 = blend(x, y, mask_m1);
-            SimdVec<Index, xsimd::avx2> const im1 = blend(idx, iy, mask_m1);
+        // __m256d m1 = _mm256_max_pd(x.value_, y); // m1[0] = max(x[0], x[2]), m1[1] = max(x[1], x[3]), etc.
+        SimdVec<double, xsimd::avx2>::MaskType const mask_m1 = y > x;
+        SimdVec const m1 = blend(x, y, mask_m1);
+        SimdVec<Index, xsimd::avx2> const im1 = blend(idx, iy, mask_m1);
 
-            SimdVec const m2 = _mm256_permute_pd(m1, 5); // set m2[0] = m1[1], m2[1] = m1[0], etc.
-            SimdVec<Index, xsimd::avx2> const im2 = _mm256_castpd_si256(_mm256_permute_pd(_mm256_castsi256_pd(im1), 5));
+        SimdVec<double, xsimd::avx2> const m2 = _mm256_permute_pd(m1, 5); // set m2[0] = m1[1], m2[1] = m1[0], etc.
+        SimdVec<Index, xsimd::avx2> const im2 = _mm256_castpd_si256(_mm256_permute_pd(_mm256_castsi256_pd(im1), 5));
 
-            // __m256d m = _mm256_max_pd(m1, m2); // all m[0] ... m[3] contain the horizontal max(x[0], x[1], x[2], x[3])
-            MaskType const mask_m = m2 > m1;
-            SimdVec const m = blend(m1, m2, mask_m);
-            SimdVec<Index, xsimd::avx2> const im = blend(im1, im2, mask_m);
+        // __m256d m = _mm256_max_pd(m1, m2); // all m[0] ... m[3] contain the horizontal max(x[0], x[1], x[2], x[3])
+        SimdVec<double, xsimd::avx2>::MaskType const mask_m = m2 > m1;
+        SimdVec const m = blend(m1, m2, mask_m);
+        SimdVec<Index, xsimd::avx2> const im = blend(im1, im2, mask_m);
 
-            return std::make_tuple(m, im);
-        }
-    };
+        return std::make_tuple(m, im);
+    }
 }
