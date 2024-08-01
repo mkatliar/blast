@@ -10,6 +10,7 @@
 #include <blaze/system/Inline.h>
 #include <blaze/math/AlignmentFlag.h>
 
+#include <type_traits>
 #include <xsimd/xsimd.hpp>
 
 #include <immintrin.h>
@@ -24,8 +25,9 @@ namespace blast
     struct Simd;
 
 
-    template <>
-    struct Simd<double, xsimd::avx2>
+    template <typename Arch>
+    requires std::is_base_of_v<xsimd::avx2, Arch>
+    struct Simd<double, Arch>
     {
     private:
         class Index;
@@ -85,8 +87,9 @@ namespace blast
     };
 
 
-    template <>
-    struct Simd<float, xsimd::avx2>
+    template <typename Arch>
+    requires std::is_base_of_v<xsimd::avx2, Arch>
+    struct Simd<float, Arch>
     {
     private:
         class Index;
