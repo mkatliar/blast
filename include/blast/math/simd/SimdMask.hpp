@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <xsimd/xsimd.hpp>
+
 
 namespace blast
 {
@@ -22,7 +24,8 @@ namespace blast
      * The width of a given simd_mask instantiation is a constant expression, determined by the template parameter.
      *
      * @tparam T the element type simd_mask applies on
+     * @tparam Arch instruction set architecture
      */
-    template <typename T>
-    class SimdMask;
+    template <typename T, typename Arch>
+    using SimdMask = xsimd::batch_bool<T, Arch>;
 }
