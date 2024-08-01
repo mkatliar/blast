@@ -54,26 +54,12 @@ namespace blast
 
 
     template <>
-    inline SimdVec<double, xsimd::avx2>::SimdVec(ValueType const * src, MaskType mask, bool aligned) noexcept
-    :   SimdVecBase {_mm256_maskload_pd(src, mask)}
-    {
-    }
-
-
-    template <>
     inline void SimdVec<double, xsimd::avx2>::store(ValueType * dst, bool aligned) const noexcept
     {
         if (aligned)
             _mm256_store_pd(dst, value_);
         else
             _mm256_storeu_pd(dst, value_);
-    }
-
-
-    template <>
-    inline void SimdVec<double, xsimd::avx2>::store(ValueType * dst, MaskType mask, bool aligned) const noexcept
-    {
-        _mm256_maskstore_pd(dst, mask, value_);
     }
 
 
@@ -128,29 +114,5 @@ namespace blast
         __m256d m = _mm256_max_pd(m1, m2); // all m[0] ... m[3] contain the horizontal max(x[0], x[1], x[2], x[3])
 
         return m[0];
-    }
-
-
-    template <typename Index>
-    requires (SimdSize_v<Index> == SimdVec<double, xsimd::avx2>::size())
-    inline std::tuple<SimdVec<double, xsimd::avx2>, SimdVec<Index, xsimd::avx2>> imax(SimdVec<double, xsimd::avx2> const& x, SimdVec<Index, xsimd::avx2> const& idx) noexcept
-    {
-        SimdVec<double, xsimd::avx2> const y = _mm256_permute2f128_pd(x, x, 1); // permute 128-bit values
-        SimdVec<Index, xsimd::avx2> const iy = _mm256_permute2f128_si256(idx, idx, 1);
-
-        // __m256d m1 = _mm256_max_pd(x.value_, y); // m1[0] = max(x[0], x[2]), m1[1] = max(x[1], x[3]), etc.
-        SimdVec<double, xsimd::avx2>::MaskType const mask_m1 = y > x;
-        SimdVec const m1 = blend(x, y, mask_m1);
-        SimdVec<Index, xsimd::avx2> const im1 = blend(idx, iy, mask_m1);
-
-        SimdVec<double, xsimd::avx2> const m2 = _mm256_permute_pd(m1, 5); // set m2[0] = m1[1], m2[1] = m1[0], etc.
-        SimdVec<Index, xsimd::avx2> const im2 = _mm256_castpd_si256(_mm256_permute_pd(_mm256_castsi256_pd(im1), 5));
-
-        // __m256d m = _mm256_max_pd(m1, m2); // all m[0] ... m[3] contain the horizontal max(x[0], x[1], x[2], x[3])
-        SimdVec<double, xsimd::avx2>::MaskType const mask_m = m2 > m1;
-        SimdVec const m = blend(m1, m2, mask_m);
-        SimdVec<Index, xsimd::avx2> const im = blend(im1, im2, mask_m);
-
-        return std::make_tuple(m, im);
     }
 }

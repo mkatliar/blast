@@ -17,27 +17,30 @@
 #include <blast/math/simd/SimdVec.hpp>
 #include <blast/math/simd/SimdVecBase.hpp>
 #include <blast/math/simd/SequenceTag.hpp>
-#include <blast/math/simd/avx256/SimdSize.hpp>
 
 #include <immintrin.h>
 
 #include <cstdint>
+#include <type_traits>
 
 
 namespace blast
 {
-    template <>
-    class SimdVec<std::int32_t, xsimd::avx2>
-    :   public SimdVecBase<std::int32_t, xsimd::avx2>
+    template <typename Arch>
+    requires std::is_base_of_v<xsimd::avx2, Arch>
+    class SimdVec<std::int32_t, Arch>
+    :   public SimdVecBase<std::int32_t, Arch>
     {
     public:
         using MaskType = __m256i;
+        using typename SimdVecBase<std::int32_t, Arch>::ValueType;
+        using typename SimdVecBase<std::int32_t, Arch>::IntrinsicType;
 
         /**
          * @brief Initialize to (0, 0, 0, 0, 0, 0, 0, 0)
          */
         SimdVec() noexcept
-        :   SimdVecBase {_mm256_setzero_si256()}
+        :   SimdVecBase<std::int32_t, Arch> {_mm256_setzero_si256()}
         {
         }
 
@@ -46,7 +49,7 @@ namespace blast
          * @brief Initialize to (a, a, a, a, a, a, a, a)
          */
         SimdVec(ValueType a) noexcept
-        :   SimdVecBase {_mm256_set1_epi32(a)}
+        :   SimdVecBase<std::int32_t, Arch> {_mm256_set1_epi32(a)}
         {
         }
 
@@ -68,20 +71,20 @@ namespace blast
          */
         SimdVec(ValueType a7, ValueType a6, ValueType a5, ValueType a4,
             ValueType a3, ValueType a2, ValueType a1, ValueType a0) noexcept
-        :   SimdVecBase {_mm256_set_epi32(a7, a6, a5, a4, a3, a2, a1, a0)}
+        :   SimdVecBase<std::int32_t, Arch> {_mm256_set_epi32(a7, a6, a5, a4, a3, a2, a1, a0)}
         {
         }
 
 
         SimdVec(IntrinsicType value) noexcept
-        :   SimdVecBase {value}
+        :   SimdVecBase<std::int32_t, Arch> {value}
         {
         }
 
 
         SimdVec& operator+=(ValueType x) noexcept
         {
-            value_ = _mm256_add_epi32(value_, _mm256_set1_epi32(x));
+            this->value_ = _mm256_add_epi32(this->value_, _mm256_set1_epi32(x));
             return *this;
         }
 
