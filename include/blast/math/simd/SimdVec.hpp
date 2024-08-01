@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include <blast/math/simd/SimdVecBase.hpp>
-
 #include <xsimd/xsimd.hpp>
 
 #include <tuple>
@@ -221,12 +219,11 @@ namespace blast
      */
     template <typename T, typename Arch>
     class SimdVec
-    :   public SimdVecBase<T, Arch>
     {
     public:
-        using typename SimdVecBase<T, Arch>::ValueType;
-        using typename SimdVecBase<T, Arch>::IntrinsicType;
-        using typename SimdVecBase<T, Arch>::XSimdType;
+        using ValueType = T;
+        using XSimdType = xsimd::batch<T, Arch>;
+        using IntrinsicType = typename XSimdType::register_type;
         using MaskType = xsimd::batch_bool<T, Arch>;
 
 
@@ -234,7 +231,7 @@ namespace blast
          * @brief Set to [0, 0, 0, ...]
          */
         SimdVec() noexcept
-        :   SimdVecBase<T, Arch> {T {}}
+        :   value_ {T {}}
         {
         }
 
@@ -243,13 +240,13 @@ namespace blast
 
 
         SimdVec(IntrinsicType value) noexcept
-        :   SimdVecBase<T, Arch> {value}
+        :   value_ {value}
         {
         }
 
 
         SimdVec(XSimdType value) noexcept
-        :   SimdVecBase<T, Arch> {value}
+        :   value_ {value}
         {
         }
 
@@ -260,7 +257,7 @@ namespace blast
          * @param value value for each component of SIMD vector
          */
         SimdVec(ValueType value) noexcept
-        :   SimdVecBase<T, Arch> {value}
+        :   value_ {value}
         {
         }
 
@@ -272,7 +269,7 @@ namespace blast
          * @param aligned true indicates that an aligned read instruction should be used
          */
         explicit SimdVec(ValueType const * src, bool aligned) noexcept
-        :   SimdVecBase<T, Arch> {aligned ? xsimd::load_aligned(src) : xsimd::load_unaligned(src)}
+        :   value_ {aligned ? xsimd::load_aligned(src) : xsimd::load_unaligned(src)}
         {
         }
 
@@ -285,8 +282,36 @@ namespace blast
          * @param aligned true if @a src is SIMD-aligned
          */
         explicit SimdVec(ValueType const * src, MaskType mask, bool aligned) noexcept
-        :   SimdVecBase<T, Arch> {maskload(src, mask)}
+        :   value_ {maskload(src, mask)}
         {
+        }
+
+
+        /**
+         * @brief Number of elements in SIMD pack
+         */
+        static size_t constexpr size()
+        {
+            return XSimdType::size;
+        }
+
+
+        operator IntrinsicType() const noexcept
+        {
+            return value_;
+        }
+
+
+        /**
+         * @brief Access single element
+         *
+         * @param i element index
+         *
+         * @return element value
+         */
+        ValueType operator[](size_t i) const noexcept
+        {
+            return value_.get(i);
         }
 
 
@@ -299,9 +324,9 @@ namespace blast
         void store(ValueType * dst, bool aligned) const noexcept
         {
             if (aligned)
-                xsimd::store_aligned(dst, this->value_);
+                xsimd::store_aligned(dst, value_);
             else
-                xsimd::store_unaligned(dst, this->value_);
+                xsimd::store_unaligned(dst, value_);
         }
 
 
@@ -314,7 +339,7 @@ namespace blast
          */
         void store(ValueType * dst, MaskType mask, bool aligned) const noexcept
         {
-            maskstore(this->value_, dst, mask);
+            maskstore(value_, dst, mask);
         }
 
 
@@ -327,7 +352,7 @@ namespace blast
          */
         SimdVec& operator*=(SimdVec const& a) noexcept
         {
-            this->value_ *= a.value_;
+            value_ *= a.value_;
             return *this;
         }
 
@@ -341,7 +366,7 @@ namespace blast
          */
         SimdVec& operator/=(SimdVec const& a) noexcept
         {
-            this->value_ /= a.value_;
+            value_ /= a.value_;
             return *this;
         }
 
@@ -362,6 +387,9 @@ namespace blast
             auto const t = imax(v1.value_, xsimd::batch<Index, Arch>(idx));
             return {get<0>(t), SimdVec<Index, Arch>(get<1>(t))};
         }
+
+    private:
+        XSimdType value_;
     };
 
 

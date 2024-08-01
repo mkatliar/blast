@@ -15,40 +15,36 @@
 #pragma once
 
 #include <blast/math/simd/SimdVec.hpp>
-#include <blast/math/simd/SimdVecBase.hpp>
-#include <blast/math/simd/avx256/SimdSize.hpp>
 
 #include <immintrin.h>
-
-#include <tuple>
 
 
 namespace blast
 {
     template <>
     inline SimdVec<float, xsimd::avx2>::SimdVec() noexcept
-    :   SimdVecBase {_mm256_setzero_ps()}
+    :   value_ {_mm256_setzero_ps()}
     {
     }
 
 
     template <>
     inline SimdVec<float, xsimd::avx2>::SimdVec(IntrinsicType value) noexcept
-    :   SimdVecBase {value}
+    :   value_ {value}
     {
     }
 
 
     template <>
     inline SimdVec<float, xsimd::avx2>::SimdVec(ValueType value) noexcept
-    :   SimdVecBase {_mm256_set1_ps(value)}
+    :   value_ {_mm256_set1_ps(value)}
     {
     }
 
 
     template <>
     inline SimdVec<float, xsimd::avx2>::SimdVec(ValueType const * src, bool aligned) noexcept
-    :   SimdVecBase {aligned ? _mm256_load_ps(src) : _mm256_loadu_ps(src)}
+    :   value_ {aligned ? _mm256_load_ps(src) : _mm256_loadu_ps(src)}
     {
     }
 
