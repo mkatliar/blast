@@ -46,10 +46,6 @@ target_compile_options(blast
     INTERFACE "-march=native" "-mfma" "-mavx" "-mavx2" "-msse4"
 )
 
-target_compile_definitions(blast
-    INTERFACE "XSIMD_DEFAULT_ARCH=avx2"
-)
-
 # BLAST_WITH_BLASFEO
 option(BLAST_WITH_BLASFEO "Build blasfeo C++ interface")
 
