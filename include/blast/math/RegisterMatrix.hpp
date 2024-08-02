@@ -7,6 +7,6 @@
 
 #include <blast/math/register_matrix/RegisterMatrix.hpp>
 #include <blast/math/register_matrix/DynamicRegisterMatrix.hpp>
-#include <blast/math/register_matrix/double_4_4_4.hpp>
-#include <blast/math/register_matrix/double_8_4_4.hpp>
-#include <blast/math/register_matrix/double_12_4_4.hpp>
+// #include <blast/math/register_matrix/double_4_4_4.hpp>
+// #include <blast/math/register_matrix/double_8_4_4.hpp>
+// #include <blast/math/register_matrix/double_12_4_4.hpp>
