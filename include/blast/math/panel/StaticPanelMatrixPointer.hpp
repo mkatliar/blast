@@ -7,10 +7,7 @@
 #include <blast/math/TransposeFlag.hpp>
 #include <blast/math/StorageOrder.hpp>
 #include <blast/math/TypeTraits.hpp>
-#include <blast/math/simd/SimdSize.hpp>
-#include <blast/math/simd/Simd.hpp>
-#include <blast/math/simd/SimdVec.hpp>
-#include <blast/math/simd/SimdMask.hpp>
+#include <blast/math/Simd.hpp>
 #include <blast/math/expressions/PanelMatrix.hpp>
 #include <blast/math/expressions/PMatTransExpr.hpp>
 #include <blast/util/Assert.hpp>

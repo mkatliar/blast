@@ -5,10 +5,7 @@
 #pragma once
 
 
-#include <blast/math/simd/Simd.hpp>
-#include <blast/math/simd/SimdVec.hpp>
-#include <blast/math/simd/SimdMask.hpp>
-#include <blast/math/simd/IsSimdAligned.hpp>
+#include <blast/math/Simd.hpp>
 #include <blast/util/Assert.hpp>
 
 
@@ -73,27 +70,27 @@ namespace blast
             else
             {
                 // Non-optimized
-                IntrinsicType v = blast::setzero<ElementType, SS>();
+                // TODO: use gather
+                T v[SS];
                 for (size_t i = 0; i < SS; ++i)
-                    if (mask[i])
-                        v[i] = ptr_[S * i];
+                    v[i] = mask[i] ? ptr_[S * i] : T {};
 
-                return SimdVecType {v};
+                return SimdVecType {v, false};
             }
         }
 
 
-        IntrinsicType broadcast() const noexcept
+        SimdVecType broadcast() const noexcept
         {
-            return blast::broadcast<SS>(ptr_);
+            return *ptr_;
         }
 
 
-        void store(IntrinsicType val) const noexcept
+        void store(SimdVecType val) const noexcept
         {
             if constexpr (S == 1)
             {
-                blast::store<AF>(ptr_, val);
+                val.store(ptr_, AF);
             }
             else
             {
@@ -108,7 +105,7 @@ namespace blast
         {
             if constexpr (S == 1)
             {
-                blast::maskstore(ptr_, mask, val);
+                val.store(ptr_, mask);
             }
             else
             {

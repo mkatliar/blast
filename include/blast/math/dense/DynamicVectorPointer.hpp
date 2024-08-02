@@ -4,9 +4,7 @@
 
 #pragma once
 
-#include <blast/math/simd/Simd.hpp>
-#include <blast/math/simd/SimdVec.hpp>
-#include <blast/math/simd/SimdMask.hpp>
+#include <blast/math/Simd.hpp>
 #include <blast/util/Assert.hpp>
 
 #include <type_traits>
@@ -41,7 +39,7 @@ namespace blast
         ,   spacing_ {spacing}
         {
             BLAST_USER_ASSERT(spacing > 0, "Vector element spacing must be positive.");
-            BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isSimdAligned(ptr), "Pointer is not aligned");
         }
 
 
@@ -52,6 +50,7 @@ namespace blast
         SimdVecType load() const noexcept
         {
             // Non-optimized
+            // TODO: use gather()
             IntrinsicType v;
             for (size_t i = 0; i < SS; ++i)
                 v[i] = ptr_[spacing_ * i];
@@ -63,18 +62,18 @@ namespace blast
         SimdVecType load(MaskType mask) const noexcept
         {
             // Non-optimized
-            IntrinsicType v = blast::setzero<std::remove_cv_t<ElementType>, SS>();
+            // TODO: use gather()
+            T v[SS];
             for (size_t i = 0; i < SS; ++i)
-                if (mask[i])
-                    v[i] = ptr_[spacing_ * i];
+                v[i] = mask[i] ? ptr_[spacing_ * i] : T {};
 
-            return SimdVecType {v};
+            return SimdVecType {v, false};
         }
 
 
-        IntrinsicType broadcast() const noexcept
+        SimdVecType broadcast() const noexcept
         {
-            return blast::broadcast<SS>(ptr_);
+            return *ptr_;
         }
 
 

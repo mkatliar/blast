@@ -7,7 +7,6 @@
 #include <blast/math/Forward.hpp>
 #include <blast/math/panel/Gemm.hpp>
 #include <blast/math/views/submatrix/BaseTemplate.hpp>
-#include <blast/math/simd/Simd.hpp>
 #include <blast/math/panel/PanelSize.hpp>
 #include <blast/system/CacheLine.hpp>
 

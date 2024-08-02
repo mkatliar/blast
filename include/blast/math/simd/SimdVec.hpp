@@ -133,6 +133,20 @@ namespace blast
 
 
     /**
+    * @brief Fused negative multiply-add
+    *
+    * Calculate -a * b + c
+    *
+    * @param a first multiplier
+    * @param b second multiplier
+    * @param c addendum
+    *
+    * @return @a a * @a b + @a c element-wise
+    */
+    template <typename T, typename Arch>
+    SimdVec<T, Arch> fnmadd(SimdVec<T, Arch> const& a, SimdVec<T, Arch> const& b, SimdVec<T, Arch> const& c) noexcept;
+
+    /**
     * @brief Fused multiply-add
     *
     * Calculate a * b + c
@@ -298,6 +312,15 @@ namespace blast
         }
 
 
+        /**
+         * @brief Set to 0
+         */
+        void reset() noexcept
+        {
+            value_ = ValueType {};
+        }
+
+
         operator IntrinsicType() const noexcept
         {
             return value_;
@@ -374,6 +397,7 @@ namespace blast
 
 
         friend SimdVec fmadd<>(SimdVec const& a, SimdVec const& b, SimdVec const& c) noexcept;
+        friend SimdVec fnmadd<>(SimdVec const& a, SimdVec const& b, SimdVec const& c) noexcept;
         friend SimdVec blend<>(SimdVec const& a, SimdVec const& b, MaskType mask) noexcept;
         friend SimdVec abs<>(SimdVec const& a) noexcept;
         friend SimdVec max<>(SimdVec const& a, SimdVec const& b) noexcept;
@@ -397,6 +421,13 @@ namespace blast
     inline SimdVec<T, Arch> fmadd(SimdVec<T, Arch> const& a, SimdVec<T, Arch> const& b, SimdVec<T, Arch> const& c) noexcept
     {
         return xsimd::fma(a.value_, b.value_, c.value_);
+    }
+
+
+    template <typename T, typename Arch>
+    inline SimdVec<T, Arch> fnmadd(SimdVec<T, Arch> const& a, SimdVec<T, Arch> const& b, SimdVec<T, Arch> const& c) noexcept
+    {
+        return xsimd::fnma(a.value_, b.value_, c.value_);
     }
 
 

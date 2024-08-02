@@ -81,6 +81,13 @@ namespace blast
 
 
     template <>
+    inline SimdVec<double, xsimd::avx2> fnmadd(SimdVec<double, xsimd::avx2> const& a, SimdVec<double, xsimd::avx2> const& b, SimdVec<double, xsimd::avx2> const& c) noexcept
+    {
+        return _mm256_fnmadd_pd(a.value_, b.value_, c.value_);
+    }
+
+
+    template <>
     inline SimdVec<double, xsimd::avx2> blend(SimdVec<double, xsimd::avx2> const& a, SimdVec<double, xsimd::avx2> const& b, SimdVec<double, xsimd::avx2>::MaskType mask) noexcept
     {
         return _mm256_blendv_pd(a.value_, b.value_, _mm256_castsi256_pd(mask));

@@ -4,11 +4,7 @@
 
 #pragma once
 
-#include <blast/math/simd/Simd.hpp>
-#include <blast/math/simd/SimdVec.hpp>
-#include <blast/math/simd/SimdMask.hpp>
-#include <blast/math/simd/SimdIndex.hpp>
-#include <blast/math/simd/RegisterCapacity.hpp>
+#include <blast/math/Simd.hpp>
 #include <blast/math/typetraits/MatrixPointer.hpp>
 #include <blast/math/Side.hpp>
 #include <blast/math/UpLo.hpp>
@@ -122,7 +118,7 @@ namespace blast
         {
             for (size_t i = 0; i < RM; ++i)
                 for (size_t j = 0; j < N; ++j)
-                    v_[i][j] = setzero<T, SS>();
+                    v_[i][j].reset();
         }
 
 

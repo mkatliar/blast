@@ -117,7 +117,7 @@ namespace blast
         {
             for (size_t i = 0; i < RM; ++i)
                 for (size_t j = 0; j < N; ++j)
-                    v_[i][j] = setzero<T, SS>();
+                    v_[i][j].reset();
         }
 
 
@@ -562,7 +562,7 @@ namespace blast
                     #pragma unroll
                     for (size_t k = 0; k < j; ++k)
                     {
-                        IntrinsicType const a_kj = (~A)(k, j).broadcast();
+                        SimdVecType const a_kj = (~A)(k, j).broadcast();
 
                         #pragma unroll
                         for (size_t i = 0; i < RM; ++i)
@@ -705,11 +705,11 @@ namespace blast
             #pragma unroll
             for (size_t j = 0; j < k; ++j)
             {
-                T const a_kj = v_[k / SS][j][k % SS];
+                SimdVecType const a_kj = v_[k / SS][j][k % SS];
 
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i) if (i >= k / SS)
-                    v_[i][k] = fnmadd(set1<SS>(a_kj), v_[i][j], v_[i][k]);
+                    v_[i][k] = fnmadd(a_kj, v_[i][j], v_[i][k]);
             }
 
             T const sqrt_a_kk = std::sqrt(v_[k / SS][k][k % SS]);
@@ -718,7 +718,7 @@ namespace blast
             for (size_t i = 0; i < RM; ++i)
             {
                 if (i < k / SS)
-                    v_[i][k] = setzero<T, SS>();
+                    v_[i][k].reset();
                 else
                     v_[i][k] /= sqrt_a_kk;
             }

@@ -73,23 +73,17 @@ namespace blast
     }
 
 
-    /*
-    NOTE: without this specialization some tests fail, e.g.:
-
-    [ RUN      ] RegisterMatrixTest/5.testPartialGerNT @ ./test/blast/math/simd/RegisterMatrixTest.cpp:386
-    │ Failure @ ./test/blast/math/simd/RegisterMatrixTest.cpp:420
-    │ │ Expected equality of these values:
-    │ │   ker(i, j)
-    │ │     Which is: 0.482636
-    │ │   i < m && j < n ? D_ref(i, j) : 0.
-    │ │     Which is: 0.482636
-    │ element mismatch at (0, 1), store size = 1x2
-    [  FAILED  ] RegisterMatrixTest/5.testPartialGerNT, where TypeParam = blast::RegisterMatrix<float, 8ul, 4ul, true> (1 ms)
-    */
     template <>
     inline SimdVec<float, xsimd::avx2> fmadd(SimdVec<float, xsimd::avx2> const& a, SimdVec<float, xsimd::avx2> const& b, SimdVec<float, xsimd::avx2> const& c) noexcept
     {
         return _mm256_fmadd_ps(a.value_, b.value_, c.value_);
+    }
+
+
+    template <>
+    inline SimdVec<float, xsimd::avx2> fnmadd(SimdVec<float, xsimd::avx2> const& a, SimdVec<float, xsimd::avx2> const& b, SimdVec<float, xsimd::avx2> const& c) noexcept
+    {
+        return _mm256_fnmadd_ps(a.value_, b.value_, c.value_);
     }
 
 
