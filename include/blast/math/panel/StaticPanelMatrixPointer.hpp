@@ -9,6 +9,8 @@
 #include <blast/math/TypeTraits.hpp>
 #include <blast/math/simd/SimdSize.hpp>
 #include <blast/math/simd/Simd.hpp>
+#include <blast/math/simd/SimdVec.hpp>
+#include <blast/math/simd/SimdMask.hpp>
 #include <blast/math/expressions/PanelMatrix.hpp>
 #include <blast/math/expressions/PMatTransExpr.hpp>
 #include <blast/util/Assert.hpp>
@@ -21,9 +23,9 @@ namespace blast
     {
     public:
         using ElementType = T;
-        using IntrinsicType = typename Simd<std::remove_cv_t<T>>::IntrinsicType;
-        using MaskType = typename Simd<std::remove_cv_t<T>>::MaskType;
         using SimdVecType = SimdVec<std::remove_cv_t<T>>;
+        using IntrinsicType = SimdVecType::IntrinsicType;
+        using MaskType = SimdMask<std::remove_cv_t<T>>;
 
         static bool constexpr storageOrder = SO;
         static bool constexpr aligned = AF;
@@ -204,7 +206,7 @@ namespace blast
 
 
     private:
-        static size_t constexpr SS = Simd<std::remove_cv_t<T>>::size;
+        static size_t constexpr SS = SimdVecType::size();
         static TransposeFlag constexpr majorOrientation = SO == columnMajor ? columnVector : rowVector;
 
 

@@ -8,11 +8,13 @@
 // Includes
 //*************************************************************************************************
 
-#include <blast/math/simd/Simd.hpp>
+#include <blast/math/simd/SimdSize.hpp>
+
+#include <xsimd/xsimd.hpp>
 
 
 namespace blast
 {
-    template <typename T>
-    size_t constexpr PanelSize_v = Simd<T>::size;
+    template <typename T, typename Arch = xsimd::default_arch>
+    size_t constexpr PanelSize_v = SimdSize_v<T, Arch>;
 }

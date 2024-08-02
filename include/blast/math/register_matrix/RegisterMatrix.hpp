@@ -5,7 +5,9 @@
 #pragma once
 
 #include <blast/math/simd/SimdVec.hpp>
-#include <blast/math/simd/Simd.hpp>
+#include <blast/math/simd/SimdMask.hpp>
+#include <blast/math/simd/SimdIndex.hpp>
+#include <blast/math/simd/RegisterCapacity.hpp>
 #include <blast/math/typetraits/MatrixPointer.hpp>
 #include <blast/math/typetraits/VectorPointer.hpp>
 #include <blast/math/RowColumnVectorPointer.hpp>
@@ -19,8 +21,6 @@
 #include <blaze/util/Exception.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/StaticAssert.h>
-
-#include <cmath>
 
 
 namespace blast
@@ -360,14 +360,14 @@ namespace blast
 
 
     private:
-        using SIMD = Simd<T>;
-        using IntrinsicType = typename SIMD::IntrinsicType;
-        using MaskType = typename SIMD::MaskType;
-        using IntType = typename SIMD::IntType;
-        using SimdVecType = SimdVec<T>;
+        using Arch = xsimd::default_arch;
+        using SimdVecType = SimdVec<T, Arch>;
+        using IntrinsicType = typename SimdVecType::IntrinsicType;
+        using MaskType = SimdMask<T, Arch>;
+        using IntType = typename SimdIndex<T, Arch>::value_type;
 
         // SIMD size
-        static size_t constexpr SS = Simd<T>::size;
+        static size_t constexpr SS = SimdVecType::size();
 
         // Numberf of SIMD registers required to store a single column of the matrix.
         static size_t constexpr RM = M / SS;
@@ -376,7 +376,7 @@ namespace blast
         BLAZE_STATIC_ASSERT_MSG((RM > 0), "Number of rows must be not less than SIMD size");
         BLAZE_STATIC_ASSERT_MSG((RN > 0), "Number of columns must be positive");
         BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
-        BLAZE_STATIC_ASSERT_MSG((RM * RN <= RegisterCapacity_v<T>), "Not enough registers for a RegisterMatrix");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN <= registerCapacity(Arch {})), "Not enough registers for a RegisterMatrix");
 
         SimdVecType v_[RM][RN];
 
@@ -461,7 +461,7 @@ namespace blast
                     v_[i][j] = beta * p(SS * i, j).load();
 
                 if (size_t const rem = m % SS)
-                    v_[m / SS][j] = beta * p(m - rem, j).load(SIMD::index() < rem);
+                    v_[m / SS][j] = beta * p(m - rem, j).load(indexSequence<T, Arch>() < rem);
             }
         }
     }
@@ -493,7 +493,7 @@ namespace blast
 
         if (IntType const rem = m % SS)
         {
-            MaskType const mask = SIMD::index() < rem;
+            MaskType const mask = indexSequence<T, Arch>() < rem;
             size_t const i = m / SS;
 
             for (size_t j = 0; j < n && j < columns(); ++j)
@@ -514,7 +514,7 @@ namespace blast
 
             if (skip && ri < RM)
             {
-                MaskType const mask = SIMD::index() >= skip;
+                MaskType const mask = indexSequence<T, Arch>() >= skip;
                 p(SS * ri, j).store(v_[ri][j], mask);
                 ++ri;
             }
@@ -536,10 +536,10 @@ namespace blast
             {
                 IntType const skip = j - ri * SS;
                 IntType const rem = m - ri * SS;
-                MaskType mask = SIMD::index() < rem;
+                MaskType mask = indexSequence<T, Arch>() < rem;
 
                 if (skip > 0)
-                    mask &= SIMD::index() >= skip;
+                    mask &= indexSequence<T, Arch>() >= skip;
 
                 p(SS * ri, j).store(v_[ri][j], mask);
             }
@@ -596,7 +596,7 @@ namespace blast
         VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b) noexcept
     {
-        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= registerCapacity(Arch {})), "Not enough registers for ger()");
 
         SimdVecType ax[RM];
 
@@ -623,7 +623,7 @@ namespace blast
         VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b) noexcept
     {
-        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= registerCapacity(Arch {})), "Not enough registers for ger()");
 
         SimdVecType ax[RM];
 
@@ -697,7 +697,7 @@ namespace blast
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::potrf() noexcept
     {
         static_assert(M >= N, "potrf() not implemented for register matrices with columns more than rows");
-        static_assert(RM * RN + 2 <= RegisterCapacity_v<T>, "Not enough registers");
+        static_assert(RM * RN + 2 <= registerCapacity(Arch {}), "Not enough registers");
 
         #pragma unroll
         for (size_t k = 0; k < N; ++k)
@@ -745,7 +745,7 @@ namespace blast
                 ax[i] = alpha * a(i * SS, 0).load();
 
             if (rem)
-                ax[ii] = alpha * a(ii * SS, 0).load(SIMD::index() < rem);
+                ax[ii] = alpha * a(ii * SS, 0).load(indexSequence<T, Arch>() < rem);
 
             #pragma unroll
             for (size_t j = 0; j < N; ++j)

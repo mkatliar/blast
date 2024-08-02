@@ -4,6 +4,7 @@
 
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/panel/MatrixPointer.hpp>
+#include <blast/math/simd/SimdVec.hpp>
 
 #include <blaze/Math.h>
 
@@ -115,10 +116,12 @@ namespace blast :: testing
         size_t constexpr N = 3 * SS + 2;
 
         StaticPanelMatrix<TypeParam, M, N, columnMajor> A;
-        IntrinsicType_t<TypeParam> val;
 
+        std::vector<TypeParam> vec(SS);
         for (size_t i = 0; i < SS; ++i)
-            val[i] = TypeParam(i + 1);
+            vec[i] = i + 1;
+
+        SimdVec<TypeParam> val {vec.data(), false};
 
         for (size_t i = 0; i < M; i += SS)
             for (size_t j = 0; j < N; ++j)

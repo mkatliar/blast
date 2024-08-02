@@ -4,8 +4,9 @@
 
 #pragma once
 
-
 #include <blast/math/simd/Simd.hpp>
+#include <blast/math/simd/SimdVec.hpp>
+#include <blast/math/simd/SimdMask.hpp>
 #include <blast/util/Assert.hpp>
 
 #include <type_traits>
@@ -18,9 +19,9 @@ namespace blast
     {
     public:
         using ElementType = T;
-        using IntrinsicType = typename Simd<std::remove_cv_t<T>>::IntrinsicType;
-        using MaskType = typename Simd<std::remove_cv_t<T>>::MaskType;
         using SimdVecType = SimdVec<std::remove_cv_t<T>>;
+        using IntrinsicType = SimdVecType::IntrinsicType;
+        using MaskType = SimdMask<std::remove_cv_t<T>>;
 
         static bool constexpr transposeFlag = TF;
         static bool constexpr aligned = AF;
@@ -172,7 +173,7 @@ namespace blast
 
 
     private:
-        static size_t constexpr SS = Simd<std::remove_cv_t<T>>::size;
+        static size_t constexpr SS = SimdVecType::size();
 
 
         T * ptrOffset(ptrdiff_t i) const noexcept
