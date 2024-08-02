@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <blast/math/simd/SimdIndex.hpp>
+
 #include <xsimd/xsimd.hpp>
 
 #include <tuple>
@@ -381,11 +383,9 @@ namespace blast
         friend SimdVec operator*<>(ValueType const& a, SimdVec const& b) noexcept;
         friend SimdVec operator*<>(SimdVec const& a, ValueType const& b) noexcept;
 
-        template <typename Index>
-        friend std::tuple<SimdVec, SimdVec<Index, Arch>> imax(SimdVec const& v1, SimdVec<Index, Arch> const& idx) noexcept
+        friend std::tuple<SimdVec, SimdIndex<T, Arch>> imax(SimdVec const& v1, SimdIndex<T, Arch> const& idx) noexcept
         {
-            auto const t = imax(v1.value_, xsimd::batch<Index, Arch>(idx));
-            return {get<0>(t), SimdVec<Index, Arch>(get<1>(t))};
+            return imax(v1.value_, idx);
         }
 
     private:

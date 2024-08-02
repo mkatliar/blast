@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/simd/Avx256.hpp>
+#include <blast/math/simd/SimdIndex.hpp>
 
 #include <blaze/Math.h>
 
@@ -64,9 +65,10 @@ namespace blast :: testing
     TYPED_TEST(SimdVecTest, testImax)
     {
         using Scalar = TypeParam;
-        size_t constexpr SS = SimdSize_v<Scalar>;
+        using SimdType = SimdVec<Scalar>;
+        size_t constexpr SS = SimdType::size();
 
-        IntVecType_t<SS> idx {simd::sequenceTag};
+        SimdIndex<Scalar> const idx = indexSequence<Scalar>();
 
         for (int i = 0; i < 100; ++i)
         {
@@ -75,12 +77,12 @@ namespace blast :: testing
             SimdVec<Scalar> const v {a.data(), false};
 
             SimdVec<Scalar> v_max;
-            IntVecType_t<SS> idx_max;
+            SimdIndex<Scalar> idx_max;
             std::tie(v_max, idx_max) = imax(v, idx);
 
             auto const max_el = std::max_element(a.begin(), a.end());
-            for (size_t i = 0; i < idx_max.size(); ++i)
-                ASSERT_EQ(idx_max[i], std::distance(a.begin(), max_el)) << "Error at element " << i;
+            for (size_t i = 0; i < idx_max.size; ++i)
+                ASSERT_EQ(idx_max.get(i), std::distance(a.begin(), max_el)) << "Error at element " << i;
 
             for (size_t i = 0; i < v_max.size(); ++i)
                 ASSERT_EQ(v_max[i], *max_el) << "Error at element " << i;

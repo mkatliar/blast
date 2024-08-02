@@ -14,11 +14,5 @@
 
 #pragma once
 
-#include <blast/math/simd/avx256/SimdSize.hpp>
 #include <blast/math/simd/avx256/SimdVecFloat32.hpp>
 #include <blast/math/simd/avx256/SimdVecFloat64.hpp>
-#include <blast/math/simd/avx256/SimdVecInt32.hpp>
-#include <blast/math/simd/avx256/SimdVecInt64.hpp>
-#include <blast/math/simd/avx256/IntScalarType.hpp>
-
-#include <blast/math/simd/IntVecType.hpp>
