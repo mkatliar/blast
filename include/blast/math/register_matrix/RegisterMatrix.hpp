@@ -4,10 +4,7 @@
 
 #pragma once
 
-#include <blast/math/simd/SimdVec.hpp>
-#include <blast/math/simd/SimdMask.hpp>
-#include <blast/math/simd/SimdIndex.hpp>
-#include <blast/math/simd/RegisterCapacity.hpp>
+#include <blast/math/Simd.hpp>
 #include <blast/math/typetraits/MatrixPointer.hpp>
 #include <blast/math/typetraits/VectorPointer.hpp>
 #include <blast/math/RowColumnVectorPointer.hpp>
