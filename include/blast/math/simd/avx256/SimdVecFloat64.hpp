@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include <blast/math/simd/SimdVec.hpp>
+#include <blast/math/Simd.hpp>
 
 #include <immintrin.h>
 
@@ -60,9 +60,9 @@ namespace blast
 
 
     template <>
-    inline SimdVec<double, xsimd::avx2>::MaskType operator>(SimdVec<double, xsimd::avx2> const& a, SimdVec<double, xsimd::avx2> const& b) noexcept
+    inline SimdMask<double, xsimd::avx2> operator>(SimdVec<double, xsimd::avx2> const& a, SimdVec<double, xsimd::avx2> const& b) noexcept
     {
-        return _mm256_castpd_si256(_mm256_cmp_pd(a.value_, b.value_, _CMP_GT_OQ));
+        return _mm256_cmp_pd(a.value_, b.value_, _CMP_GT_OQ);
     }
 
 
@@ -88,9 +88,9 @@ namespace blast
 
 
     template <>
-    inline SimdVec<double, xsimd::avx2> blend(SimdVec<double, xsimd::avx2> const& a, SimdVec<double, xsimd::avx2> const& b, SimdVec<double, xsimd::avx2>::MaskType mask) noexcept
+    inline SimdVec<double, xsimd::avx2> blend(SimdVec<double, xsimd::avx2> const& a, SimdVec<double, xsimd::avx2> const& b, SimdMask<double, xsimd::avx2> mask) noexcept
     {
-        return _mm256_blendv_pd(a.value_, b.value_, _mm256_castsi256_pd(mask));
+        return _mm256_blendv_pd(a.value_, b.value_, mask);
     }
 
 

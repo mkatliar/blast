@@ -15,6 +15,7 @@
 #pragma once
 
 #include <blast/math/simd/SimdIndex.hpp>
+#include <blast/math/simd/SimdMask.hpp>
 
 #include <xsimd/xsimd.hpp>
 
@@ -51,14 +52,14 @@ namespace blast
     requires std::is_base_of_v<xsimd::avx2, Arch>
     inline void maskstore(xsimd::batch<float, Arch> const& v, float * dst, xsimd::batch_bool<float, Arch> const& mask) noexcept
     {
-        _mm256_maskstore_ps(dst, mask, v);
+        _mm256_maskstore_ps(dst, xsimd::batch_bool_cast<std::int32_t>(mask), v);
     }
 
     template <typename Arch>
     requires std::is_base_of_v<xsimd::avx2, Arch>
     inline void maskstore(xsimd::batch<double, Arch> const& v, double * dst, xsimd::batch_bool<double, Arch> const& mask) noexcept
     {
-        _mm256_maskstore_pd(dst, mask, v);
+        _mm256_maskstore_pd(dst, xsimd::batch_bool_cast<std::int64_t>(mask), v);
     }
 
 
@@ -75,7 +76,7 @@ namespace blast
         // __m256 v3 = _mm256_max_ps(v1, v2);
         __m256 const mask_v3 = _mm256_cmp_ps(v2, v1, _CMP_GT_OQ);
         __m256 const v3 = _mm256_blendv_ps(v1, v2, mask_v3);
-        __m256i const iv3 = _mm256_blendv_epi8(idx, iv2, mask_v3);
+        __m256i const iv3 = _mm256_blendv_epi8(idx, iv2, _mm256_castps_si256(mask_v3));
 
         /* v4 = [Z Z W W | X X Y Y]                                                                         */
         __m256 const v4 = _mm256_permute_ps(v3, 0b00'00'10'10);
@@ -86,7 +87,7 @@ namespace blast
         // __m256 v5 = _mm256_max_ps(v3, v4);
         __m256 const mask_v5 = _mm256_cmp_ps(v4, v3, _CMP_GT_OQ);
         __m256 const v5 = _mm256_blendv_ps(v3, v4, mask_v5);
-        __m256i const iv5 = _mm256_blendv_epi8(iv3, iv4, mask_v5);
+        __m256i const iv5 = _mm256_blendv_epi8(iv3, iv4, _mm256_castps_si256(mask_v5));
 
         /* v6 = [I I I I | J J J J]                                                                         */
         __m256 const v6 = _mm256_permute2f128_ps(v5, v5, 0b0000'0001);
@@ -102,7 +103,7 @@ namespace blast
         // __m128 v7 = _mm_max_ps(_mm256_castps256_ps128(v5), v6);
         __m256 const mask_v7 = _mm256_cmp_ps(v6, v5, _CMP_GT_OQ);
         __m256 const v7 = _mm256_blendv_ps(v5, v6, mask_v7);
-        __m256i const iv7 = _mm256_blendv_epi8(iv5, iv6, mask_v7);
+        __m256i const iv7 = _mm256_blendv_epi8(iv5, iv6, _mm256_castps_si256(mask_v7));
 
         return {v7, iv7};
     }
@@ -118,7 +119,7 @@ namespace blast
         // __m256d m1 = _mm256_max_pd(x.value_, y); // m1[0] = max(x[0], x[2]), m1[1] = max(x[1], x[3]), etc.
         __m256d const mask_m1 = _mm256_cmp_pd(y, x, _CMP_GT_OQ);
         __m256d const m1 = _mm256_blendv_pd(x, y, mask_m1);
-        __m256i const im1 = _mm256_blendv_epi8(idx, iy, mask_m1);
+        __m256i const im1 = _mm256_blendv_epi8(idx, iy, _mm256_castpd_si256(mask_m1));
 
         __m256d const m2 = _mm256_permute_pd(m1, 5); // set m2[0] = m1[1], m2[1] = m1[0], etc.
         __m256i const im2 = _mm256_castpd_si256(_mm256_permute_pd(_mm256_castsi256_pd(im1), 5));
@@ -126,7 +127,7 @@ namespace blast
         // __m256d m = _mm256_max_pd(m1, m2); // all m[0] ... m[3] contain the horizontal max(x[0], x[1], x[2], x[3])
         __m256d const mask_m = _mm256_cmp_pd(m2, m1, _CMP_GT_OQ);
         __m256d const m = _mm256_blendv_pd(m1, m2, mask_m);
-        __m256i const im = _mm256_blendv_epi8(im1, im2, mask_m);
+        __m256i const im = _mm256_blendv_epi8(im1, im2, _mm256_castpd_si256(mask_m));
 
         return {m, im};
     }
@@ -191,7 +192,7 @@ namespace blast
     T max(SimdVec<T, Arch> const& x) noexcept;
 
     template <typename T, typename Arch>
-    typename SimdVec<T, Arch>::MaskType operator>(SimdVec<T, Arch> const& a, SimdVec<T, Arch> const& b) noexcept;
+    SimdMask<T, Arch> operator>(SimdVec<T, Arch> const& a, SimdVec<T, Arch> const& b) noexcept;
 
     /**
     * @brief Multiplication
@@ -240,7 +241,7 @@ namespace blast
         using ValueType = T;
         using XSimdType = xsimd::batch<T, Arch>;
         using IntrinsicType = typename XSimdType::register_type;
-        using MaskType = xsimd::batch_bool<T, Arch>;
+        using MaskType = SimdMask<T, Arch>;
 
 
         /**
@@ -446,7 +447,7 @@ namespace blast
 
 
     template <typename T, typename Arch>
-    inline typename SimdVec<T, Arch>::MaskType operator>(SimdVec<T, Arch> const& a, SimdVec<T, Arch> const& b) noexcept
+    inline SimdMask<T, Arch> operator>(SimdVec<T, Arch> const& a, SimdVec<T, Arch> const& b) noexcept
     {
         return xsimd::gt(a.value_, b.value_);
     }

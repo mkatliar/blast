@@ -72,7 +72,7 @@ namespace blast
          */
         template <typename U>
         SimdMask(xsimd::batch_bool<U, Arch> const& v) noexcept
-        :   XSimdType {IntrinsicType(v)}
+        :   XSimdType {xsimd::batch_bool_cast<T>(v)}
         {
         }
 
