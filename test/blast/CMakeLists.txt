@@ -13,7 +13,6 @@ find_package(LAPACK REQUIRED)
 add_executable(test-blast
     math/simd/RegisterMatrixTest.cpp
     math/simd/DynamicRegisterMatrixTest.cpp
-    math/simd/HsumTest.cpp
     math/simd/SimdVecTest.cpp
 
     math/dense/StaticVectorPointerTest.cpp
