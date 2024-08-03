@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include <xsimd/xsimd.hpp>
+#include <blast/math/simd/Simd.hpp>
 
 #include <cstdlib>
 

@@ -9,8 +9,7 @@
 //*************************************************************************************************
 
 #include <blast/math/simd/SimdSize.hpp>
-
-#include <xsimd/xsimd.hpp>
+#include <blast/math/simd/Simd.hpp>
 
 
 namespace blast
