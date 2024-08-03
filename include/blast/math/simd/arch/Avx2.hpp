@@ -24,7 +24,7 @@ namespace blast
     requires std::is_base_of_v<xsimd::avx2, Arch>
     inline xsimd::batch<float, Arch> maskload(float const * src, xsimd::batch_bool<float, Arch> const& mask) noexcept
     {
-        return _mm256_maskload_ps(src, mask);
+        return _mm256_maskload_ps(src, _mm256_castps_si256(mask));
     }
 
 
@@ -32,7 +32,7 @@ namespace blast
     requires std::is_base_of_v<xsimd::avx2, Arch>
     inline xsimd::batch<double, Arch> maskload(double const * src, xsimd::batch_bool<double, Arch> const& mask) noexcept
     {
-        return _mm256_maskload_pd(src, mask);
+        return _mm256_maskload_pd(src, _mm256_castpd_si256(mask));
     }
 
 
@@ -40,7 +40,7 @@ namespace blast
     requires std::is_base_of_v<xsimd::avx2, Arch>
     inline void maskstore(xsimd::batch<float, Arch> const& v, float * dst, xsimd::batch_bool<float, Arch> const& mask) noexcept
     {
-        _mm256_maskstore_ps(dst, xsimd::batch_bool_cast<std::int32_t>(mask), v);
+        _mm256_maskstore_ps(dst, _mm256_castps_si256(mask), v);
     }
 
 
@@ -48,7 +48,7 @@ namespace blast
     requires std::is_base_of_v<xsimd::avx2, Arch>
     inline void maskstore(xsimd::batch<double, Arch> const& v, double * dst, xsimd::batch_bool<double, Arch> const& mask) noexcept
     {
-        _mm256_maskstore_pd(dst, xsimd::batch_bool_cast<std::int64_t>(mask), v);
+        _mm256_maskstore_pd(dst, _mm256_castpd_si256(mask), v);
     }
 
 
