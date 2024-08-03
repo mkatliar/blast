@@ -17,7 +17,6 @@
 
 #include <blast/util/Exception.hpp>
 #include <blast/math/dense/VectorPointer.hpp>
-#include <blast/math/simd/Avx256.hpp>
 
 #include <cmath>
 #include <tuple>

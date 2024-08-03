@@ -10,5 +10,3 @@
 #include <blast/math/simd/SimdSize.hpp>
 #include <blast/math/simd/IsSimdAligned.hpp>
 #include <blast/math/simd/RegisterCapacity.hpp>
-
-#include <blast/math/simd/Avx256.hpp>

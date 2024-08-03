@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <blast/math/simd/Avx256.hpp>
 #include <blast/math/simd/SimdIndex.hpp>
 
 #include <blaze/Math.h>
