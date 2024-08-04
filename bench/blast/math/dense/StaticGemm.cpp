@@ -4,9 +4,10 @@
 
 #include <blast/math/dense/Gemm.hpp>
 
+#include <bench/Gemm.hpp>
+
 #include <blaze/math/StaticMatrix.h>
 
-#include <bench/Gemm.hpp>
 #include <test/Randomize.hpp>
 
 
@@ -39,7 +40,7 @@ namespace blast :: benchmark
             DoNotOptimize(D);
         }
 
-        state.counters["flops"] = Counter(2 * M * N * K + 3 * M * N, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(M, N, K));
         state.counters["m"] = M;
     }
 

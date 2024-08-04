@@ -12,8 +12,6 @@
 
 #include <bench/Gemm.hpp>
 
-#include <vector>
-
 
 namespace blast :: benchmark
 {
@@ -43,7 +41,7 @@ namespace blast :: benchmark
             ::benchmark::DoNotOptimize(C);
         }
 
-        state.counters["flops"] = Counter(2 * M * N * K, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(M, N, K));
         state.counters["m"] = M;
         state.counters["n"] = N;
         state.counters["k"] = K;
@@ -72,12 +70,12 @@ namespace blast :: benchmark
             ::benchmark::DoNotOptimize(C);
         }
 
-        state.counters["flops"] = Counter(2 * m * m * m, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, m, m));
         state.counters["m"] = m;
     }
 
 
-    BENCHMARK_TEMPLATE(BM_gemm_dynamic, double)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_dynamic, double)->DenseRange(1, BENCHMARK_MAX_GEMM);
 
 
 #define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_GEMM)

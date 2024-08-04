@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include "blast/math/StorageOrder.hpp"
 #include <blast/math/DynamicPanelMatrix.hpp>
 #include <blast/math/panel/Gemm.hpp>
 
 #include <bench/Gemm.hpp>
+
 #include <test/Randomize.hpp>
 
 
@@ -40,7 +40,7 @@ namespace blast :: benchmark
             DoNotOptimize(D);
         }
 
-        state.counters["flops"] = Counter(2 * M * N * K, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(M, N, K));
         state.counters["m"] = M;
     }
 

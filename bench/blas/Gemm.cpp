@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-
-
-#include <benchmark/benchmark.h>
+#include <bench/Gemm.hpp>
 
 #include <blaze/Math.h>
 
@@ -31,10 +29,10 @@ namespace blast :: benchmark
         for (auto _ : state)
             gemm(C, trans(A), B, 1.0, 1.0);
 
-        state.counters["flops"] = Counter(2 * m * m * m, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, m, m));
         state.counters["m"] = m;
     }
 
-    BENCHMARK_TEMPLATE(BM_gemm, double)->DenseRange(1, 50);
-    BENCHMARK_TEMPLATE(BM_gemm, float)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm, double)->DenseRange(1, BENCHMARK_MAX_GEMM);
+    BENCHMARK_TEMPLATE(BM_gemm, float)->DenseRange(1, BENCHMARK_MAX_GEMM);
 }

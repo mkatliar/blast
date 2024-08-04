@@ -34,7 +34,7 @@ namespace blast :: benchmark
             DoNotOptimize(C);
         }
 
-        state.counters["flops"] = Counter(2 * M * N * K, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(M, N, K));
         state.counters["m"] = M;
         state.counters["n"] = N;
         state.counters["k"] = K;
@@ -63,7 +63,7 @@ namespace blast :: benchmark
             DoNotOptimize(C);
         }
 
-        state.counters["flops"] = Counter(2 * m * m * m, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, m, m));
         state.counters["m"] = m;
     }
 
@@ -90,7 +90,7 @@ namespace blast :: benchmark
                 }
         }
 
-        state.counters["flops"] = Counter(2 * m * m * m, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, m, m));
         state.counters["m"] = m;
     }
 
@@ -123,7 +123,7 @@ namespace blast :: benchmark
                 }
         }
 
-        state.counters["flops"] = Counter(2 * m * m * m, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, m, m));
         state.counters["m"] = m;
     }
 

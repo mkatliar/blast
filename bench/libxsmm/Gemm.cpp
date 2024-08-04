@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <bench/Benchmark.hpp>
+#include <bench/Gemm.hpp>
+
 #include <test/Randomize.hpp>
 
 #include <libxsmm.h>
@@ -39,7 +40,7 @@ namespace blast :: benchmark
         for (auto _ : state)
             kernel(a.data(), b.data(), c.data());
 
-        state.counters["flops"] = Counter(m * n * k, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, n, k));
         state.counters["m"] = m;
     }
 
@@ -69,14 +70,14 @@ namespace blast :: benchmark
         for (auto _ : state)
             kernel(a.data(), b.data(), c.data());
 
-        state.counters["flops"] = Counter(2 * m * n * k, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, n, k));
         state.counters["m"] = m;
     }
 
 
-    BENCHMARK_TEMPLATE(BM_gemm_nn, double)->DenseRange(1, 50);
-    BENCHMARK_TEMPLATE(BM_gemm_nt, double)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, double)->DenseRange(1, BENCHMARK_MAX_GEMM);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, double)->DenseRange(1, BENCHMARK_MAX_GEMM);
 
-    BENCHMARK_TEMPLATE(BM_gemm_nn, float)->DenseRange(1, 50);
-    BENCHMARK_TEMPLATE(BM_gemm_nt, float)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_nn, float)->DenseRange(1, BENCHMARK_MAX_GEMM);
+    BENCHMARK_TEMPLATE(BM_gemm_nt, float)->DenseRange(1, BENCHMARK_MAX_GEMM);
 }
