@@ -9,9 +9,6 @@
 #include <bench/Gemm.hpp>
 #include <test/Randomize.hpp>
 
-#include <random>
-#include <memory>
-
 
 namespace blast :: benchmark
 {
@@ -22,17 +19,20 @@ namespace blast :: benchmark
         size_t constexpr K = M;
 
         StaticMatrix<Real, M, K, columnMajor> A;
-        StaticMatrix<Real, N, K, columnMajor> B;
+        StaticMatrix<Real, K, N, columnMajor> B;
         StaticMatrix<Real, M, N, columnMajor> C;
         StaticMatrix<Real, M, N, columnMajor> D;
+        Real alpha, beta;
 
         randomize(A);
         randomize(B);
         randomize(C);
+        randomize(alpha);
+        randomize(beta);
 
         for (auto _ : state)
         {
-            gemm(0.5, A, B, 0.1, C, D);
+            gemm(alpha, A, B, beta, C, D);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);

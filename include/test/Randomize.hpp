@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <blast/math/StaticPanelMatrix.hpp>
+#include <blaze/util/Random.h>
 
 
 #include <array>
@@ -12,6 +12,9 @@
 
 namespace blast
 {
+    using blaze::randomize;
+
+
     template <typename T, std::size_t N>
     inline void randomize(std::array<T, N>& a)
     {
