@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+#include <bench/Gemm.hpp>
 
-
-#include <benchmark/benchmark.h>
+#include <test/Randomize.hpp>
 
 #include <blaze/Math.h>
 
@@ -28,13 +28,17 @@ namespace blast :: benchmark
         blaze::DynamicMatrix<Real, blaze::columnMajor> C(m, m);
         randomize(C);
 
-        for (auto _ : state)
-            gemm(C, trans(A), B, 1.0, 1.0);
+        Real alpha, beta;
+        randomize(alpha);
+        randomize(beta);
 
-        state.counters["flops"] = Counter(2 * m * m * m, Counter::kIsIterationInvariantRate);
+        for (auto _ : state)
+            gemm(C, trans(A), B, alpha, beta);
+
+        setCounters(state.counters, complexityGemm(m, m, m));
         state.counters["m"] = m;
     }
 
-    BENCHMARK_TEMPLATE(BM_gemm, double)->DenseRange(1, 50);
-    BENCHMARK_TEMPLATE(BM_gemm, float)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm, double)->DenseRange(1, BENCHMARK_MAX_GEMM);
+    BENCHMARK_TEMPLATE(BM_gemm, float)->DenseRange(1, BENCHMARK_MAX_GEMM);
 }

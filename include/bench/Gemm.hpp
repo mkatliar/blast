@@ -5,5 +5,19 @@
 #pragma once
 
 #include <bench/Benchmark.hpp>
+#include <bench/Complexity.hpp>
 
 #define BENCHMARK_MAX_GEMM 50
+
+
+namespace blast :: benchmark
+{
+    /// @brief Algorithmic complexity of gemm
+    inline Complexity complexityGemm(std::size_t m, std::size_t n, std::size_t k)
+    {
+        return {
+            {"add", (m * n) * (k + 1)},
+            {"mul", (m * n) * (k + 2)},
+        };
+    }
+}

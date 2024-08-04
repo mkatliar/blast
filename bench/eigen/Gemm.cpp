@@ -10,9 +10,9 @@
 
 #include <Eigen/Dense>
 
-#include <bench/Gemm.hpp>
+#include <test/Randomize.hpp>
 
-#include <vector>
+#include <bench/Gemm.hpp>
 
 
 namespace blast :: benchmark
@@ -32,18 +32,23 @@ namespace blast :: benchmark
         Eigen::Matrix<Real, K, N, Eigen::ColMajor> B;
         B.setRandom();
 
-        Eigen::Matrix<Real, M, N, Eigen::ColMajor> C;
+        Eigen::Matrix<Real, M, N, Eigen::ColMajor> C, D;
         C.setRandom();
+
+        Real alpha, beta;
+        randomize(alpha);
+        randomize(beta);
 
         for (auto _ : state)
         {
-            C += A.transpose() * B;
+            D = alpha * A.transpose() * B + beta * C;
             ::benchmark::DoNotOptimize(A);
             ::benchmark::DoNotOptimize(B);
             ::benchmark::DoNotOptimize(C);
+            ::benchmark::DoNotOptimize(D);
         }
 
-        state.counters["flops"] = Counter(2 * M * N * K, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(M, N, K));
         state.counters["m"] = M;
         state.counters["n"] = N;
         state.counters["k"] = K;
@@ -61,23 +66,28 @@ namespace blast :: benchmark
         Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> B(m, m);
         B.setRandom();
 
-        Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> C(m, m);
+        Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> C(m, m), D(m, m);
         C.setRandom();
+
+        Real alpha, beta;
+        randomize(alpha);
+        randomize(beta);
 
         for (auto _ : state)
         {
-            C += A.transpose() * B;
+            D = alpha * A.transpose() * B + beta * C;
             ::benchmark::DoNotOptimize(A);
             ::benchmark::DoNotOptimize(B);
             ::benchmark::DoNotOptimize(C);
+            ::benchmark::DoNotOptimize(D);
         }
 
-        state.counters["flops"] = Counter(2 * m * m * m, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, m, m));
         state.counters["m"] = m;
     }
 
 
-    BENCHMARK_TEMPLATE(BM_gemm_dynamic, double)->DenseRange(1, 50);
+    BENCHMARK_TEMPLATE(BM_gemm_dynamic, double)->DenseRange(1, BENCHMARK_MAX_GEMM);
 
 
 #define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_GEMM)

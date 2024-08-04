@@ -5,6 +5,7 @@
 #include <blast/math/DynamicPanelMatrix.hpp>
 #include <blast/math/dense/DynamicMatrixPointer.hpp>
 #include <blast/math/dense/StaticMatrixPointer.hpp>
+#include <blast/math/RegisterMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
 

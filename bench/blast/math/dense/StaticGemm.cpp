@@ -4,13 +4,11 @@
 
 #include <blast/math/dense/Gemm.hpp>
 
+#include <bench/Gemm.hpp>
+
 #include <blaze/math/StaticMatrix.h>
 
-#include <bench/Gemm.hpp>
 #include <test/Randomize.hpp>
-
-#include <random>
-#include <memory>
 
 
 namespace blast :: benchmark
@@ -22,24 +20,27 @@ namespace blast :: benchmark
         size_t constexpr K = M;
 
         StaticMatrix<Real, M, K, columnMajor> A;
-        StaticMatrix<Real, N, K, columnMajor> B;
+        StaticMatrix<Real, K, N, columnMajor> B;
         StaticMatrix<Real, M, N, columnMajor> C;
         StaticMatrix<Real, M, N, columnMajor> D;
+        Real alpha, beta;
 
         randomize(A);
         randomize(B);
         randomize(C);
+        randomize(alpha);
+        randomize(beta);
 
         for (auto _ : state)
         {
-            gemm(0.5, A, B, 0.1, C, D);
+            gemm(alpha, A, trans(B), beta, C, D);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);
             DoNotOptimize(D);
         }
 
-        state.counters["flops"] = Counter(2 * M * N * K + 3 * M * N, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(M, N, K));
         state.counters["m"] = M;
     }
 

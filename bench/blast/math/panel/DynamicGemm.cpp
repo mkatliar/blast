@@ -6,10 +6,8 @@
 #include <blast/math/panel/Gemm.hpp>
 
 #include <bench/Gemm.hpp>
-#include <test/Randomize.hpp>
 
-#include <random>
-#include <memory>
+#include <test/Randomize.hpp>
 
 
 namespace blast :: benchmark
@@ -21,25 +19,28 @@ namespace blast :: benchmark
         size_t const N = M;
         size_t const K = M;
 
-        DynamicPanelMatrix<Real> A(M, K);
-        DynamicPanelMatrix<Real> B(N, K);
-        DynamicPanelMatrix<Real> C(M, N);
-        DynamicPanelMatrix<Real> D(M, N);
+        DynamicPanelMatrix<Real, columnMajor> A(M, K);
+        DynamicPanelMatrix<Real, columnMajor> B(N, K);
+        DynamicPanelMatrix<Real, columnMajor> C(M, N);
+        DynamicPanelMatrix<Real, columnMajor> D(M, N);
+        Real alpha, beta;
 
         randomize(A);
         randomize(B);
         randomize(C);
+        randomize(alpha);
+        randomize(beta);
 
         for (auto _ : state)
         {
-            gemm_nt(A, B, C, D);
+            gemm(alpha, A, trans(B), beta, C, D);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);
             DoNotOptimize(D);
         }
 
-        state.counters["flops"] = Counter(2 * M * N * K, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(M, N, K));
         state.counters["m"] = M;
     }
 
