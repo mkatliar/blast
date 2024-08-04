@@ -48,7 +48,7 @@ namespace blast :: testing
 
             // Check A == L * trans(L)
             A1 = 0.;
-            gemm_nt(L, L, A1, A1);
+            gemm(L, trans(L), A1, A1);
 
             BLAST_EXPECT_APPROX_EQ(A1, A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
         }

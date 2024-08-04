@@ -58,7 +58,7 @@ namespace blast :: testing
                     C = blaze_C;
 
                     // Do gemm with BLAST
-                    gemm_nt(A, B, C, D);
+                    gemm(A, trans(B), C, D);
 
                     // Copy the resulting D matrix from BLAST to Blaze
                     blaze_D = D;
