@@ -4,13 +4,11 @@
 
 #include <blast/math/dense/Gemm.hpp>
 
+#include <bench/Gemm.hpp>
+
 #include <blaze/math/DynamicMatrix.h>
 
-#include <bench/Gemm.hpp>
 #include <test/Randomize.hpp>
-
-#include <random>
-#include <memory>
 
 
 namespace blast :: benchmark
@@ -26,21 +24,24 @@ namespace blast :: benchmark
         DynamicMatrix<Real, columnMajor> B(N, K);
         DynamicMatrix<Real, columnMajor> C(M, N);
         DynamicMatrix<Real, columnMajor> D(M, N);
+        Real alpha, beta;
 
         randomize(A);
         randomize(B);
         randomize(C);
+        randomize(alpha);
+        randomize(beta);
 
         for (auto _ : state)
         {
-            gemm(1., A, trans(B), 1., C, D);
+            gemm(alpha, A, trans(B), beta, C, D);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);
             DoNotOptimize(D);
         }
 
-        state.counters["flops"] = Counter(2 * M * N * K, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(M, N, K));
         state.counters["m"] = M;
     }
 

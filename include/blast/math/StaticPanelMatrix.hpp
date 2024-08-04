@@ -333,7 +333,7 @@ namespace blaze
         StaticPanelMatrix<Type, N, N, SO> A;
         randomize(A);
 
-        gemm_nt(A, A, matrix, matrix);
+        gemm(A, trans(A), matrix, matrix);
 
         // TODO: implement it as below after the matrix *= ctrans( matrix ) expression works.
 

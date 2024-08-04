@@ -347,7 +347,7 @@ namespace blaze
         DynamicPanelMatrix<Type, SO> A(n, n);
         randomize(A);
 
-        gemm_nt(A, A, matrix, matrix);
+        gemm(A, trans(A), matrix, matrix);
 
         // TODO: implement it as below after the matrix *= ctrans( matrix ) expression works.
 
