@@ -14,6 +14,13 @@
 
 namespace blast
 {
+    /**
+     * @brief Default size of a panel (in a panel matrix) for a given architecture and data type
+     *
+     * TODO: Is it always equal to SIMD size? Deprecate?
+     *
+     * @tparam Arch architecture
+     */
     template <typename T, typename Arch = xsimd::default_arch>
     size_t constexpr PanelSize_v = SimdSize_v<T, Arch>;
 }

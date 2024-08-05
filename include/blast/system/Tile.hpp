@@ -4,18 +4,14 @@
 
 #pragma once
 
-//*************************************************************************************************
-// Includes
-//*************************************************************************************************
-
-#include <blaze/math/simd/SIMDTrait.h>
+#include <blast/util/Types.hpp>
 
 
 namespace blast
 {
-    using namespace blaze;
-
-
+    /**
+     * @brief TODO: deprecate?
+     */
     template <typename T>
     struct TileSize;
 

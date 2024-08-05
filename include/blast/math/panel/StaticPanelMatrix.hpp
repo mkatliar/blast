@@ -15,7 +15,6 @@
 #include <blaze/math/dense/DenseIterator.h>
 #include <blaze/util/typetraits/AlignmentOf.h>
 #include <blaze/math/typetraits/HasMutableDataAccess.h>
-#include <blaze/util/constraints/Vectorizable.h>
 #include <blaze/math/traits/SubmatrixTrait.h>
 
 #include <initializer_list>
@@ -183,9 +182,6 @@ namespace blast
                 ? i / panelSize_ * spacing_ + i % panelSize_ + j * panelSize_
                 : j / panelSize_ * spacing_ + j % panelSize_ + i * panelSize_;
         }
-
-
-        BLAZE_CONSTRAINT_MUST_BE_VECTORIZABLE_TYPE(Type);
     };
 
 

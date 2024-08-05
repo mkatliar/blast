@@ -44,9 +44,6 @@ target_link_libraries(blast
 
 target_compile_options(blast
     INTERFACE "-Wno-ignored-attributes" "-fno-math-errno" "-ftemplate-backtrace-limit=0"
-    # Enable SIMD instruction sets, otherwise it does not compile.
-    # This will change when we support multiple architectures.
-    INTERFACE "-march=native" "-mfma" "-mavx" "-mavx2" "-msse4"
 )
 
 # BLAST_WITH_BLASFEO
