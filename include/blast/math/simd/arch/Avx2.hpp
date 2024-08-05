@@ -20,6 +20,15 @@
 
 namespace blast
 {
+    namespace detail
+    {
+        std::size_t constexpr registerCapacity(xsimd::avx2)
+        {
+            return 16;
+        }
+    }
+
+
     template <typename Arch>
     requires std::is_base_of_v<xsimd::avx2, Arch>
     inline xsimd::batch<float, Arch> maskload(float const * src, xsimd::batch_bool<float, Arch> const& mask) noexcept

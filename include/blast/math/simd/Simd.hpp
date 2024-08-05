@@ -18,3 +18,7 @@
 #if XSIMD_WITH_AVX2
     #include <blast/math/simd/arch/Avx2.hpp>
 #endif
+
+#if XSIMD_WITH_SVE
+    #include <blast/math/simd/arch/Sve.hpp>
+#endif
