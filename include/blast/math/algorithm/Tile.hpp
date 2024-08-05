@@ -8,6 +8,10 @@
 #   include <blast/math/algorithm/arch/avx2/Tile.hpp>
 #endif
 
+#if XSIMD_WITH_NEON64
+#   include <blast/math/algorithm/arch/neon64/Tile.hpp>
+#endif
+
 #include <blast/math/StorageOrder.hpp>
 
 #include <cstdlib>

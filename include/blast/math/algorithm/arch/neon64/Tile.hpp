@@ -16,7 +16,7 @@
 namespace blast :: detail
 {
     template <typename ET, size_t KM, size_t KN, StorageOrder SO, typename FF, typename FP>
-    BLAST_ALWAYS_INLINE void tile_backend(xsimd::avx2, size_t m, size_t n, size_t i, FF&& f_full, FP&& f_partial)
+    BLAST_ALWAYS_INLINE void tile_backend(xsimd::neon64, size_t m, size_t n, size_t i, FF&& f_full, FP&& f_partial)
     {
         RegisterMatrix<ET, KM, KN, SO> ker;
 
@@ -44,7 +44,7 @@ namespace blast :: detail
 
 
     template <typename ET, StorageOrder SO, typename FF, typename FP>
-    BLAST_ALWAYS_INLINE void tile(xsimd::avx2 const& arch, StorageOrder traversal_order, std::size_t m, std::size_t n, FF&& f_full, FP&& f_partial)
+    BLAST_ALWAYS_INLINE void tile(xsimd::neon64 const& arch, StorageOrder traversal_order, std::size_t m, std::size_t n, FF&& f_full, FP&& f_partial)
     {
         size_t constexpr SS = SimdSize_v<ET>;
         size_t constexpr TILE_STEP = 4;    // TODO: this is almost arbitrary and needs to be properly determined

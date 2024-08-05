@@ -5,6 +5,7 @@
 #pragma once
 
 #include <blast/math/dense/TrmmBackend.hpp>
+#include <blast/system/Tile.hpp>
 
 #include <blaze/util/Exception.h>
 #include <blaze/util/constraints/SameType.h>
