@@ -6,7 +6,6 @@
 
 #include <blast/math/Forward.hpp>
 #include <blast/math/views/submatrix/BaseTemplate.hpp>
-#include <blast/math/expressions/PanelMatrix.hpp>
 #include <blast/math/panel/PanelSize.hpp>
 #include <blast/math/TypeTraits.hpp>
 #include <blast/system/CacheLine.hpp>

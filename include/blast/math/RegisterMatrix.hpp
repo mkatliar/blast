@@ -6,4 +6,3 @@
 
 #include <blast/math/register_matrix/RegisterMatrix.hpp>
 #include <blast/math/register_matrix/DynamicRegisterMatrix.hpp>
-#include <blast/math/register_matrix/Gemm.hpp>

@@ -5,12 +5,12 @@
 #pragma once
 
 #include <blast/math/typetraits/IsPanelMatrix.hpp>
-#include <blast/math/typetraits/ElementType.hpp>
 #include <blast/math/simd/SimdSize.hpp>
 #include <blast/math/simd/SimdMask.hpp>
 #include <blast/math/simd/SimdIndex.hpp>
 #include <blast/math/panel/PanelSize.hpp>
-#include <blast/math/Matrix.hpp>
+#include <blast/math/panel/MatrixPointer.hpp>
+#include <blast/math/dense/MatrixPointer.hpp>
 
 #include <blast/blaze/Math.hpp>
 

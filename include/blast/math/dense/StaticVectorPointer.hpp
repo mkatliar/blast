@@ -6,7 +6,6 @@
 
 
 #include <blast/math/Simd.hpp>
-#include <blast/math/TypeTraits.hpp>
 #include <blast/util/Assert.hpp>
 
 
@@ -213,47 +212,5 @@ namespace blast
     BLAZE_ALWAYS_INLINE auto trans(StaticVectorPointer<T, S, TF, AF, PF> const& p) noexcept
     {
         return p.trans();
-    }
-
-
-    /**
-     * @brief Pointer to a statically spaced vector
-     *
-     * @tparam AF true if the pointer is SIMD-aligned
-     * @tparam VT vector type
-     *
-     * @param v vector
-     * @param i index within @a v
-     *
-     * @return vector pointer to @a i -th element of @a v
-     */
-    template <bool AF, Vector VT>
-    requires IsStaticallySpaced_v<VT>
-    BLAST_ALWAYS_INLINE auto ptr(VT& v, size_t i)
-    {
-        // NOTE: we don't use data(v) here because of this bug:
-        // https://bitbucket.org/blaze-lib/blaze/issues/457
-        return StaticVectorPointer<ElementType_t<VT>, Spacing_v<VT>, VT::transposeFlag, AF, IsPadded_v<VT>> {&v[i]};
-    }
-
-
-    /**
-     * @brief Pointer to a statically spaced const vector
-     *
-     * @tparam AF true if the pointer is SIMD-aligned
-     * @tparam VT vector type
-     *
-     * @param v vector
-     * @param i index within @a v
-     *
-     * @return vector pointer to @a i -th element of @a v
-     */
-    template <bool AF, Vector VT>
-    requires IsStaticallySpaced_v<VT>
-    BLAST_ALWAYS_INLINE auto ptr(VT const& v, size_t i)
-    {
-        // NOTE: we don't use data(v) here because of this bug:
-        // https://bitbucket.org/blaze-lib/blaze/issues/457
-        return StaticVectorPointer<ElementType_t<VT> const, Spacing_v<VT>, VT::transposeFlag, AF, IsPadded_v<VT>> {&v[i]};
     }
 }

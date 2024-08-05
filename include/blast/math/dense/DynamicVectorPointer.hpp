@@ -5,7 +5,6 @@
 #pragma once
 
 #include <blast/math/Simd.hpp>
-#include <blast/math/TypeTraits.hpp>
 #include <blast/util/Assert.hpp>
 #include <blast/system/Inline.hpp>
 
@@ -192,47 +191,5 @@ namespace blast
     BLAST_ALWAYS_INLINE auto trans(DynamicVectorPointer<T, TF, AF, PF> const& p) noexcept
     {
         return p.trans();
-    }
-
-
-    /**
-     * @brief Pointer to a dynamically spaced vector
-     *
-     * @tparam AF true if the pointer is SIMD-aligned
-     * @tparam VT vector type
-     *
-     * @param v vector
-     * @param i index within @a v
-     *
-     * @return vector pointer to @a i -th element of @a v
-     */
-    template <bool AF, Vector VT>
-    requires (!IsStaticallySpaced_v<VT>)
-    BLAST_ALWAYS_INLINE auto ptr(VT& v, size_t i) noexcept
-    {
-        // NOTE: we don't use data(v) here because of this bug:
-        // https://bitbucket.org/blaze-lib/blaze/issues/457
-        return DynamicVectorPointer<ElementType_t<VT>, VT::transposeFlag, AF, IsPadded_v<VT>> {&v[i], spacing(v)};
-    }
-
-
-    /**
-     * @brief Pointer to a dynamically spaced const vector
-     *
-     * @tparam AF true if the pointer is SIMD-aligned
-     * @tparam VT vector type
-     *
-     * @param v vector
-     * @param i index within @a v
-     *
-     * @return vector pointer to @a i -th element of @a v
-     */
-    template <bool AF, Vector VT>
-    requires (!IsStaticallySpaced_v<VT>)
-    BLAST_ALWAYS_INLINE auto ptr(VT const& v, size_t i) noexcept
-    {
-        // NOTE: we don't use data(v) here because of this bug:
-        // https://bitbucket.org/blaze-lib/blaze/issues/457
-        return DynamicVectorPointer<ElementType_t<VT> const, VT::transposeFlag, AF, IsPadded_v<VT>> {&v[i], spacing(v)};
     }
 }
