@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include <blast/math/simd/Simd.hpp>
+#include <blast/math/Simd.hpp>
 #include <blast/util/Assert.hpp>
 
 
@@ -16,9 +16,9 @@ namespace blast
     {
     public:
         using ElementType = T;
-        using IntrinsicType = typename Simd<std::remove_cv_t<T>>::IntrinsicType;
-        using MaskType = typename Simd<std::remove_cv_t<T>>::MaskType;
         using SimdVecType = SimdVec<std::remove_cv_t<T>>;
+        using IntrinsicType = SimdVecType::IntrinsicType;
+        using MaskType = SimdMask<std::remove_cv_t<T>>;
 
         static bool constexpr transposeFlag = TF;
         static bool constexpr aligned = AF;
@@ -35,7 +35,7 @@ namespace blast
         constexpr StaticVectorPointer(T * ptr) noexcept
         :   ptr_ {ptr}
         {
-            BLAST_USER_ASSERT(!AF || reinterpret_cast<ptrdiff_t>(ptr) % (SS * sizeof(T)) == 0, "Pointer is not aligned");
+            BLAST_USER_ASSERT(!AF || isSimdAligned(ptr), "Pointer is not aligned");
         }
 
 
@@ -70,27 +70,27 @@ namespace blast
             else
             {
                 // Non-optimized
-                IntrinsicType v = blast::setzero<ElementType, SS>();
+                // TODO: use gather
+                T v[SS];
                 for (size_t i = 0; i < SS; ++i)
-                    if (mask[i])
-                        v[i] = ptr_[S * i];
+                    v[i] = mask[i] ? ptr_[S * i] : T {};
 
-                return SimdVecType {v};
+                return SimdVecType {v, false};
             }
         }
 
 
-        IntrinsicType broadcast() const noexcept
+        SimdVecType broadcast() const noexcept
         {
-            return blast::broadcast<SS>(ptr_);
+            return *ptr_;
         }
 
 
-        void store(IntrinsicType val) const noexcept
+        void store(SimdVecType val) const noexcept
         {
             if constexpr (S == 1)
             {
-                blast::store<AF>(ptr_, val);
+                val.store(ptr_, AF);
             }
             else
             {
@@ -105,7 +105,7 @@ namespace blast
         {
             if constexpr (S == 1)
             {
-                blast::maskstore(ptr_, mask, val);
+                val.store(ptr_, mask);
             }
             else
             {
@@ -195,7 +195,7 @@ namespace blast
 
 
     private:
-        static size_t constexpr SS = Simd<std::remove_cv_t<T>>::size;
+        static size_t constexpr SS = SimdVecType::size();
 
 
         T * ptrOffset(ptrdiff_t i) const noexcept

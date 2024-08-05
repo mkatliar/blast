@@ -56,7 +56,7 @@ ENV PKG_CONFIG_PATH=/usr/local/lib
 RUN mkdir -p blast/build && cd blast/build \
     && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DCMAKE_CXX_COMPILER="clang++-15" \
-        -DCMAKE_CXX_FLAGS="-march=native -mfma -mavx -mavx2 -msse4 -fno-math-errno" \
+        -DCMAKE_CXX_FLAGS="-march=native -mfma -mavx -mavx2 -msse4 -fno-math-errno -DXSIMD_DEFAULT_ARCH='fma3<avx2>'" \
         -DCMAKE_CXX_FLAGS_RELEASE="-O3 -g -DNDEBUG -ffast-math" .. \
         -DBLAST_WITH_TEST=ON \
         -DBLAST_WITH_BENCHMARK=ON \
@@ -79,4 +79,3 @@ CMD mkdir -p blast/bench_result/data \
     && mkdir -p blast/bench_result/image \
     && cd blast \
     && make -j 1 bench_result/image/dgemm_performance.png bench_result/image/dgemm_performance_ratio.png
-

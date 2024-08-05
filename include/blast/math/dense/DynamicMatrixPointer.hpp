@@ -8,12 +8,9 @@
 #include <blast/math/TransposeFlag.hpp>
 #include <blast/math/StorageOrder.hpp>
 #include <blast/math/TypeTraits.hpp>
-#include <blast/math/simd/Simd.hpp>
-#include <blast/math/simd/IsSimdAligned.hpp>
+#include <blast/math/Simd.hpp>
 #include <blast/util/Assert.hpp>
-
 #include <blaze/util/Exception.h>
-
 
 
 namespace blast
@@ -23,9 +20,9 @@ namespace blast
     {
     public:
         using ElementType = T;
-        using IntrinsicType = typename Simd<std::remove_cv_t<T>>::IntrinsicType;
-        using MaskType = typename Simd<std::remove_cv_t<T>>::MaskType;
         using SimdVecType = SimdVec<std::remove_cv_t<T>>;
+        using IntrinsicType = SimdVecType::IntrinsicType;
+        using MaskType = SimdMask<std::remove_cv_t<T>>;
 
         static bool constexpr storageOrder = SO;
         static bool constexpr aligned = AF;
@@ -83,9 +80,9 @@ namespace blast
         }
 
 
-        IntrinsicType broadcast() const noexcept
+        SimdVecType broadcast() const noexcept
         {
-            return blast::broadcast<SS>(ptr_);
+            return *ptr_;
         }
 
 
@@ -187,7 +184,7 @@ namespace blast
 
 
     private:
-        static size_t constexpr SS = Simd<std::remove_cv_t<T>>::size;
+        static size_t constexpr SS = SimdVecType::size();
         static TransposeFlag constexpr majorOrientation = SO == columnMajor ? columnVector : rowVector;
 
 

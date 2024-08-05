@@ -7,7 +7,6 @@
 #include <blast/math/Forward.hpp>
 #include <blast/math/panel/Gemm.hpp>
 #include <blast/math/views/submatrix/BaseTemplate.hpp>
-#include <blast/math/simd/Simd.hpp>
 #include <blast/math/panel/PanelSize.hpp>
 #include <blast/system/CacheLine.hpp>
 
@@ -157,45 +156,6 @@ namespace blast
         Type const * data() const noexcept
         {
             return v_;
-        }
-
-
-        Type * ptr(size_t i, size_t j)
-        {
-            // BLAST_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
-            return v_ + elementIndex(i, j);
-        }
-
-
-        Type const * ptr(size_t i, size_t j) const
-        {
-            // BLAST_USER_ASSERT(i % panelSize_ == 0, "Row index not aligned to panel boundary");
-            return v_ + elementIndex(i, j);
-        }
-
-
-        template <size_t SS>
-        auto load(size_t i, size_t j) const
-        {
-            BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
-            BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
-            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
-            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
-
-            return blast::load<aligned, SS>(v_ + elementIndex(i, j));
-        }
-
-
-        template <typename T>
-        void store(size_t i, size_t j, T val)
-        {
-            BLAZE_INTERNAL_ASSERT(i < M, "Invalid row access index");
-            BLAZE_INTERNAL_ASSERT(j < N, "Invalid column access index");
-            BLAZE_INTERNAL_ASSERT(i % panelSize_ == 0 || SO == rowMajor, "Row index not aligned to panel boundary");
-            BLAZE_INTERNAL_ASSERT(j % panelSize_ == 0 || SO == columnMajor, "Column index not aligned to panel boundary");
-
-            // We never use maskstore here because we have padding
-            blast::store<aligned>(v_ + elementIndex(i, j), val);
         }
 
 

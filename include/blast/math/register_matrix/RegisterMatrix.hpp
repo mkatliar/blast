@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include <blast/math/simd/SimdVec.hpp>
-#include <blast/math/simd/Simd.hpp>
+#include <blast/math/Simd.hpp>
 #include <blast/math/typetraits/MatrixPointer.hpp>
 #include <blast/math/typetraits/VectorPointer.hpp>
 #include <blast/math/RowColumnVectorPointer.hpp>
@@ -19,8 +18,6 @@
 #include <blaze/util/Exception.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/StaticAssert.h>
-
-#include <cmath>
 
 
 namespace blast
@@ -117,7 +114,7 @@ namespace blast
         {
             for (size_t i = 0; i < RM; ++i)
                 for (size_t j = 0; j < N; ++j)
-                    v_[i][j] = setzero<T, SS>();
+                    v_[i][j].reset();
         }
 
 
@@ -360,14 +357,14 @@ namespace blast
 
 
     private:
-        using SIMD = Simd<T>;
-        using IntrinsicType = typename SIMD::IntrinsicType;
-        using MaskType = typename SIMD::MaskType;
-        using IntType = typename SIMD::IntType;
-        using SimdVecType = SimdVec<T>;
+        using Arch = xsimd::default_arch;
+        using SimdVecType = SimdVec<T, Arch>;
+        using IntrinsicType = typename SimdVecType::IntrinsicType;
+        using MaskType = SimdMask<T, Arch>;
+        using IntType = typename SimdIndex<T, Arch>::value_type;
 
         // SIMD size
-        static size_t constexpr SS = Simd<T>::size;
+        static size_t constexpr SS = SimdVecType::size();
 
         // Numberf of SIMD registers required to store a single column of the matrix.
         static size_t constexpr RM = M / SS;
@@ -376,9 +373,9 @@ namespace blast
         BLAZE_STATIC_ASSERT_MSG((RM > 0), "Number of rows must be not less than SIMD size");
         BLAZE_STATIC_ASSERT_MSG((RN > 0), "Number of columns must be positive");
         BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
-        BLAZE_STATIC_ASSERT_MSG((RM * RN <= RegisterCapacity_v<T>), "Not enough registers for a RegisterMatrix");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN <= registerCapacity(Arch {})), "Not enough registers for a RegisterMatrix");
 
-        IntrinsicType v_[RM][RN];
+        SimdVecType v_[RM][RN];
 
 
         /// @brief Reference to the matrix element at row \a i and column \a j
@@ -461,7 +458,7 @@ namespace blast
                     v_[i][j] = beta * p(SS * i, j).load();
 
                 if (size_t const rem = m % SS)
-                    v_[m / SS][j] = beta * p(m - rem, j).load(SIMD::index() < rem);
+                    v_[m / SS][j] = beta * p(m - rem, j).load(indexSequence<T, Arch>() < rem);
             }
         }
     }
@@ -493,7 +490,7 @@ namespace blast
 
         if (IntType const rem = m % SS)
         {
-            MaskType const mask = SIMD::index() < rem;
+            MaskType const mask = indexSequence<T, Arch>() < rem;
             size_t const i = m / SS;
 
             for (size_t j = 0; j < n && j < columns(); ++j)
@@ -514,7 +511,7 @@ namespace blast
 
             if (skip && ri < RM)
             {
-                MaskType const mask = SIMD::index() >= skip;
+                MaskType const mask = indexSequence<T, Arch>() >= skip;
                 p(SS * ri, j).store(v_[ri][j], mask);
                 ++ri;
             }
@@ -536,10 +533,10 @@ namespace blast
             {
                 IntType const skip = j - ri * SS;
                 IntType const rem = m - ri * SS;
-                MaskType mask = SIMD::index() < rem;
+                MaskType mask = indexSequence<T, Arch>() < rem;
 
                 if (skip > 0)
-                    mask &= SIMD::index() >= skip;
+                    mask &= indexSequence<T, Arch>() >= skip;
 
                 p(SS * ri, j).store(v_[ri][j], mask);
             }
@@ -562,7 +559,7 @@ namespace blast
                     #pragma unroll
                     for (size_t k = 0; k < j; ++k)
                     {
-                        IntrinsicType const a_kj = (~A)(k, j).broadcast();
+                        SimdVecType const a_kj = (~A)(k, j).broadcast();
 
                         #pragma unroll
                         for (size_t i = 0; i < RM; ++i)
@@ -596,7 +593,7 @@ namespace blast
         VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b) noexcept
     {
-        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= registerCapacity(Arch {})), "Not enough registers for ger()");
 
         SimdVecType ax[RM];
 
@@ -623,7 +620,7 @@ namespace blast
         VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b) noexcept
     {
-        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= RegisterCapacity_v<T>), "Not enough registers for ger()");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= registerCapacity(Arch {})), "Not enough registers for ger()");
 
         SimdVecType ax[RM];
 
@@ -697,7 +694,7 @@ namespace blast
     BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::potrf() noexcept
     {
         static_assert(M >= N, "potrf() not implemented for register matrices with columns more than rows");
-        static_assert(RM * RN + 2 <= RegisterCapacity_v<T>, "Not enough registers");
+        static_assert(RM * RN + 2 <= registerCapacity(Arch {}), "Not enough registers");
 
         #pragma unroll
         for (size_t k = 0; k < N; ++k)
@@ -705,11 +702,11 @@ namespace blast
             #pragma unroll
             for (size_t j = 0; j < k; ++j)
             {
-                T const a_kj = v_[k / SS][j][k % SS];
+                SimdVecType const a_kj = v_[k / SS][j][k % SS];
 
                 #pragma unroll
                 for (size_t i = 0; i < RM; ++i) if (i >= k / SS)
-                    v_[i][k] = fnmadd(set1<SS>(a_kj), v_[i][j], v_[i][k]);
+                    v_[i][k] = fnmadd(a_kj, v_[i][j], v_[i][k]);
             }
 
             T const sqrt_a_kk = std::sqrt(v_[k / SS][k][k % SS]);
@@ -718,7 +715,7 @@ namespace blast
             for (size_t i = 0; i < RM; ++i)
             {
                 if (i < k / SS)
-                    v_[i][k] = setzero<T, SS>();
+                    v_[i][k].reset();
                 else
                     v_[i][k] /= sqrt_a_kk;
             }
@@ -745,7 +742,7 @@ namespace blast
                 ax[i] = alpha * a(i * SS, 0).load();
 
             if (rem)
-                ax[ii] = alpha * a(ii * SS, 0).load(SIMD::index() < rem);
+                ax[ii] = alpha * a(ii * SS, 0).load(indexSequence<T, Arch>() < rem);
 
             #pragma unroll
             for (size_t j = 0; j < N; ++j)
