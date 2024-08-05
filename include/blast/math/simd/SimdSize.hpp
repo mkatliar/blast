@@ -1,4 +1,4 @@
-// Copyright 2023 Mikhail Katliar
+// Copyright 2023-2024 Mikhail Katliar
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,24 +14,20 @@
 
 #pragma once
 
+#include <blast/math/simd/Simd.hpp>
+
 #include <cstdlib>
+#include <type_traits>
 
 
 namespace blast
 {
-    template <typename T>
-    struct SimdSize;
-
-
-    template <typename T>
-    struct SimdSize<T const> : SimdSize<T> {};
-
-
     /**
-     * @brief Number of elements in a SimdVec<T> object.
+     * @brief Size of a SIMD register conatining scalars of a given type.
      *
      * @tparam T scalar type
+     * @tparam Arch instruction set architecture
      */
-    template <typename T>
-    size_t constexpr SimdSize_v = SimdSize<T>::value;
+    template <typename T, typename Arch = xsimd::default_arch>
+    std::size_t constexpr SimdSize_v = xsimd::batch<std::remove_cv_t<T>, Arch>::size;
 }

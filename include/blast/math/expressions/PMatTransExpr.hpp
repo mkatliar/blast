@@ -12,7 +12,6 @@
 #include <blaze/math/constraints/StorageOrder.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/Computation.h>
-#include <blaze/math/expressions/DMatTransposer.h>
 #include <blaze/math/expressions/Forward.h>
 #include <blaze/math/expressions/MatTransExpr.h>
 #include <blaze/math/expressions/Transformation.h>

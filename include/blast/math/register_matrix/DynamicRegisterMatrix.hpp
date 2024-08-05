@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include <blast/math/simd/SimdVec.hpp>
-#include <blast/math/simd/Simd.hpp>
+#include <blast/math/Simd.hpp>
 #include <blast/math/typetraits/MatrixPointer.hpp>
 #include <blast/math/Side.hpp>
 #include <blast/math/UpLo.hpp>
@@ -17,8 +16,6 @@
 #include <blaze/util/Types.h>
 #include <blaze/util/Exception.h>
 #include <blaze/util/StaticAssert.h>
-
-#include <cmath>
 
 
 namespace blast
@@ -121,7 +118,7 @@ namespace blast
         {
             for (size_t i = 0; i < RM; ++i)
                 for (size_t j = 0; j < N; ++j)
-                    v_[i][j] = setzero<T, SS>();
+                    v_[i][j].reset();
         }
 
 
@@ -250,14 +247,14 @@ namespace blast
 
 
     private:
-        using SIMD = Simd<T>;
-        using IntrinsicType = typename SIMD::IntrinsicType;
-        using MaskType = typename SIMD::MaskType;
-        using IntType = typename SIMD::IntType;
-        using SimdVecType = SimdVec<T>;
+        using Arch = xsimd::default_arch;
+        using SimdVecType = SimdVec<T, Arch>;
+        using IntrinsicType = typename SimdVecType::IntrinsicType;
+        using MaskType = SimdMask<T, Arch>;
+        using IntType = typename SimdIndex<T, Arch>::value_type;
 
         // SIMD size
-        static size_t constexpr SS = Simd<T>::size;
+        static size_t constexpr SS = SimdVecType::size();
 
         // Numberf of SIMD registers required to store a single column of the matrix.
         static size_t constexpr RM = M / SS;
@@ -266,9 +263,9 @@ namespace blast
         BLAZE_STATIC_ASSERT_MSG((RM > 0), "Number of rows must be not less than SIMD size");
         BLAZE_STATIC_ASSERT_MSG((RN > 0), "Number of columns must be positive");
         BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
-        BLAZE_STATIC_ASSERT_MSG((RM * RN <= RegisterCapacity_v<T>), "Not enough registers for a DynamicRegisterMatrix");
+        BLAZE_STATIC_ASSERT_MSG((RM * RN <= registerCapacity(Arch {})), "Not enough registers for a DynamicRegisterMatrix");
 
-        IntrinsicType v_[RM][RN];
+        SimdVecType v_[RM][RN];
         size_t const m_;
         size_t const n_;
 
@@ -329,7 +326,7 @@ namespace blast
 
         if (IntType const rem = m_ % SS)
         {
-            MaskType const mask = SIMD::index() < rem;
+            MaskType const mask = indexSequence<T>() < rem;
             size_t const i = m_ / SS;
 
             for (size_t j = 0; j < n_ && j < columns(); ++j)
@@ -349,10 +346,10 @@ namespace blast
             {
                 IntType const skip = j - ri * SS;
                 IntType const rem = m_ - ri * SS;
-                MaskType mask = SIMD::index() < rem;
+                MaskType mask = indexSequence<T>() < rem;
 
                 if (skip > 0)
-                    mask &= SIMD::index() >= skip;
+                    mask &= indexSequence<T>() >= skip;
 
                 p(SS * ri, j).store(v_[ri][j], mask);
             }
@@ -490,7 +487,7 @@ namespace blast
     //             ax[i] = alpha * a.load(i * SS, 0);
 
     //         if (rem)
-    //             ax[ii] = alpha * a.load(ii * SS, 0, SIMD::index() < rem);
+    //             ax[ii] = alpha * a.load(ii * SS, 0, indexSequence<T>() < rem);
 
     //         #pragma unroll
     //         for (size_t j = 0; j < N; ++j)

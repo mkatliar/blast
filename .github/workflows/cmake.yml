@@ -21,7 +21,17 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Install APT packages
-      run: sudo apt install clang libboost-exception-dev libbenchmark-dev -y
+      run: |
+        sudo apt-get update
+        sudo apt install libboost-exception-dev libbenchmark-dev -y
+
+    - name: Install LLVM and Clang 18
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget gnupg lsb-release
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh 18
 
     - name: Install Blaze
       run: |
@@ -36,6 +46,13 @@ jobs:
         -DCMAKE_INSTALL_PREFIX=/usr/local/ . \
         && sudo make install
 
+    - name: Install xsimd
+      run: |
+        git clone https://github.com/xtensor-stack/xsimd.git
+        cd xsimd
+        cmake -B build -DCMAKE_INSTALL_PREFIX=/usr/local/ .
+        sudo cmake --build build --target install
+
     - name: Install GTest
       run: |
         git clone https://github.com/google/googletest.git
@@ -47,7 +64,7 @@ jobs:
       run: |
         cmake -B ${{github.workspace}}/build \
         -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
-        -DCMAKE_CXX_COMPILER=clang++ \
+        -DCMAKE_CXX_COMPILER=clang++-18 \
         -DBLAST_WITH_BENCHMARK=ON \
         -DBLAST_WITH_TEST=ON
 
@@ -60,4 +77,3 @@ jobs:
       # Execute tests defined by the CMake configuration.
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C ${{env.BUILD_TYPE}}
-

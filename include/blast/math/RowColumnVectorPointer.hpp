@@ -15,7 +15,7 @@
 #pragma once
 
 #include <blast/math/typetraits/MatrixPointer.hpp>
-#include <blast/math/simd/Simd.hpp>
+#include <blast/math/Simd.hpp>
 #include <blast/math/TransposeFlag.hpp>
 #include <blast/util/Assert.hpp>
 
@@ -28,9 +28,9 @@ namespace blast
     {
     public:
         using ElementType = typename MP::ElementType;
-        using IntrinsicType = typename Simd<std::remove_cv_t<ElementType>>::IntrinsicType;
-        using MaskType = typename Simd<std::remove_cv_t<ElementType>>::MaskType;
         using SimdVecType = SimdVec<std::remove_cv_t<ElementType>>;
+        using IntrinsicType = SimdVecType::IntrinsicType;
+        using MaskType = SimdMask<std::remove_cv_t<ElementType>>;
 
         static TransposeFlag constexpr transposeFlag = TF;
         static bool constexpr aligned = MP::aligned;
@@ -176,7 +176,7 @@ namespace blast
 
 
     private:
-        static size_t constexpr SS = Simd<std::remove_cv_t<ElementType>>::size;
+        static size_t constexpr SS = SimdVecType::size();
 
         MP ptr_;
     };

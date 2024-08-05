@@ -5,9 +5,12 @@
 #pragma once
 
 #include <blast/math/typetraits/IsPanelMatrix.hpp>
-#include <blast/math/simd/Simd.hpp>
+#include <blast/math/simd/SimdSize.hpp>
+#include <blast/math/simd/SimdMask.hpp>
+#include <blast/math/simd/SimdIndex.hpp>
 #include <blast/math/panel/PanelSize.hpp>
-//#include <blast/math/RegisterMatrix.hpp>
+#include <blast/math/panel/MatrixPointer.hpp>
+#include <blast/math/dense/MatrixPointer.hpp>
 
 #include <blaze/math/ReductionFlag.h>
 #include <blaze/math/Matrix.h>
@@ -91,13 +94,12 @@ namespace blast
 
         using ET1 = ElementType_t<MT1>;
         using ET2 = ElementType_t<MT2>;
-        static size_t constexpr SS = Simd<ET2>::size;
+        static size_t constexpr SS = SimdSize_v<ET2>;
         static size_t constexpr PANEL_SIZE = PanelSize_v<ET2>;
         static_assert(PANEL_SIZE % SS == 0);
 
-        using MaskType = typename Simd<ET2>::MaskType;
-        using IntType = typename Simd<ET2>::IntType;
-        using SIMD = Simd<ET2>;
+        using MaskType = SimdMask<ET2, xsimd::default_arch>;
+        using IntType = typename SimdIndex<ET2>::value_type;
 
 
         if constexpr (SO1 == columnMajor && SO2 == columnMajor)
@@ -108,22 +110,22 @@ namespace blast
 
 			for (size_t i = 0; i + SS <= m; i += SS)
             {
-                ET2 const * pr = &(*rhs)(i, 0);
-                ET1 * pl = data(lhs) + i;
+                auto pr = ptr<aligned>(*rhs, i, 0);
+                auto pl = ptr<aligned>(*lhs, i, 0);
 
                 for (size_t j = 0; j < n; ++j)
-                    store<aligned>(pl + s * j, load<aligned, SS>(pr + PANEL_SIZE * j));
+                    pl(0, j).store(pr(0, j).load());
             }
 
             if (IntType const rem = m % SS)
             {
-                MaskType const mask = SIMD::index() < rem;
+                MaskType const mask = indexSequence<ET2>() < rem;
                 size_t const i = m - rem;
-                ET2 const * pr = &(*rhs)(i, 0);
-                ET1 * pl = data(lhs) + i;
+                auto pr = ptr<aligned>(*rhs, i, 0);
+                auto pl = ptr<aligned>(*lhs, i, 0);
 
                 for (size_t j = 0; j < n; ++j)
-                    maskstore(pl + s * j, mask, load<aligned, SS>(pr + PANEL_SIZE * j));
+                    pl(0, j).store(pr(0, j).load(), mask);
             }
 
 		#if 0
@@ -185,22 +187,22 @@ namespace blast
 
         using ET1 = ElementType_t<MT1>;
         using ET2 = ElementType_t<MT2>;
-        static size_t constexpr SS = Simd<ET2>::size;
+        static size_t constexpr SS = SimdSize_v<ET2>;
         static size_t constexpr PANEL_SIZE = PanelSize_v<ET2>;
         static_assert(PANEL_SIZE % SS == 0);
 
-        using MaskType = typename Simd<ET2>::MaskType;
-        using IntType = typename Simd<ET2>::IntType;
+        using MaskType = SimdMask<ET2, xsimd::default_arch>;
+        using IntType = typename SimdIndex<ET2>::value_type;
 
         if constexpr (SO1 == columnMajor && SO2 == columnMajor)
         {
 			for (size_t i = 0; i + SS <= m; i += SS)
             {
-                ET2 const * pr = data(rhs) + i;
-                ET1 * pl = &(*lhs)(i, 0);
+                auto pr = ptr<aligned>(*rhs, i, 0);
+                auto pl = ptr<aligned>(*lhs, i, 0);
 
                 for (size_t j = 0; j < n; ++j)
-                    store<aligned>(pl + PANEL_SIZE * j, load<aligned, SS>(pr + s * j));
+                    pl(0, j).store(pr(0, j).load());
             }
 
             if (IntType const rem = m % SS)

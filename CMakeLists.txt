@@ -25,6 +25,7 @@ set(CMAKE_DEBUG_POSTFIX d)
 
 find_package(Boost REQUIRED COMPONENTS exception)
 find_package(blaze REQUIRED)
+find_package(xsimd REQUIRED)
 
 add_library(blast INTERFACE)
 
@@ -35,6 +36,7 @@ target_include_directories(blast INTERFACE
 
 target_link_libraries(blast
     INTERFACE blaze::blaze
+    INTERFACE xsimd
 )
 
 target_compile_options(blast

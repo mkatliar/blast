@@ -7,7 +7,6 @@
 #include <blast/math/PanelMatrix.hpp>
 #include <blast/math/views/submatrix/BaseTemplate.hpp>
 #include <blast/math/constraints/Submatrix.hpp>
-#include <blast/math/simd/Simd.hpp>
 #include <blast/math/panel/PanelSize.hpp>
 #include <blast/math/constraints/PanelMatrix.hpp>
 #include <blast/util/Assert.hpp>
@@ -24,9 +23,6 @@
 #include <blaze/util/TypeList.h>
 #include <blaze/util/Exception.h>
 #include <blaze/util/Assert.h>
-
-#include <algorithm>
-#include <iterator>
 
 
 namespace blast
