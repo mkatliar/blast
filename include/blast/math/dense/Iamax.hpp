@@ -17,7 +17,6 @@
 
 #include <blast/util/Exception.hpp>
 #include <blast/math/Vector.hpp>
-#include <blast/blaze/Math.hpp>
 
 #include <cmath>
 #include <tuple>
@@ -168,13 +167,13 @@ namespace blast
      *
      * @return index of the first element in @a x having maximum absolute value.
      */
-    template <typename VT, bool TF>
-    inline size_t iamax(DenseVector<VT, TF> const& x)
+    template <Vector VT>
+    inline size_t iamax(VT const& x)
     {
         size_t const N = size(x);
         if (N == 0)
             BLAST_THROW_EXCEPTION(std::invalid_argument {"Vector is empty"});
 
-        return iamax(N, ptr(*x));
+        return iamax(N, ptr(x));
     }
 }
