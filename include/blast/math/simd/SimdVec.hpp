@@ -298,9 +298,20 @@ namespace blast
         friend SimdVec operator*<>(ValueType const& a, SimdVec const& b) noexcept;
         friend SimdVec operator*<>(SimdVec const& a, ValueType const& b) noexcept;
 
-        friend std::tuple<SimdVec, SimdIndex<T, Arch>> imax(SimdVec const& v1, SimdIndex<T, Arch> const& idx) noexcept
+        /**
+         * @brief Maximum element of a batch and its index.
+         *
+         * For example, imax([-1., 0., 4., 3.], [1, 2, -1, 42]) == ([4., 4., 4., 4.], [-1, -1, -1, -1])
+         *
+         * @param v batch of values
+         * @param idx batch of indices
+         *
+         * @return a tuple {A, I} such that A == [a, a, ..., a] and I == [idx[i], idx[i], ..., idx[i]],
+         *   where a == max_j(v[j]), i = argmax_j(v[j])
+         */
+        friend std::tuple<SimdVec, SimdIndex<T, Arch>> imax(SimdVec const& v, SimdIndex<T, Arch> const& idx) noexcept
         {
-            return imax(v1.value_, idx);
+            return imax(v.value_, idx);
         }
 
     private:
