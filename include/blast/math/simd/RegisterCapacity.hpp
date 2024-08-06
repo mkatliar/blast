@@ -21,12 +21,13 @@
 namespace blast
 {
     /**
-     * @brief Number of available SIMD registers.
+     * @brief Number of available SIMD registers for a given architecture.
      *
      * @return Number of SIMD registers for AVX2
      */
-    std::size_t constexpr registerCapacity(xsimd::avx2)
+    template <typename Arch>
+    std::size_t constexpr registerCapacity(Arch arch)
     {
-        return 16;
+        return detail::registerCapacity(arch);
     }
 }

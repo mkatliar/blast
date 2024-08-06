@@ -59,17 +59,24 @@ namespace blast
         };
 
         template <typename T, typename Arch>
-        requires (xsimd::batch<T, Arch>::size == 4) && std::is_integral_v<T>
-        inline xsimd::batch<T, Arch> indexSequence(T start) noexcept
+        requires (xsimd::batch<T, Arch>::size == 2) && std::is_integral_v<T>
+        constexpr xsimd::batch<T, Arch> integerSequence()
         {
-            return {start, start + 1, start + 2, start + 3};
+            return {0, 1};
+        }
+
+        template <typename T, typename Arch>
+        requires (xsimd::batch<T, Arch>::size == 4) && std::is_integral_v<T>
+        constexpr xsimd::batch<T, Arch> integerSequence()
+        {
+            return {0, 1, 2, 3};
         }
 
         template <typename T, typename Arch = xsimd::default_arch>
         requires (xsimd::batch<T, Arch>::size == 8) && std::is_integral_v<T>
-        inline xsimd::batch<T, Arch> indexSequence(T start) noexcept
+        constexpr xsimd::batch<T, Arch> integerSequence()
         {
-            return {start, start + 1, start + 2, start + 3, start + 4, start + 5, start + 6, start + 7};
+            return {0, 1, 2, 3, 4, 5, 6, 7};
         }
     }
 
@@ -85,14 +92,11 @@ namespace blast
 
     /// @brief Construct an integer index sequence
     ///
-    /// @param start start of the sequence
-    ///
-    /// @return [ @a start, @a start + 1, ..., @a start + N - 1 ]
-    ///   where N = SimdIndex<T, Arch>::size
+    /// @return [0, 1, ..., SimdIndex<T, Arch>::size - 1]
     ///
     template <typename T, typename Arch = xsimd::default_arch>
-    inline SimdIndex<T, Arch> indexSequence(typename SimdIndex<T, Arch>::value_type start = 0) noexcept
+    constexpr SimdIndex<T, Arch> indexSequence()
     {
-        return detail::indexSequence<detail::IntOfSize_t<sizeof(T), true>, Arch>(start);
+        return detail::integerSequence<detail::IntOfSize_t<sizeof(T), true>, Arch>();
     }
 }

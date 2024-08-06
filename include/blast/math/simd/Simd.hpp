@@ -18,3 +18,7 @@
 #if XSIMD_WITH_AVX2
     #include <blast/math/simd/arch/Avx2.hpp>
 #endif
+
+#if XSIMD_WITH_NEON64
+    #include <blast/math/simd/arch/Neon64.hpp>
+#endif
