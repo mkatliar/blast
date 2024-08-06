@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <bench/Benchmark.hpp>
 #include <bench/Complexity.hpp>
 
 #define BENCHMARK_MAX_GEMM 50

@@ -5,7 +5,7 @@
 
 
 #include <bench/Benchmark.hpp>
-#include <bench/Complexity.hpp>
+#include <bench/Syrk.hpp>
 
 #include <blaze/Math.h>
 
