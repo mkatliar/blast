@@ -7,12 +7,9 @@
 #include <blaze/math/DynamicMatrix.h>
 
 #include <bench/Benchmark.hpp>
-#include <bench/Complexity.hpp>
+#include <bench/Syrk.hpp>
 
 #include <test/Randomize.hpp>
-
-#include <random>
-#include <memory>
 
 
 namespace blast :: benchmark

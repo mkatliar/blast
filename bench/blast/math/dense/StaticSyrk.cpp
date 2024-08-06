@@ -7,10 +7,9 @@
 #include <blaze/math/StaticMatrix.h>
 
 #include <bench/Benchmark.hpp>
-#include <bench/Complexity.hpp>
+#include <bench/Syrk.hpp>
 
-#include <random>
-#include <memory>
+#include <test/Randomize.hpp>
 
 
 namespace blast :: benchmark

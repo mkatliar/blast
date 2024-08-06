@@ -272,6 +272,6 @@ namespace blast
     requires (!IsStatic_v<MT>) && IsPanelMatrix_v<MT>
     BLAZE_ALWAYS_INLINE auto ptr(PMatTransExpr<MT, SO> const& m, size_t i, size_t j)
     {
-        return trans(ptr(m.operand(), j, i));
+        return trans(ptr<AF>(m.operand(), j, i));
     }
 }

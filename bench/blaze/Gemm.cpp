@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-
-
 #include <bench/Gemm.hpp>
+#include <test/Randomize.hpp>
 
 #include <blaze/Math.h>
 
@@ -23,18 +22,23 @@ namespace blast :: benchmark
         blaze::StaticMatrix<Real, K, N, blaze::columnMajor> B;
         randomize(B);
 
-        blaze::StaticMatrix<Real, M, N, blaze::columnMajor> C;
+        blaze::StaticMatrix<Real, M, N, blaze::columnMajor> C, D;
         randomize(C);
+
+        Real alpha, beta;
+        randomize(alpha);
+        randomize(beta);
 
         for (auto _ : state)
         {
-            C += trans(A) * B;
+            D = alpha * trans(A) * B + beta * C;
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);
+            DoNotOptimize(D);
         }
 
-        state.counters["flops"] = Counter(2 * M * N * K, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(M, N, K));
         state.counters["m"] = M;
         state.counters["n"] = N;
         state.counters["k"] = K;
@@ -52,18 +56,23 @@ namespace blast :: benchmark
         blaze::DynamicMatrix<Real, blaze::columnMajor> B(m, m);
         randomize(B);
 
-        blaze::DynamicMatrix<Real, blaze::columnMajor> C(m, m);
+        blaze::DynamicMatrix<Real, blaze::columnMajor> C(m, m), D(m, m);
         randomize(C);
+
+        Real alpha, beta;
+        randomize(alpha);
+        randomize(beta);
 
         for (auto _ : state)
         {
-            C += trans(A) * B;
+            D = alpha * trans(A) * B + beta * C;
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);
+            DoNotOptimize(D);
         }
 
-        state.counters["flops"] = Counter(2 * m * m * m, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, m, m));
         state.counters["m"] = m;
     }
 
@@ -90,7 +99,7 @@ namespace blast :: benchmark
                 }
         }
 
-        state.counters["flops"] = Counter(2 * m * m * m, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, m, m));
         state.counters["m"] = m;
     }
 
@@ -123,7 +132,7 @@ namespace blast :: benchmark
                 }
         }
 
-        state.counters["flops"] = Counter(2 * m * m * m, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, m, m));
         state.counters["m"] = m;
     }
 

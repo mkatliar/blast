@@ -6,6 +6,7 @@ find_package(benchmark REQUIRED)
 
 add_library(bench-blast-common STATIC
     Benchmark.cpp
+    Syrk.cpp
 )
 
 target_link_libraries(bench-blast-common

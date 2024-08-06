@@ -117,6 +117,28 @@ namespace blast
         }
 
 
+        /**
+         * @brief Pointer to the data
+         *
+         * @return Pointer to matrix data
+         */
+        ElementType * data() noexcept
+        {
+            return pm_.data();
+        }
+
+
+        /**
+         * @brief Constant pointer to the data
+         *
+         * @return Constant pointer to matrix data
+         */
+        ElementType const * data() const noexcept
+        {
+            return pm_.data();
+        }
+
+
         /*!\brief Returns the current number of columns of the matrix.
         //
         // \return The number of columns of the matrix.

@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-
-
-#include <bench/Gemm.hpp>
+#include <bench/Syrk.hpp>
 
 #include <blaze/Math.h>
 
@@ -128,7 +126,7 @@ namespace blast :: benchmark
     // BENCHMARK_STATIC(4, 5);
     // BENCHMARK_STATIC(20, 40);
     // BENCHMARK_STATIC(30, 35);
-#define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_GEMM)
+#define BOOST_PP_LOCAL_LIMITS (1, BENCHMARK_MAX_SYRK)
 #define BOOST_PP_LOCAL_MACRO(N) \
     BENCHMARK_STATIC(N, N);
 #include BOOST_PP_LOCAL_ITERATE()

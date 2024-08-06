@@ -43,7 +43,7 @@ namespace blast :: benchmark
     static void BM_iamax(State& state)
     {
         size_t const N = state.range(0);
-        DynamicVector<Real> x(N);
+        blaze::DynamicVector<Real> x(N);
         randomize(x);
 
         for (auto _ : state)

@@ -4,10 +4,8 @@
 
 #include <blasfeo/Blasfeo.hpp>
 
-
-
 #include <bench/Benchmark.hpp>
-#include <bench/Complexity.hpp>
+#include <bench/Syrk.hpp>
 
 
 namespace blast :: benchmark
