@@ -26,14 +26,14 @@ namespace blast
     template <typename MT, bool SO>
     BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO>& m)
     {
-        return ptr<IsAligned_v<MT>>(m, 0, 0);
+        return ptr<IsAligned_v<MT>>(*m, 0, 0);
     }
 
 
     template <typename MT, bool SO>
     BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO> const& m)
     {
-        return ptr<IsAligned_v<MT>>(m, 0, 0);
+        return ptr<IsAligned_v<MT>>(*m, 0, 0);
     }
 
 
@@ -41,6 +41,6 @@ namespace blast
     requires IsPanelMatrix_v<MT>
     BLAZE_ALWAYS_INLINE auto ptr(blaze::DMatTransExpr<MT, SO> const& m)
     {
-        return ptr<IsAligned_v<MT>>(m, 0, 0);
+        return ptr<IsAligned_v<MT>>(*m, 0, 0);
     }
 }
