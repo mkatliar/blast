@@ -33,7 +33,7 @@ namespace blast
     requires std::is_base_of_v<xsimd::neon64, Arch>
     inline xsimd::batch<float, Arch> maskload(float const * src, xsimd::batch_bool<float, Arch> const& mask) noexcept
     {
-        throw std::logic_error {"Not implemented"};
+        return xsimd::load(src, xsimd::unaligned_mode {});
     }
 
 
@@ -41,7 +41,7 @@ namespace blast
     requires std::is_base_of_v<xsimd::neon64, Arch>
     inline xsimd::batch<double, Arch> maskload(double const * src, xsimd::batch_bool<double, Arch> const& mask) noexcept
     {
-        throw std::logic_error {"Not implemented"};
+        return xsimd::load(src, xsimd::unaligned_mode {});
     }
 
 
@@ -49,7 +49,7 @@ namespace blast
     requires std::is_base_of_v<xsimd::neon64, Arch>
     inline void maskstore(xsimd::batch<float, Arch> const& v, float * dst, xsimd::batch_bool<float, Arch> const& mask) noexcept
     {
-        throw std::logic_error {"Not implemented"};
+        xsimd::store(dst, v, xsimd::unaligned_mode {});
     }
 
 
@@ -57,7 +57,7 @@ namespace blast
     requires std::is_base_of_v<xsimd::neon64, Arch>
     inline void maskstore(xsimd::batch<double, Arch> const& v, double * dst, xsimd::batch_bool<double, Arch> const& mask) noexcept
     {
-        throw std::logic_error {"Not implemented"};
+        xsimd::store(dst, v, xsimd::unaligned_mode {});
     }
 
 
