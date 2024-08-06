@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import json
-
+import glob
+import pathlib
 
 def filter_aggregate(benchmarks, name):
     result = []
@@ -22,19 +23,20 @@ line_width = 1
 
 plots = [
     # {'data_file': 'dgemm-openblas.json', 'label': 'OpenBLAS'},
-    {'data_file': 'dgemm-mkl.json', 'label': 'MKL'},
-    {'data_file': 'dgemm-blasfeo.json', 'label': 'BLASFEO'},
+    # {'data_file': 'dgemm-mkl.json', 'label': 'MKL'},
+    # {'data_file': 'dgemm-blasfeo.json', 'label': 'BLASFEO'},
     # {'data_file': 'dgemm-blasfeo-blas.json', 'label': 'BLASFEO*'},
-    {'data_file': 'dgemm-libxsmm.json', 'label': 'LIBXSMM'},
+    # {'data_file': 'dgemm-libxsmm.json', 'label': 'LIBXSMM'},
     # {'data_file': 'dgemm-eigen-dynamic.json', 'label': 'Eigen (D)'},
     # {'data_file': 'dgemm-eigen-static.json', 'label': 'Eigen (S)'},
     # {'data_file': 'dgemm-blaze-dynamic.json', 'label': 'Blaze (D)'},
-    {'data_file': 'dgemm-blaze-static.json', 'label': 'Blaze (S)'},
-    {'data_file': 'dgemm-blast-static-panel.json', 'label': 'BLAST (SP)'},
-    {'data_file': 'dgemm-blast-static-plain.json', 'label': 'BLAST (SD)'},
-    {'data_file': 'dgemm-blast-dynamic-panel.json', 'label': 'BLAST (DP)'},
-    {'data_file': 'dgemm-blast-dynamic-plain.json', 'label': 'BLAST (DD)'},
+    # {'data_file': 'dgemm-blaze-static.json', 'label': 'Blaze (S)'},
 ]
+
+for benchmark_file, benchmark_label in [('dgemm-blast-static-panel.json', 'SP'), ('dgemm-blast-static-plain.json', 'SD'), ('dgemm-blast-dynamic-panel.json', 'DP'), ('dgemm-blast-dynamic-plain.json', 'DD')]:
+    files = glob.glob('./**/' + benchmark_file, recursive=True, root_dir='bench_result/data')
+    for file in files:
+        plots.append({'data_file': file, 'label': f'BLAST ({benchmark_label}) {pathlib.Path(file).parent.stem}'})
 
 fig = plt.figure(figsize=[10, 6])
 ax = fig.subplots()

@@ -61,21 +61,21 @@ ${BENCH_DATA}/sgemm-blaze-static.json: $(BENCH_BLAZE)
 	$(BENCH_BLAZE) --benchmark_filter="BM_gemm_static<float>*" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/sgemm-blaze-static.json
 
-${BENCH_DATA}/dgemm-blast-static-panel.json: $(BENCH_BLAST)
+${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-panel.json: $(BENCH_BLAST)
 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_static_panel<double, .+>" $(BENCHMARK_OPTIONS) \
-		--benchmark_out=${BENCH_DATA}/dgemm-blast-static-panel.json
+		--benchmark_out=${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-panel.json
 
-${BENCH_DATA}/dgemm-blast-dynamic-panel.json: $(BENCH_BLAST)
+${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-panel.json: $(BENCH_BLAST)
 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_dynamic_panel<double>" $(BENCHMARK_OPTIONS) \
-		--benchmark_out=${BENCH_DATA}/dgemm-blast-dynamic-panel.json
+		--benchmark_out=${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-panel.json
 
-${BENCH_DATA}/dgemm-blast-static-plain.json: $(BENCH_BLAST)
+${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-plain.json: $(BENCH_BLAST)
 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_static_plain<double, .+>" $(BENCHMARK_OPTIONS) \
-		--benchmark_out=${BENCH_DATA}/dgemm-blast-static-plain.json
+		--benchmark_out=${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-plain.json
 
-${BENCH_DATA}/dgemm-blast-dynamic-plain.json: $(BENCH_BLAST)
+${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-plain.json: $(BENCH_BLAST)
 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_dynamic_plain<double>" $(BENCHMARK_OPTIONS) \
-		--benchmark_out=${BENCH_DATA}/dgemm-blast-dynamic-plain.json
+		--benchmark_out=${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-plain.json
 
 ${BENCH_DATA}/sgemm-blast-static-panel.json: $(BENCH_BLAST)
 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_static_panel<float, .+>" $(BENCHMARK_OPTIONS) \
@@ -94,16 +94,17 @@ ${BENCH_DATA}/sgemm-libxsmm.json: $(BENCH_LIBXSMM)
 		--benchmark_out=${BENCH_DATA}/sgemm-libxsmm.json
 
 dgemm-benchmarks: \
+	$(shell mkdir -p ${BENCH_DATA}/$(shell git rev-parse --short HEAD)) \
 	${BENCH_DATA}/dgemm-openblas.json \
 	${BENCH_DATA}/dgemm-mkl.json \
 	${BENCH_DATA}/dgemm-libxsmm.json \
 	${BENCH_DATA}/dgemm-blasfeo.json \
 	${BENCH_DATA}/dgemm-blaze-static.json \
 	${BENCH_DATA}/dgemm-eigen-static.json \
-	${BENCH_DATA}/dgemm-blast-static-panel.json \
-	${BENCH_DATA}/dgemm-blast-dynamic-panel.json \
-	${BENCH_DATA}/dgemm-blast-static-plain.json \
-	${BENCH_DATA}/dgemm-blast-dynamic-plain.json
+	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-panel.json \
+	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-panel.json \
+	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-plain.json \
+	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-plain.json
 
 
 #
