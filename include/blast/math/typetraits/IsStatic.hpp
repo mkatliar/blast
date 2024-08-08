@@ -16,8 +16,15 @@
 
 #include <blaze/math/TypeTraits.h>
 
+#include <type_traits>
+
 
 namespace blast
 {
-    using blaze::IsStatic_v;
+    template <typename T>
+    struct IsStatic : blaze::IsStatic<T> {};
+
+
+    template <typename T>
+    using IsStatic_v = IsStatic<T>::value;
 }

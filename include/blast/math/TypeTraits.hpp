@@ -19,7 +19,9 @@
 #include <blast/math/typetraits/IsPadded.hpp>
 #include <blast/math/typetraits/ElementType.hpp>
 #include <blast/math/typetraits/StorageOrder.hpp>
+#include <blast/math/typetraits/IsDenseMatrix.hpp>
 #include <blast/math/typetraits/IsPanelMatrix.hpp>
 #include <blast/math/typetraits/IsPanelSubmatrix.hpp>
 #include <blast/math/typetraits/VectorPointer.hpp>
 #include <blast/math/typetraits/MatrixPointer.hpp>
+#include <blast/math/typetraits/Matrix.hpp>
