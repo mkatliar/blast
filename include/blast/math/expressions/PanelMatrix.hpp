@@ -5,6 +5,7 @@
 #pragma once
 
 #include <blast/math/typetraits/IsPanelMatrix.hpp>
+#include <blast/math/typetraits/ElementType.hpp>
 #include <blast/math/simd/SimdSize.hpp>
 #include <blast/math/simd/SimdMask.hpp>
 #include <blast/math/simd/SimdIndex.hpp>
@@ -21,12 +22,9 @@
 
 namespace blast
 {
-    using namespace blaze;
-
-
     template <typename Derived, bool SO>
     struct PanelMatrix
-    :   public Matrix<Derived, SO>
+    :   public blaze::Matrix<Derived, SO>
     {
     public:
         using TagType = Group0;
@@ -80,14 +78,14 @@ namespace blast
     template <typename MT1, typename MT2, typename MT3, bool SO>
     inline auto assign(PanelMatrix<MT1, SO>& lhs,
         blaze::DMatTDMatMultExpr<MT2, MT3, false, false, false, false> const& rhs)
-        -> blaze::EnableIf_t<IsPanelMatrix_v<MT2> && IsRowMajorMatrix_v<MT2> && IsPanelMatrix_v<MT3> && IsRowMajorMatrix_v<MT3>>
+        -> blaze::EnableIf_t<IsPanelMatrix_v<MT2> && blaze::IsRowMajorMatrix_v<MT2> && IsPanelMatrix_v<MT3> && blaze::IsRowMajorMatrix_v<MT3>>
     {
         BLAZE_THROW_LOGIC_ERROR("Not implemented 2");
     }
 
 
     template <typename MT1, bool SO1, typename MT2, bool SO2>
-    inline void assign(DenseMatrix<MT1, SO1>& lhs, PanelMatrix<MT2, SO2> const& rhs)
+    inline void assign(blaze::DenseMatrix<MT1, SO1>& lhs, PanelMatrix<MT2, SO2> const& rhs)
     {
         BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == (*rhs).rows()   , "Invalid number of rows"    );
         BLAZE_INTERNAL_ASSERT( (*lhs).columns() == (*rhs).columns(), "Invalid number of columns" );
@@ -176,7 +174,7 @@ namespace blast
 
 
     template <typename MT1, bool SO1, typename MT2, bool SO2>
-    inline void assign(PanelMatrix<MT1, SO1>& lhs, DenseMatrix<MT2, SO2> const& rhs)
+    inline void assign(PanelMatrix<MT1, SO1>& lhs, blaze::DenseMatrix<MT2, SO2> const& rhs)
     {
         size_t const m = (*rhs).rows();
         size_t const n = (*rhs).columns();
