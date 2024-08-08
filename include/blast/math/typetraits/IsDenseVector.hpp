@@ -6,22 +6,23 @@
 
 #include <type_traits>
 
+
 namespace blast
 {
-    /**
-     * @brief Tests if the given data type is a dense matrix with column- or row-major storage
+     /**
+     * @brief Tests if the given data type is a vector with dense storage
      *
      * @tparam T data type
      */
     template <typename T>
-    struct IsDenseMatrix : std::false_type {};
+    struct IsDenseVector : std::false_type {};
 
 
     /**
-     * @brief Shortcut for @a IsDenseMatrix<T>::value
+     * @brief Shortcut for @a IsDenseVector<T>::value
      *
      * @tparam T data type
      */
     template <typename T>
-    bool constexpr IsDenseMatrix_v = IsDenseMatrix<T>::value;
+    bool constexpr IsDenseVector_v = IsDenseVector<T>::value;
 }

@@ -11,19 +11,19 @@
 namespace blast
 {
     /**
-     * @brief Matrix concept
+     * @brief Vector concept
      *
-     * @tparam M matrix type
+     * @tparam V vector type
      * @tparam T element type
      */
-    template <typename M, typename T = ElementType_t<M>>
-    concept Matrix = requires(M m, T v, T * p, size_t i, size_t j)
+    template <typename V, typename T = ElementType_t<V>>
+    concept Vector = requires(V v, T a, T * p, size_t i)
     {
-        m;
-        // m(i, j) = v;
-        v = m(i, j);
-        i = rows(m);
-        j = columns(m);
-        // p = data(m);
+        v;
+        // v[i] = a;
+        a = v[i];
+        i = size(v);
+        // i = spacing(v);
+        p = data(v);
     };
 }

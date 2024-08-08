@@ -15,8 +15,7 @@
 #pragma once
 
 #include <blast/util/Exception.hpp>
-
-#include <blast/math/dense/VectorPointer.hpp>
+#include <blast/math/Vector.hpp>
 
 #include <algorithm>
 

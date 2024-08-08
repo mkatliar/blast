@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <blast/math/dense/VectorPointer.hpp>
+#include <blast/math/Vector.hpp>
+#include <blast/blaze/Math.hpp>
 
 #include <test/Testing.hpp>
 
@@ -209,5 +210,22 @@ namespace blast :: testing
     TYPED_TEST(DynamicVectorPointerTest, testMatrixColumnSubvectorColumnMajor)
     {
         this->template testMatrixColumnSubvectorImpl<columnMajor>();
+    }
+
+
+    TEST(DynamicVectorPointerTest, testSpacing)
+    {
+        blaze::DynamicVector<double> dv(10);
+        ASSERT_EQ(spacing(dv), 1);
+
+        blaze::StaticVector<double, 10> sv;
+        ASSERT_EQ(spacing(sv), 1);
+    }
+
+
+    TEST(DynamicVectorPointerTest, testStaticallySpaced)
+    {
+        ASSERT_TRUE((IsStaticallySpaced_v<blaze::DynamicVector<double>>));
+        ASSERT_TRUE((IsStaticallySpaced_v<blaze::StaticVector<double, 10>>));
     }
 }

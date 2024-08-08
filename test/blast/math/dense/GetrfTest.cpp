@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include "blast/math/dense/Laswp.hpp"
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/adaptors/lowermatrix/BaseTemplate.h>
 #include <blaze/math/dense/DynamicMatrix.h>
-
 #include <blast/math/dense/Getrf.hpp>
+#include <blast/blaze/Math.hpp>
 
-#include <cstddef>
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 #include <test/Tolerance.hpp>

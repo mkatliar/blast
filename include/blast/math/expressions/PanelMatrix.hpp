@@ -10,14 +10,9 @@
 #include <blast/math/simd/SimdMask.hpp>
 #include <blast/math/simd/SimdIndex.hpp>
 #include <blast/math/panel/PanelSize.hpp>
-#include <blast/math/panel/MatrixPointer.hpp>
-#include <blast/math/dense/MatrixPointer.hpp>
+#include <blast/math/Matrix.hpp>
 
-#include <blaze/math/ReductionFlag.h>
-#include <blaze/math/Matrix.h>
-#include <blaze/math/StorageOrder.h>
-#include <blaze/math/typetraits/IsRowMajorMatrix.h>
-#include <blaze/util/Types.h>
+#include <blast/blaze/Math.hpp>
 
 
 namespace blast

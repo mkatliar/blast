@@ -3,7 +3,9 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/StaticPanelMatrix.hpp>
+#include <blast/math/Matrix.hpp>
 #include <blast/math/panel/Gemm.hpp>
+#include <blast/blaze/Math.hpp>
 
 #include <bench/Gemm.hpp>
 

@@ -8,19 +8,19 @@
 namespace blast
 {
     /**
-     * @brief Tests if dimensions of the given matrix or vector type are known at compile-time.
+     * @brief Tests whether the elements of a given data type lie contiguous in memory
      *
-     * @tparam T matrix or vector type
+     * @tparam T data type
      */
     template <typename T>
-    struct IsStatic;
+    struct IsContiguous;
 
 
     /**
-     * @brief Shortcut for @a IsStatic<T>::value
+     * @brief Shortcut for @a IsContiguous<T>::value
      *
-     * @tparam T matrix or vector type
+     * @tparam T data type
      */
     template <typename T>
-    bool constexpr IsStatic_v = IsStatic<T>::value;
+    bool constexpr IsContiguous_v = IsContiguous<T>::value;
 }

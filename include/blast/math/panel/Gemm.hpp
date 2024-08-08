@@ -5,7 +5,7 @@
 #pragma once
 
 #include <blast/math/PanelMatrix.hpp>
-#include <blast/math/panel/MatrixPointer.hpp>
+#include <blast/math/Matrix.hpp>
 #include <blast/math/algorithm/Gemm.hpp>
 #include <blast/util/Exception.hpp>
 
