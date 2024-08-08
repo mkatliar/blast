@@ -10,6 +10,8 @@
 #include <blast/math/TypeTraits.hpp>
 #include <blast/math/Simd.hpp>
 #include <blast/util/Assert.hpp>
+#include <blast/system/Inline.hpp>
+
 #include <blaze/util/Exception.h>
 
 
@@ -203,7 +205,7 @@ namespace blast
 
 
     template <bool SO, typename T, bool AF, bool PF>
-    BLAZE_ALWAYS_INLINE auto trans(DynamicMatrixPointer<T, SO, AF, PF> const& p) noexcept
+    BLAST_ALWAYS_INLINE auto trans(DynamicMatrixPointer<T, SO, AF, PF> const& p) noexcept
     {
         return p.trans();
     }
@@ -211,7 +213,7 @@ namespace blast
 
     template <bool AF, typename MT, bool SO>
         requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT>, SO, AF, IsPadded_v<MT>>
+    BLAST_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT>, SO, AF, IsPadded_v<MT>>
         ptr(DenseMatrix<MT, SO>& m, size_t i, size_t j)
     {
         if constexpr (SO == columnMajor)
@@ -223,7 +225,7 @@ namespace blast
 
     template <bool AF, typename MT, bool SO>
         requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>
+    BLAST_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>
         ptr(DenseMatrix<MT, SO> const& m, size_t i, size_t j)
     {
         if constexpr (SO == columnMajor)
@@ -235,7 +237,7 @@ namespace blast
 
     template <bool AF, typename MT, bool SO>
         requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>
+    BLAST_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>
         ptr(DMatTransExpr<MT, SO> const& m, size_t i, size_t j)
     {
         if constexpr (SO == columnMajor)
@@ -246,7 +248,7 @@ namespace blast
 
 
     template <bool AF, bool PF, bool SO, typename T>
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<T, SO, AF, PF> ptr(T * p, size_t spacing)
+    BLAST_ALWAYS_INLINE DynamicMatrixPointer<T, SO, AF, PF> ptr(T * p, size_t spacing)
     {
         return {p, spacing};
     }

@@ -109,7 +109,7 @@ namespace blast
 
         template< typename MT    // Type of the right-hand side matrix
             , bool SO2 >      // Storage order of the right-hand side matrix
-        DynamicPanelMatrix& operator=(Matrix<MT, SO2> const& rhs)
+        DynamicPanelMatrix& operator=(blaze::Matrix<MT, SO2> const& rhs)
         {
             assign(*this, *rhs);
             return *this;

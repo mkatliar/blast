@@ -14,10 +14,15 @@
 
 #pragma once
 
-#include <blaze/math/TypeTraits.h>
+#include <blaze/math/typetraits/IsStatic.h>
 
 
 namespace blast
 {
-    using blaze::IsStatic_v;
+    template <typename T>
+    struct IsStatic : blaze::IsStatic<T> {};
+
+
+    template <typename T>
+    bool constexpr IsStatic_v = IsStatic<T>::value;
 }
