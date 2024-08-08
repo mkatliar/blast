@@ -3,11 +3,11 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/RegisterMatrix.hpp>
-#include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/Matrix.hpp>
 #include <blast/math/Vector.hpp>
 #include <blast/math/views/submatrix/Panel.hpp>
-#include <blast/blaze/Math.hpp>
+#include <blast/math/reference/Ger.hpp>
+#include <blast/math/panel/StaticPanelMatrix.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
@@ -131,7 +131,7 @@ namespace blast :: testing
         StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
         for (size_t i = 0; i < rows(A); ++i)
             for (size_t j = 0; j < columns(A); ++j)
-                (*A)(i, j) = 1000 * i + j;
+                A(i, j) = 1000 * i + j;
 
         for (size_t m = 1; m <= rows(A); ++m)
         {
@@ -179,7 +179,7 @@ namespace blast :: testing
         using ET = ElementType_t<RM>;
 
         StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B(0.);
-        randomize(A);
+        blast::randomize(A);
 
         RM ker;
         ker.load(1., ptr<aligned>(A, 0, 0));
@@ -374,10 +374,12 @@ namespace blast :: testing
         blaze::randomize(alpha);
 
         TypeParam ker;
-        ker.load(1., ptr(*C));
+        ker.load(1., ptr(C));
         ker.ger(alpha, ptr(a), ptr(b));
 
-        BLAST_EXPECT_APPROX_EQ(ker, evaluate(C + alpha * a * b), absTol<ET>(), relTol<ET>());
+        reference::ger(rows(C), columns(C), alpha, ptr(a), ptr(b), ptr(C));
+
+        BLAST_EXPECT_APPROX_EQ(ker, C, absTol<ET>(), relTol<ET>());
     }
 
 
@@ -443,7 +445,7 @@ namespace blast :: testing
             for (size_t n = 0; n <= columns(C); ++n)
             {
                 TypeParam ker;
-                ker.load(1., ptr(*C));
+                ker.load(1., ptr(C));
                 ker.ger(ET(1.), ptr(a), ptr(trans(b)), m, n);
 
                 for (size_t i = 0; i < m; ++i)
@@ -471,9 +473,9 @@ namespace blast :: testing
         randomize(C);
 
         TypeParam ker;
-        ker.load(1., ptr(*C));
+        ker.load(1., ptr(C));
         ker.ger(ET(1.), ptr(a), ptr(trans(b)));
-        ker.store(ptr(*D));
+        ker.store(ptr(D));
 
         BLAST_EXPECT_EQ(D, evaluate(C + a * trans(b)));
     }
