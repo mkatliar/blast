@@ -4,8 +4,9 @@
 
 #include <blast/math/register_matrix/DynamicRegisterMatrix.hpp>
 #include <blast/math/StaticPanelMatrix.hpp>
-#include <blast/math/dense/MatrixPointer.hpp>
+#include <blast/math/Matrix.hpp>
 #include <blast/math/views/submatrix/Panel.hpp>
+#include <blast/blaze/Math.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>

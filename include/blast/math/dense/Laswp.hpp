@@ -14,8 +14,9 @@
 
 #pragma once
 
-
 #include <blast/math/dense/Swap.hpp>
+
+#include <blast/blaze/Math.hpp>
 
 
 namespace blast
@@ -34,10 +35,10 @@ namespace blast
           @a k0 ... @a k1 - 1 of @a ipiv are accessed. ipiv[k] = l implies rows k and l are to be interchanged.
      */
     template <typename MT, bool SO>
-    inline void laswp(DenseMatrix<MT, SO>& A, size_t k0, size_t k1, size_t * ipiv)
+    inline void laswp(blaze::DenseMatrix<MT, SO>& A, size_t k0, size_t k1, size_t * ipiv)
     {
         for (size_t k = k0; k < k1; ++k)
             if (k != ipiv[k])
-                swap(row(*A, k, unchecked), row(*A, ipiv[k], unchecked));
+                swap(row(*A, k, blaze::unchecked), row(*A, ipiv[k], blaze::unchecked));
     }
 }

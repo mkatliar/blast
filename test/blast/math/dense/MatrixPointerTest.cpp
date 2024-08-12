@@ -2,19 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <blast/math/dense/MatrixPointer.hpp>
-#include <blast/math/panel/MatrixPointer.hpp>
+#include <blast/math/Matrix.hpp>
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/DynamicPanelMatrix.hpp>
 
-#include <blaze/math/StorageOrder.h>
-#include <blaze/math/dense/DynamicMatrix.h>
-#include <blaze/math/typetraits/IsStatic.h>
 #include <test/Testing.hpp>
 
-#include <blaze/Math.h>
-
-#include <utility>
+#include <blast/blaze/Math.hpp>
 
 
 namespace blast :: testing
@@ -53,7 +47,7 @@ namespace blast :: testing
     template <typename T, bool SO, bool AF, bool PF>
     struct MatrixType<DynamicPanelMatrixPointer<T, SO, AF, PF>>
     {
-        using type = blaze::DynamicPanelMatrix<T, SO>;
+        using type = DynamicPanelMatrix<T, SO>;
     };
 
 
@@ -67,7 +61,7 @@ namespace blast :: testing
         static size_t constexpr N = SO == columnMajor ? S / SimdSize_v<T> : defaultColumns;
 
     public:
-        using type = blaze::StaticPanelMatrix<T, M, N, SO>;
+        using type = StaticPanelMatrix<T, M, N, SO>;
         static_assert(type::spacing() == S);
     };
 

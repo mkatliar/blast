@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/StaticPanelMatrix.hpp>
-#include <blast/math/panel/MatrixPointer.hpp>
+#include <blast/math/Matrix.hpp>
 #include <blast/math/simd/SimdVec.hpp>
 
 #include <blaze/Math.h>

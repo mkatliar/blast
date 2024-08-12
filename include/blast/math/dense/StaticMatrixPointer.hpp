@@ -12,10 +12,6 @@
 #include <blast/math/TypeTraits.hpp>
 #include <blast/util/Assert.hpp>
 
-#include <blaze/math/StorageOrder.h>
-#include <blaze/math/StaticMatrix.h>
-#include <blaze/util/Exception.h>
-
 
 namespace blast
 {
@@ -203,26 +199,18 @@ namespace blast
     }
 
 
-    template <bool AF, typename MT, bool SO>
-    requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE auto ptr(blaze::DenseMatrix<MT, SO>& m, size_t i, size_t j)
+    template <bool AF, Matrix MT>
+    requires IsStatic_v<MT> && IsDenseMatrix_v<MT>
+    BLAZE_ALWAYS_INLINE auto ptr(MT& m, size_t i, size_t j)
     {
-        return StaticMatrixPointer<ElementType_t<MT>, MT::spacing(), SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
+        return StaticMatrixPointer<ElementType_t<MT>, Spacing_v<MT>, StorageOrder_v<MT>, AF, IsPadded_v<MT>>(data(m), i, j);
     }
 
 
-    template <bool AF, typename MT, bool SO>
-    requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE auto ptr(blaze::DenseMatrix<MT, SO> const& m, size_t i, size_t j)
+    template <bool AF, Matrix MT>
+    requires IsStatic_v<MT> && IsDenseMatrix_v<MT>
+    BLAZE_ALWAYS_INLINE auto ptr(MT const& m, size_t i, size_t j)
     {
-        return StaticMatrixPointer<ElementType_t<MT> const, MT::spacing(), SO, AF, IsPadded_v<MT>>((*m).data(), i, j);
-    }
-
-
-    template <bool AF, typename MT, bool SO>
-    requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE auto ptr(blaze::DMatTransExpr<MT, SO> const& m, size_t i, size_t j)
-    {
-        return trans(ptr<AF>(m.operand(), j, i));
+        return StaticMatrixPointer<ElementType_t<MT> const, Spacing_v<MT>, StorageOrder_v<MT>, AF, IsPadded_v<MT>>(data(m), i, j);
     }
 }

@@ -5,8 +5,7 @@
 #include <blast/math/DynamicPanelMatrix.hpp>
 #include <blast/math/panel/Potrf.hpp>
 #include <blast/math/panel/Gemm.hpp>
-
-#include <blaze/Math.h>
+#include <blast/blaze/Math.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>

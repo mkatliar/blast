@@ -6,6 +6,7 @@
 
 #include <blast/math/constraints/PanelMatrix.hpp>
 #include <blast/math/expressions/PanelMatrix.hpp>
+#include <blast/math/TypeTraits.hpp>
 
 #include <blaze/math/Aliases.h>
 #include <blaze/math/constraints/RequiresEvaluation.h>
@@ -31,6 +32,8 @@
 #include <blaze/util/mpl/If.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/typetraits/GetMemberType.h>
+
+#include <type_traits>
 
 
 namespace blast
@@ -234,4 +237,22 @@ namespace blast
         using ReturnType = const PMatTransExpr<MT, !SO>;
         return ReturnType(*pm);
     }
+
+
+    template <typename MT, bool SO>
+    struct IsPanelMatrix<PMatTransExpr<MT, SO>> : std::true_type {};
+
+
+    template <typename MT, bool SO>
+    struct IsStatic<PMatTransExpr<MT, SO>> : IsStatic<MT> {};
+
+
+    /**
+     * @brief Specialization for @a PMatTransExpr
+     *
+     * @tparam expression operand type
+     * @tparam SO storage order
+     */
+    template <typename MT, bool SO>
+    struct Spacing<PMatTransExpr<MT, SO>> : Spacing<MT> {};
 }
