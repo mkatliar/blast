@@ -5,7 +5,14 @@ import json
 
 
 def filter_aggregate(benchmarks, name):
-    return [b for b in benchmarks if b['aggregate_name'] == name]
+    result = []
+    for b in benchmarks:
+        try:
+            if b['aggregate_name'] == name:
+                result.append(b)
+        except KeyError:
+            continue
+    return result
 
 
 factor = 1e+9 # Giga

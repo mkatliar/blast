@@ -4,7 +4,7 @@ BENCH_BLAZE = build/bin/bench-blaze
 BENCH_EIGEN = build/bin/bench-eigen
 BENCH_BLAST = build/bin/bench-blast
 BENCH_LIBXSMM = build/bin/bench-libxsmm
-BENCHMARK_OPTIONS = --benchmark_repetitions=5 --benchmark_counters_tabular=true --benchmark_out_format=json --benchmark_report_aggregates_only=true
+BENCHMARK_OPTIONS = --benchmark_repetitions=10 --benchmark_counters_tabular=true --benchmark_out_format=json
 RUN_MATLAB = matlab -nodisplay -nosplash -nodesktop -r
 BENCH_DATA = bench_result/data
 BENCH_IMAGE = bench_result/image
