@@ -8,6 +8,7 @@
 #include <blast/math/panel/Gemm.hpp>
 #include <blast/math/views/submatrix/BaseTemplate.hpp>
 #include <blast/math/panel/PanelSize.hpp>
+#include <blast/math/TypeTraits.hpp>
 #include <blast/system/CacheLine.hpp>
 
 #include <blaze/math/shims/NextMultiple.h>
@@ -17,6 +18,7 @@
 #include <blaze/util/constraints/Vectorizable.h>
 
 #include <initializer_list>
+#include <type_traits>
 
 
 namespace blast
@@ -223,6 +225,18 @@ namespace blast
 
         return *this;
     }
+
+
+    /**
+     * @brief Specialization for @a StaticPanelMatrix
+     *
+     * @tparam Type element type
+     * @tparam M number of rows
+     * @tparam N number of columns
+     * @tparam SO storage order
+     */
+    template <typename Type, size_t M, size_t N, bool SO>
+    struct Spacing<StaticPanelMatrix<Type, M, N, SO>> : std::integral_constant<size_t, StaticPanelMatrix<Type, M, N, SO>::spacing()> {};
 }
 
 namespace blaze

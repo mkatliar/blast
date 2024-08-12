@@ -1,26 +1,14 @@
-// Copyright 2023 Mikhail Katliar
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Copyright 2023-2024 Mikhail Katliar. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
 #pragma once
 
 #include <blast/util/Exception.hpp>
-
 #include <blast/system/Tile.hpp>
 #include <blast/math/RegisterMatrix.hpp>
-#include <blast/math/typetraits/VectorPointer.hpp>
-#include <blast/math/dense/VectorPointer.hpp>
-#include <blast/math/dense/MatrixPointer.hpp>
+#include <blast/math/Matrix.hpp>
+#include <blast/math/Vector.hpp>
 
 
 namespace blast
@@ -57,12 +45,8 @@ namespace blast
         MatrixPointer<MPB, Scalar> && (StorageOrder_v<MPB> == columnMajor)
     inline void ger(size_t M, size_t N, Scalar alpha, VPX x, VPY y, MPA A, MPB B)
     {
-        using ET = ElementType_t<MPB>;
+        using ET = Scalar;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;
-
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<VPX>, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<VPY>, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MPA>, ET);
 
         size_t j = 0;
 
@@ -182,13 +166,6 @@ namespace blast
         DenseMatrix<MT1, columnMajor>& B
     )
     {
-        using ET = ElementType_t<MT1>;
-        size_t constexpr TILE_SIZE = TileSize_v<ET>;
-
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<VT0>, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<VT1>, ET);
-        BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(ElementType_t<MT0>, ET);
-
         size_t const M = size(x);
         size_t const N = size(y);
 

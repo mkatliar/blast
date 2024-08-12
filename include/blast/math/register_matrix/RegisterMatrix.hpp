@@ -7,9 +7,12 @@
 #include <blast/math/Simd.hpp>
 #include <blast/math/typetraits/MatrixPointer.hpp>
 #include <blast/math/typetraits/VectorPointer.hpp>
+#include <blast/math/typetraits/Matrix.hpp>
 #include <blast/math/RowColumnVectorPointer.hpp>
 #include <blast/math/Side.hpp>
 #include <blast/math/UpLo.hpp>
+#include <blast/math/StorageOrder.hpp>
+#include <blast/util/Types.hpp>
 
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/Matrix.h>
@@ -22,9 +25,6 @@
 
 namespace blast
 {
-    using namespace blaze;
-
-
     /// @brief Register-resident matrix
     ///
     /// The RegisterMatrix class provides basic linear algebra operations that can be performed
@@ -39,12 +39,12 @@ namespace blast
     ///
     template <typename T, size_t M, size_t N, bool SO = columnMajor>
     class RegisterMatrix
-    :   public Matrix<RegisterMatrix<T, M, N, SO>, SO>
+    :   public blaze::Matrix<RegisterMatrix<T, M, N, SO>, SO>
     {
     public:
         static_assert(SO == columnMajor, "Only column-major register matrices are currently supported");
 
-        using BaseType = Matrix<RegisterMatrix<T, M, N, SO>, SO>;
+        using BaseType = blaze::Matrix<RegisterMatrix<T, M, N, SO>, SO>;
         using BaseType::storageOrder;
 
         /// @brief Type of matrix elements
@@ -131,7 +131,7 @@ namespace blast
 
         /// @brief R += beta * A
         template <typename PA>
-            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
         void axpy(T beta, PA a) noexcept
         {
             SimdVecType const beta_simd {beta};
@@ -146,7 +146,7 @@ namespace blast
 
         /// @brief R(0:m-1, 0:n-1) += beta * A
         template <typename PA>
-            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
         void axpy(T beta, PA a, size_t m, size_t n) noexcept
         {
             SimdVecType const beta_simd {beta};
@@ -191,7 +191,7 @@ namespace blast
 
         /// @brief Store lower-triangular part of the matrix at location pointed by \a p.
         template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void storeLower(P p) const noexcept;
 
 
@@ -466,7 +466,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::store(P p) const noexcept
     {
         #pragma unroll
@@ -479,7 +479,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::store(P p, size_t m, size_t n) const noexcept
     {
         // The compile-time constant size of the j loop in combination with the if() expression
@@ -501,7 +501,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::storeLower(P p) const noexcept
     {
         for (size_t j = 0; j < N; ++j)
@@ -524,7 +524,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::storeLower(P p, size_t m, size_t n) const noexcept
     {
         for (size_t j = 0; j < N; ++j) if (j < n)
@@ -802,23 +802,23 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2>
-    inline bool operator==(RegisterMatrix<T, M, N, SO1> const& rm, Matrix<MT, SO2> const& m)
+    template <typename T, size_t M, size_t N, bool SO1, Matrix MT>
+    inline bool operator==(RegisterMatrix<T, M, N, SO1> const& rm, MT const& m)
     {
         if (rows(m) != rm.rows() || columns(m) != rm.columns())
             return false;
 
         for (size_t i = 0; i < rm.rows(); ++i)
             for (size_t j = 0; j < rm.columns(); ++j)
-                if (rm(i, j) != (*m)(i, j))
+                if (rm(i, j) != m(i, j))
                     return false;
 
         return true;
     }
 
 
-    template <typename MT, bool SO1, typename T, size_t M, size_t N, bool SO2>
-    inline bool operator==(Matrix<MT, SO1> const& m, RegisterMatrix<T, M, N, SO2> const& rm)
+    template <Matrix MT, typename T, size_t M, size_t N, bool SO2>
+    inline bool operator==(MT const& m, RegisterMatrix<T, M, N, SO2> const& rm)
     {
         return rm == m;
     }

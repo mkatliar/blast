@@ -3,10 +3,10 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/dense/Gemm.hpp>
+#include <blast/math/Matrix.hpp>
+#include <blast/blaze/Math.hpp>
 
 #include <bench/Gemm.hpp>
-
-#include <blaze/math/StaticMatrix.h>
 
 #include <test/Randomize.hpp>
 

@@ -14,7 +14,7 @@
 
 #include <blast/math/dense/Iamax.hpp>
 
-#include <blaze/math/DynamicVector.h>
+#include <blast/blaze/Math.hpp>
 
 #include <bench/Iamax.hpp>
 #include <bench/Complexity.hpp>

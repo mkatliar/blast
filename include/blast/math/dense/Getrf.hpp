@@ -57,7 +57,7 @@ namespace blast
 
         size_t const M = rows(A);
         size_t const N = columns(A);
-        auto pA = ptr(A);
+        auto pA = ptr(*A);
 
         size_t k = 0;
 

@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-
 #include <blast/math/dense/Potrf.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 #include <test/Tolerance.hpp>
+
+#include <blast/blaze/Math.hpp>
 
 
 namespace blast :: testing
@@ -30,7 +31,7 @@ namespace blast :: testing
         {
             // Init matrices
             //
-            DynamicMatrix<Real, columnMajor> A(M, M), L(M, M);
+            blaze::DynamicMatrix<Real, columnMajor> A(M, M), L(M, M);
             makePositiveDefinite(A);
             reset(L);
 
@@ -51,7 +52,7 @@ namespace blast :: testing
 
         // Init matrices
         //
-        StaticMatrix<Real, M, M, columnMajor> A, L;
+        blaze::StaticMatrix<Real, M, M, columnMajor> A, L;
         makePositiveDefinite(A);
         reset(L);
 
@@ -71,10 +72,10 @@ namespace blast :: testing
 
         // Init matrices
         //
-        StaticMatrix<Real, M, M, columnMajor> A_orig;
+        blaze::StaticMatrix<Real, M, M, columnMajor> A_orig;
         makePositiveDefinite(A_orig);
 
-        StaticMatrix<Real, M, M, columnMajor> A = A_orig;
+        blaze::StaticMatrix<Real, M, M, columnMajor> A = A_orig;
         for (size_t i = 0; i < M; ++i)
             for (size_t j = i + 1; j < M; ++j)
                 reset(A(i, j));

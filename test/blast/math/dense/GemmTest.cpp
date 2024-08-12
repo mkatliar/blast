@@ -9,7 +9,7 @@
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 
-#include <blaze/Math.h>
+#include <blast/blaze/Math.hpp>
 
 
 namespace blast :: testing

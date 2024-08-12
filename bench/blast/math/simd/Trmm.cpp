@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <blast/math/dense/StaticMatrixPointer.hpp>
+#include <blast/math/Matrix.hpp>
 #include <blast/math/RegisterMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
 
 #include <test/Randomize.hpp>
 
-#include <blaze/math/StaticMatrix.h>
+#include <blast/blaze/Math.hpp>
 
 
 namespace blast :: benchmark
