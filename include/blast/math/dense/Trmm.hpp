@@ -44,15 +44,15 @@ namespace blast
         // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
         for (; i + 2 * TILE_SIZE < M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             trmmLeftUpper_backend<3 * TILE_SIZE, TILE_SIZE>(
-                M - i, N, alpha, ptr<aligned>(A, i, i), ptr<aligned>(B, i, 0), ptr<aligned>(C, i, 0));
+                M - i, N, alpha, ptr<aligned>(*A, i, i), ptr<aligned>(*B, i, 0), ptr<aligned>(*C, i, 0));
 
         for (; i + 1 * TILE_SIZE < M; i += 2 * TILE_SIZE)
             trmmLeftUpper_backend<2 * TILE_SIZE, TILE_SIZE>(
-                M - i, N, alpha, ptr<aligned>(A, i, i), ptr<aligned>(B, i, 0), ptr<aligned>(C, i, 0));
+                M - i, N, alpha, ptr<aligned>(*A, i, i), ptr<aligned>(*B, i, 0), ptr<aligned>(*C, i, 0));
 
         for (; i + 0 * TILE_SIZE < M; i += 1 * TILE_SIZE)
             trmmLeftUpper_backend<1 * TILE_SIZE, TILE_SIZE>(
-                M - i, N, alpha, ptr<aligned>(A, i, i), ptr<aligned>(B, i, 0), ptr<aligned>(C, i, 0));
+                M - i, N, alpha, ptr<aligned>(*A, i, i), ptr<aligned>(*B, i, 0), ptr<aligned>(*C, i, 0));
     }
 
 
@@ -92,46 +92,46 @@ namespace blast
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-				gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
+				gemm(ker, N - j, alpha, ptr<aligned>(*B, i, j), ptr<aligned>(*A, j, j));
 				/*
                 ker.trmmRightLower(alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
                 ker.gemm(K, alpha, ptr<aligned>(B, i, j + TILE_SIZE), ptr<aligned>(A, j + TILE_SIZE, j));
 				*/
-                ker.store(ptr<aligned>(C, i, j));
+                ker.store(ptr<aligned>(*C, i, j));
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-				gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
+				gemm(ker, N - j, alpha, ptr<aligned>(*B, i, j), ptr<aligned>(*A, j, j));
 				/*
                 ker.trmmRightLower(alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
                 ker.gemm(K, alpha, ptr<aligned>(B, i, j + TILE_SIZE), ptr<aligned>(A, j + TILE_SIZE, j));
 				*/
-                ker.store(ptr<aligned>(C, i, j));
+                ker.store(ptr<aligned>(*C, i, j));
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-				gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
+				gemm(ker, N - j, alpha, ptr<aligned>(*B, i, j), ptr<aligned>(*A, j, j));
 				/*
                 ker.trmmRightLower(alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
                 ker.gemm(K, alpha, ptr<aligned>(B, i, j + TILE_SIZE), ptr<aligned>(A, j + TILE_SIZE, j));
 				*/
-                ker.store(ptr<aligned>(C, i, j));
+                ker.store(ptr<aligned>(*C, i, j));
             }
 
             // Bottom side
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-				gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), M - i, ker.columns());
+				gemm(ker, N - j, alpha, ptr<aligned>(*B, i, j), ptr<aligned>(*A, j, j), M - i, ker.columns());
 				/*
                 ker.trmmRightLower(alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j));
                 ker.gemm(K, alpha, ptr<aligned>(B, i, j + TILE_SIZE), ptr<aligned>(A, j + TILE_SIZE, j), M - i, ker.columns());
 				*/
-                ker.store(ptr<aligned>(C, i, j), M - i, ker.columns());
+                ker.store(ptr<aligned>(*C, i, j), M - i, ker.columns());
             }
         }
 
@@ -146,30 +146,30 @@ namespace blast
             for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), ker.rows(), N - j);
-                ker.store(ptr<aligned>(C, i, j), ker.rows(), N - j);
+                gemm(ker, N - j, alpha, ptr<aligned>(*B, i, j), ptr<aligned>(*A, j, j), ker.rows(), N - j);
+                ker.store(ptr<aligned>(*C, i, j), ker.rows(), N - j);
             }
 
             for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), ker.rows(), N - j);
-                ker.store(ptr<aligned>(C, i, j), ker.rows(), N - j);
+                gemm(ker, N - j, alpha, ptr<aligned>(*B, i, j), ptr<aligned>(*A, j, j), ker.rows(), N - j);
+                ker.store(ptr<aligned>(*C, i, j), ker.rows(), N - j);
             }
 
             for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
             {
                 RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), ker.rows(), N - j);
-                ker.store(ptr<aligned>(C, i, j), ker.rows(), N - j);
+                gemm(ker, N - j, alpha, ptr<aligned>(*B, i, j), ptr<aligned>(*A, j, j), ker.rows(), N - j);
+                ker.store(ptr<aligned>(*C, i, j), ker.rows(), N - j);
             }
 
             // Bottom-right corner
             if (i < M)
             {
                 RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                gemm(ker, N - j, alpha, ptr<aligned>(B, i, j), ptr<aligned>(A, j, j), M - i, N - j);
-                ker.store(ptr<aligned>(C, i, j), M - i, N - j);
+                gemm(ker, N - j, alpha, ptr<aligned>(*B, i, j), ptr<aligned>(*A, j, j), M - i, N - j);
+                ker.store(ptr<aligned>(*C, i, j), M - i, N - j);
             }
         }
     }

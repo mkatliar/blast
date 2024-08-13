@@ -4,14 +4,12 @@
 
 #pragma once
 
-
 #include <blast/math/TransposeFlag.hpp>
 #include <blast/math/StorageOrder.hpp>
 #include <blast/math/TypeTraits.hpp>
 #include <blast/math/Simd.hpp>
 #include <blast/util/Assert.hpp>
-#include <blaze/util/Exception.h>
-
+#include <blast/system/Inline.hpp>
 
 namespace blast
 {
@@ -203,51 +201,32 @@ namespace blast
 
 
     template <bool SO, typename T, bool AF, bool PF>
-    BLAZE_ALWAYS_INLINE auto trans(DynamicMatrixPointer<T, SO, AF, PF> const& p) noexcept
+    BLAST_ALWAYS_INLINE auto trans(DynamicMatrixPointer<T, SO, AF, PF> const& p) noexcept
     {
         return p.trans();
     }
 
 
-    template <bool AF, typename MT, bool SO>
-        requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT>, SO, AF, IsPadded_v<MT>>
-        ptr(DenseMatrix<MT, SO>& m, size_t i, size_t j)
+    template <bool AF, Matrix MT>
+    requires (!IsStatic_v<MT>) && IsDenseMatrix_v<MT>
+    BLAST_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT>, StorageOrder_v<MT>, AF, IsPadded_v<MT>>
+        ptr(MT& m, size_t i, size_t j)
     {
-        if constexpr (SO == columnMajor)
-            return {(*m).data() + i + spacing(m) * j, spacing(m)};
+        if constexpr (StorageOrder_v<MT> == columnMajor)
+            return {data(m) + i + spacing(m) * j, spacing(m)};
         else
-            return {(*m).data() + spacing(m) * i + j, spacing(m)};
+            return {data(m) + spacing(m) * i + j, spacing(m)};
     }
 
 
-    template <bool AF, typename MT, bool SO>
-        requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>
-        ptr(DenseMatrix<MT, SO> const& m, size_t i, size_t j)
+    template <bool AF, typename MT>
+    requires (!IsStatic_v<MT>) && IsDenseMatrix_v<MT>
+    BLAST_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, StorageOrder_v<MT>, AF, IsPadded_v<MT>>
+        ptr(MT const& m, size_t i, size_t j)
     {
-        if constexpr (SO == columnMajor)
-            return {(*m).data() + i + spacing(m) * j, spacing(m)};
+        if constexpr (StorageOrder_v<MT> == columnMajor)
+            return {data(m) + i + spacing(m) * j, spacing(m)};
         else
-            return {(*m).data() + spacing(m) * i + j, spacing(m)};
-    }
-
-
-    template <bool AF, typename MT, bool SO>
-        requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>
-        ptr(DMatTransExpr<MT, SO> const& m, size_t i, size_t j)
-    {
-        if constexpr (SO == columnMajor)
-            return {(*m).data() + i + spacing(m) * j, spacing(m)};
-        else
-            return {(*m).data() + spacing(m) * i + j, spacing(m)};
-    }
-
-
-    template <bool AF, bool PF, bool SO, typename T>
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<T, SO, AF, PF> ptr(T * p, size_t spacing)
-    {
-        return {p, spacing};
+            return {data(m) + spacing(m) * i + j, spacing(m)};
     }
 }

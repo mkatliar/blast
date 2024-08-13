@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-
 #include <blast/math/dense/Getf2.hpp>
 #include <blast/math/dense/Laswp.hpp>
+#include <blast/blaze/Math.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
@@ -23,13 +23,13 @@ namespace blast :: testing
         using Real = T;
 
         template <typename MT, bool SO>
-        static DynamicMatrix<Real> luRestore(Matrix<MT, SO> const& LU, size_t * ipiv)
+        static blaze::DynamicMatrix<Real> luRestore(blaze::Matrix<MT, SO> const& LU, size_t * ipiv)
         {
             auto const M = rows(LU);
             auto const N = columns(LU);
             auto const K = std::min(M, N);
 
-            DynamicMatrix<Real> L(M, K, 0.);
+            blaze::DynamicMatrix<Real> L(M, K, 0.);
             for (size_t i = 0; i < M; ++i)
             {
                 for (size_t j = 0; j < i && j < K; ++j)
@@ -39,7 +39,7 @@ namespace blast :: testing
                     L(i, i) = 1.;
             }
 
-            DynamicMatrix<Real> U(K, N, 0.);
+            blaze::DynamicMatrix<Real> U(K, N, 0.);
             for (size_t i = 0; i < K; ++i)
             {
                 for (size_t j = i; j < N; ++j)
@@ -63,9 +63,9 @@ namespace blast :: testing
 
                     // Init matrices
                     //
-                    DynamicMatrix<Real, SO> A(M, N);
+                    blaze::DynamicMatrix<Real, SO> A(M, N);
                     randomize(A);
-                    DynamicMatrix<Real, SO> A_orig = A;
+                    blaze::DynamicMatrix<Real, SO> A_orig = A;
 
                     // Do getrf
                     std::vector<size_t> ipiv(K);

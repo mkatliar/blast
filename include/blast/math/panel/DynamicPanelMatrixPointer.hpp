@@ -8,11 +8,7 @@
 #include <blast/math/StorageOrder.hpp>
 #include <blast/math/TypeTraits.hpp>
 #include <blast/math/Simd.hpp>
-#include <blast/math/expressions/PanelMatrix.hpp>
-#include <blast/math/expressions/PMatTransExpr.hpp>
 #include <blast/util/Assert.hpp>
-
-#include <type_traits>
 
 
 namespace blast
@@ -252,26 +248,18 @@ namespace blast
     }
 
 
-    template <bool AF, typename MT, bool SO>
-    requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO>& m, size_t i, size_t j)
-    {
-        return DynamicPanelMatrixPointer<ElementType_t<MT>, SO, AF, IsPadded_v<MT>>((*m).data(), spacing(m), i, j);
-    }
-
-
-    template <bool AF, typename MT, bool SO>
-    requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE auto ptr(PanelMatrix<MT, SO> const& m, size_t i, size_t j)
-    {
-        return DynamicPanelMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>((*m).data(), spacing(m), i, j);
-    }
-
-
-    template <bool AF, typename MT, bool SO>
+    template <bool AF, Matrix MT>
     requires (!IsStatic_v<MT>) && IsPanelMatrix_v<MT>
-    BLAZE_ALWAYS_INLINE auto ptr(PMatTransExpr<MT, SO> const& m, size_t i, size_t j)
+    BLAZE_ALWAYS_INLINE auto ptr(MT& m, size_t i, size_t j)
     {
-        return trans(ptr(m.operand(), j, i));
+        return DynamicPanelMatrixPointer<ElementType_t<MT>, StorageOrder_v<MT>, AF, IsPadded_v<MT>>(data(m), spacing(m), i, j);
+    }
+
+
+    template <bool AF, Matrix MT>
+    requires (!IsStatic_v<MT>) && IsPanelMatrix_v<MT>
+    BLAZE_ALWAYS_INLINE auto ptr(MT const& m, size_t i, size_t j)
+    {
+        return DynamicPanelMatrixPointer<ElementType_t<MT> const, StorageOrder_v<MT>, AF, IsPadded_v<MT>>(data(m), spacing(m), i, j);
     }
 }

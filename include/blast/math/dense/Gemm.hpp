@@ -5,12 +5,8 @@
 #pragma once
 
 #include <blast/math/algorithm/Gemm.hpp>
-#include <blast/math/dense/MatrixPointer.hpp>
+#include <blast/math/Matrix.hpp>
 #include <blast/util/Exception.hpp>
-
-#include <cstddef>
-#include <stdexcept>
-#include <type_traits>
 
 
 namespace blast

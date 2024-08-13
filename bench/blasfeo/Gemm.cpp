@@ -7,7 +7,6 @@
 #include <bench/Gemm.hpp>
 
 #include <random>
-#include <memory>
 
 
 namespace blast :: benchmark
@@ -53,7 +52,7 @@ namespace blast :: benchmark
         for (auto _ : state)
             gemm_nt(m, n, k, 1., A, 0, 0, B, 0, 0, 1., C, 0, 0, C, 0, 0);
 
-        state.counters["flops"] = Counter(2 * m * n * k + 3 * m * n, Counter::kIsIterationInvariantRate);
+        setCounters(state.counters, complexityGemm(m, n, k));
         state.counters["m"] = m;
     }
 

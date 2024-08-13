@@ -5,8 +5,7 @@
 #include <blast/math/DynamicPanelMatrix.hpp>
 #include <blast/math/panel/Potrf.hpp>
 #include <blast/math/panel/Gemm.hpp>
-
-#include <blaze/Math.h>
+#include <blast/blaze/Math.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
@@ -48,7 +47,7 @@ namespace blast :: testing
 
             // Check A == L * trans(L)
             A1 = 0.;
-            gemm_nt(L, L, A1, A1);
+            gemm(L, trans(L), A1, A1);
 
             BLAST_EXPECT_APPROX_EQ(A1, A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
         }

@@ -3,14 +3,11 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/dense/Trmm.hpp>
-
-#include <blaze/math/StaticMatrix.h>
+#include <blast/math/Matrix.hpp>
+#include <blast/blaze/Math.hpp>
 
 #include <bench/Gemm.hpp>
 #include <test/Randomize.hpp>
-
-#include <random>
-#include <memory>
 
 
 namespace blast :: benchmark

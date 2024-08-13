@@ -6,10 +6,11 @@
 
 #include <blast/math/dense/Syrk.hpp>
 
-
-
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
+
+#include <blast/blaze/Math.hpp>
+
 
 namespace blast :: testing
 {
@@ -32,8 +33,8 @@ namespace blast :: testing
             {
                 // Init Blaze matrices
                 //
-                DynamicMatrix<Real, columnMajor> A(m, k);
-                DynamicMatrix<Real, columnMajor> C(m, m), D(m, m);
+                blaze::DynamicMatrix<Real, columnMajor> A(m, k);
+                blaze::DynamicMatrix<Real, columnMajor> C(m, m), D(m, m);
                 randomize(A);
                 makeSymmetric(C);
                 // for (size_t i = 0; i < m; ++i)

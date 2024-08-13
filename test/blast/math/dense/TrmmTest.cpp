@@ -4,8 +4,7 @@
 
 #include <blast/math/dense/Trmm.hpp>
 #include <blast/math/dense/Gemm.hpp>
-
-
+#include <blast/blaze/Math.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>

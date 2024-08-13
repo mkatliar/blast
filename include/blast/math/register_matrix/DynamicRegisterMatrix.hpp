@@ -6,14 +6,16 @@
 
 #include <blast/math/Simd.hpp>
 #include <blast/math/typetraits/MatrixPointer.hpp>
+#include <blast/math/typetraits/Matrix.hpp>
 #include <blast/math/Side.hpp>
 #include <blast/math/UpLo.hpp>
+#include <blast/math/StorageOrder.hpp>
 #include <blast/util/Assert.hpp>
+#include <blast/util/Types.hpp>
 
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/Matrix.h>
 #include <blaze/system/Inline.h>
-#include <blaze/util/Types.h>
 #include <blaze/util/Exception.h>
 #include <blaze/util/StaticAssert.h>
 
@@ -31,12 +33,12 @@ namespace blast
     /// @tparam SO orientation of SIMD registers.
     template <typename T, size_t M, size_t N, bool SO = columnMajor>
     class DynamicRegisterMatrix
-    :   public Matrix<DynamicRegisterMatrix<T, M, N, SO>, SO>
+    :   public blaze::Matrix<DynamicRegisterMatrix<T, M, N, SO>, SO>
     {
     public:
         static_assert(SO == columnMajor, "Only column-major register matrices are currently supported");
 
-        using BaseType = Matrix<DynamicRegisterMatrix<T, M, N, SO>, SO>;
+        using BaseType = blaze::Matrix<DynamicRegisterMatrix<T, M, N, SO>, SO>;
         using BaseType::storageOrder;
 
         /// @brief Type of matrix elements
@@ -135,7 +137,7 @@ namespace blast
 
         /// @brief R(0:m-1, 0:n-1) += beta * A
         template <typename PA>
-            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
         void axpy(T beta, PA a) noexcept
         {
             #pragma unroll
@@ -148,25 +150,25 @@ namespace blast
 
         /// @brief Load from memory
         template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(P p) noexcept;
 
 
         /// @brief Load from memory
         template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void load(T beta, P p) noexcept;
 
 
         /// @brief Store matrix at location pointed by \a p
         template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void store(P p) const noexcept;
 
 
         /// @brief Store lower-triangular part of the matrix at location pointed by \a p.
         template <typename P>
-            requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
         void storeLower(P p) const noexcept;
 
 
@@ -178,7 +180,7 @@ namespace blast
         /// @param a pointer to the first element of the first matrix.
         /// @param b pointer to the first element of the second matrix.
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
         void ger(T alpha, PA a, PB b) noexcept;
 
 
@@ -189,7 +191,7 @@ namespace blast
         /// @param a pointer to the first element of the first matrix.
         /// @param b pointer to the first element of the second matrix.
         template <typename PA, typename PB>
-            requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
         void ger(PA a, PB b) noexcept;
 
 
@@ -202,7 +204,7 @@ namespace blast
         /// @brief a pointer to a triangular matrix
         ///
         template <typename P>
-            requires MatrixPointer<P, T>
+        requires MatrixPointer<P, T>
         void trsmRightUpper(P a);
 
 
@@ -222,7 +224,7 @@ namespace blast
         /// @param b general matrix.
         ///
         template <typename P1, typename P2>
-            requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
+        requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
         void trmmLeftUpper(T alpha, P1 a, P2 b) noexcept;
 
 
@@ -242,7 +244,7 @@ namespace blast
         /// @param b general matrix.
         ///
         template <typename P1, typename P2>
-            requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
+        requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
         void trmmRightLower(T alpha, P1 a, P2 b) noexcept;
 
 
@@ -289,7 +291,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void DynamicRegisterMatrix<T, M, N, SO>::load(P p) noexcept
     {
         #pragma unroll
@@ -302,7 +304,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void DynamicRegisterMatrix<T, M, N, SO>::load(T beta, P p) noexcept
     {
         #pragma unroll
@@ -315,7 +317,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void DynamicRegisterMatrix<T, M, N, SO>::store(P p) const noexcept
     {
         // The compile-time constant size of the j loop in combination with the if() expression
@@ -337,7 +339,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
-        requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
+    requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void DynamicRegisterMatrix<T, M, N, SO>::storeLower(P p) const noexcept
     {
         for (size_t j = 0; j < N; ++j) if (j < n_)
@@ -393,7 +395,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PA, typename PB>
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+    requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
     BLAZE_ALWAYS_INLINE void DynamicRegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b) noexcept
     {
         SimdVecType ax[RM];
@@ -416,7 +418,7 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PA, typename PB>
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
+    requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor) && MatrixPointer<PB, T>
     BLAZE_ALWAYS_INLINE void DynamicRegisterMatrix<T, M, N, SO>::ger(PA a, PB b) noexcept
     {
         SimdVecType ax[RM];
@@ -550,23 +552,23 @@ namespace blast
     // }
 
 
-    template <typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2>
-    inline bool operator==(DynamicRegisterMatrix<T, M, N, SO1> const& rm, Matrix<MT, SO2> const& m)
+    template <typename T, size_t M, size_t N, bool SO1, Matrix MT>
+    inline bool operator==(DynamicRegisterMatrix<T, M, N, SO1> const& rm, MT const& m)
     {
         if (rows(m) != rm.rows() || columns(m) != rm.columns())
             return false;
 
         for (size_t i = 0; i < rm.rows(); ++i)
             for (size_t j = 0; j < rm.columns(); ++j)
-                if (rm(i, j) != (*m)(i, j))
+                if (rm(i, j) != m(i, j))
                     return false;
 
         return true;
     }
 
 
-    template <typename MT, bool SO1, typename T, size_t M, size_t N, bool SO2>
-    inline bool operator==(Matrix<MT, SO1> const& m, DynamicRegisterMatrix<T, M, N, SO2> const& rm)
+    template <Matrix MT, typename T, size_t M, size_t N, bool SO2>
+    inline bool operator==(MT const& m, DynamicRegisterMatrix<T, M, N, SO2> const& rm)
     {
         return rm == m;
     }
@@ -576,9 +578,9 @@ namespace blast
         typename T, size_t M, size_t N, bool SO,
         typename PA, typename PB, typename PC, typename PD
     >
-        requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
-            && MatrixPointer<PB, T>
-            && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
+    requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
+        && MatrixPointer<PB, T>
+        && MatrixPointer<PC, T> && (PC::storageOrder == columnMajor)
     BLAZE_ALWAYS_INLINE void gemm(DynamicRegisterMatrix<T, M, N, SO>& ker,
         size_t K, T alpha, PA a, PB b, T beta, PC c, PD d) noexcept
     {

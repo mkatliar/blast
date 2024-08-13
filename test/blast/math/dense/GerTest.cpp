@@ -6,8 +6,8 @@
 #define BLAST_USER_ASSERTION 1
 
 #include <blast/math/dense/Ger.hpp>
-
-
+#include <blast/blaze/Math.hpp>
+#include <blast/math/Vector.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>

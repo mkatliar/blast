@@ -19,10 +19,7 @@
 #include <blast/math/dense/Swap.hpp>
 #include <blast/math/dense/Iamax.hpp>
 #include <blast/math/dense/Ger.hpp>
-#include <blast/math/dense/MatrixPointer.hpp>
-#include <blast/math/RowColumnVectorPointer.hpp>
-
-#include <cmath>
+#include <blast/math/Matrix.hpp>
 
 
 namespace blast
@@ -106,7 +103,7 @@ namespace blast
     template <typename MT>
     inline void getf2(DenseMatrix<MT, columnMajor>& A, size_t * ipiv)
     {
-        getf2(rows(*A), columns(*A), ptr(A), ipiv);
+        getf2(rows(*A), columns(*A), ptr(*A), ipiv);
     }
 
 
