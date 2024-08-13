@@ -4,7 +4,7 @@
 
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/Matrix.hpp>
-#include <blast/math/panel/Gemm.hpp>
+#include <blast/math/algorithm/Gemm.hpp>
 #include <blast/blaze/Math.hpp>
 
 #include <bench/Gemm.hpp>

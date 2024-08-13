@@ -6,7 +6,7 @@
 
 #include <blast/math/PanelMatrix.hpp>
 #include <blast/math/views/submatrix/Panel.hpp>
-#include <blast/math/panel/Gemm.hpp>
+#include <blast/math/algorithm/Gemm.hpp>
 #include <blast/math/panel/PanelSize.hpp>
 
 #include <blaze/util/Exception.h>

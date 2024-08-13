@@ -7,7 +7,7 @@
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/DynamicPanelMatrix.hpp>
 #include <blast/math/views/submatrix/Panel.hpp>
-#include <blast/math/panel/Gemm.hpp>
+#include <blast/math/algorithm/Gemm.hpp>
 
 #include <blaze/Math.h>
 

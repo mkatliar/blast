@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <blast/math/dense/Gemm.hpp>
+#include <blast/math/algorithm/Gemm.hpp>
 #include <blast/math/Matrix.hpp>
 #include <blast/blaze/Math.hpp>
 
