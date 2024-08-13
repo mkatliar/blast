@@ -7,6 +7,7 @@
 #include <blast/math/PanelMatrix.hpp>
 #include <blast/math/views/submatrix/BaseTemplate.hpp>
 #include <blast/math/simd/SimdSize.hpp>
+#include <blast/math/TypeTraits.hpp>
 #include <blast/system/CacheLine.hpp>
 
 #include <blaze/util/IntegralConstant.h>
@@ -18,6 +19,7 @@
 #include <blaze/system/Restrict.h>
 
 #include <new>
+#include <type_traits>
 
 
 namespace blast
@@ -177,6 +179,13 @@ namespace blast
                 : j / SS * spacing_ + j % SS + i * SS;
         }
     };
+
+
+    /**
+     * @brief Specialization for @a DynamicPanelMatrix
+     */
+    template <typename T, bool SO>
+    struct StorageOrderHelper<DynamicPanelMatrix<T, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 }
 
 

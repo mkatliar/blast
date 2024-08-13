@@ -10,3 +10,4 @@
 #include <blast/blaze/math/typetraits/IsDenseVector.hpp>
 #include <blast/blaze/math/typetraits/IsDenseMatrix.hpp>
 #include <blast/blaze/math/typetraits/Spacing.hpp>
+#include <blast/blaze/math/typetraits/StorageOrder.hpp>

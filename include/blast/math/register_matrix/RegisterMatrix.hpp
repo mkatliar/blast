@@ -5,9 +5,7 @@
 #pragma once
 
 #include <blast/math/Simd.hpp>
-#include <blast/math/typetraits/MatrixPointer.hpp>
-#include <blast/math/typetraits/VectorPointer.hpp>
-#include <blast/math/typetraits/Matrix.hpp>
+#include <blast/math/TypeTraits.hpp>
 #include <blast/math/RowColumnVectorPointer.hpp>
 #include <blast/math/Side.hpp>
 #include <blast/math/UpLo.hpp>
@@ -21,6 +19,8 @@
 #include <blaze/util/Exception.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/StaticAssert.h>
+
+#include <type_traits>
 
 
 namespace blast
@@ -391,6 +391,18 @@ namespace blast
             return v_[i / SS][j][i % SS];
         }
     };
+
+
+    /**
+     * @brief Specialization for @a RegisterMatrix
+     *
+     * @tparam T type of matrix elements
+     * @tparam M number of rows of the matrix. Must be a multiple of SS.
+     * @tparam N number of columns of the matrix.
+     * @tparam SO orientation of SIMD registers.
+     */
+    template <typename T, size_t M, size_t N, bool SO>
+    struct StorageOrderHelper<RegisterMatrix<T, M, N, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 
 
     template <typename Ker>

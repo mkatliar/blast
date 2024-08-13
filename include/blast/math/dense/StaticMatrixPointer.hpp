@@ -12,6 +12,8 @@
 #include <blast/math/TypeTraits.hpp>
 #include <blast/util/Assert.hpp>
 
+#include <type_traits>
+
 
 namespace blast
 {
@@ -190,6 +192,13 @@ namespace blast
 
         T * ptr_;
     };
+
+
+    /**
+     * @brief Specialization for StaticMatrixPointer
+     */
+    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    struct StorageOrderHelper<StaticMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 
 
     template <typename T, size_t S, bool SO, bool AF, bool PF>
