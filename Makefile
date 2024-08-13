@@ -3,8 +3,10 @@ BENCH_BLASFEO = build/bin/bench-blasfeo
 BENCH_BLAZE = build/bin/bench-blaze
 BENCH_EIGEN = build/bin/bench-eigen
 BENCH_BLAST = build/bin/bench-blast
+BENCH_BLAST_OUTPUT_DIR = $(shell git rev-parse --short HEAD)
+BENCH_BLAST_CPU_CORE = 11
 BENCH_LIBXSMM = build/bin/bench-libxsmm
-BENCHMARK_OPTIONS = --benchmark_repetitions=10 --benchmark_counters_tabular=true --benchmark_out_format=json
+BENCHMARK_OPTIONS = --benchmark_repetitions=30 --benchmark_counters_tabular=true --benchmark_out_format=json --benchmark_enable_random_interleaving=true --benchmark_min_warmup_time=10 --benchmark_min_time=1000000x
 RUN_MATLAB = matlab -nodisplay -nosplash -nodesktop -r
 BENCH_DATA = bench_result/data
 BENCH_IMAGE = bench_result/image
@@ -61,29 +63,29 @@ ${BENCH_DATA}/sgemm-blaze-static.json: $(BENCH_BLAZE)
 	$(BENCH_BLAZE) --benchmark_filter="BM_gemm_static<float>*" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/sgemm-blaze-static.json
 
-${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-panel.json: $(BENCH_BLAST)
-	$(BENCH_BLAST) --benchmark_filter="BM_gemm_static_panel<double, .+>" $(BENCHMARK_OPTIONS) \
-		--benchmark_out=${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-panel.json
+${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-panel.json: $(BENCH_BLAST)
+	taskset -c ${BENCH_BLAST_CPU_CORE} $(BENCH_BLAST) --benchmark_filter="BM_gemm_static_panel<double, .+>" $(BENCHMARK_OPTIONS) \
+		--benchmark_out=${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-panel.json
 
-${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-panel.json: $(BENCH_BLAST)
-	$(BENCH_BLAST) --benchmark_filter="BM_gemm_dynamic_panel<double>" $(BENCHMARK_OPTIONS) \
-		--benchmark_out=${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-panel.json
+${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-panel.json: $(BENCH_BLAST)
+	taskset -c ${BENCH_BLAST_CPU_CORE} $(BENCH_BLAST) --benchmark_filter="BM_gemm_dynamic_panel<double>" $(BENCHMARK_OPTIONS) \
+		--benchmark_out=${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-panel.json
 
-${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-plain.json: $(BENCH_BLAST)
-	$(BENCH_BLAST) --benchmark_filter="BM_gemm_static_plain<double, .+>" $(BENCHMARK_OPTIONS) \
-		--benchmark_out=${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-plain.json
+${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-plain.json: $(BENCH_BLAST)
+	taskset -c ${BENCH_BLAST_CPU_CORE} $(BENCH_BLAST) --benchmark_filter="BM_gemm_static_plain<double, .+>" $(BENCHMARK_OPTIONS) \
+		--benchmark_out=${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-plain.json
 
-${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-plain.json: $(BENCH_BLAST)
-	$(BENCH_BLAST) --benchmark_filter="BM_gemm_dynamic_plain<double>" $(BENCHMARK_OPTIONS) \
-		--benchmark_out=${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-plain.json
+${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-plain.json: $(BENCH_BLAST)
+	taskset -c ${BENCH_BLAST_CPU_CORE} $(BENCH_BLAST) --benchmark_filter="BM_gemm_dynamic_plain<double>" $(BENCHMARK_OPTIONS) \
+		--benchmark_out=${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-plain.json
 
 ${BENCH_DATA}/sgemm-blast-static-panel.json: $(BENCH_BLAST)
-	$(BENCH_BLAST) --benchmark_filter="BM_gemm_static_panel<float, .+>" $(BENCHMARK_OPTIONS) \
-		--benchmark_out=${BENCH_DATA}/sgemm-blast-static-panel.json
+	taskset -c ${BENCH_BLAST_CPU_CORE} $(BENCH_BLAST) --benchmark_filter="BM_gemm_static_panel<float, .+>" $(BENCHMARK_OPTIONS) \
+		--benchmark_out=${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/sgemm-blast-static-panel.json
 
 ${BENCH_DATA}/sgemm-blast-dynamic-panel.json: $(BENCH_BLAST)
-	$(BENCH_BLAST) --benchmark_filter="BM_gemm_dynamic_panel<float>" $(BENCHMARK_OPTIONS) \
-		--benchmark_out=${BENCH_DATA}/sgemm-blast-dynamic-panel.json
+	taskset -c ${BENCH_BLAST_CPU_CORE} $(BENCH_BLAST) --benchmark_filter="BM_gemm_dynamic_panel<float>" $(BENCHMARK_OPTIONS) \
+		--benchmark_out=${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/sgemm-blast-dynamic-panel.json
 
 ${BENCH_DATA}/dgemm-libxsmm.json: $(BENCH_LIBXSMM)
 	$(BENCH_LIBXSMM) --benchmark_filter="BM_gemm_nt<double>" $(BENCHMARK_OPTIONS) \
@@ -94,17 +96,17 @@ ${BENCH_DATA}/sgemm-libxsmm.json: $(BENCH_LIBXSMM)
 		--benchmark_out=${BENCH_DATA}/sgemm-libxsmm.json
 
 dgemm-benchmarks: \
-	$(shell mkdir -p ${BENCH_DATA}/$(shell git rev-parse --short HEAD)) \
+	$(shell mkdir -p ${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}) \
 	${BENCH_DATA}/dgemm-openblas.json \
 	${BENCH_DATA}/dgemm-mkl.json \
 	${BENCH_DATA}/dgemm-libxsmm.json \
 	${BENCH_DATA}/dgemm-blasfeo.json \
 	${BENCH_DATA}/dgemm-blaze-static.json \
 	${BENCH_DATA}/dgemm-eigen-static.json \
-	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-panel.json \
-	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-panel.json \
-	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-plain.json \
-	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-plain.json
+	${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-panel.json \
+	${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-panel.json \
+	${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-plain.json \
+	${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-plain.json
 
 
 #
