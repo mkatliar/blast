@@ -13,7 +13,7 @@
 #include <blast/math/RegisterMatrix.hpp>
 #include <blast/math/dense/Getf2.hpp>
 #include <blast/math/dense/Trsm.hpp>
-#include <blast/math/dense/Gemm.hpp>
+#include <blast/math/algorithm/Gemm.hpp>
 #include <blast/system/Tile.hpp>
 
 #include <blaze/util/Exception.h>

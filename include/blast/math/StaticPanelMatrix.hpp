@@ -5,6 +5,7 @@
 #pragma once
 
 #include <blast/math/panel/StaticPanelMatrix.hpp>
+#include <blast/math/expressions/PMatTransExpr.hpp>
 
 #include <blaze/util/Random.h>
 #include <blaze/util/constraints/Numeric.h>

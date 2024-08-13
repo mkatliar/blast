@@ -5,8 +5,8 @@
 #pragma once
 
 #include <blast/math/Forward.hpp>
-#include <blast/math/panel/Gemm.hpp>
 #include <blast/math/views/submatrix/BaseTemplate.hpp>
+#include <blast/math/expressions/PanelMatrix.hpp>
 #include <blast/math/panel/PanelSize.hpp>
 #include <blast/math/TypeTraits.hpp>
 #include <blast/system/CacheLine.hpp>
@@ -16,6 +16,7 @@
 #include <blaze/util/typetraits/AlignmentOf.h>
 #include <blaze/math/typetraits/HasMutableDataAccess.h>
 #include <blaze/util/constraints/Vectorizable.h>
+#include <blaze/math/traits/SubmatrixTrait.h>
 
 #include <initializer_list>
 #include <type_traits>
