@@ -9,6 +9,7 @@
 #include <blast/math/TypeTraits.hpp>
 #include <blast/math/Simd.hpp>
 #include <blast/util/Assert.hpp>
+#include <blast/system/Inline.hpp>
 
 
 namespace blast
@@ -235,8 +236,15 @@ namespace blast
     };
 
 
+    /**
+     * @brief Specialization for @a StaticPanelMatrixPointer
+     */
     template <typename T, size_t S, bool SO, bool AF, bool PF>
-    BLAZE_ALWAYS_INLINE auto trans(StaticPanelMatrixPointer<T, S, SO, AF, PF> const& p) noexcept
+    struct StorageOrderHelper<StaticPanelMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
+
+
+    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    BLAST_ALWAYS_INLINE auto trans(StaticPanelMatrixPointer<T, S, SO, AF, PF> const& p) noexcept
     {
         return p.trans();
     }
@@ -244,7 +252,7 @@ namespace blast
 
     template <bool AF, Matrix MT>
     requires IsStatic_v<MT> && IsPanelMatrix_v<MT>
-    BLAZE_ALWAYS_INLINE auto ptr(MT& m, size_t i, size_t j)
+    BLAST_ALWAYS_INLINE auto ptr(MT& m, size_t i, size_t j)
     {
         return StaticPanelMatrixPointer<ElementType_t<MT>, Spacing_v<MT>, StorageOrder_v<MT>, AF, IsPadded_v<MT>>(data(m), i, j);
     }
@@ -252,7 +260,7 @@ namespace blast
 
     template <bool AF, Matrix MT>
     requires IsStatic_v<MT> && IsPanelMatrix_v<MT>
-    BLAZE_ALWAYS_INLINE auto ptr(MT const& m, size_t i, size_t j)
+    BLAST_ALWAYS_INLINE auto ptr(MT const& m, size_t i, size_t j)
     {
         return StaticPanelMatrixPointer<ElementType_t<MT> const, Spacing_v<MT>, StorageOrder_v<MT>, AF, IsPadded_v<MT>>(data(m), i, j);
     }

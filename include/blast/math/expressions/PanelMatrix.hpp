@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include <blast/math/typetraits/IsPanelMatrix.hpp>
-#include <blast/math/typetraits/ElementType.hpp>
+#include <blast/math/TypeTraits.hpp>
 #include <blast/math/simd/SimdSize.hpp>
 #include <blast/math/simd/SimdMask.hpp>
 #include <blast/math/simd/SimdIndex.hpp>

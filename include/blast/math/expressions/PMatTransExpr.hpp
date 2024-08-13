@@ -255,4 +255,14 @@ namespace blast
      */
     template <typename MT, bool SO>
     struct Spacing<PMatTransExpr<MT, SO>> : Spacing<MT> {};
+
+
+    /**
+     * @brief Specialization for @a PMatTransExpr
+     *
+     * @tparam expression operand type
+     * @tparam SO storage order
+     */
+    template <typename MT, bool SO>
+    struct StorageOrderHelper<PMatTransExpr<MT, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 }

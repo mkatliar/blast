@@ -13,7 +13,6 @@
 
 namespace blast
 {
-
     /**
      * @brief Matrix-matrix multiplication with @a MatrixPointer arguments
      *
@@ -47,7 +46,7 @@ namespace blast
     {
         using ET = std::remove_cv_t<ElementType_t<MPD>>;
 
-        tile<ET, StorageOrder(StorageOrder_v<MPD>)>(
+        tile<ET, StorageOrder_v<MPD>>(
             xsimd::default_arch {},
             D.cachePreferredTraversal,
             M, N,

@@ -11,6 +11,8 @@
 #include <blast/util/Assert.hpp>
 #include <blast/system/Inline.hpp>
 
+#include <type_traits>
+
 
 namespace blast
 {
@@ -201,7 +203,14 @@ namespace blast
     };
 
 
-    template <bool SO, typename T, bool AF, bool PF>
+    /**
+     * @brief Specialization for @a DynamicMatrixPointer
+     */
+    template <typename T, bool SO, bool AF, bool PF>
+    struct StorageOrderHelper<DynamicMatrixPointer<T, SO, AF, PF>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
+
+
+    template <typename T, bool SO, bool AF, bool PF>
     BLAST_ALWAYS_INLINE auto trans(DynamicMatrixPointer<T, SO, AF, PF> const& p) noexcept
     {
         return p.trans();
@@ -220,7 +229,7 @@ namespace blast
     }
 
 
-    template <bool AF, typename MT>
+    template <bool AF, Matrix MT>
     requires (!IsStatic_v<MT>) && IsDenseMatrix_v<MT>
     BLAST_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, StorageOrder_v<MT>, AF, IsPadded_v<MT>>
         ptr(MT const& m, size_t i, size_t j)

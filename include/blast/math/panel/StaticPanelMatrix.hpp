@@ -238,6 +238,18 @@ namespace blast
      */
     template <typename Type, size_t M, size_t N, bool SO>
     struct Spacing<StaticPanelMatrix<Type, M, N, SO>> : std::integral_constant<size_t, StaticPanelMatrix<Type, M, N, SO>::spacing()> {};
+
+
+    /**
+     * @brief Specialization for @a StaticPanelMatrix
+     *
+     * @tparam Type element type
+     * @tparam M number of rows
+     * @tparam N number of columns
+     * @tparam SO storage order
+     */
+    template <typename Type, size_t M, size_t N, bool SO>
+    struct StorageOrderHelper<StaticPanelMatrix<Type, M, N, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 }
 
 namespace blaze
