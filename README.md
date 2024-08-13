@@ -95,6 +95,16 @@ make bench_result/image/dgemm_performance.png bench_result/image/dgemm_performan
 
 You are welcome to contribute by organizing the existing benchmark, writing more benchmarks, and writing scripts to visualize the results.
 
+### Making benchmarks give more consistent results
+
+So far, we haven't been able to make the benchmarks give always the same results on the same processor. However, what we tried so far is :
+
+- isolating CPU 11 by adding 'nohz_full=5,11 isolcpus=domain,managed_irq,5,11 irqaffinity=0-4,6-10' to the boot parameters (see https://manuel.bernhardt.io/posts/2023-11-16-core-pinning/)
+- using taskset -c 11 to then run the benchmark only on that core
+- use performance governor (see https://google.github.io/benchmark/reducing_variance.html)
+- turn off Intel Boost (see https://llvm.org/docs/Benchmarking.html)
+- use benchmark repetitions, random interleaving, warmup time (these are options of Google benchmark)
+
 ## Docker image
 To automate building and running benchmarks, a [Dockerfile](Dockerfile) is provided. Use the following commands to build a Docker image and run benchmarks in a Docker container:
 ```bash
