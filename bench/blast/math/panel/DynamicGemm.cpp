@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/DynamicPanelMatrix.hpp>
-#include <blast/math/panel/Gemm.hpp>
+#include <blast/math/algorithm/Gemm.hpp>
 
 #include <bench/Gemm.hpp>
 

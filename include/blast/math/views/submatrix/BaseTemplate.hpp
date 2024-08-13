@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <blast/util/Types.hpp>
+
 
 namespace blast
 {
