@@ -8,6 +8,9 @@ project(blast VERSION 0.1 LANGUAGES CXX)
 # Enable modern C++
 set(CMAKE_CXX_STANDARD 20)
 
+# Allow for integration with other tools such as Intellisense
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Don't use compiler's C++ extensions
 set(CMAKE_CXX_EXTENSIONS False)
 

@@ -54,19 +54,7 @@ COPY CMakeLists.txt blast
 COPY Makefile blast/Makefile
 ENV PKG_CONFIG_PATH=/usr/local/lib
 RUN mkdir -p blast/build && cd blast/build \
-    && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-        -DCMAKE_CXX_COMPILER="clang++-15" \
-        -DCMAKE_CXX_FLAGS="-march=native -mfma -mavx -mavx2 -msse4 -fno-math-errno -DXSIMD_DEFAULT_ARCH='fma3<avx2>'" \
-        -DCMAKE_CXX_FLAGS_RELEASE="-O3 -g -DNDEBUG -ffast-math" .. \
-        -DBLAST_WITH_TEST=ON \
-        -DBLAST_WITH_BENCHMARK=ON \
-        -DBLAST_WITH_BLASFEO=ON \
-        -DBLAST_BUILD_BLAST_BENCHMARK=ON \
-        -DBLAST_BUILD_LIBXSMM_BENCHMARK=ON \
-        -DBLAST_BUILD_BLAS_BENCHMARK=ON \
-        -DBLAST_BUILD_BLAZE_BENCHMARK=ON \
-        -DBLAST_BUILD_EIGEN_BENCHMARK=ON \
-        -DBLAST_BUILD_BLASFEO_BENCHMARK=ON \
+    && cmake -C ../cmake/InitialCache.cmake .. \
     && make -j `nproc` VERBOSE=1
 
 # Run tests
