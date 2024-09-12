@@ -19,6 +19,7 @@ namespace blast
      *
      * TODO: Is it always equal to SIMD size? Deprecate?
      *
+	 * @tparam T data type
      * @tparam Arch architecture
      */
     template <typename T, typename Arch = xsimd::default_arch>
