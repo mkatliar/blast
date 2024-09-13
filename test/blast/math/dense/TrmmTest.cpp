@@ -3,11 +3,12 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/dense/Trmm.hpp>
-#include <blast/math/algorithm/Gemm.hpp>
-#include <blast/blaze/Math.hpp>
+#include <blast/math/dense/DynamicMatrix.hpp>
+#include <blast/math/reference/Trmm.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
 
 #include <test/Testing.hpp>
-#include <blast/math/algorithm/Randomize.hpp>
+
 
 namespace blast :: testing
 {
@@ -16,7 +17,7 @@ namespace blast :: testing
         for (size_t m = 1; m <= 20; m += 1)
             for (size_t n = 1; n <= 20; n += 1)
             {
-                // Init Blaze matrices
+                // Init matrices
                 //
                 DynamicMatrix<double, columnMajor> A(m, m);
                 DynamicMatrix<double, rowMajor> B(m, n);
@@ -27,15 +28,17 @@ namespace blast :: testing
                 // Reset lower-triangular part of A
                 for (size_t i = 0; i < m; ++i)
                     for (size_t j = 0; j < i; ++j)
-                        reset(A(i, j));
+                        A(i, j) = 0.;
 
                 double alpha {};
-                blaze::randomize(alpha);
+                randomize(alpha);
 
                 // Do trmm
                 trmmLeftUpper(alpha, A, B, C);
 
-                BLAST_ASSERT_APPROX_EQ(C, evaluate(alpha * A * B), 1e-10, 1e-10)
+                DynamicMatrix<double, columnMajor> C_ref(m, n);
+                reference::trmm(alpha, A, UpLo::Upper, false, B, C_ref);
+                BLAST_ASSERT_APPROX_EQ(C, C_ref, 1e-10, 1e-10)
                     << "trmm error at size m,n=" << m << "," << n;
             }
     }
@@ -46,7 +49,7 @@ namespace blast :: testing
         for (size_t m = 4; m <= 20; m += 1)
             for (size_t n = 4; n <= 20; n += 1)
             {
-                // Init Blaze matrices
+                // Init matrices
                 //
                 DynamicMatrix<double, columnMajor> A(n, n);
                 DynamicMatrix<double, columnMajor> B(m, n);
@@ -57,15 +60,17 @@ namespace blast :: testing
                 // Reset upper-triangular part of A
                 for (size_t i = 0; i < n; ++i)
                     for (size_t j = i + 1; j < n; ++j)
-                        reset(A(i, j));
+                        A(i, j) = 0.;
 
                 double alpha {};
-                blaze::randomize(alpha);
+                randomize(alpha);
 
                 // Do trmm
                 trmmRightLower(alpha, B, A, C);
 
-                BLAST_ASSERT_APPROX_EQ(C, evaluate(alpha * B * A), 1e-10, 1e-10)
+                DynamicMatrix<double, columnMajor> C_ref(m, n);
+                reference::trmm(alpha, B, A, UpLo::Lower, false, C_ref);
+                BLAST_ASSERT_APPROX_EQ(C, C_ref, 1e-10, 1e-10)
                     << "trmm error at size m,n=" << m << "," << n;
             }
     }

@@ -17,7 +17,7 @@ namespace blast
     BLAZE_ALWAYS_INLINE void trmmLeftUpper_backend(size_t M, size_t N, T alpha, P1 a, P2 b, P3 c)
     {
         size_t constexpr TILE_SIZE = TileSize_v<T>;
-        BLAZE_STATIC_ASSERT(KM % TILE_SIZE == 0);
+        static_assert(KM % TILE_SIZE == 0);
 
         RegisterMatrix<T, KM, KN, columnMajor> ker;
 
