@@ -11,6 +11,7 @@
 #include <blast/util/Assert.hpp>
 #include <blast/system/Inline.hpp>
 
+
 namespace blast
 {
     template <typename T, bool SO, bool AF, bool PF>
