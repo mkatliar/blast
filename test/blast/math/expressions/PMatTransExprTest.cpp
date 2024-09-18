@@ -4,12 +4,10 @@
 
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/DynamicPanelMatrix.hpp>
-#include <blast/math/panel/Potrf.hpp>
-#include <blast/math/panel/Gemm.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
-#include <test/Tolerance.hpp>
+
 
 namespace blast :: testing
 {
