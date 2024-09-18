@@ -38,7 +38,7 @@ If you want to run benchmarks, you will also need:
     ```
 3. Run CMake
 ```bash
-cmake -DBLAST_WITH_BLASFEO=ON ..
+cmake -DBLAST_WITH_TEST=ON ..
 ```
 4. Build
 ```bash
@@ -53,7 +53,11 @@ ctest
 TODO: add examples
 
 ## Benchmarks
-Specify `BLAST_WITH_BENCHMARK=ON` in *CMake* configure steps if you want to build benchmarks. The following *CMake* variables must be switched ON to enable specific benchmarks:
+Either use
+
+`cmake -C cmake/InitialCache.cmake ..`
+
+that has all the right variables set up or specify `BLAST_WITH_BENCHMARK=ON` in *CMake* configure steps if you want to build benchmarks. The following *CMake* variables must be switched ON to enable specific benchmarks:
 - `BLAST_BUILD_BLAST_BENCHMARK`
 - `BLAST_BUILD_LIBXSMM_BENCHMARK`
 - `BLAST_BUILD_BLAS_BENCHMARK`
