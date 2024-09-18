@@ -16,7 +16,8 @@
 
 
 #include <blast/util/Exception.hpp>
-#include <blast/math/dense/VectorPointer.hpp>
+#include <blast/math/Vector.hpp>
+#include <blast/blaze/Math.hpp>
 
 #include <cmath>
 #include <tuple>

@@ -95,17 +95,17 @@ ${BENCH_DATA}/sgemm-libxsmm.json: $(BENCH_LIBXSMM)
 		--benchmark_out=${BENCH_DATA}/sgemm-libxsmm.json
 
 dgemm-benchmarks: \
-	$(shell mkdir -p ${BENCH_DATA}/$(shell git rev-parse --short HEAD)) \
+	$(shell mkdir -p ${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}) \
 	${BENCH_DATA}/dgemm-openblas.json \
 	${BENCH_DATA}/dgemm-mkl.json \
 	${BENCH_DATA}/dgemm-libxsmm.json \
 	${BENCH_DATA}/dgemm-blasfeo.json \
 	${BENCH_DATA}/dgemm-blaze-static.json \
 	${BENCH_DATA}/dgemm-eigen-static.json \
-	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-panel.json \
-	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-panel.json \
-	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-static-plain.json \
-	${BENCH_DATA}/$(shell git rev-parse --short HEAD)/dgemm-blast-dynamic-plain.json
+	${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-panel.json \
+	${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-panel.json \
+	${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-plain.json \
+	${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-plain.json
 
 
 #

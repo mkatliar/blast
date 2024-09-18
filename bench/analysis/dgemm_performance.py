@@ -26,7 +26,7 @@ line_width = 1
 plots = [
     # {'data_file': 'dgemm-openblas.json', 'label': 'OpenBLAS'},
     # {'data_file': 'dgemm-mkl.json', 'label': 'MKL'},
-    # {'data_file': 'dgemm-blasfeo.json', 'label': 'BLASFEO'},
+    {'data_file': 'dgemm-blasfeo.json', 'label': 'BLASFEO'},
     # {'data_file': 'dgemm-blasfeo-blas.json', 'label': 'BLASFEO*'},
     # {'data_file': 'dgemm-libxsmm.json', 'label': 'LIBXSMM'},
     # {'data_file': 'dgemm-eigen-dynamic.json', 'label': 'Eigen (D)'},

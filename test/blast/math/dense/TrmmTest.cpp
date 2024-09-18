@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/dense/Trmm.hpp>
-#include <blast/math/algorithm/Gemm.hpp>
+#include <blast/math/dense/Gemm.hpp>
 #include <blast/blaze/Math.hpp>
 
 #include <test/Testing.hpp>

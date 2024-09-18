@@ -9,8 +9,7 @@
 #include <blast/math/TypeTraits.hpp>
 #include <blast/math/Simd.hpp>
 #include <blast/util/Assert.hpp>
-#include <blaze/util/Exception.h>
-
+#include <blast/system/Inline.hpp>
 
 namespace blast
 {
@@ -229,24 +228,5 @@ namespace blast
             return {data(m) + i + spacing(m) * j, spacing(m)};
         else
             return {data(m) + spacing(m) * i + j, spacing(m)};
-    }
-
-
-    template <bool AF, typename MT, bool SO>
-        requires (!IsStatic_v<MT>)
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<ElementType_t<MT> const, SO, AF, IsPadded_v<MT>>
-        ptr(DMatTransExpr<MT, SO> const& m, size_t i, size_t j)
-    {
-        if constexpr (SO == columnMajor)
-            return {(*m).data() + i + spacing(m) * j, spacing(m)};
-        else
-            return {(*m).data() + spacing(m) * i + j, spacing(m)};
-    }
-
-
-    template <bool AF, bool PF, bool SO, typename T>
-    BLAZE_ALWAYS_INLINE DynamicMatrixPointer<T, SO, AF, PF> ptr(T * p, size_t spacing)
-    {
-        return {p, spacing};
     }
 }

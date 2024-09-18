@@ -4,7 +4,7 @@
 
 #include <blast/math/DynamicPanelMatrix.hpp>
 #include <blast/math/panel/Potrf.hpp>
-#include <blast/math/algorithm/Gemm.hpp>
+#include <blast/math/panel/Gemm.hpp>
 #include <blast/blaze/Math.hpp>
 
 #include <test/Testing.hpp>

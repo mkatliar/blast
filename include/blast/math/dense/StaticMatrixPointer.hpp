@@ -213,12 +213,4 @@ namespace blast
     {
         return StaticMatrixPointer<ElementType_t<MT> const, Spacing_v<MT>, StorageOrder_v<MT>, AF, IsPadded_v<MT>>(data(m), i, j);
     }
-
-
-    template <bool AF, typename MT, bool SO>
-    requires IsStatic_v<MT>
-    BLAZE_ALWAYS_INLINE auto ptr(blaze::DMatTransExpr<MT, SO> const& m, size_t i, size_t j)
-    {
-        return trans(ptr<AF>(m.operand(), j, i));
-    }
 }
