@@ -65,6 +65,7 @@ jobs:
         cmake -B ${{github.workspace}}/build \
         -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
         -DCMAKE_CXX_COMPILER=clang++-18 \
+        -DCMAKE_CXX_FLAGS="-mfma -mavx -mavx2 -DXSIMD_DEFAULT_ARCH=\"fma3<avx2>\"" \
         -DBLAST_WITH_BENCHMARK=ON \
         -DBLAST_WITH_TEST=ON
 
