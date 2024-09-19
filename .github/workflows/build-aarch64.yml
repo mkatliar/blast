@@ -1,0 +1,37 @@
+name: Build (aarch64)
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up QEMU for ARM
+      uses: docker/setup-qemu-action@v2
+      with:
+        platforms: arm64
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker image for ARM
+      run: |
+        docker buildx create --use
+        docker buildx build --platform linux/arm64 -t my-arm-build --load -f docker/aarch64/Dockerfile .
+
+    # - name: Run tests on ARM Docker container
+    #   run: |
+    #     docker run --rm my-arm-build ./run-tests.sh
