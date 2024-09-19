@@ -29,7 +29,7 @@ RUN mkdir -p eigen/build && cd eigen/build && cmake -DCMAKE_INSTALL_PREFIX=/usr/
 RUN apt-get install -y bc
 RUN git clone https://github.com/giaf/blasfeo.git
 RUN cd blasfeo && git checkout cc90e146ee9089de518f57dbb736e064bd82394e
-COPY docker/blasfeo/Makefile.rule blasfeo
+COPY docker/x86_64/blasfeo/Makefile.rule blasfeo
 RUN cd blasfeo && make -j `nproc` static_library && make install_static
 
 # Install libxsmm
