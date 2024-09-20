@@ -113,7 +113,7 @@ So far, we haven't been able to make the benchmarks give always the same results
 To automate building and running benchmarks, a [Dockerfile](Dockerfile) is provided. Use the following commands to build a Docker image and run benchmarks in a Docker container:
 ```bash
 cd blast
-docker build . --tag blast_bench .
+docker build -f docker/x86_64/Dockerfile --tag blast_bench .
 docker run -v `pwd`/bench_result/docker:/root/blast/bench_result blast_bench
 ```
 The benchmark results will be put in `/bench_result/docker`.
