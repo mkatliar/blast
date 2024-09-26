@@ -9,10 +9,12 @@
 #include <blast/math/reference/Ger.hpp>
 #include <blast/math/panel/StaticPanelMatrix.hpp>
 #include <blast/math/dense/StaticMatrix.hpp>
+// #include <blast/math/expressions/TransExpr.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 #include <test/Tolerance.hpp>
+// #include <test/MakePositiveDefinite.hpp>
 
 
 namespace blast :: testing
