@@ -125,6 +125,15 @@ namespace blast
         }
 
 
+        /**
+         * @brief Set all matrix elements to 0
+         */
+        void reset() noexcept
+        {
+            std::fill_n(v_, spacing_ * (SO == columnMajor ? n_ : m_), T {});
+        }
+
+
     private:
         static size_t constexpr alignment_ = CACHE_LINE_SIZE;
         static size_t constexpr SS = SimdSize_v<T>;
@@ -174,6 +183,13 @@ namespace blast
     inline constexpr T const * data(DynamicMatrix<T, SO> const& m) noexcept
     {
         return m.data();
+    }
+
+
+    template <typename T, bool SO>
+    inline void reset(DynamicMatrix<T, SO>& m) noexcept
+    {
+        m.reset();
     }
 
 
