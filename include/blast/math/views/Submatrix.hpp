@@ -118,9 +118,9 @@ namespace blast
         }
 
 
-        size_t spacing() const noexcept
+        friend size_t spacing(Submatrix const& m) noexcept
         {
-            return matrix_.spacing();
+            return spacing(m.matrix_);
         }
 
 
@@ -142,20 +142,20 @@ namespace blast
         }
 
 
-        Pointer data() noexcept
+        friend Pointer data(Submatrix& m) noexcept
         {
-            return data_;
+            return m.data_;
         }
 
 
-        ConstPointer data() const noexcept
+        friend ConstPointer data(Submatrix const& m) noexcept
         {
-            return data_;
+            return m.data_;
         }
 
 
     private:
-        ViewedType matrix_;        //!< The matrix containing the submatrix.
+        ViewedType& matrix_;        //!< The matrix containing the submatrix.
         size_t const i_;
         size_t const j_;
         size_t const m_;
@@ -174,6 +174,41 @@ namespace blast
 
 
     /**
+     * @brief Specialization for @a Submatrix class
+     */
+    template <typename MT, AlignmentFlag AF>
+    struct IsStatic<Submatrix<MT, AF>> : IsStatic<MT> {};
+
+
+    /**
+     * @brief Specialization for @a Submatrix class
+     */
+    template <typename MT, AlignmentFlag AF>
+    struct IsDenseMatrix<Submatrix<MT, AF>> : IsDenseMatrix<MT> {};
+
+
+    /**
+     * @brief Specialization for @a Submatrix class
+     */
+    template <typename MT, AlignmentFlag AF>
+    struct IsView<Submatrix<MT, AF>> : std::integral_constant<bool, true> {};
+
+
+    /**
+     * @brief Specialization for @a Submatrix class
+     */
+    template <typename MT, AlignmentFlag AF>
+    struct Spacing<Submatrix<MT, AF>> : Spacing<MT> {};
+
+
+    /**
+     * @brief Specialization for @a Submatrix class
+     */
+    template <typename MT, AlignmentFlag AF>
+    struct StorageOrderHelper<Submatrix<MT, AF>> : StorageOrderHelper<MT> {};
+
+
+    /**
      * @brief Submatrix of a matrix
      *
      * @tparam AF alignment flag of the resulting submatrix
@@ -187,7 +222,7 @@ namespace blast
      *
      * @return submatrix of @a matrix
      */
-    template <AlignmentFlag AF, Matrix MT>
+    template <AlignmentFlag AF, typename MT>
     inline decltype(auto) submatrix(MT& matrix, size_t row, size_t column, size_t m, size_t n)
     {
         return Submatrix<MT, AF> {matrix, row, column, m, n};
@@ -209,7 +244,7 @@ namespace blast
      *
      * @return submatrix of @a matrix
      */
-    template <AlignmentFlag AF, Matrix MT, AlignmentFlag AF1>
+    template <AlignmentFlag AF, typename MT, AlignmentFlag AF1>
     inline decltype(auto) submatrix(Submatrix<MT, AF1> const& matrix, size_t row, size_t column, size_t m, size_t n)
     {
         return Submatrix<MT const, AF> {matrix.operand(), matrix.row() + row, matrix.column() + column, m, n};
@@ -231,9 +266,23 @@ namespace blast
      *
      * @return submatrix of @a matrix
      */
-    template <AlignmentFlag AF, Matrix MT, AlignmentFlag AF1>
+    template <AlignmentFlag AF, typename MT, AlignmentFlag AF1>
     inline decltype(auto) submatrix(Submatrix<MT, AF1>& matrix, size_t row, size_t column, size_t m, size_t n)
     {
-        return PanelSubmatrix<MT, AF> {matrix.operand(), matrix.row() + row, matrix.column() + column, m, n};
+        return Submatrix<MT, AF> {matrix.operand(), matrix.row() + row, matrix.column() + column, m, n};
+    }
+
+
+    /**
+     * @brief Set all elements of a submatrix to their default value (0).
+     *
+     * @param matrix submatrix to set to 0.
+     */
+    template <typename MT, AlignmentFlag AF>
+    inline void reset(Submatrix<MT, AF>& matrix) noexcept
+    {
+        for (size_t i = 0; i < rows(matrix); ++i)
+            for (size_t j = 0; j < columns(matrix); ++j)
+                matrix(i, j) = ElementType_t<MT> {};
     }
 }

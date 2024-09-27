@@ -4,22 +4,39 @@
 
 #pragma once
 
-#include <blaze/util/Random.h>
+#include <blast/math/TypeTraits.hpp>
 
 #include <array>
 #include <vector>
+#include <random>
 
 
-namespace blast
+namespace blast :: testing
 {
-    using blaze::randomize;
+    namespace detail
+    {
+        inline auto& randomEngine()
+        {
+            static std::mt19937 engine;
+            return engine;
+        }
+    }
+
+
+    template <typename T>
+    requires std::is_floating_point_v<T>
+    inline void randomize(T& a)
+    {
+        std::uniform_real_distribution<T> dist;
+        a = dist(detail::randomEngine());
+    }
 
 
     template <typename T, std::size_t N>
     inline void randomize(std::array<T, N>& a)
     {
         for (T& v : a)
-            blaze::randomize(v);
+            randomize(v);
     }
 
 
@@ -27,6 +44,23 @@ namespace blast
     inline void randomize(std::vector<T>& a)
     {
         for (T& v : a)
-            blaze::randomize(v);
+            randomize(v);
+    }
+
+
+    template <Matrix M>
+    inline void randomize(M& m) noexcept
+    {
+        for (size_t i = 0; i < rows(m); ++i)
+            for (size_t j = 0; j < columns(m); ++j)
+                randomize(m(i, j));
+    }
+
+
+    template <Matrix M>
+    requires IsView_v<M>
+    inline void randomize(M&& m) noexcept
+    {
+        randomize(m);
     }
 }

@@ -7,15 +7,15 @@
 #include <blast/math/TypeTraits.hpp>
 #include <blast/math/Matrix.hpp>
 #include <blast/math/dense/DynamicMatrix.hpp>
-
-#include <stdexcept>
+#include <blast/math/reference/Gemm.hpp>
+#include <blast/math/expressions/MatTransExpr.hpp>
+#include <blast/util/Exception.hpp>
 
 
 namespace blast :: testing
 {
     /**
      * @brief Setup of a random positive definite @a Matrix.
-     *
      *
      * @param matrix The matrix to be randomized.
      *
@@ -28,19 +28,31 @@ namespace blast :: testing
 
         size_t const N = columns(matrix);
         if (rows(matrix) != N)
-            throw std::invalid_argument {"Non-square matrix provided"};
+            BLAST_THROW_EXCEPTION(std::invalid_argument {"Non-square matrix provided"});
 
         DynamicMatrix<ET> tmp(N, N);
         randomize(tmp);
 
-        // TODO: this can be replaced by reference::gemm() when it is there.
         reset(matrix);
-        for (size_t i = 0; i < N; ++i)
-            for (size_t j = 0; j < N; ++j)
-                for (size_t k = 0; k < N; ++k)
-                    matrix(i, j) += tmp(i, k) * tmp(k, j);
+        reference::gemm(ET(1), tmp, trans(tmp), ET(0), matrix, matrix);
 
         for (size_t i = 0; i < N; ++i)
             matrix(i, i) += ET(N);
+    }
+
+
+     /**
+     * @brief Setup of a random positive definite matrix,
+     * specialized for rvalue reverence to matrix views.
+     *
+     * @param matrix The matrix to be randomized.
+     *
+     * @throw @a std::invalid_argument if non-square matrix is provided
+     */
+    template <Matrix MT>
+    requires IsView_v<MT>
+    inline void makePositiveDefinite(MT&& matrix)
+    {
+        makePositiveDefinite(matrix);
     }
 }

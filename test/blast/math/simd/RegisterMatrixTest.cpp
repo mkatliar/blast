@@ -5,16 +5,17 @@
 #include <blast/math/RegisterMatrix.hpp>
 #include <blast/math/Matrix.hpp>
 #include <blast/math/Vector.hpp>
-#include <blast/math/views/submatrix/Panel.hpp>
+#include <blast/math/views/Submatrix.hpp>
 #include <blast/math/reference/Ger.hpp>
+#include <blast/math/reference/Gemm.hpp>
 #include <blast/math/panel/StaticPanelMatrix.hpp>
 #include <blast/math/dense/StaticMatrix.hpp>
-// #include <blast/math/expressions/TransExpr.hpp>
+#include <blast/math/expressions/MatTransExpr.hpp>
 
 #include <test/Testing.hpp>
 #include <test/Randomize.hpp>
 #include <test/Tolerance.hpp>
-// #include <test/MakePositiveDefinite.hpp>
+#include <test/MakePositiveDefinite.hpp>
 
 
 namespace blast :: testing
@@ -182,7 +183,7 @@ namespace blast :: testing
         using ET = ElementType_t<RM>;
 
         StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B(0.);
-        blast::randomize(A);
+        randomize(A);
 
         RM ker;
         ker.load(1., ptr<aligned>(A, 0, 0));
@@ -333,30 +334,21 @@ namespace blast :: testing
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        blaze::DynamicMatrix<ET, blaze::columnMajor> ma(Traits::rows, 1);
-        blaze::DynamicMatrix<ET, blaze::columnMajor> mb(Traits::columns, 1);
-        blaze::StaticMatrix<ET, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
-
-        randomize(ma);
-        randomize(mb);
-        randomize(mc);
-
         StaticPanelMatrix<ET, Traits::rows, 1, columnMajor> A;
         StaticPanelMatrix<ET, Traits::columns, 1, columnMajor> B;
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
+        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
 
-        A = ma;
-        B = mb;
-        C = mc;
+        randomize(A);
+        randomize(B);
+        randomize(C);
 
         TypeParam ker;
         ker.load(ptr(C));
         ker.ger(column(ptr(A)), row(ptr(B).trans()));
-        ker.store(ptr(D));
 
-        md = D;
+        reference::ger(rows(C), columns(C), 1., column(ptr(A)), column(ptr(B)).trans(), ptr(C), ptr(C));
 
-        BLAST_EXPECT_EQ(md, evaluate(mc + ma * trans(mb)));
+        BLAST_EXPECT_EQ(ker, C);
     }
 
 
@@ -480,37 +472,34 @@ namespace blast :: testing
     }
 
 
-    // TYPED_TEST(RegisterMatrixTest, testPotrf)
-    // {
-    //     using Traits = RegisterMatrixTraits<TypeParam>;
-    //     using ET = typename Traits::ElementType;
-    //     static size_t constexpr m = Traits::rows;
-    //     static size_t constexpr n = Traits::columns;
+    TYPED_TEST(RegisterMatrixTest, testPotrf)
+    {
+        using Traits = RegisterMatrixTraits<TypeParam>;
+        using ET = typename Traits::ElementType;
+        static size_t constexpr m = Traits::rows;
+        static size_t constexpr n = Traits::columns;
 
-    //     if constexpr (m >= n)
-    //     {
-    //         StaticMatrix<ET, m, n, columnMajor> A, L;
+        if constexpr (m >= n)
+        {
+            StaticMatrix<ET, m, n, columnMajor> A, L;
+            makePositiveDefinite(submatrix<aligned>(A, 0, 0, n, n));
+            randomize(submatrix<unaligned>(A, n, 0, m - n, n));
 
-    //         {
-    //             StaticMatrix<ET, n, n, columnMajor> C0;
-    //             makePositiveDefinite(C0);
+            TypeParam ker;
+            ker.load(ptr(A));
+            ker.potrf();
+            ker.store(ptr(L));
 
-    //             submatrix(A, 0, 0, n, n) = C0;
-    //             randomize(submatrix(A, n, 0, m - n, n));
-    //         }
+            StaticMatrix<ET, m, m, columnMajor> LTL {};
+            reference::gemm(1., L, trans(L), 0., LTL, LTL);
 
-    //         TypeParam ker;
-    //         ker.load(ptr(A));
-    //         ker.potrf();
-    //         ker.store(ptr(L));
-
-    //         BLAST_ASSERT_APPROX_EQ(submatrix(L * trans(L), 0, 0, m, n), A, absTol<ET>(), relTol<ET>());
-    //     }
-    //     else
-    //     {
-    //         std::clog << "RegisterMatrixTest.testPotrf not implemented for kernels with columns more than rows!" << std::endl;
-    //     }
-    // }
+            BLAST_ASSERT_APPROX_EQ(submatrix<aligned>(LTL, 0, 0, m, n), A, absTol<ET>(), relTol<ET>());
+        }
+        else
+        {
+            std::clog << "RegisterMatrixTest.testPotrf not implemented for kernels with columns more than rows!" << std::endl;
+        }
+    }
 
 
     // TYPED_TEST(RegisterMatrixTest, testTrsmRltPanel)

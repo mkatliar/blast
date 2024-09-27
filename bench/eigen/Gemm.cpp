@@ -18,6 +18,7 @@
 namespace blast :: benchmark
 {
     using namespace ::benchmark;
+    using blast::testing::randomize;
 
 
     template <typename Real, size_t M>

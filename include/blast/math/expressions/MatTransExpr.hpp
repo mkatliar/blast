@@ -5,6 +5,7 @@
 #pragma once
 
 #include <blast/math/TypeTraits.hpp>
+#include <blast/util/Types.hpp>
 
 #include <type_traits>
 #include <cassert>
@@ -19,14 +20,14 @@ namespace blast
      *
      */
     template <Matrix MT>
-    class TransExpr
+    class MatTransExpr
     {
     public:
         using ElementType = ElementType_t<MT>;
         using Operand = MT const;
 
-        explicit TransExpr(MT const& pm) noexcept
-        :   m_ {pm}
+        explicit MatTransExpr(MT const& matrix) noexcept
+        :   m_ {matrix}
         {}
 
 
@@ -49,11 +50,11 @@ namespace blast
         /**
          * @brief Number of rows
          *
-         * @param e transpose expression
+         * @param e matrix transpose expression
          *
          * @return The number of rows of the transpose expression.
          */
-        friend size_t rows(TransExpr const& e) noexcept
+        friend size_t rows(MatTransExpr const& e) noexcept
         {
             return columns(e.m_);
         }
@@ -62,11 +63,11 @@ namespace blast
         /**
          * @brief Number of columns
          *
-         * @param e transpose expression
+         * @param e matrix transpose expression
          *
          * @return The number of columns of the transpose expression.
          */
-        friend size_t columns(TransExpr const& e) noexcept
+        friend size_t columns(MatTransExpr const& e) noexcept
         {
             return rows(e.m_);
         }
@@ -75,33 +76,39 @@ namespace blast
         /**
          * @brief Pointer to the data
          *
+         * @param e matrix transpose expression
+         *
          * @return Pointer to matrix data
          */
-        ElementType * data() noexcept
+        friend ElementType * data(MatTransExpr& e) noexcept
         {
-            return m_.data();
+            return data(e.m_);
         }
 
 
         /**
          * @brief Constant pointer to the data
          *
+         * @param e matrix transpose expression
+         *
          * @return Constant pointer to matrix data
          */
-        ElementType const * data() const noexcept
+        friend ElementType const * data(MatTransExpr const& e) noexcept
         {
-            return m_.data();
+            return data(e.m_);
         }
 
 
         /**
          * @brief Returns the spacing of the underlying matrix storage.
          *
+         * @param e matrix transpose expression
+         *
          * @return The spacing of the underlying matrix storage.
          */
-        size_t spacing() const noexcept
+        friend size_t spacing(MatTransExpr const& e) noexcept
         {
-            return m_.spacing();
+            return spacing(e.m_);
         }
 
 
@@ -116,7 +123,7 @@ namespace blast
         }
 
     private:
-        Operand m_;
+        Operand& m_;
     };
 
 
@@ -132,7 +139,7 @@ namespace blast
     template <Matrix MT>
     inline auto trans(MT const& m)
     {
-        return TransExpr<MT> {m};
+        return MatTransExpr<MT> {m};
     }
 
 
@@ -146,35 +153,53 @@ namespace blast
      * @return the operand of the transposition expression
      */
     template <typename MT>
-    inline decltype(auto) trans(TransExpr<MT> const& e)
+    inline decltype(auto) trans(MatTransExpr<MT> const& e)
     {
         return e.operand();
     }
 
 
     /**
-     * @brief Specialization for @a TransExpr
+     * @brief Specialization for @a MatTransExpr
      *
      * @tparam MT expression operand type
      */
     template <typename MT>
-    struct IsStatic<TransExpr<MT>> : IsStatic<MT> {};
+    struct IsAligned<MatTransExpr<MT>> : IsAligned<MT> {};
 
 
     /**
-     * @brief Specialization for @a TransExpr
+     * @brief Specialization for @a MatTransExpr
      *
      * @tparam MT expression operand type
      */
     template <typename MT>
-    struct Spacing<TransExpr<MT>> : Spacing<MT> {};
+    struct IsStatic<MatTransExpr<MT>> : IsStatic<MT> {};
 
 
     /**
-     * @brief Specialization for @a TransExpr
+     * @brief Specialization for @a MatTransExpr
      *
      * @tparam MT expression operand type
      */
     template <typename MT>
-    struct StorageOrderHelper<TransExpr<MT>> : std::integral_constant<StorageOrder, !StorageOrder_v<MT>> {};
+    struct IsDenseMatrix<MatTransExpr<MT>> : IsDenseMatrix<MT> {};
+
+
+    /**
+     * @brief Specialization for @a MatTransExpr
+     *
+     * @tparam MT expression operand type
+     */
+    template <typename MT>
+    struct Spacing<MatTransExpr<MT>> : Spacing<MT> {};
+
+
+    /**
+     * @brief Specialization for @a MatTransExpr
+     *
+     * @tparam MT expression operand type
+     */
+    template <typename MT>
+    struct StorageOrderHelper<MatTransExpr<MT>> : std::integral_constant<StorageOrder, !StorageOrder_v<MT>> {};
 }
