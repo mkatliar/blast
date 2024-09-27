@@ -12,7 +12,7 @@
 #include <blast/util/Exception.hpp>
 
 
-namespace blast :: testing
+namespace blast
 {
     /**
      * @brief Setup of a random positive definite @a Matrix.

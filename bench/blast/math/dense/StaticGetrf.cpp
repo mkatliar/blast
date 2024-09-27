@@ -9,7 +9,7 @@
 #include <bench/Complexity.hpp>
 #include <bench/Getrf.hpp>
 
-#include <test/Randomize.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
 
 #include <vector>
 

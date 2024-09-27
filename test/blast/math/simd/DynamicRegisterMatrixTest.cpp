@@ -9,7 +9,7 @@
 #include <blast/blaze/Math.hpp>
 
 #include <test/Testing.hpp>
-#include <test/Randomize.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
 #include <test/Tolerance.hpp>
 
 

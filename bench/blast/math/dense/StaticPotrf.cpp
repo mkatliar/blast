@@ -8,7 +8,7 @@
 #include <bench/Benchmark.hpp>
 #include <bench/Complexity.hpp>
 
-#include <test/Randomize.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
 
 #include <random>
 #include <memory>

@@ -11,11 +11,11 @@
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/dense/StaticMatrix.hpp>
 #include <blast/math/expressions/MatTransExpr.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
+#include <blast/math/algorithm/MakePositiveDefinite.hpp>
 
 #include <test/Testing.hpp>
-#include <test/Randomize.hpp>
 #include <test/Tolerance.hpp>
-#include <test/MakePositiveDefinite.hpp>
 
 
 namespace blast :: testing

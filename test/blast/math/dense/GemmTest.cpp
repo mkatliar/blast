@@ -7,7 +7,7 @@
 #include <blast/math/algorithm/Gemm.hpp>
 
 #include <test/Testing.hpp>
-#include <test/Randomize.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
 
 #include <blast/blaze/Math.hpp>
 

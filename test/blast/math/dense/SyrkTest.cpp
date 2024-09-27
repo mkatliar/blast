@@ -7,7 +7,7 @@
 #include <blast/math/dense/Syrk.hpp>
 
 #include <test/Testing.hpp>
-#include <test/Randomize.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
 
 #include <blast/blaze/Math.hpp>
 

@@ -10,7 +10,7 @@
 
 #include <Eigen/Dense>
 
-#include <test/Randomize.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
 
 #include <bench/Gemm.hpp>
 
@@ -18,7 +18,6 @@
 namespace blast :: benchmark
 {
     using namespace ::benchmark;
-    using blast::testing::randomize;
 
 
     template <typename Real, size_t M>

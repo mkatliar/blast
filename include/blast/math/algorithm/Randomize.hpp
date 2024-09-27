@@ -11,7 +11,7 @@
 #include <random>
 
 
-namespace blast :: testing
+namespace blast
 {
     namespace detail
     {
