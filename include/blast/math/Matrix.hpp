@@ -14,7 +14,6 @@
 
 #include <iosfwd>
 #include <stdexcept>
-#include <random>
 
 
 namespace blast
@@ -48,18 +47,6 @@ namespace blast
     BLAST_ALWAYS_INLINE auto ptr(MT const& m)
     {
         return ptr<IsAligned_v<MT>>(m, 0, 0);
-    }
-	
-	
-    template <Matrix M>
-    inline void randomize(M& m) noexcept
-    {
-        std::mt19937 rng;
-        std::uniform_real_distribution<ElementType_t<M>> dist;
-
-        for (size_t i = 0; i < rows(m); ++i)
-            for (size_t j = 0; j < columns(m); ++j)
-                m(i, j) = dist(rng);
     }
 
 

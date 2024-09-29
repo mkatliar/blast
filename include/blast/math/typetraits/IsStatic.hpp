@@ -17,6 +17,15 @@ namespace blast
 
 
     /**
+     * @brief Specialization for const types
+     *
+     * @tparam T matrix or vector type
+     */
+    template <typename T>
+    struct IsStatic<T const> : IsStatic<T> {};
+
+
+    /**
      * @brief Shortcut for @a IsStatic<T>::value
      *
      * @tparam T matrix or vector type

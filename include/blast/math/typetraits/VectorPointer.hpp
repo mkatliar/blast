@@ -23,5 +23,7 @@ namespace blast
         *p;
 
         // {p.get()} -> std::same_as<T *>;
+
+        P::transposeFlag;
     };
 }

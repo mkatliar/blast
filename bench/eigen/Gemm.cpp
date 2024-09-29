@@ -10,7 +10,7 @@
 
 #include <Eigen/Dense>
 
-#include <test/Randomize.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
 
 #include <bench/Gemm.hpp>
 

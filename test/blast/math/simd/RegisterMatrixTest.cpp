@@ -5,12 +5,16 @@
 #include <blast/math/RegisterMatrix.hpp>
 #include <blast/math/Matrix.hpp>
 #include <blast/math/Vector.hpp>
-#include <blast/math/views/submatrix/Panel.hpp>
+#include <blast/math/views/Submatrix.hpp>
 #include <blast/math/reference/Ger.hpp>
-#include <blast/math/panel/StaticPanelMatrix.hpp>
+#include <blast/math/reference/Gemm.hpp>
+#include <blast/math/StaticPanelMatrix.hpp>
+#include <blast/math/dense/StaticMatrix.hpp>
+#include <blast/math/expressions/MatTransExpr.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
+#include <blast/math/algorithm/MakePositiveDefinite.hpp>
 
 #include <test/Testing.hpp>
-#include <test/Randomize.hpp>
 #include <test/Tolerance.hpp>
 
 
@@ -179,7 +183,7 @@ namespace blast :: testing
         using ET = ElementType_t<RM>;
 
         StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B(0.);
-        blast::randomize(A);
+        randomize(A);
 
         RM ker;
         ker.load(1., ptr<aligned>(A, 0, 0));
@@ -276,7 +280,7 @@ namespace blast :: testing
         randomize(A_ref);
 
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
-        A = A_ref;
+        assign(A, A_ref);
 
         RM ker;
         ker.load(ptr(A));
@@ -330,30 +334,21 @@ namespace blast :: testing
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        blaze::DynamicMatrix<ET, blaze::columnMajor> ma(Traits::rows, 1);
-        blaze::DynamicMatrix<ET, blaze::columnMajor> mb(Traits::columns, 1);
-        blaze::StaticMatrix<ET, Traits::rows, Traits::columns, blaze::columnMajor> mc, md;
-
-        randomize(ma);
-        randomize(mb);
-        randomize(mc);
-
         StaticPanelMatrix<ET, Traits::rows, 1, columnMajor> A;
         StaticPanelMatrix<ET, Traits::columns, 1, columnMajor> B;
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
+        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
 
-        A = ma;
-        B = mb;
-        C = mc;
+        randomize(A);
+        randomize(B);
+        randomize(C);
 
         TypeParam ker;
         ker.load(ptr(C));
         ker.ger(column(ptr(A)), row(ptr(B).trans()));
-        ker.store(ptr(D));
 
-        md = D;
+        reference::ger(rows(C), columns(C), 1., column(ptr(A)), column(ptr(B)).trans(), ptr(C), ptr(C));
 
-        BLAST_EXPECT_EQ(md, evaluate(mc + ma * trans(mb)));
+        BLAST_EXPECT_EQ(ker, C);
     }
 
 
@@ -377,7 +372,7 @@ namespace blast :: testing
         ker.load(1., ptr(C));
         ker.ger(alpha, ptr(a), ptr(b));
 
-        reference::ger(rows(C), columns(C), alpha, ptr(a), ptr(b), ptr(C));
+        reference::ger(rows(C), columns(C), alpha, ptr(a), ptr(b), ptr(C), ptr(C));
 
         BLAST_EXPECT_APPROX_EQ(ker, C, absTol<ET>(), relTol<ET>());
     }
@@ -389,23 +384,16 @@ namespace blast :: testing
         using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        DynamicMatrix<ET, columnMajor> ma(Traits::rows, 1);
-        DynamicMatrix<ET, columnMajor> mb(Traits::columns, 1);
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> mc;
-
-        randomize(ma);
-        randomize(mb);
-        randomize(mc);
-
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> const D_ref = ma * trans(mb) + mc;
-
         StaticPanelMatrix<ET, Traits::rows, 1, columnMajor> A;
         StaticPanelMatrix<ET, Traits::columns, 1, columnMajor> B;
         StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
 
-        A = ma;
-        B = mb;
-        C = mc;
+        randomize(A);
+        randomize(B);
+        randomize(C);
+
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> D;
+        reference::ger(Traits::rows, Traits::columns, 1., column(ptr(A)), column(ptr(B)).trans(), ptr(C), ptr(D));
 
         for (size_t m = 0; m <= rows(C); ++m)
         {
@@ -417,7 +405,7 @@ namespace blast :: testing
 
                 for (size_t i = 0; i < m; ++i)
                     for (size_t j = 0; j < n; ++j)
-                        ASSERT_EQ(ker(i, j), i < m && j < n ? D_ref(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), "
+                        ASSERT_EQ(ker(i, j), i < m && j < n ? D(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), "
                             << "store size = " << m << "x" << n;
             }
         }
@@ -438,7 +426,8 @@ namespace blast :: testing
         randomize(b);
         randomize(C);
 
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> const D_ref = a * trans(b) + C;
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> D;
+        reference::ger(Traits::rows, Traits::columns, 1., ptr(a), ptr(trans(b)), ptr(C), ptr(D));
 
         for (size_t m = 0; m <= rows(C); ++m)
         {
@@ -450,7 +439,7 @@ namespace blast :: testing
 
                 for (size_t i = 0; i < m; ++i)
                     for (size_t j = 0; j < n; ++j)
-                        BLAST_ASSERT_APPROX_EQ(ker(i, j), D_ref(i, j), absTol<ET>(), relTol<ET>())
+                        BLAST_ASSERT_APPROX_EQ(ker(i, j), D(i, j), absTol<ET>(), relTol<ET>())
                             << "element mismatch at (" << i << ", " << j << "), "
                             << "store size = " << m << "x" << n;
             }
@@ -477,7 +466,9 @@ namespace blast :: testing
         ker.ger(ET(1.), ptr(a), ptr(trans(b)));
         ker.store(ptr(D));
 
-        BLAST_EXPECT_EQ(D, evaluate(C + a * trans(b)));
+        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> D_ref;
+        reference::ger(Traits::rows, Traits::columns, 1., ptr(a), ptr(trans(b)), ptr(C), ptr(D_ref));
+        BLAST_EXPECT_EQ(D, D_ref);
     }
 
 
@@ -491,21 +482,18 @@ namespace blast :: testing
         if constexpr (m >= n)
         {
             StaticMatrix<ET, m, n, columnMajor> A, L;
-
-            {
-                StaticMatrix<ET, n, n, columnMajor> C0;
-                makePositiveDefinite(C0);
-
-                submatrix(A, 0, 0, n, n) = C0;
-                randomize(submatrix(A, n, 0, m - n, n));
-            }
+            makePositiveDefinite(submatrix<aligned>(A, 0, 0, n, n));
+            randomize(submatrix<unaligned>(A, n, 0, m - n, n));
 
             TypeParam ker;
             ker.load(ptr(A));
             ker.potrf();
             ker.store(ptr(L));
 
-            BLAST_ASSERT_APPROX_EQ(submatrix(L * trans(L), 0, 0, m, n), A, absTol<ET>(), relTol<ET>());
+            StaticMatrix<ET, m, m, columnMajor> LTL {};
+            reference::gemm(1., L, trans(L), 0., LTL, LTL);
+
+            BLAST_ASSERT_APPROX_EQ(submatrix<aligned>(LTL, 0, 0, m, n), A, absTol<ET>(), relTol<ET>());
         }
         else
         {
@@ -535,18 +523,18 @@ namespace blast :: testing
                         L(i, j) += ET(1.);  // Improve conditioning
                 }
                 else
-                    reset(L(i, j));
+                    L(i, j) = ET(0.);
 
         randomize(B);
 
-        StaticMatrix<ET, Traits::columns, Traits::columns, columnMajor> LL;
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> BB, XX;
+        blaze::StaticMatrix<ET, Traits::columns, Traits::columns, columnMajor> LL;
+        blaze::StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> BB, XX;
 
         LL = L;
         BB = B;
 
         // True value
-        XX = evaluate(BB * inv(trans(LL)));
+        XX = evaluate(BB * inv(blaze::trans(LL)));
 
         ker.load(ptr(B));
         ker.trsm(Side::Right, UpLo::Upper, ptr(L).trans());
@@ -565,8 +553,8 @@ namespace blast :: testing
         RM ker;
 
         using blaze::randomize;
-        StaticMatrix<ET, RM::columns(), RM::columns(), columnMajor> L;
-        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> B, B1;
+        blaze::StaticMatrix<ET, RM::columns(), RM::columns(), columnMajor> L;
+        blaze::StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> B, B1;
 
         for (size_t i = 0; i < RM::columns(); ++i)
             for (size_t j = 0; j < RM::columns(); ++j)
@@ -577,7 +565,7 @@ namespace blast :: testing
                         L(i, j) += ET(1.);  // Improve conditioning
                 }
                 else
-                    reset(L(i, j));
+                    blaze::reset(L(i, j));
 
         randomize(B);
 
@@ -585,7 +573,7 @@ namespace blast :: testing
         ker.trsm(Side::Right, UpLo::Upper, trans(ptr(L)));
 
         // TODO: should be strictly equal?
-        BLAST_ASSERT_APPROX_EQ(ker, evaluate(B * inv(trans(L))), absTol<ET>(), relTol<ET>());
+        BLAST_ASSERT_APPROX_EQ(ker, evaluate(B * inv(blaze::trans(L))), absTol<ET>(), relTol<ET>());
     }
 
 
@@ -594,12 +582,11 @@ namespace blast :: testing
         using RM = TypeParam;
         using ET = ElementType_t<RM>;
 
+        blaze::DynamicMatrix<ET, columnMajor> A(RM::rows(), RM::rows());
+        blaze::DynamicMatrix<ET, columnMajor> B(RM::rows(), RM::columns());
 
-        DynamicMatrix<ET, columnMajor> A(RM::rows(), RM::rows());
-        DynamicMatrix<ET, columnMajor> B(RM::rows(), RM::columns());
-
-        randomize(A);
-        randomize(B);
+        blaze::randomize(A);
+        blaze::randomize(B);
 
         ET alpha {};
         blaze::randomize(alpha);
@@ -610,7 +597,7 @@ namespace blast :: testing
         // Reset lower-triangular part
         for (size_t i = 0; i < A.rows(); ++i)
             for (size_t j = 0; j < i && j < A.columns(); ++j)
-                reset(A(i, j));
+                blaze::reset(A(i, j));
 
         // TODO: should be strictly equal?
         BLAST_ASSERT_APPROX_EQ(ker, alpha * A * B, absTol<ET>(), relTol<ET>());
@@ -622,12 +609,11 @@ namespace blast :: testing
         using RM = TypeParam;
         using ET = ElementType_t<RM>;
 
+        blaze::DynamicMatrix<ET, columnMajor> A(RM::columns(), RM::columns());
+        blaze::DynamicMatrix<ET, columnMajor> B(RM::rows(), RM::columns());
 
-        DynamicMatrix<ET, columnMajor> A(RM::columns(), RM::columns());
-        DynamicMatrix<ET, columnMajor> B(RM::rows(), RM::columns());
-
-        randomize(A);
-        randomize(B);
+        blaze::randomize(A);
+        blaze::randomize(B);
 
         ET alpha {};
         blaze::randomize(alpha);
@@ -638,7 +624,7 @@ namespace blast :: testing
         // Reset upper-triangular part
         for (size_t i = 0; i < A.rows(); ++i)
             for (size_t j = i + 1; j < A.columns(); ++j)
-                reset(A(i, j));
+                blaze::reset(A(i, j));
 
         // TODO: should be strictly equal?
         BLAST_ASSERT_APPROX_EQ(ker, alpha * B * A, absTol<ET>(), relTol<ET>());

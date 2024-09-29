@@ -138,6 +138,15 @@ namespace blast
         }
 
 
+        /**
+         * @brief Set all matrix elements to 0
+         */
+        void reset() noexcept
+        {
+            std::fill_n(v_, capacity_, T {});
+        }
+
+
     private:
         static size_t constexpr spacing_ = nextMultiple(SO == columnMajor ? M : N, SimdSize_v<T>);
         static size_t constexpr capacity_ = spacing_ * (SO == columnMajor ? N : M);
@@ -181,6 +190,13 @@ namespace blast
     inline constexpr T const * data(StaticMatrix<T, M, N, SO> const& m) noexcept
     {
         return m.data();
+    }
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    inline void reset(StaticMatrix<T, M, N, SO>& m) noexcept
+    {
+        m.reset();
     }
 
 

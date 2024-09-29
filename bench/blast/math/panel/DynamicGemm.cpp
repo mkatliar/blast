@@ -7,7 +7,7 @@
 
 #include <bench/Gemm.hpp>
 
-#include <test/Randomize.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
 
 
 namespace blast :: benchmark

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 #include <bench/Gemm.hpp>
-#include <test/Randomize.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
 
 #include <blaze/Math.h>
 

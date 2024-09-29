@@ -9,6 +9,7 @@
 #include <blast/math/typetraits/IsPadded.hpp>
 #include <blast/math/typetraits/IsContiguous.hpp>
 #include <blast/math/typetraits/IsStaticallySpaced.hpp>
+#include <blast/math/typetraits/IsView.hpp>
 #include <blast/math/typetraits/ElementType.hpp>
 #include <blast/math/typetraits/StorageOrder.hpp>
 #include <blast/math/typetraits/Spacing.hpp>

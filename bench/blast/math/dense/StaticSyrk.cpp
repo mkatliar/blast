@@ -9,7 +9,7 @@
 #include <bench/Benchmark.hpp>
 #include <bench/Syrk.hpp>
 
-#include <test/Randomize.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
 
 
 namespace blast :: benchmark
