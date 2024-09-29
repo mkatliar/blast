@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <blast/math/dense/Trmm.hpp>
+#include <blast/math/algorithm/Trmm.hpp>
 #include <blast/math/dense/DynamicMatrix.hpp>
 #include <blast/math/reference/Trmm.hpp>
 #include <blast/math/algorithm/Randomize.hpp>
