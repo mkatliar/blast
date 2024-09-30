@@ -34,7 +34,7 @@ namespace blast :: testing
                 randomize(alpha);
 
                 // Do trmm
-                trmmLeftUpper(alpha, A, B, C);
+                trmm(alpha, A, UpLo::Upper, false, B, C);
 
                 DynamicMatrix<double, columnMajor> C_ref(m, n);
                 reference::trmm(alpha, A, UpLo::Upper, false, B, C_ref);
@@ -66,7 +66,7 @@ namespace blast :: testing
                 randomize(alpha);
 
                 // Do trmm
-                trmmRightLower(alpha, B, A, C);
+                trmm(alpha, B, A, UpLo::Lower, false, C);
 
                 DynamicMatrix<double, columnMajor> C_ref(m, n);
                 reference::trmm(alpha, B, A, UpLo::Lower, false, C_ref);
