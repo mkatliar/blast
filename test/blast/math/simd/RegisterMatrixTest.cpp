@@ -650,11 +650,49 @@ namespace blast :: testing
 
         RM ker;
         ker.load(ptr(B));
-        ker.axpy(alpha, ptr(A), ker.rows(), ker.columns());
+        ker.axpy(alpha, ptr(A));
 
         StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> C;
         reference::axpy(alpha, A, B, C);
 
         EXPECT_EQ(ker, C);
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testAxpyWithSize)
+    {
+        using RM = TypeParam;
+        using ET = ElementType_t<RM>;
+
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> A, B;
+        randomize(A);
+        randomize(B);
+
+        ET alpha {};
+        randomize(alpha);
+
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> C;
+
+        for (size_t m = 0; m < RM::rows(); ++m)
+        {
+            for (size_t n = 0; n < RM::columns(); ++n)
+            {
+                RM ker;
+                ker.load(ptr(B));
+                ker.axpy(alpha, ptr(A), ker.rows(), ker.columns());
+
+                reference::axpy(alpha,
+                    submatrix<aligned>(A, 0, 0, m, n),
+                    submatrix<aligned>(B, 0, 0, m, n),
+                    submatrix<aligned>(C, 0, 0, m, n)
+                );
+
+                for (size_t i = 0; i < m; ++i)
+                    for (size_t j = 0; j < n; ++j)
+                        ASSERT_EQ(ker(i, j), C(i, j))
+                            << "element mismatch at (" << i << ", " << j << "), "
+                            << "axpy() size = " << m << "x" << n;
+            }
+        }
     }
 }

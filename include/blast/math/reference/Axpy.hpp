@@ -54,9 +54,9 @@ namespace blast :: reference
      * @tparam MTC matrix type for @a C
      *
      * @param alpha the scalar alpha
-     * @param A pointer to the top left element of matrix A
-     * @param B pointer to the top left element of matrix B
-     * @param C pointer to the top left element of matrix C
+     * @param A matrix A
+     * @param B matrix B
+     * @param C matrix C
      *
      * @throw @a std::invalid_argument if matrix sizes are not consistent
      */
@@ -71,5 +71,32 @@ namespace blast :: reference
             BLAST_THROW_EXCEPTION(std::invalid_argument {"Inconsistent matrix sizes"});
 
         reference::axpy(M, N, alpha, ptr(A), ptr(B), ptr(C));
+    }
+
+
+    /**
+     * @brief Constant times matrix plus matrix, matrix arguments, rvalue reference output argument
+     *
+     * C := alpha*A + B
+     *
+     * where alpha is a scalar, and A, B and C are M by N matrices
+     *
+     * @tparam ST scalar type for @a alpha
+     * @tparam MTA matrix type for @a A
+     * @tparam MTB matrix type for @a B
+     * @tparam MTC matrix view type for @a C
+     *
+     * @param alpha the scalar alpha
+     * @param A matrix A
+     * @param B matrix B
+     * @param C matrix view C
+     *
+     * @throw @a std::invalid_argument if matrix sizes are not consistent
+     */
+    template <typename ST, Matrix MTA, Matrix MTB, Matrix MTC>
+    requires IsView_v<MTC>
+    inline void axpy(ST alpha, MTA const& A, MTB const& B, MTC&& C)
+    {
+        reference::axpy(alpha, A, B, C);
     }
 }
