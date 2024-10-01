@@ -8,6 +8,7 @@
 #include <blast/math/views/Submatrix.hpp>
 #include <blast/math/reference/Ger.hpp>
 #include <blast/math/reference/Gemm.hpp>
+#include <blast/math/reference/Axpy.hpp>
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/dense/StaticMatrix.hpp>
 #include <blast/math/expressions/MatTransExpr.hpp>
@@ -28,14 +29,18 @@ namespace blast :: testing
 
 
     using MyTypes = Types<
-        RegisterMatrix<double, 4, 4, columnMajor>,
-        RegisterMatrix<double, 4, 2, columnMajor>,
-        RegisterMatrix<double, 4, 1, columnMajor>,
-        RegisterMatrix<double, 8, 4, columnMajor>,
-        RegisterMatrix<double, 12, 4, columnMajor>,
-        RegisterMatrix<float, 8, 4, columnMajor>,
-        RegisterMatrix<float, 16, 4, columnMajor>,
-        RegisterMatrix<float, 24, 4, columnMajor>
+        RegisterMatrix<double, 1 * SimdSize_v<double>, 4, columnMajor>,
+        RegisterMatrix<double, 1 * SimdSize_v<double>, 2, columnMajor>,
+        RegisterMatrix<double, 1 * SimdSize_v<double>, 1, columnMajor>,
+        RegisterMatrix<double, 2 * SimdSize_v<double>, 4, columnMajor>,
+        RegisterMatrix<double, 2 * SimdSize_v<double>, 2, columnMajor>,
+        RegisterMatrix<double, 2 * SimdSize_v<double>, 1, columnMajor>,
+        RegisterMatrix<double, 3 * SimdSize_v<double>, 4, columnMajor>,
+        RegisterMatrix<double, 3 * SimdSize_v<double>, 2, columnMajor>,
+        RegisterMatrix<double, 3 * SimdSize_v<double>, 1, columnMajor>,
+        RegisterMatrix<float, 1 * SimdSize_v<float>, 4, columnMajor>,
+        RegisterMatrix<float, 2 * SimdSize_v<float>, 4, columnMajor>,
+        RegisterMatrix<float, 3 * SimdSize_v<float>, 4, columnMajor>
     >;
 
 
@@ -628,5 +633,28 @@ namespace blast :: testing
 
         // TODO: should be strictly equal?
         BLAST_ASSERT_APPROX_EQ(ker, alpha * B * A, absTol<ET>(), relTol<ET>());
+    }
+
+
+    TYPED_TEST(RegisterMatrixTest, testAxpy)
+    {
+        using RM = TypeParam;
+        using ET = ElementType_t<RM>;
+
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> A, B;
+        randomize(A);
+        randomize(B);
+
+        ET alpha {};
+        randomize(alpha);
+
+        RM ker;
+        ker.load(ptr(B));
+        ker.axpy(alpha, ptr(A), ker.rows(), ker.columns());
+
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> C;
+        reference::axpy(alpha, A, B, C);
+
+        EXPECT_EQ(ker, C);
     }
 }
