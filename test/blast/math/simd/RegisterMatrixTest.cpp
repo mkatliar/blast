@@ -9,6 +9,7 @@
 #include <blast/math/reference/Ger.hpp>
 #include <blast/math/reference/Gemm.hpp>
 #include <blast/math/reference/Axpy.hpp>
+#include <blast/math/reference/Trmm.hpp>
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/dense/StaticMatrix.hpp>
 #include <blast/math/expressions/MatTransExpr.hpp>
@@ -587,25 +588,22 @@ namespace blast :: testing
         using RM = TypeParam;
         using ET = ElementType_t<RM>;
 
-        blaze::DynamicMatrix<ET, columnMajor> A(RM::rows(), RM::rows());
-        blaze::DynamicMatrix<ET, columnMajor> B(RM::rows(), RM::columns());
+        StaticMatrix<ET, RM::rows(), RM::rows(), columnMajor> A;
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> B, C;
 
-        blaze::randomize(A);
-        blaze::randomize(B);
+        randomize(A);
+        randomize(B);
 
         ET alpha {};
-        blaze::randomize(alpha);
+        randomize(alpha);
 
         RM ker;
         ker.trmm(alpha, ptr(A), UpLo::Upper, false, ptr(B));
 
-        // Reset lower-triangular part
-        for (size_t i = 0; i < A.rows(); ++i)
-            for (size_t j = 0; j < i && j < A.columns(); ++j)
-                blaze::reset(A(i, j));
+        reference::trmm(alpha, A, UpLo::Upper, false, B, C);
 
         // TODO: should be strictly equal?
-        BLAST_ASSERT_APPROX_EQ(ker, alpha * A * B, absTol<ET>(), relTol<ET>());
+        BLAST_ASSERT_APPROX_EQ(ker, C, absTol<ET>(), relTol<ET>());
     }
 
 
@@ -614,25 +612,22 @@ namespace blast :: testing
         using RM = TypeParam;
         using ET = ElementType_t<RM>;
 
-        blaze::DynamicMatrix<ET, columnMajor> A(RM::columns(), RM::columns());
-        blaze::DynamicMatrix<ET, columnMajor> B(RM::rows(), RM::columns());
+        StaticMatrix<ET, RM::columns(), RM::columns(), columnMajor> A;
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> B, C;
 
-        blaze::randomize(A);
-        blaze::randomize(B);
+        randomize(A);
+        randomize(B);
 
         ET alpha {};
-        blaze::randomize(alpha);
+        randomize(alpha);
 
         RM ker;
         ker.trmm(alpha, ptr(B), ptr(A), UpLo::Lower, false);
 
-        // Reset upper-triangular part
-        for (size_t i = 0; i < A.rows(); ++i)
-            for (size_t j = i + 1; j < A.columns(); ++j)
-                blaze::reset(A(i, j));
+        reference::trmm(alpha, B, A, UpLo::Lower, false, C);
 
         // TODO: should be strictly equal?
-        BLAST_ASSERT_APPROX_EQ(ker, alpha * B * A, absTol<ET>(), relTol<ET>());
+        BLAST_ASSERT_APPROX_EQ(ker, C, absTol<ET>(), relTol<ET>());
     }
 
 
