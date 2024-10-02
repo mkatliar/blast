@@ -154,7 +154,7 @@ namespace blast
             #pragma unroll
             for (size_t j = 0; j < N; ++j) if (j < n)
                 #pragma unroll
-                for (size_t i = 0; i < RM; ++i) if (i * RM < m)
+                for (size_t i = 0; i < RM; ++i) if (SS * i < m)
                     v_[i][j] = fmadd(beta_simd, a(SS * i, j).load(), v_[i][j]);
         }
 

@@ -88,6 +88,6 @@ namespace blast :: reference
         if (rows(D) != M || columns(D) != N)
             BLAST_THROW_EXCEPTION(std::invalid_argument {"Matrix sizes do not match"});
 
-        gemm(M, N, K, alpha, ptr(A), ptr(B), beta, ptr(C), ptr(D));
+        reference::gemm(M, N, K, alpha, ptr(A), ptr(B), beta, ptr(C), ptr(D));
     }
 }

@@ -5,11 +5,12 @@
 #define BLAST_USER_ASSERTION 1
 
 #include <blast/math/algorithm/Gemm.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
+#include <blast/math/dense/DynamicMatrix.hpp>
+#include <blast/math/views/Submatrix.hpp>
+#include <blast/math/reference/Gemm.hpp>
 
 #include <test/Testing.hpp>
-#include <blast/math/algorithm/Randomize.hpp>
-
-#include <blast/blaze/Math.hpp>
 
 
 namespace blast :: testing
@@ -29,22 +30,23 @@ namespace blast :: testing
                 for (size_t n = 1; n <= 20; n += 1)
                     for (size_t k = 1; k <= 20; ++k)
                     {
-                        // Init Blaze matrices
-                        //
-                        blaze::DynamicMatrix<Real, SOA> A(m, k), C(m, n), D(m, n);
-                        blaze::DynamicMatrix<Real, SOB> B(k, n);
+                        DynamicMatrix<Real, SOA> A(m, k), C(m, n), D(m, n);
+                        DynamicMatrix<Real, SOB> B(k, n);
                         randomize(A);
                         randomize(B);
                         randomize(C);
 
                         Real alpha {}, beta {};
-                        blaze::randomize(alpha);
-                        blaze::randomize(beta);
+                        randomize(alpha);
+                        randomize(beta);
 
-                        /// Do gemm
+                        // Do gemm
                         gemm(alpha, A, B, beta, C, D);
 
-                        BLAST_ASSERT_APPROX_EQ(D, evaluate(beta * C + alpha * A * B), 1e-10, 1e-10)
+                        DynamicMatrix<Real, columnMajor> D_ref(m, n);
+                        reference::gemm(alpha, A, B, beta, C, D_ref);
+
+                        BLAST_ASSERT_APPROX_EQ(D, D_ref, 1e-10, 1e-10)
                             << "gemm error at size m,n,k=" << m << "," << n << "," << k;
                     }
         }
@@ -54,31 +56,32 @@ namespace blast :: testing
         void testUnalignedImpl()
         {
             size_t constexpr S_MAX = 20;
-            blaze::DynamicMatrix<Real, SOA> AA(S_MAX, S_MAX), CC(S_MAX, S_MAX), DD(S_MAX, S_MAX);
-            blaze::DynamicMatrix<Real, SOB> BB(S_MAX, S_MAX);
+            DynamicMatrix<Real, SOA> AA(S_MAX, S_MAX), CC(S_MAX, S_MAX), DD(S_MAX, S_MAX);
+            DynamicMatrix<Real, SOB> BB(S_MAX, S_MAX);
 
             for (size_t m = 1; m <= S_MAX; m += 1)
                 for (size_t n = 1; n <= S_MAX; n += 1)
                     for (size_t k = 1; k <= S_MAX; ++k)
                     {
-                        // Init Blaze matrices
-                        //
-                        auto A = submatrix(AA, rows(AA) - m, columns(AA) - k, m, k);
-                        auto C = submatrix(CC, rows(CC) - m, columns(CC) - n, m, n);
-                        auto D = submatrix(DD, rows(DD) - m, columns(DD) - n, m, n);
-                        auto B = submatrix(BB, rows(BB) - k, columns(BB) - n, k, n);
+                        auto A = submatrix<unaligned>(AA, rows(AA) - m, columns(AA) - k, m, k);
+                        auto C = submatrix<unaligned>(CC, rows(CC) - m, columns(CC) - n, m, n);
+                        auto D = submatrix<unaligned>(DD, rows(DD) - m, columns(DD) - n, m, n);
+                        auto B = submatrix<unaligned>(BB, rows(BB) - k, columns(BB) - n, k, n);
                         randomize(A);
                         randomize(B);
                         randomize(C);
 
                         Real alpha {}, beta {};
-                        blaze::randomize(alpha);
-                        blaze::randomize(beta);
+                        randomize(alpha);
+                        randomize(beta);
 
-                        /// Do gemm
+                        // Do gemm
                         gemm(alpha, A, B, beta, C, D);
 
-                        BLAST_ASSERT_APPROX_EQ(D, evaluate(beta * C + alpha * A * B), 1e-10, 1e-10)
+                        DynamicMatrix<Real, columnMajor> D_ref(m, n);
+                        reference::gemm(alpha, A, B, beta, C, D_ref);
+
+                        BLAST_ASSERT_APPROX_EQ(D, D_ref, 1e-10, 1e-10)
                             << "gemm error at size m,n,k=" << m << "," << n << "," << k;
                     }
         }
