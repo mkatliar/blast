@@ -86,19 +86,19 @@ namespace blast
     /// @param alpha the scalar alpha
     /// @param A pointer to top left element of matrix A
     /// @param uplo specifies whether the matrix A is an upper or lower triangular
-    /// @param diag specifies whether or not A is unit triangular
+    /// @param diagonal_unit specifies whether or not A is unit triangular
     /// @param B pointer to top left element of matrix B
     /// @param C pointer to top left element of matrix C
     ///
     template <typename ST, typename MPA, typename MPB, typename MPC>
     requires MatrixPointer<MPA, ST> && MatrixPointer<MPB, ST> && MatrixPointer<MPC, ST>
         && (StorageOrder_v<MPA> == columnMajor) && (StorageOrder_v<MPC> == columnMajor)
-    inline void trmm(size_t M, size_t N, ST alpha, MPA A, UpLo uplo, bool diag, MPB B, MPC C)
+    inline void trmm(size_t M, size_t N, ST alpha, MPA A, UpLo uplo, bool diagonal_unit, MPB B, MPC C)
     {
         using ET = ST;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;
 
-        if (diag)
+        if (diagonal_unit)
             BLAST_THROW_EXCEPTION(std::logic_error {"Unit-triangular matrices support not implemented in trmm()"});
 
         if (uplo == UpLo::Upper)
@@ -140,18 +140,18 @@ namespace blast
     /// @param B pointer to top left element of matrix B
     /// @param A pointer to top left element of matrix A
     /// @param uplo specifies whether the matrix A is an upper or lower triangular
-    /// @param diag specifies whether or not A is unit triangular
+    /// @param diagonal_unit specifies whether or not A is unit triangular
     /// @param C pointer to top left element of matrix C
     ///
     template <typename ST, typename MPB, typename MPA, typename MPC>
     requires MatrixPointer<MPB, ST> && MatrixPointer<MPA, ST> && MatrixPointer<MPC, ST>
         && (StorageOrder_v<MPB> == columnMajor) && (StorageOrder_v<MPC> == columnMajor)
-    inline void trmm(size_t M, size_t N, ST alpha, MPB B, MPA A, UpLo uplo, bool diag, MPC C)
+    inline void trmm(size_t M, size_t N, ST alpha, MPB B, MPA A, UpLo uplo, bool diagonal_unit, MPC C)
     {
         using ET = ST;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;
 
-        if (diag)
+        if (diagonal_unit)
             BLAST_THROW_EXCEPTION(std::logic_error {"Unit-triangular matrices support not implemented in trmm()"});
 
         if (uplo == UpLo::Lower)
