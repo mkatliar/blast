@@ -30,8 +30,6 @@ namespace blast :: testing
                 for (size_t n = 1; n <= 20; n += 1)
                     for (size_t k = 1; k <= 20; ++k)
                     {
-                        // Init matrices
-                        //
                         DynamicMatrix<Real, SOA> A(m, k), C(m, n), D(m, n);
                         DynamicMatrix<Real, SOB> B(k, n);
                         randomize(A);
@@ -65,8 +63,6 @@ namespace blast :: testing
                 for (size_t n = 1; n <= S_MAX; n += 1)
                     for (size_t k = 1; k <= S_MAX; ++k)
                     {
-                        // Init matrices
-                        //
                         auto A = submatrix<unaligned>(AA, rows(AA) - m, columns(AA) - k, m, k);
                         auto C = submatrix<unaligned>(CC, rows(CC) - m, columns(CC) - n, m, n);
                         auto D = submatrix<unaligned>(DD, rows(DD) - m, columns(DD) - n, m, n);
