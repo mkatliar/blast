@@ -348,12 +348,32 @@ namespace blast
         /// @tparam P1 matrix A pointer type.
         /// @tparam P2 matrix B pointer type.
         ///
-        /// @param a triangular matrix.
         /// @param b general matrix.
+        /// @param a triangular matrix.
         ///
         template <typename P1, typename P2>
         requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
-        void trmmRightLower(T alpha, P1 a, P2 b) noexcept;
+        void trmmRightLower(T alpha, P1 b, P2 a) noexcept;
+
+
+        /// @brief Triangular matrix multiplication with a submatrix
+        ///
+        /// Performs the matrix-matrix operation
+        ///
+        /// R += alpha*B(0..m-1, 0..n-1)*A(0..n-1, 0..n-1),
+        ///
+        /// where alpha is a scalar, B is a general matrix,
+        /// and A is a lower triangular matrix.
+        ///
+        /// @tparam P1 matrix A pointer type.
+        /// @tparam P2 matrix B pointer type.
+        ///
+        /// @param b general matrix.
+        /// @param a triangular matrix.
+        ///
+        template <typename PB, typename PA>
+        requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
+        void trmmRightLower(T alpha, PB b, PA a, size_t m, size_t n) noexcept;
 
 
     private:
@@ -786,6 +806,48 @@ namespace blast
         {
             #pragma unroll
             for (size_t k = 0; k < N; ++k)
+            {
+                SimdVecType bx[RM];
+
+                #pragma unroll
+                for (size_t i = 0; i < RM; ++i)
+                    bx[i] = alpha * b(i * SS, 0).load();
+
+                #pragma unroll
+                for (size_t j = 0; j <= k; ++j)
+                {
+                    SimdVecType ax = au(0, j).broadcast();
+
+                    #pragma unroll
+                    for (size_t i = 0; i < RM; ++i)
+                        v_[i][j] = fmadd(bx[i], ax, v_[i][j]);
+                }
+
+                b.hmove(1);
+                au.vmove(1);
+            }
+        }
+        else
+        {
+            BLAZE_THROW_LOGIC_ERROR("Not implemented");
+        }
+    }
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    template <typename PB, typename PA>
+    requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmmRightLower(T alpha, PB b, PA a, size_t m, size_t n) noexcept
+    {
+        // NOTE: this implementation does uses unmasked loads from the matrix a,
+        // and therefore will access rows of a beyond m-1.
+        // This will result in undefined behavior on unpadded matrices.
+        auto au = ~a;
+
+        if constexpr (SO == columnMajor)
+        {
+            #pragma unroll
+            for (size_t k = 0; k < N; ++k) if (k < n)
             {
                 SimdVecType bx[RM];
 
