@@ -597,7 +597,7 @@ namespace blast :: testing
         blaze::randomize(alpha);
 
         RM ker;
-        ker.trmmLeftUpper(alpha, ptr(A), ptr(B));
+        ker.trmm(alpha, ptr(A), UpLo::Upper, false, ptr(B));
 
         // Reset lower-triangular part
         for (size_t i = 0; i < A.rows(); ++i)
@@ -624,7 +624,7 @@ namespace blast :: testing
         blaze::randomize(alpha);
 
         RM ker;
-        ker.trmmRightLower(alpha, ptr(B), ptr(A));
+        ker.trmm(alpha, ptr(B), ptr(A), UpLo::Lower, false);
 
         // Reset upper-triangular part
         for (size_t i = 0; i < A.rows(); ++i)

@@ -35,7 +35,7 @@ namespace blast
                 for (; j + KN <= N; j += KN)
                 {
                     ker.reset();
-                    ker.trmmLeftUpper(alpha, a, b(0, j));
+                    ker.trmm(alpha, a, UpLo::Upper, false, b(0, j));
                     gemm(ker, M - KM, alpha, a(0, KM), b(KM, j));
                     ker.store(c(0, j));
                 }
@@ -151,9 +151,6 @@ namespace blast
         using ET = ST;
         size_t constexpr TILE_SIZE = TileSize_v<ET>;
 
-        if (diagonal_unit)
-            BLAST_THROW_EXCEPTION(std::logic_error {"Unit-triangular matrices support not implemented in trmm()"});
-
         if (uplo == UpLo::Lower)
         {
             size_t j = 0;
@@ -169,7 +166,7 @@ namespace blast
                 for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
                 {
                     RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                    ker.trmmRightLower(alpha, B(i, j), A(j, j));
+                    ker.trmm(alpha, B(i, j), A(j, j), UpLo::Lower, diagonal_unit);
                     gemm(ker, N - j - TILE_SIZE, alpha, B(i, j + TILE_SIZE), A(j + TILE_SIZE, j));
                     ker.store(C(i, j));
                 }
@@ -177,7 +174,7 @@ namespace blast
                 for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
                 {
                     RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                    ker.trmmRightLower(alpha, B(i, j), A(j, j));
+                    ker.trmm(alpha, B(i, j), A(j, j), UpLo::Lower, diagonal_unit);
                     gemm(ker, N - j - TILE_SIZE, alpha, B(i, j + TILE_SIZE), A(j + TILE_SIZE, j));
                     ker.store(C(i, j));
                 }
@@ -185,7 +182,7 @@ namespace blast
                 for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
                 {
                     RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                    ker.trmmRightLower(alpha, B(i, j), A(j, j));
+                    ker.trmm(alpha, B(i, j), A(j, j), UpLo::Lower, diagonal_unit);
                     gemm(ker, N - j - TILE_SIZE, alpha, B(i, j + TILE_SIZE), A(j + TILE_SIZE, j));
                     ker.store(C(i, j));
                 }
@@ -194,7 +191,7 @@ namespace blast
                 if (i < M)
                 {
                     RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                    ker.trmmRightLower(alpha, B(i, j), A(j, j), M - i, ker.columns());
+                    ker.trmm(alpha, B(i, j), A(j, j), UpLo::Lower, diagonal_unit, M - i, ker.columns());
                     gemm(ker, N - j - TILE_SIZE, alpha, B(i, j + TILE_SIZE), A(j + TILE_SIZE, j), M - i, ker.columns());
                     ker.store(C(i, j), M - i, ker.columns());
                 }
@@ -211,21 +208,21 @@ namespace blast
                 for (; i + 3 * TILE_SIZE <= M && i + 4 * TILE_SIZE != M; i += 3 * TILE_SIZE)
                 {
                     RegisterMatrix<ET, 3 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                    ker.trmmRightLower(alpha, B(i, j), A(j, j), ker.rows(), N - j);
+                    ker.trmm(alpha, B(i, j), A(j, j), UpLo::Lower, diagonal_unit, ker.rows(), N - j);
                     ker.store(C(i, j), ker.rows(), N - j);
                 }
 
                 for (; i + 2 * TILE_SIZE <= M; i += 2 * TILE_SIZE)
                 {
                     RegisterMatrix<ET, 2 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                    ker.trmmRightLower(alpha, B(i, j), A(j, j), ker.rows(), N - j);
+                    ker.trmm(alpha, B(i, j), A(j, j), UpLo::Lower, diagonal_unit, ker.rows(), N - j);
                     ker.store(C(i, j), ker.rows(), N - j);
                 }
 
                 for (; i + 1 * TILE_SIZE <= M; i += 1 * TILE_SIZE)
                 {
                     RegisterMatrix<ET, 1 * TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                    ker.trmmRightLower(alpha, B(i, j), A(j, j), ker.rows(), N - j);
+                    ker.trmm(alpha, B(i, j), A(j, j), UpLo::Lower, diagonal_unit, ker.rows(), N - j);
                     ker.store(C(i, j), ker.rows(), N - j);
                 }
 
@@ -233,7 +230,7 @@ namespace blast
                 if (i < M)
                 {
                     RegisterMatrix<ET, TILE_SIZE, TILE_SIZE, columnMajor> ker;
-                    ker.trmmRightLower(alpha, B(i, j), A(j, j), M - i, N - j);
+                    ker.trmm(alpha, B(i, j), A(j, j), UpLo::Lower, diagonal_unit, M - i, N - j);
                     ker.store(C(i, j), M - i, N - j);
                 }
             }
