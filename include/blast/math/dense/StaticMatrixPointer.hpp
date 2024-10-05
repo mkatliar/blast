@@ -201,6 +201,20 @@ namespace blast
     struct StorageOrderHelper<StaticMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 
 
+    /**
+     * @brief Specialization for StaticMatrixPointer
+     */
+    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    struct IsAligned<StaticMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<bool, AF> {};
+
+
+    /**
+     * @brief Specialization for StaticMatrixPointer
+     */
+    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    struct IsPadded<StaticMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<bool, PF> {};
+
+
     template <typename T, size_t S, bool SO, bool AF, bool PF>
     BLAZE_ALWAYS_INLINE auto trans(StaticMatrixPointer<T, S, SO, AF, PF> const& p) noexcept
     {

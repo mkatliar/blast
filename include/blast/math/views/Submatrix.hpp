@@ -175,6 +175,15 @@ namespace blast
 
     /**
      * @brief Specialization for @a Submatrix class
+     *
+     * Submatrices can't be padded
+     */
+    template <typename MT, AlignmentFlag AF>
+    struct IsPadded<Submatrix<MT, AF>> : std::integral_constant<bool, false> {};
+
+
+    /**
+     * @brief Specialization for @a Submatrix class
      */
     template <typename MT, AlignmentFlag AF>
     struct IsStatic<Submatrix<MT, AF>> : IsStatic<MT> {};

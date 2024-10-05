@@ -245,6 +245,14 @@ namespace blast
 
 
     template <bool SO, typename T, bool AF, bool PF>
+    struct IsAligned<DynamicPanelMatrixPointer<T, SO, AF, PF>> : std::integral_constant<bool, AF> {};
+
+
+    template <bool SO, typename T, bool AF, bool PF>
+    struct IsPadded<DynamicPanelMatrixPointer<T, SO, AF, PF>> : std::integral_constant<bool, PF> {};
+
+
+    template <bool SO, typename T, bool AF, bool PF>
     struct StorageOrderHelper<DynamicPanelMatrixPointer<T, SO, AF, PF>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 
 

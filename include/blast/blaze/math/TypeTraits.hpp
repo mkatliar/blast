@@ -9,5 +9,7 @@
 #include <blast/blaze/math/typetraits/IsStaticallySpaced.hpp>
 #include <blast/blaze/math/typetraits/IsDenseVector.hpp>
 #include <blast/blaze/math/typetraits/IsDenseMatrix.hpp>
+#include <blast/blaze/math/typetraits/IsAligned.hpp>
+#include <blast/blaze/math/typetraits/IsPadded.hpp>
 #include <blast/blaze/math/typetraits/Spacing.hpp>
 #include <blast/blaze/math/typetraits/StorageOrder.hpp>

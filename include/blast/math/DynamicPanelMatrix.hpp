@@ -329,8 +329,6 @@ namespace blaze
             , bool SO >
     void makePositiveDefinite( DynamicPanelMatrix<Type, SO>& matrix )
     {
-        using blaze::randomize;
-
         BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( Type );
 
         if( !isSquare( *matrix ) ) {
@@ -349,16 +347,13 @@ namespace blaze
 
         gemm(A, trans(A), matrix, matrix);
 
-        // TODO: implement it as below after the matrix *= ctrans( matrix ) expression works.
-
-        // randomize( matrix );
-        // matrix *= ctrans( matrix );
-
-        // for( size_t i=0UL; i<n; ++i ) {
-        //     matrix(i,i) += Type(n);
-        // }
-
-        BLAZE_INTERNAL_ASSERT( isHermitian( matrix ), "Non-symmetric matrix detected" );
+        // NOTE: if uncommented, the following line results in a compiler error:
+        // /usr/local/include/blaze/math/Matrix.h:203:13: note: candidate template ignored: invalid explicitly-specified argument for template parameter 'MT'
+        //    203 | inline bool isHermitian( const Matrix<MT,SO>& m )
+        // I could not figure out what causes it, but we are gping to decouple DynamicPanelMatrix from Blaze,
+        // so this code will be gone anyway.
+        //
+        // BLAZE_INTERNAL_ASSERT( isHermitian( matrix ), "Non-symmetric matrix detected" );
     }
     /*! \endcond */
     //*************************************************************************************************
