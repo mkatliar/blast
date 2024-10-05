@@ -216,6 +216,6 @@ namespace blast :: reference
             rows(C) != m || columns(C) != n)
             throw std::invalid_argument {"Inconsistent matrix sizes"};
 
-        trmm(m, n, alpha, ptr(B), ptr(A), uplo, diag, ptr(C));
+        reference::trmm(m, n, alpha, ptr(B), ptr(A), uplo, diag, ptr(C));
     }
 }

@@ -14,8 +14,8 @@
 
 namespace blast :: benchmark
 {
-    template <typename T, size_t M, size_t N, bool SO>
-    static void BM_RegisterMatrix_trmmLeftUpper(State& state)
+    template <typename T, size_t M, size_t N, bool SO, UpLo UPLO>
+    static void BM_RegisterMatrix_trmmLeft(State& state)
     {
         using Kernel = RegisterMatrix<T, M, N, SO>;
         size_t constexpr K = 100;
@@ -30,7 +30,7 @@ namespace blast :: benchmark
 
         for (auto _ : state)
         {
-            ker.trmmLeftUpper(T(1.), ptr<aligned>(A, 0, 0), ptr<aligned>(B, 0, 0));
+            ker.trmm(T(1.), ptr(A), UPLO, false, ptr(B));
             DoNotOptimize(ker);
         }
 
@@ -38,8 +38,8 @@ namespace blast :: benchmark
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
-    static void BM_RegisterMatrix_trmmRightLower(State& state)
+    template <typename T, size_t M, size_t N, bool SO, UpLo UPLO>
+    static void BM_RegisterMatrix_trmmRight(State& state)
     {
         using Kernel = RegisterMatrix<T, M, N, SO>;
         size_t constexpr K = 100;
@@ -54,7 +54,7 @@ namespace blast :: benchmark
 
         for (auto _ : state)
         {
-            ker.trmmRightLower(T(1.), ptr<aligned>(A, 0, 0), ptr<aligned>(B, 0, 0));
+            ker.trmm(T(1.), ptr(A), ptr(B), UPLO, false);
             DoNotOptimize(ker);
         }
 
@@ -62,23 +62,23 @@ namespace blast :: benchmark
     }
 
 
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeftUpper, double, 4, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeftUpper, double, 4, 8, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeftUpper, double, 8, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeftUpper, double, 12, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeftUpper, float, 8, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeftUpper, float, 16, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeftUpper, float, 24, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeftUpper, float, 16, 5, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeftUpper, float, 16, 6, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeft, double, 4, 4, columnMajor, UpLo::Upper);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeft, double, 4, 8, columnMajor, UpLo::Upper);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeft, double, 8, 4, columnMajor, UpLo::Upper);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeft, double, 12, 4, columnMajor, UpLo::Upper);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeft, float, 8, 4, columnMajor, UpLo::Upper);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeft, float, 16, 4, columnMajor, UpLo::Upper);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeft, float, 24, 4, columnMajor, UpLo::Upper);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeft, float, 16, 5, columnMajor, UpLo::Upper);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmLeft, float, 16, 6, columnMajor, UpLo::Upper);
 
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRightLower, double, 4, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRightLower, double, 4, 8, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRightLower, double, 8, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRightLower, double, 12, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRightLower, float, 8, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRightLower, float, 16, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRightLower, float, 24, 4, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRightLower, float, 16, 5, columnMajor);
-    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRightLower, float, 16, 6, columnMajor);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRight, double, 4, 4, columnMajor, UpLo::Lower);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRight, double, 4, 8, columnMajor, UpLo::Lower);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRight, double, 8, 4, columnMajor, UpLo::Lower);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRight, double, 12, 4, columnMajor, UpLo::Lower);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRight, float, 8, 4, columnMajor, UpLo::Lower);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRight, float, 16, 4, columnMajor, UpLo::Lower);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRight, float, 24, 4, columnMajor, UpLo::Lower);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRight, float, 16, 5, columnMajor, UpLo::Lower);
+    BENCHMARK_TEMPLATE(BM_RegisterMatrix_trmmRight, float, 16, 6, columnMajor, UpLo::Lower);
 }

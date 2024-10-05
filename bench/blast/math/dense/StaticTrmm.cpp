@@ -24,7 +24,7 @@ namespace blast :: benchmark
 
         for (auto _ : state)
         {
-            trmmLeftUpper(1., A, B, C);
+            trmm(1., A, UpLo::Upper, false, B, C);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);
@@ -48,7 +48,7 @@ namespace blast :: benchmark
 
         for (auto _ : state)
         {
-            trmmRightLower(1., B, A, C);
+            trmm(1., B, A, UpLo::Lower, false, C);
             DoNotOptimize(A);
             DoNotOptimize(B);
             DoNotOptimize(C);

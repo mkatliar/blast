@@ -7,7 +7,4 @@
 
 #include <boost/throw_exception.hpp>
 
-#include <stdexcept>
-
-
 #define BLAST_THROW_EXCEPTION BOOST_THROW_EXCEPTION

@@ -11,6 +11,7 @@
 #include <blast/math/UpLo.hpp>
 #include <blast/math/StorageOrder.hpp>
 #include <blast/util/Types.hpp>
+#include <blast/util/Exception.hpp>
 
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/Matrix.h>
@@ -20,6 +21,7 @@
 #include <blaze/util/Assert.h>
 #include <blaze/util/StaticAssert.h>
 
+#include <stdexcept>
 #include <type_traits>
 
 
@@ -316,7 +318,7 @@ namespace blast
         void trsm(Side side, UpLo uplo, P A) noexcept;
 
 
-        /// @brief Triangular matrix multiplication
+        /// @brief Left multiplication with a triangular matrix
         ///
         /// Performs the matrix-matrix operation
         ///
@@ -328,15 +330,18 @@ namespace blast
         /// @tparam P1 matrix A pointer type.
         /// @tparam P2 matrix B pointer type.
         ///
-        /// @param a triangular matrix.
+        /// @param alpha the scalar multiplier
+        /// @param a triangular matrix
+        /// @param uplo specifies whether the matrix A is an upper or lower triangular
+        /// @param diagonal_unit specifies whether or not A is unit triangular
         /// @param b general matrix.
         ///
         template <typename P1, typename P2>
         requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
-        void trmmLeftUpper(T alpha, P1 a, P2 b) noexcept;
+        void trmm(T alpha, P1 a, UpLo uplo, bool diagonal_unit, P2 b) noexcept;
 
 
-        /// @brief Triangular matrix multiplication
+        /// @brief Right multiplication with a triangular matrix
         ///
         /// Performs the matrix-matrix operation
         ///
@@ -348,12 +353,36 @@ namespace blast
         /// @tparam P1 matrix A pointer type.
         /// @tparam P2 matrix B pointer type.
         ///
-        /// @param a triangular matrix.
-        /// @param b general matrix.
+        /// @param b general matrix
+        /// @param a triangular matrix
+        /// @param uplo specifies whether the matrix A is an upper or lower triangular
+        /// @param diagonal_unit specifies whether or not A is unit triangular
         ///
         template <typename P1, typename P2>
         requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
-        void trmmRightLower(T alpha, P1 a, P2 b) noexcept;
+        void trmm(T alpha, P1 b, P2 a, UpLo uplo, bool diagonal_unit) noexcept;
+
+
+        /// @brief Right multiplication with a triangular submatrix
+        ///
+        /// Performs the matrix-matrix operation
+        ///
+        /// R += alpha*B(0..m-1, 0..n-1)*A(0..n-1, 0..n-1),
+        ///
+        /// where alpha is a scalar, B is a general matrix,
+        /// and A is a lower triangular matrix.
+        ///
+        /// @tparam P1 matrix A pointer type.
+        /// @tparam P2 matrix B pointer type.
+        ///
+        /// @param b general matrix
+        /// @param a triangular matrix
+        /// @param uplo specifies whether the matrix A is an upper or lower triangular
+        /// @param diagonal_unit specifies whether or not A is unit triangular
+        ///
+        template <typename PB, typename PA>
+        requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
+        void trmm(T alpha, PB b, PA a, UpLo uplo, bool diagonal_unit, size_t m, size_t n) noexcept;
 
 
     private:
@@ -738,39 +767,49 @@ namespace blast
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P1, typename P2>
     requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmmLeftUpper(T alpha, P1 a, P2 b) noexcept
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, P1 a, UpLo uplo, bool diagonal_unit, P2 b) noexcept
     {
-        auto bu = ~b;
+        if (diagonal_unit)
+            BLAST_THROW_EXCEPTION(std::logic_error {"Unit diagonal matrices support not implemented in RegisterMatrix::trmm()"});
 
-        #pragma unroll
-        for (size_t k = 0; k < rows(); ++k)
+        if (uplo == UpLo::Upper)
         {
-            SimdVecType ax[RM];
-            size_t const ii = (k + 1) / SS;
-            size_t const rem = (k + 1) % SS;
+            auto bu = ~b;
 
             #pragma unroll
-            for (size_t i = 0; i < ii; ++i)
-                ax[i] = alpha * a(i * SS, 0).load();
-
-            if (rem)
-                ax[ii] = alpha * a(ii * SS, 0).load(indexSequence<T, Arch>() < rem);
-
-            #pragma unroll
-            for (size_t j = 0; j < N; ++j)
+            for (size_t k = 0; k < rows(); ++k)
             {
-                SimdVecType bx = bu(0, j).broadcast();
+                SimdVecType ax[RM];
+                size_t const ii = (k + 1) / SS;
+                size_t const rem = (k + 1) % SS;
 
                 #pragma unroll
                 for (size_t i = 0; i < ii; ++i)
-                    v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
+                    ax[i] = alpha * a(i * SS, 0).load();
 
                 if (rem)
-                    v_[ii][j] = fmadd(ax[ii], bx, v_[ii][j]);
-            }
+                    ax[ii] = alpha * a(ii * SS, 0).load(indexSequence<T, Arch>() < rem);
 
-            a.hmove(1);
-            bu.vmove(1);
+                #pragma unroll
+                for (size_t j = 0; j < N; ++j)
+                {
+                    SimdVecType bx = bu(0, j).broadcast();
+
+                    #pragma unroll
+                    for (size_t i = 0; i < ii; ++i)
+                        v_[i][j] = fmadd(ax[i], bx, v_[i][j]);
+
+                    if (rem)
+                        v_[ii][j] = fmadd(ax[ii], bx, v_[ii][j]);
+                }
+
+                a.hmove(1);
+                bu.vmove(1);
+            }
+        }
+        else
+        {
+            BLAST_THROW_EXCEPTION(std::logic_error {"Left multiplication with lower-triangular matrix not implemented in RegisterMatrix::trmm()"});
         }
     }
 
@@ -778,14 +817,66 @@ namespace blast
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PB, typename PA>
     requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmmRightLower(T alpha, PB b, PA a) noexcept
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, PB b, PA a, UpLo uplo, bool diagonal_unit) noexcept
     {
+        if (diagonal_unit)
+            BLAST_THROW_EXCEPTION(std::logic_error {"Unit diagonal matrices support not implemented in RegisterMatrix::trmm()"});
+
+        if (uplo == UpLo::Lower)
+        {
+            auto au = ~a;
+
+            if constexpr (SO == columnMajor)
+            {
+                #pragma unroll
+                for (size_t k = 0; k < N; ++k)
+                {
+                    SimdVecType bx[RM];
+
+                    #pragma unroll
+                    for (size_t i = 0; i < RM; ++i)
+                        bx[i] = alpha * b(i * SS, 0).load();
+
+                    #pragma unroll
+                    for (size_t j = 0; j <= k; ++j)
+                    {
+                        SimdVecType ax = au(0, j).broadcast();
+
+                        #pragma unroll
+                        for (size_t i = 0; i < RM; ++i)
+                            v_[i][j] = fmadd(bx[i], ax, v_[i][j]);
+                    }
+
+                    b.hmove(1);
+                    au.vmove(1);
+                }
+            }
+            else
+            {
+                BLAZE_THROW_LOGIC_ERROR("Not implemented");
+            }
+        }
+        else
+        {
+            BLAST_THROW_EXCEPTION(std::logic_error {"Right multiplication with upper-triangular matrix not implemented in RegisterMatrix::trmm()"});
+        }
+    }
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    template <typename PB, typename PA>
+    requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
+    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, PB b, PA a, UpLo uplo, bool diagonal_unit, size_t m, size_t n) noexcept
+    {
+        // NOTE: this implementation does uses unmasked loads from the matrix a,
+        // and therefore will access rows of a beyond m-1.
+        // This will result in undefined behavior on unpadded matrices.
         auto au = ~a;
 
         if constexpr (SO == columnMajor)
         {
             #pragma unroll
-            for (size_t k = 0; k < N; ++k)
+            for (size_t k = 0; k < N; ++k) if (k < n)
             {
                 SimdVecType bx[RM];
 

@@ -14,27 +14,20 @@ namespace blast :: testing
 {
     TEST(DenseTrmmTest, testLeftUpper)
     {
-        for (size_t m = 1; m <= 20; m += 1)
-            for (size_t n = 1; n <= 20; n += 1)
+        for (size_t m = 1; m <= 20; ++m)
+            for (size_t n = 1; n <= 20; ++n)
             {
-                // Init matrices
-                //
                 DynamicMatrix<double, columnMajor> A(m, m);
                 DynamicMatrix<double, rowMajor> B(m, n);
                 DynamicMatrix<double, columnMajor> C(m, n);
                 randomize(A);
                 randomize(B);
 
-                // Reset lower-triangular part of A
-                for (size_t i = 0; i < m; ++i)
-                    for (size_t j = 0; j < i; ++j)
-                        A(i, j) = 0.;
-
                 double alpha {};
                 randomize(alpha);
 
                 // Do trmm
-                trmmLeftUpper(alpha, A, B, C);
+                trmm(alpha, A, UpLo::Upper, false, B, C);
 
                 DynamicMatrix<double, columnMajor> C_ref(m, n);
                 reference::trmm(alpha, A, UpLo::Upper, false, B, C_ref);
@@ -46,27 +39,20 @@ namespace blast :: testing
 
     TEST(DenseTrmmTest, testRightLower)
     {
-        for (size_t m = 4; m <= 20; m += 1)
-            for (size_t n = 4; n <= 20; n += 1)
+        for (size_t m = 1; m <= 20; ++m)
+            for (size_t n = 1; n <= 20; ++n)
             {
-                // Init matrices
-                //
                 DynamicMatrix<double, columnMajor> A(n, n);
                 DynamicMatrix<double, columnMajor> B(m, n);
                 DynamicMatrix<double, columnMajor> C(m, n);
                 randomize(A);
                 randomize(B);
 
-                // Reset upper-triangular part of A
-                for (size_t i = 0; i < n; ++i)
-                    for (size_t j = i + 1; j < n; ++j)
-                        A(i, j) = 0.;
-
                 double alpha {};
                 randomize(alpha);
 
                 // Do trmm
-                trmmRightLower(alpha, B, A, C);
+                trmm(alpha, B, A, UpLo::Lower, false, C);
 
                 DynamicMatrix<double, columnMajor> C_ref(m, n);
                 reference::trmm(alpha, B, A, UpLo::Lower, false, C_ref);
