@@ -350,7 +350,7 @@ namespace blaze
         // NOTE: if uncommented, the following line results in a compiler error:
         // /usr/local/include/blaze/math/Matrix.h:203:13: note: candidate template ignored: invalid explicitly-specified argument for template parameter 'MT'
         //    203 | inline bool isHermitian( const Matrix<MT,SO>& m )
-        // I could not figure out what causes it, but we are gping to decouple DynamicPanelMatrix from Blaze,
+        // I could not figure out what causes it, but we are going to decouple DynamicPanelMatrix from Blaze,
         // so this code will be gone anyway.
         //
         // BLAZE_INTERNAL_ASSERT( isHermitian( matrix ), "Non-symmetric matrix detected" );
