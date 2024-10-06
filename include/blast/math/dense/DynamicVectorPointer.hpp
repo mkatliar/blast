@@ -73,12 +73,6 @@ namespace blast
         }
 
 
-        SimdVecType broadcast() const noexcept
-        {
-            return *ptr_;
-        }
-
-
         void store(IntrinsicType val) const noexcept
         {
             // Non-optimized

@@ -407,7 +407,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n_)
         {
-            SimdVecType bx = b(0, j).broadcast();
+            SimdVecType const bx = b[0, j];
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i) // TODO: !!! check i against m
@@ -430,7 +430,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n_)
         {
-            SimdVecType bx = b(0, j).broadcast();
+            SimdVecType bx = b[0, j];
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i) // TODO: !!! check i against m

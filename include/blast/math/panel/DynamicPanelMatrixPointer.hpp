@@ -95,12 +95,6 @@ namespace blast
         }
 
 
-        SimdVecType broadcast() const noexcept
-        {
-            return SimdVecType {*ptr_};
-        }
-
-
         void store(SimdVecType const& val) const noexcept
         {
             static_assert(AF, "store() implemented only for aligned pointers");

@@ -82,12 +82,6 @@ namespace blast
         }
 
 
-        SimdVecType broadcast() const noexcept
-        {
-            return SimdVecType {*ptr_};
-        }
-
-
         void store(SimdVecType const& val) const noexcept
         {
             val.store(ptr_, AF);

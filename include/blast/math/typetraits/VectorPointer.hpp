@@ -17,7 +17,6 @@ namespace blast
         p(i);
         p[i];
         p.load();
-        p.broadcast();
         p.spacing();
         p.trans();
         ~p;

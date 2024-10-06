@@ -68,12 +68,6 @@ namespace blast
         }
 
 
-        SimdVecType broadcast() const noexcept
-        {
-            return ptr_.broadcast();
-        }
-
-
         void store(SimdVecType const& val) const noexcept
         {
             ptr_.store(transposeFlag, val);

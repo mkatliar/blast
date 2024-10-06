@@ -600,14 +600,14 @@ namespace blast
                     #pragma unroll
                     for (size_t k = 0; k < j; ++k)
                     {
-                        SimdVecType const a_kj = (~A)(k, j).broadcast();
+                        SimdVecType const a_kj = A[k, j];
 
                         #pragma unroll
                         for (size_t i = 0; i < RM; ++i)
                             v_[i][j] = fnmadd(a_kj, v_[i][k], v_[i][j]);
                     }
 
-                    IntrinsicType const a_jj = (~A)(j, j).broadcast();
+                    SimdVecType const a_jj = A[j, j];
 
                     #pragma unroll
                     for (size_t i = 0; i < RM; ++i)
@@ -793,7 +793,7 @@ namespace blast
                 #pragma unroll
                 for (size_t j = 0; j < N; ++j)
                 {
-                    SimdVecType bx = bu(0, j).broadcast();
+                    SimdVecType const bx = bu[0, j];
 
                     #pragma unroll
                     for (size_t i = 0; i < ii; ++i)
@@ -840,7 +840,7 @@ namespace blast
                     #pragma unroll
                     for (size_t j = 0; j <= k; ++j)
                     {
-                        SimdVecType ax = au(0, j).broadcast();
+                        SimdVecType const ax = au[0, j];
 
                         #pragma unroll
                         for (size_t i = 0; i < RM; ++i)
@@ -887,7 +887,7 @@ namespace blast
                 #pragma unroll
                 for (size_t j = 0; j <= k; ++j)
                 {
-                    SimdVecType ax = au(0, j).broadcast();
+                    SimdVecType const ax = au[0, j];
 
                     #pragma unroll
                     for (size_t i = 0; i < RM; ++i)
