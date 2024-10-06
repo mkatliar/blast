@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.10)   # Need at least 3.10 for gtest_discover_t
 project(blast VERSION 0.1 LANGUAGES CXX)
 
 # Enable modern C++
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 # Allow for integration with other tools such as Intellisense
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

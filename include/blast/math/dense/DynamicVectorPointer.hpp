@@ -121,6 +121,19 @@ namespace blast
 
 
         /**
+         * @brief Access element at specified offset
+         *
+         * @param i offset
+         *
+         * @return reference to the element at specified offset
+         */
+        ElementType& operator[](ptrdiff_t i) const noexcept
+        {
+            return *ptrOffset(i);
+        }
+
+
+        /**
          * @brief Get reference to the pointed value.
          *
          * @return reference to the pointed value

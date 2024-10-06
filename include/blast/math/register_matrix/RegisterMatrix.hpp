@@ -645,7 +645,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
         {
-            SimdVecType const bx {*(~b)(j)};
+            SimdVecType const bx = b[j];
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -672,7 +672,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j)
         {
-            SimdVecType bx = (~b)(j).broadcast();
+            SimdVecType const bx = b[j];
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -697,7 +697,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
-            SimdVecType bx = (~b)(j).broadcast();
+            SimdVecType const bx = b[j];
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)
@@ -722,7 +722,7 @@ namespace blast
         #pragma unroll
         for (size_t j = 0; j < N; ++j) if (j < n)
         {
-            SimdVecType bx = (~b)(j).broadcast();
+            SimdVecType const bx = b[j];
 
             #pragma unroll
             for (size_t i = 0; i < RM; ++i)

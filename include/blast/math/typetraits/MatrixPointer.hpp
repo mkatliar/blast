@@ -15,6 +15,7 @@ namespace blast
     concept MatrixPointer = requires(P p, std::ptrdiff_t i, std::ptrdiff_t j)
     {
         p(i, j);
+        p[i, j];
         p.load();
         p.broadcast();
         p.vmove(i);
