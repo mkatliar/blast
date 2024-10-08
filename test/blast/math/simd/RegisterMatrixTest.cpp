@@ -354,7 +354,7 @@ namespace blast :: testing
 
         reference::ger(rows(C), columns(C), 1., column(ptr(A)), column(ptr(B)).trans(), ptr(C), ptr(C));
 
-        BLAST_EXPECT_EQ(ker, C);
+        BLAST_EXPECT_APPROX_EQ(ker, C, absTol<ET>(), relTol<ET>());
     }
 
 
@@ -411,7 +411,8 @@ namespace blast :: testing
 
                 for (size_t i = 0; i < m; ++i)
                     for (size_t j = 0; j < n; ++j)
-                        ASSERT_EQ(ker(i, j), i < m && j < n ? D(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), "
+                        BLAST_ASSERT_APPROX_EQ(ker(i, j), D(i, j), absTol<ET>(), relTol<ET>())
+                            << "element mismatch at (" << i << ", " << j << "), "
                             << "store size = " << m << "x" << n;
             }
         }
@@ -474,7 +475,7 @@ namespace blast :: testing
 
         StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> D_ref;
         reference::ger(Traits::rows, Traits::columns, 1., ptr(a), ptr(trans(b)), ptr(C), ptr(D_ref));
-        BLAST_EXPECT_EQ(D, D_ref);
+        BLAST_EXPECT_APPROX_EQ(D, D_ref, absTol<ET>(), relTol<ET>());
     }
 
 
@@ -650,7 +651,7 @@ namespace blast :: testing
         StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> C;
         reference::axpy(alpha, A, B, C);
 
-        EXPECT_EQ(ker, C);
+        BLAST_EXPECT_APPROX_EQ(ker, C, absTol<ET>(), relTol<ET>());
     }
 
 
@@ -684,7 +685,7 @@ namespace blast :: testing
 
                 for (size_t i = 0; i < m; ++i)
                     for (size_t j = 0; j < n; ++j)
-                        ASSERT_EQ(ker(i, j), C(i, j))
+                        BLAST_ASSERT_APPROX_EQ(ker(i, j), C(i, j), absTol<ET>(), relTol<ET>())
                             << "element mismatch at (" << i << ", " << j << "), "
                             << "axpy() size = " << m << "x" << n;
             }

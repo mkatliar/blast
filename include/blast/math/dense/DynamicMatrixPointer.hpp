@@ -81,12 +81,6 @@ namespace blast
         }
 
 
-        SimdVecType broadcast() const noexcept
-        {
-            return *ptr_;
-        }
-
-
         void store(SimdVecType const& val) const noexcept
         {
             val.store(ptr_, AF);
@@ -116,6 +110,20 @@ namespace blast
         DynamicMatrixPointer operator()(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
             return {ptrOffset(i, j), spacing_};
+        }
+
+
+        /**
+         * @brief Access element at specified offset
+         *
+         * @param i row offset
+         * @param j column offset
+         *
+         * @return reference to the element at specified offset
+         */
+        ElementType& operator[](ptrdiff_t i, ptrdiff_t j) const noexcept
+        {
+            return *ptrOffset(i, j);
         }
 
 
@@ -208,6 +216,20 @@ namespace blast
      */
     template <typename T, bool SO, bool AF, bool PF>
     struct StorageOrderHelper<DynamicMatrixPointer<T, SO, AF, PF>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
+
+
+    /**
+     * @brief Specialization for @a DynamicMatrixPointer
+     */
+    template <typename T, bool SO, bool AF, bool PF>
+    struct IsAligned<DynamicMatrixPointer<T, SO, AF, PF>> : std::integral_constant<bool, AF> {};
+
+
+    /**
+     * @brief Specialization for @a DynamicMatrixPointer
+     */
+    template <typename T, bool SO, bool AF, bool PF>
+    struct IsPadded<DynamicMatrixPointer<T, SO, AF, PF>> : std::integral_constant<bool, PF> {};
 
 
     template <typename T, bool SO, bool AF, bool PF>

@@ -15,8 +15,8 @@ namespace blast
     concept VectorPointer = requires(P p, std::ptrdiff_t i)
     {
         p(i);
+        p[i];
         p.load();
-        p.broadcast();
         p.spacing();
         p.trans();
         ~p;

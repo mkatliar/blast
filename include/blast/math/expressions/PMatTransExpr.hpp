@@ -247,6 +247,14 @@ namespace blast
     struct IsStatic<PMatTransExpr<MT, SO>> : IsStatic<MT> {};
 
 
+    template <typename MT, bool SO>
+    struct IsAligned<PMatTransExpr<MT, SO>> : IsAligned<MT> {};
+
+
+    template <typename MT, bool SO>
+    struct IsPadded<PMatTransExpr<MT, SO>> : IsPadded<MT> {};
+
+
     /**
      * @brief Specialization for @a PMatTransExpr
      *

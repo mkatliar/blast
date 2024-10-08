@@ -52,11 +52,11 @@ namespace blast
             M, N,
             [&] (auto& ker, size_t i, size_t j)
             {
-                gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j));
+                gemm(ker, K, alpha, A(i, 0), (~B)(0, j), beta, C(i, j), D(i, j));
             },
             [&] (auto& ker, size_t i, size_t j, size_t m, size_t n)
             {
-                gemm(ker, K, alpha, A(i, 0), B(0, j), beta, C(i, j), D(i, j), m, n);
+                gemm(ker, K, alpha, A(i, 0), (~B)(0, j), beta, C(i, j), D(i, j), m, n);
             }
         );
     }

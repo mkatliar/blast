@@ -33,6 +33,7 @@ add_executable(bench-blast
     math/panel/DynamicGemm.cpp
     math/panel/StaticPotrf.cpp
     math/panel/DynamicPotrf.cpp
+    math/panel/StaticMatrixPointer.cpp
 )
 
 target_compile_definitions(bench-blast

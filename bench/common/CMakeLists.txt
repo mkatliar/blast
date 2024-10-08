@@ -16,6 +16,6 @@ target_link_libraries(bench-blast-common
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # More aggressive inlining with Clang
     target_compile_options(bench-blast-common
-        PUBLIC "-mllvm" "-inline-threshold=1000"
+        PUBLIC "-mllvm" "-inline-threshold=4000"
     )
 endif()

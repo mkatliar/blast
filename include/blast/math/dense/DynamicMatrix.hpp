@@ -203,4 +203,12 @@ namespace blast
 
     template <typename T, bool SO>
     struct StorageOrderHelper<DynamicMatrix<T, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
+
+
+    template <typename T, bool SO>
+    struct IsAligned<DynamicMatrix<T, SO>> : std::integral_constant<bool, true> {};
+
+
+    template <typename T, bool SO>
+    struct IsPadded<DynamicMatrix<T, SO>> : std::integral_constant<bool, true> {};
 }

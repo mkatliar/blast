@@ -42,7 +42,7 @@ namespace blast
          *
          */
         constexpr StaticMatrixPointer(T * p00, ptrdiff_t i, ptrdiff_t j) noexcept
-        :   ptr_ {p00 + (SO == columnMajor ? i + spacing() * j : spacing() * i + j)}
+        :   ptr_ {ptrOffset(p00, i, j)}
         {
             BLAST_USER_ASSERT(!AF || isSimdAligned(ptr_), "Pointer is not aligned");
         }
@@ -82,12 +82,6 @@ namespace blast
         }
 
 
-        SimdVecType broadcast() const noexcept
-        {
-            return SimdVecType {*ptr_};
-        }
-
-
         void store(SimdVecType const& val) const noexcept
         {
             val.store(ptr_, AF);
@@ -111,6 +105,20 @@ namespace blast
         StaticMatrixPointer constexpr operator()(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
             return {ptr_, i, j};
+        }
+
+
+        /**
+         * @brief Access element at specified offset
+         *
+         * @param i row offset
+         * @param j column offset
+         *
+         * @return reference to the element at specified offset
+         */
+        ElementType& operator[](ptrdiff_t i, ptrdiff_t j) const noexcept
+        {
+            return *ptrOffset(ptr_, i, j);
         }
 
 
@@ -186,9 +194,14 @@ namespace blast
 
 
     private:
+        static T * ptrOffset(T * p, ptrdiff_t i, ptrdiff_t j) noexcept
+        {
+            return p + (SO == columnMajor ? i + spacing() * j : spacing() * i + j);
+        }
+		
+
         static size_t constexpr SS = SimdVecType::size();
         static TransposeFlag constexpr majorOrientation = SO == columnMajor ? columnVector : rowVector;
-
 
         T * ptr_;
     };
@@ -199,6 +212,20 @@ namespace blast
      */
     template <typename T, size_t S, bool SO, bool AF, bool PF>
     struct StorageOrderHelper<StaticMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
+
+
+    /**
+     * @brief Specialization for StaticMatrixPointer
+     */
+    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    struct IsAligned<StaticMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<bool, AF> {};
+
+
+    /**
+     * @brief Specialization for StaticMatrixPointer
+     */
+    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    struct IsPadded<StaticMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<bool, PF> {};
 
 
     template <typename T, size_t S, bool SO, bool AF, bool PF>

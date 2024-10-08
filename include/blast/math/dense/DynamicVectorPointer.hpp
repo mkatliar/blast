@@ -73,12 +73,6 @@ namespace blast
         }
 
 
-        SimdVecType broadcast() const noexcept
-        {
-            return *ptr_;
-        }
-
-
         void store(IntrinsicType val) const noexcept
         {
             // Non-optimized
@@ -117,6 +111,19 @@ namespace blast
         DynamicVectorPointer operator()(ptrdiff_t i) const noexcept
         {
             return {ptrOffset(i), spacing_};
+        }
+
+
+        /**
+         * @brief Access element at specified offset
+         *
+         * @param i offset
+         *
+         * @return reference to the element at specified offset
+         */
+        ElementType& operator[](ptrdiff_t i) const noexcept
+        {
+            return *ptrOffset(i);
         }
 
 

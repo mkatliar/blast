@@ -15,6 +15,7 @@
 #pragma once
 
 #include <blast/math/register_matrix/RegisterMatrix.hpp>
+#include <blast/math/TypeTraits.hpp>
 
 
 namespace blast
@@ -72,8 +73,18 @@ namespace blast
     {
         ker.reset();
 
+        bool constexpr a_columns_aligned = IsAligned_v<PA> && IsPadded_v<PA> && StorageOrder_v<PA> == columnMajor;
+        bool constexpr b_rows_aligned = IsAligned_v<PB> && IsPadded_v<PB> && StorageOrder_v<PB> == rowMajor;
+
         for (size_t k = 0; k < K; ++k)
-            ker.ger(column(a(0, k)), row((~b)(k, 0)));
+            if constexpr (a_columns_aligned && b_rows_aligned)
+                ker.ger(column(a(0, k)), row(b(k, 0)));
+            else if constexpr (a_columns_aligned && !b_rows_aligned)
+                ker.ger(column(a(0, k)), row((~b)(k, 0)));
+            else if constexpr (!a_columns_aligned && b_rows_aligned)
+                ker.ger(column((~a)(0, k)), row(b(k, 0)));
+            else
+                ker.ger(column((~a)(0, k)), row((~b)(k, 0)));
 
         ker *= alpha;
         ker.axpy(beta, c);

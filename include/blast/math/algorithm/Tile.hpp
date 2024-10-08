@@ -13,8 +13,7 @@
 #endif
 
 #include <blast/math/StorageOrder.hpp>
-
-#include <cstdlib>
+#include <blast/util/Types.hpp>
 
 
 namespace blast
@@ -47,7 +46,7 @@ namespace blast
      * @param f_partial functor to call on partial tiles
      */
     template <typename ET, StorageOrder SO, typename FF, typename FP, typename Arch>
-    inline void tile(Arch arch, StorageOrder traversal_order, std::size_t m, std::size_t n, FF&& f_full, FP&& f_partial)
+    inline void tile(Arch arch, StorageOrder traversal_order, size_t m, size_t n, FF&& f_full, FP&& f_partial)
     {
         detail::tile<ET, SO>(arch, traversal_order, m, n, f_full, f_partial);
     }

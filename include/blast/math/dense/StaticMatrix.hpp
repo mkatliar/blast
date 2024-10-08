@@ -13,6 +13,7 @@
 #include <blast/util/Types.hpp>
 
 #include <initializer_list>
+#include <type_traits>
 
 
 namespace blast
@@ -214,4 +215,12 @@ namespace blast
 
     template <typename T, size_t M, size_t N, bool SO>
     struct StorageOrderHelper<StaticMatrix<T, M, N, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    struct IsAligned<StaticMatrix<T, M, N, SO>> : std::integral_constant<bool, true> {};
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    struct IsPadded<StaticMatrix<T, M, N, SO>> : std::integral_constant<bool, true> {};
 }
