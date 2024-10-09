@@ -5,19 +5,19 @@ BENCH_EIGEN = build/bin/bench-eigen
 BENCH_BLAST = build/bin/bench-blast
 BENCH_BLAST_OUTPUT_DIR = $(shell git rev-parse --short HEAD)
 BENCH_LIBXSMM = build/bin/bench-libxsmm
-BENCHMARK_OPTIONS = --benchmark_repetitions=30 --benchmark_counters_tabular=true --benchmark_out_format=json --benchmark_enable_random_interleaving=true --benchmark_min_warmup_time=10 --benchmark_min_time=1000000x
+BENCHMARK_OPTIONS = --benchmark_repetitions=3 --benchmark_counters_tabular=true --benchmark_out_format=json
 RUN_MATLAB = matlab -nodisplay -nosplash -nodesktop -r
 BENCH_DATA = bench_result/data
 BENCH_IMAGE = bench_result/image
 PYTHON = python3
 
 # run-benchmark-blaze-dynamic:
-# 	$(BENCH_TMPC) --benchmark_filter="BM_gemm_blaze_dynamic<double>*" $(BENCHMARK_OPTIONS) \
+# 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_blaze_dynamic<double>*" $(BENCHMARK_OPTIONS) \
 # 		--benchmark_out=${BENCH_DATA}/blaze-dynamic.json
 
-${BENCH_DATA}/loop-naive.json:
-	$(BENCH_TMPC) --benchmark_filter="BM_gemm_loop_naive<double>*" $(BENCHMARK_OPTIONS) \
-		--benchmark_out=${BENCH_DATA}/loop-naive.json
+# ${BENCH_DATA}/loop-naive.json:
+# 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_loop_naive<double>*" $(BENCHMARK_OPTIONS) \
+# 		--benchmark_out=${BENCH_DATA}/loop-naive.json
 
 #
 # DGEMM/SGEMM bechmarks data
@@ -65,18 +65,22 @@ ${BENCH_DATA}/sgemm-blaze-static.json: $(BENCH_BLAZE)
 ${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-panel.json: $(BENCH_BLAST)
 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_static_panel<double, .+>" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-panel.json
+	cp $@ ${BENCH_DATA}
 
 ${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-panel.json: $(BENCH_BLAST)
 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_dynamic_panel<double>" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-panel.json
+	cp $@ ${BENCH_DATA}
 
 ${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-plain.json: $(BENCH_BLAST)
 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_static_plain<double, .+>" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-static-plain.json
+	cp $@ ${BENCH_DATA}
 
 ${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-plain.json: $(BENCH_BLAST)
 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_dynamic_plain<double>" $(BENCHMARK_OPTIONS) \
 		--benchmark_out=${BENCH_DATA}/${BENCH_BLAST_OUTPUT_DIR}/dgemm-blast-dynamic-plain.json
+	cp $@ ${BENCH_DATA}
 
 ${BENCH_DATA}/sgemm-blast-static-panel.json: $(BENCH_BLAST)
 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_static_panel<float, .+>" $(BENCHMARK_OPTIONS) \
