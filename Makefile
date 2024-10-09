@@ -16,7 +16,7 @@ PYTHON = python3
 # 		--benchmark_out=${BENCH_DATA}/blaze-dynamic.json
 
 # ${BENCH_DATA}/loop-naive.json:
-# 	$(BENCH_BLAS) --benchmark_filter="BM_gemm_loop_naive<double>*" $(BENCHMARK_OPTIONS) \
+# 	$(BENCH_BLAST) --benchmark_filter="BM_gemm_loop_naive<double>*" $(BENCHMARK_OPTIONS) \
 # 		--benchmark_out=${BENCH_DATA}/loop-naive.json
 
 #
