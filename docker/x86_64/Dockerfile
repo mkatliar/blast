@@ -1,4 +1,4 @@
-FROM ubuntu:kinetic
+FROM ubuntu:noble
 WORKDIR /root
 RUN apt-get update
 RUN apt-get upgrade -y
