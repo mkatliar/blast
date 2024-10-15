@@ -95,12 +95,6 @@ namespace blast
         }
 
 
-        SimdVecType broadcast() const noexcept
-        {
-            return SimdVecType {*ptr_};
-        }
-
-
         void store(SimdVecType const& val) const noexcept
         {
             static_assert(AF, "store() implemented only for aligned pointers");
@@ -132,6 +126,20 @@ namespace blast
         DynamicPanelMatrixPointer operator()(ptrdiff_t i, ptrdiff_t j) const noexcept
         {
             return {ptr_, spacing_, i, j};
+        }
+
+
+        /**
+         * @brief Access element at specified offset
+         *
+         * @param i row offset
+         * @param j column offset
+         *
+         * @return reference to element at specified offset
+         */
+        ElementType& operator[](ptrdiff_t i, ptrdiff_t j) const noexcept
+        {
+            return *ptrOffset(ptr_, spacing_, i, j);
         }
 
 
@@ -242,6 +250,14 @@ namespace blast
         T * ptr_;
         size_t spacing_;
     };
+
+
+    template <bool SO, typename T, bool AF, bool PF>
+    struct IsAligned<DynamicPanelMatrixPointer<T, SO, AF, PF>> : std::integral_constant<bool, AF> {};
+
+
+    template <bool SO, typename T, bool AF, bool PF>
+    struct IsPadded<DynamicPanelMatrixPointer<T, SO, AF, PF>> : std::integral_constant<bool, PF> {};
 
 
     template <bool SO, typename T, bool AF, bool PF>

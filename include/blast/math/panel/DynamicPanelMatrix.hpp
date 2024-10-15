@@ -160,6 +160,15 @@ namespace blast
         }
 
 
+        /**
+         * @brief Set all matrix elements to 0
+         */
+        void reset() noexcept
+        {
+            std::fill_n(v_, spacing_ * (SO == columnMajor ? n_ : m_), Type {});
+        }
+
+
     private:
         static size_t constexpr alignment_ = CACHE_LINE_SIZE;
         static size_t constexpr SS = SimdSize_v<Type>;

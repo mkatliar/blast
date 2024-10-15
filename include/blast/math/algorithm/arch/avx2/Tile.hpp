@@ -10,8 +10,6 @@
 
 #include <blast/math/Simd.hpp>
 
-#include <cstdlib>
-
 
 namespace blast :: detail
 {

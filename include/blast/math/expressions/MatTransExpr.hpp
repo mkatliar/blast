@@ -174,6 +174,15 @@ namespace blast
      * @tparam MT expression operand type
      */
     template <typename MT>
+    struct IsPadded<MatTransExpr<MT>> : IsPadded<MT> {};
+
+
+    /**
+     * @brief Specialization for @a MatTransExpr
+     *
+     * @tparam MT expression operand type
+     */
+    template <typename MT>
     struct IsStatic<MatTransExpr<MT>> : IsStatic<MT> {};
 
 

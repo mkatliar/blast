@@ -8,11 +8,10 @@
 #include <blast/math/DynamicPanelMatrix.hpp>
 #include <blast/math/views/submatrix/Panel.hpp>
 #include <blast/math/algorithm/Gemm.hpp>
-
-#include <blaze/Math.h>
+#include <blast/math/algorithm/Randomize.hpp>
+#include <blast/math/reference/Gemm.hpp>
 
 #include <test/Testing.hpp>
-#include <blast/math/algorithm/Randomize.hpp>
 #include <test/Tolerance.hpp>
 
 
@@ -39,31 +38,22 @@ namespace blast :: testing
             {
                 for (size_t K = 1; K <= K_max; ++K)
                 {
-                    // Init Blaze matrices
-                    //
-                    blaze::DynamicMatrix<Real, blaze::columnMajor> blaze_A(M, K), blaze_B(N, K), blaze_C(M, N), blaze_D(M, N);
-                    randomize(blaze_A);
-                    randomize(blaze_B);
-                    randomize(blaze_C);
-
-                    // Init BLAST matrices
-                    //
                     DynamicPanelMatrix<Real> A(M, K);
                     DynamicPanelMatrix<Real> B(N, K);
                     DynamicPanelMatrix<Real> C(M, N);
                     DynamicPanelMatrix<Real> D(M, N);
 
-                    A = blaze_A;
-                    B = blaze_B;
-                    C = blaze_C;
+                    randomize(A);
+                    randomize(B);
+                    randomize(C);
 
                     // Do gemm with BLAST
                     gemm(A, trans(B), C, D);
 
-                    // Copy the resulting D matrix from BLAST to Blaze
-                    blaze_D = D;
+                    DynamicPanelMatrix<Real> D_ref(M, N);
+                    reference::gemm(1., A, trans(B), 1., C, D_ref);
 
-                    BLAST_ASSERT_APPROX_EQ(blaze_D, evaluate(blaze_C + blaze_A * trans(blaze_B)), absTol<Real>(), relTol<Real>())
+                    BLAST_ASSERT_APPROX_EQ(D, D_ref, absTol<Real>(), relTol<Real>())
                         << "gemm error at size m,n,k=" << M << "," << N << "," << K;
                 }
             }

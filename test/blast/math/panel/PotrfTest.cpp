@@ -3,13 +3,15 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/DynamicPanelMatrix.hpp>
+#include <blast/math/dense/DynamicMatrix.hpp>
 #include <blast/math/panel/Potrf.hpp>
 #include <blast/math/algorithm/Gemm.hpp>
-#include <blast/blaze/Math.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
+#include <blast/math/reference/Gemm.hpp>
 
 #include <test/Testing.hpp>
-#include <blast/math/algorithm/Randomize.hpp>
 #include <test/Tolerance.hpp>
+
 
 namespace blast :: testing
 {
@@ -29,13 +31,8 @@ namespace blast :: testing
 
         for (size_t M = 0; M <= 50; ++M)
         {
-            // Init matrices
-            //
-            blaze::DynamicMatrix<Real, blaze::columnMajor> blaze_A(M, M);
-            makePositiveDefinite(blaze_A);
-
             DynamicPanelMatrix<Real, columnMajor> A(M, M), L(M, M), A1(M, M);
-            A = blaze_A;
+            makePositiveDefinite(A);
 
             // Do potrf
             potrf(A, L);
@@ -46,8 +43,8 @@ namespace blast :: testing
                     EXPECT_NEAR(L(i, j), Real {}, absTol<Real>());
 
             // Check A == L * trans(L)
-            A1 = 0.;
-            gemm(L, trans(L), A1, A1);
+            reset(A1);
+            reference::gemm(1., L, trans(L), 0., A1, A1);
 
             BLAST_EXPECT_APPROX_EQ(A1, A, absTol<Real>(), relTol<Real>()) << "potrf error for size " << M;
         }

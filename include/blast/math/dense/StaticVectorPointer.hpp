@@ -81,12 +81,6 @@ namespace blast
         }
 
 
-        SimdVecType broadcast() const noexcept
-        {
-            return *ptr_;
-        }
-
-
         void store(SimdVecType val) const noexcept
         {
             if constexpr (S == 1)
@@ -128,6 +122,19 @@ namespace blast
         StaticVectorPointer constexpr operator()(ptrdiff_t i) const noexcept
         {
             return {ptrOffset(i)};
+        }
+
+
+        /**
+         * @brief Access element at specified offset
+         *
+         * @param i element offset
+         *
+         * @return reference to the element at specified offset
+         */
+        ElementType& operator[](ptrdiff_t i) const noexcept
+        {
+            return *ptrOffset(i);
         }
 
 

@@ -1,28 +1,35 @@
-// Copyright 2023 Mikhail Katliar
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Copyright 2024 Mikhail Katliar. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
 #pragma once
-
-#include <blaze/math/typetraits/IsAligned.h>
 
 
 namespace blast
 {
+    /**
+     * @brief Tests if the given matrix or vector type storage is aligned.
+     *
+     * @tparam T matrix or vector type
+     */
     template <typename T>
-    struct IsAligned : blaze::IsAligned<T> {};
+    struct IsAligned;
 
 
+    /**
+     * @brief Specialization for const types
+     *
+     * @tparam T matrix or vector type
+     */
+    template <typename T>
+    struct IsAligned<T const> : IsAligned<T> {};
+
+
+    /**
+     * @brief Shortcut for @a IsAligned<T>::value
+     *
+     * @tparam T matrix or vector type
+     */
     template <typename T>
     bool constexpr IsAligned_v = IsAligned<T>::value;
 }
