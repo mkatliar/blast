@@ -16,7 +16,7 @@ def filter_aggregate(benchmarks, name):
 
 def load_benchmark(file_name):
     with open(file_name) as f:
-        return filter_aggregate(json.load(f)['benchmarks'], 'mean')
+        return filter_aggregate(json.load(f)['benchmarks'], 'median')
 
 
 factor = 1e+9 # Giga
