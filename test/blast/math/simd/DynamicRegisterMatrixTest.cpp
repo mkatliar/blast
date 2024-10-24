@@ -6,7 +6,9 @@
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/Matrix.hpp>
 #include <blast/math/views/submatrix/Panel.hpp>
-#include <blast/blaze/Math.hpp>
+#include <blast/math/RowColumnVectorPointer.hpp>
+#include <blast/math/dense/DynamicMatrix.hpp>
+#include <blast/math/reference/Ger.hpp>
 
 #include <test/Testing.hpp>
 #include <blast/math/algorithm/Randomize.hpp>
@@ -132,21 +134,22 @@ namespace blast :: testing
             {
                 DynamicMatrix<ET, RM::storageOrder> A(m, 1);
                 DynamicMatrix<ET, RM::storageOrder> B(1, n);
-                DynamicMatrix<ET, RM::storageOrder> C(m, n);
+                DynamicMatrix<ET, RM::storageOrder> C(m, n), D(m, n);
 
                 randomize(A);
                 randomize(B);
                 randomize(C);
 
                 ET alpha {};
-                blaze::randomize(alpha);
+                randomize(alpha);
 
                 TypeParam ker(m, n);
                 ker.load(ptr<aligned>(C, 0, 0));
                 ker.ger(alpha, ptr<aligned>(A, 0, 0), ptr<aligned>(B, 0, 0));
 
-                BLAST_EXPECT_APPROX_EQ(ker,
-                    evaluate(C + alpha * A * B), absTol<ET>(), relTol<ET>());
+                reference::ger(m, n, alpha, column(ptr(A)), row(ptr(B)), ptr(C), ptr(D));
+
+                BLAST_EXPECT_APPROX_EQ(ker, D, absTol<ET>(), relTol<ET>());
             }
     }
 
@@ -161,21 +164,22 @@ namespace blast :: testing
             {
                 DynamicMatrix<ET, RM::storageOrder> A(m, 1);
                 DynamicMatrix<ET, !RM::storageOrder> B(1, n);
-                DynamicMatrix<ET, RM::storageOrder> C(m, n);
+                DynamicMatrix<ET, RM::storageOrder> C(m, n), D(m, n);
 
                 randomize(A);
                 randomize(B);
                 randomize(C);
 
                 ET alpha {};
-                blaze::randomize(alpha);
+                randomize(alpha);
 
                 TypeParam ker(m, n);
                 ker.load(ptr(C));
                 ker.ger(alpha, ~ptr(A), ~ptr(B));
 
-                BLAST_EXPECT_APPROX_EQ(ker,
-                    evaluate(C + alpha * A * B), absTol<ET>(), relTol<ET>());
+                reference::ger(m, n, alpha, column(ptr(A)), row(ptr(B)), ptr(C), ptr(D));
+
+                BLAST_EXPECT_APPROX_EQ(ker, D, absTol<ET>(), relTol<ET>());
             }
     }
 
