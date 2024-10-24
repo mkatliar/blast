@@ -60,6 +60,24 @@ namespace blast :: detail
             {
                 size_t i = 0;
 
+                for (; i + 6 * SS <= m; i += 6 * SS)
+                {
+                    RegisterMatrix<ET, 6 * SS, TILE_STEP, SO> ker;
+                    f_full(ker, i, j);
+                }
+
+                for (; i + 5 * SS <= m; i += 5 * SS)
+                {
+                    RegisterMatrix<ET, 5 * SS, TILE_STEP, SO> ker;
+                    f_full(ker, i, j);
+                }
+
+                for (; i + 4 * SS <= m; i += 4 * SS)
+                {
+                    RegisterMatrix<ET, 4 * SS, TILE_STEP, SO> ker;
+                    f_full(ker, i, j);
+                }
+
                 // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
                 // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
                 for (; i + 3 * SS <= m && i + 4 * SS != m; i += 3 * SS)
@@ -94,6 +112,24 @@ namespace blast :: detail
             {
                 size_t i = 0;
 
+                for (; i + 6 * SS <= m; i += 6 * SS)
+                {
+                    RegisterMatrix<ET, 6 * SS, TILE_STEP, SO> ker;
+                    f_partial(ker, i, j, ker.rows(), n - j);
+                }
+
+                for (; i + 5 * SS <= m; i += 5 * SS)
+                {
+                    RegisterMatrix<ET, 5 * SS, TILE_STEP, SO> ker;
+                    f_partial(ker, i, j, ker.rows(), n - j);
+                }
+
+                for (; i + 4 * SS <= m; i += 4 * SS)
+                {
+                    RegisterMatrix<ET, 4 * SS, TILE_STEP, SO> ker;
+                    f_partial(ker, i, j, ker.rows(), n - j);
+                }
+
                 // i + 4 * TILE_STEP != M is to improve performance in case when the remaining number of rows is 4 * TILE_STEP:
                 // it is more efficient to apply 2 * TILE_STEP kernel 2 times than 3 * TILE_STEP + 1 * TILE_STEP kernel.
                 for (; i + 3 * SS <= m && i + 4 * SS != m; i += 3 * SS)
@@ -125,6 +161,15 @@ namespace blast :: detail
         else
         {
             size_t i = 0;
+
+            for (; i + 5 * SS < m; i += 6 * SS)
+                tile_backend<ET, 6 * SS, TILE_STEP, SO>(arch, m, n, i, f_full, f_partial);
+
+            for (; i + 4 * SS < m; i += 5 * SS)
+                tile_backend<ET, 5 * SS, TILE_STEP, SO>(arch, m, n, i, f_full, f_partial);
+
+            for (; i + 3 * SS < m; i += 4 * SS)
+                tile_backend<ET, 4 * SS, TILE_STEP, SO>(arch, m, n, i, f_full, f_partial);
 
             // i + 4 * SS != M is to improve performance in case when the remaining number of rows is 4 * SS:
             // it is more efficient to apply 2 * SS kernel 2 times than 3 * SS + 1 * SS kernel.
