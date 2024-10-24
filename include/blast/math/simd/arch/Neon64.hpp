@@ -33,7 +33,21 @@ namespace blast
     requires std::is_base_of_v<xsimd::neon64, Arch>
     inline xsimd::batch<float, Arch> maskload(float const * src, xsimd::batch_bool<float, Arch> const& mask) noexcept
     {
-        return xsimd::load(src, xsimd::unaligned_mode {});
+        xsimd::batch<float, Arch> v {0.f};
+
+        if (vgetq_lane_u32(mask, 0))
+            v = vsetq_lane_f32(src[0], v, 0);
+
+        if (vgetq_lane_u32(mask, 1))
+            v = vsetq_lane_f32(src[1], v, 1);
+
+        if (vgetq_lane_u32(mask, 2))
+            v = vsetq_lane_f32(src[2], v, 2);
+
+        if (vgetq_lane_u32(mask, 3))
+            v = vsetq_lane_f32(src[3], v, 3);
+
+        return v;
     }
 
 
@@ -41,7 +55,15 @@ namespace blast
     requires std::is_base_of_v<xsimd::neon64, Arch>
     inline xsimd::batch<double, Arch> maskload(double const * src, xsimd::batch_bool<double, Arch> const& mask) noexcept
     {
-        return xsimd::load(src, xsimd::unaligned_mode {});
+        xsimd::batch<double, Arch> v {0.};
+
+        if (vgetq_lane_u64(mask, 0))
+            v = vsetq_lane_f64(src[0], v, 0);
+
+        if (vgetq_lane_u64(mask, 1))
+            v = vsetq_lane_f64(src[1], v, 1);
+
+        return v;
     }
 
 
@@ -49,7 +71,17 @@ namespace blast
     requires std::is_base_of_v<xsimd::neon64, Arch>
     inline void maskstore(xsimd::batch<float, Arch> const& v, float * dst, xsimd::batch_bool<float, Arch> const& mask) noexcept
     {
-        xsimd::store(dst, v, xsimd::unaligned_mode {});
+        if (vgetq_lane_u32(mask, 0))
+            dst[0] = vgetq_lane_f32(v, 0);
+
+        if (vgetq_lane_u32(mask, 1))
+            dst[1] = vgetq_lane_f32(v, 1);
+
+        if (vgetq_lane_u32(mask, 2))
+            dst[2] = vgetq_lane_f32(v, 2);
+
+        if (vgetq_lane_u32(mask, 3))
+            dst[3] = vgetq_lane_f32(v, 3);
     }
 
 
@@ -57,7 +89,11 @@ namespace blast
     requires std::is_base_of_v<xsimd::neon64, Arch>
     inline void maskstore(xsimd::batch<double, Arch> const& v, double * dst, xsimd::batch_bool<double, Arch> const& mask) noexcept
     {
-        xsimd::store(dst, v, xsimd::unaligned_mode {});
+        if (vgetq_lane_u64(mask, 0))
+            dst[0] = vgetq_lane_f64(v, 0);
+
+        if (vgetq_lane_u64(mask, 1))
+            dst[1] = vgetq_lane_f64(v, 1);
     }
 
 
