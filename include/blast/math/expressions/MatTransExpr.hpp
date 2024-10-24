@@ -201,6 +201,15 @@ namespace blast
      * @tparam MT expression operand type
      */
     template <typename MT>
+    struct IsPanelMatrix<MatTransExpr<MT>> : IsPanelMatrix<MT> {};
+
+
+    /**
+     * @brief Specialization for @a MatTransExpr
+     *
+     * @tparam MT expression operand type
+     */
+    template <typename MT>
     struct Spacing<MatTransExpr<MT>> : Spacing<MT> {};
 
 
