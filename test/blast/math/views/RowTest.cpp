@@ -19,7 +19,7 @@ namespace blast :: testing
         for (size_t i = 0; i < rows(A); ++i)
         {
             auto r = row(A, i);
-            ASSERT_EQ(r.size(), A.columns());
+            ASSERT_EQ(size(r), A.columns());
         }
     }
 
