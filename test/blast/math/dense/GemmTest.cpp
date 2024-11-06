@@ -11,6 +11,7 @@
 #include <blast/math/reference/Gemm.hpp>
 
 #include <test/Testing.hpp>
+#include <test/Tolerance.hpp>
 
 
 namespace blast :: testing
@@ -46,7 +47,7 @@ namespace blast :: testing
                         DynamicMatrix<Real, columnMajor> D_ref(m, n);
                         reference::gemm(alpha, A, B, beta, C, D_ref);
 
-                        BLAST_ASSERT_APPROX_EQ(D, D_ref, 1e-10, 1e-10)
+                        BLAST_ASSERT_APPROX_EQ(D, D_ref, absTol<Real>(), relTol<Real>())
                             << "gemm error at size m,n,k=" << m << "," << n << "," << k;
                     }
         }
@@ -81,7 +82,7 @@ namespace blast :: testing
                         DynamicMatrix<Real, columnMajor> D_ref(m, n);
                         reference::gemm(alpha, A, B, beta, C, D_ref);
 
-                        BLAST_ASSERT_APPROX_EQ(D, D_ref, 1e-10, 1e-10)
+                        BLAST_ASSERT_APPROX_EQ(D, D_ref, absTol<Real>(), relTol<Real>())
                             << "gemm error at size m,n,k=" << m << "," << n << "," << k;
                     }
         }
@@ -124,4 +125,5 @@ namespace blast :: testing
 
 
     INSTANTIATE_TYPED_TEST_SUITE_P(double, DenseGemmTest, double);
+    INSTANTIATE_TYPED_TEST_SUITE_P(float, DenseGemmTest, float);
 }

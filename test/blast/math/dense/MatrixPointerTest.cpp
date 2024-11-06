@@ -5,10 +5,12 @@
 #include <blast/math/Matrix.hpp>
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/DynamicPanelMatrix.hpp>
+#include <blast/math/dense/StaticMatrix.hpp>
+#include <blast/math/dense/DynamicMatrix.hpp>
+#include <blast/math/algorithm/Randomize.hpp>
+#include <blast/util/NextMultiple.hpp>
 
 #include <test/Testing.hpp>
-
-#include <blast/blaze/Math.hpp>
 
 
 namespace blast :: testing
@@ -25,7 +27,7 @@ namespace blast :: testing
     template <typename T, bool SO, bool AF, bool PF>
     struct MatrixType<DynamicMatrixPointer<T, SO, AF, PF>>
     {
-        using type = blaze::DynamicMatrix<T, SO>;
+        using type = DynamicMatrix<T, SO>;
     };
 
 
@@ -39,7 +41,7 @@ namespace blast :: testing
         static size_t constexpr N = SO == rowMajor ? S : defaultColumns;
 
     public:
-        using type = blaze::StaticMatrix<T, M, N, SO>;
+        using type = StaticMatrix<T, M, N, SO>;
         static_assert(type::spacing() == S);
     };
 
@@ -110,10 +112,10 @@ namespace blast :: testing
         DynamicMatrixPointer<double, columnMajor, unaligned, padded>,
         DynamicMatrixPointer<double, rowMajor, aligned, padded>,
         DynamicMatrixPointer<double, rowMajor, unaligned, padded>,
-        StaticMatrixPointer<double, blaze::nextMultiple(13, blaze::SIMDTrait<double>::size), columnMajor, aligned, padded>,
-        StaticMatrixPointer<double, blaze::nextMultiple(13, blaze::SIMDTrait<double>::size), columnMajor, unaligned, padded>,
-        StaticMatrixPointer<double, blaze::nextMultiple(13, blaze::SIMDTrait<double>::size), rowMajor, aligned, padded>,
-        StaticMatrixPointer<double, blaze::nextMultiple(13, blaze::SIMDTrait<double>::size), rowMajor, unaligned, padded>,
+        StaticMatrixPointer<double, nextMultiple(13, SimdSize_v<double>), columnMajor, aligned, padded>,
+        StaticMatrixPointer<double, nextMultiple(13, SimdSize_v<double>), columnMajor, unaligned, padded>,
+        StaticMatrixPointer<double, nextMultiple(13, SimdSize_v<double>), rowMajor, aligned, padded>,
+        StaticMatrixPointer<double, nextMultiple(13, SimdSize_v<double>), rowMajor, unaligned, padded>,
         DynamicPanelMatrixPointer<double, columnMajor, aligned, padded>,
         DynamicPanelMatrixPointer<double, columnMajor, unaligned, padded>,
         DynamicPanelMatrixPointer<double, rowMajor, aligned, padded>,
@@ -127,10 +129,10 @@ namespace blast :: testing
         DynamicMatrixPointer<float, rowMajor, aligned, padded>,
         DynamicMatrixPointer<float, columnMajor, unaligned, padded>,
         DynamicMatrixPointer<float, rowMajor, unaligned, padded>,
-        StaticMatrixPointer<float, blaze::nextMultiple(13, blaze::SIMDTrait<float>::size), columnMajor, aligned, padded>,
-        StaticMatrixPointer<float, blaze::nextMultiple(13, blaze::SIMDTrait<float>::size), rowMajor, aligned, padded>,
-        StaticMatrixPointer<float, blaze::nextMultiple(13, blaze::SIMDTrait<float>::size), columnMajor, unaligned, padded>,
-        StaticMatrixPointer<float, blaze::nextMultiple(13, blaze::SIMDTrait<float>::size), rowMajor, unaligned, padded>,
+        StaticMatrixPointer<float, nextMultiple(13, SimdSize_v<float>), columnMajor, aligned, padded>,
+        StaticMatrixPointer<float, nextMultiple(13, SimdSize_v<float>), rowMajor, aligned, padded>,
+        StaticMatrixPointer<float, nextMultiple(13, SimdSize_v<float>), columnMajor, unaligned, padded>,
+        StaticMatrixPointer<float, nextMultiple(13, SimdSize_v<float>), rowMajor, unaligned, padded>,
         DynamicPanelMatrixPointer<float, columnMajor, aligned, padded>,
         DynamicPanelMatrixPointer<float, columnMajor, unaligned, padded>,
         DynamicPanelMatrixPointer<float, rowMajor, aligned, padded>,

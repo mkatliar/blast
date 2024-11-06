@@ -10,6 +10,7 @@
 #include <blast/math/reference/Gemm.hpp>
 #include <blast/math/reference/Axpy.hpp>
 #include <blast/math/reference/Trmm.hpp>
+#include <blast/math/reference/Trsm.hpp>
 #include <blast/math/StaticPanelMatrix.hpp>
 #include <blast/math/dense/StaticMatrix.hpp>
 #include <blast/math/expressions/MatTransExpr.hpp>
@@ -509,7 +510,7 @@ namespace blast :: testing
     }
 
 
-    TYPED_TEST(RegisterMatrixTest, testTrsmRltPanel)
+    TYPED_TEST(RegisterMatrixTest, testTrsmRightLowerTransposePanel)
     {
         using RM = TypeParam;
         using Traits = RegisterMatrixTraits<RM>;
@@ -517,70 +518,49 @@ namespace blast :: testing
 
         RM ker;
 
-        using blaze::randomize;
-        StaticPanelMatrix<ET, Traits::columns, Traits::columns, columnMajor> L;
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> B, X, B1;
+        StaticPanelMatrix<ET, Traits::columns, Traits::columns, columnMajor> A;
+        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> B, X;
 
+        randomize(A);
         for (size_t i = 0; i < Traits::columns; ++i)
-            for (size_t j = 0; j < Traits::columns; ++j)
-                if (j <= i)
-                {
-                    randomize(L(i, j));
-                    if (i == j)
-                        L(i, j) += ET(1.);  // Improve conditioning
-                }
-                else
-                    L(i, j) = ET(0.);
+            A(i, i) += Traits::columns;  // Improve conditioning
 
         randomize(B);
 
-        blaze::StaticMatrix<ET, Traits::columns, Traits::columns, columnMajor> LL;
-        blaze::StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> BB, XX;
-
-        LL = L;
-        BB = B;
-
         // True value
-        XX = evaluate(BB * inv(blaze::trans(LL)));
+        reference::trsm(X, trans(A), UpLo::Upper, false, ET(1.), B);
 
         ker.load(ptr(B));
-        ker.trsm(Side::Right, UpLo::Upper, ptr(L).trans());
-        ker.store(ptr(X));
+        ker.trsm(Side::Right, UpLo::Upper, ptr(A).trans());
 
         // TODO: should be strictly equal?
-        BLAST_ASSERT_APPROX_EQ(X, XX, absTol<ET>(), relTol<ET>());
+        BLAST_ASSERT_APPROX_EQ(ker, X, absTol<ET>(), relTol<ET>());
     }
 
 
-    TYPED_TEST(RegisterMatrixTest, testTrsmRltDense)
+    TYPED_TEST(RegisterMatrixTest, testTrsmRightLowerTransposeDense)
     {
         using RM = TypeParam;
         using ET = ElementType_t<RM>;
 
         RM ker;
 
-        using blaze::randomize;
-        blaze::StaticMatrix<ET, RM::columns(), RM::columns(), columnMajor> L;
-        blaze::StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> B, B1;
+        StaticMatrix<ET, RM::columns(), RM::columns(), columnMajor> A;
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> B, X;
 
+        randomize(A);
         for (size_t i = 0; i < RM::columns(); ++i)
-            for (size_t j = 0; j < RM::columns(); ++j)
-                if (j <= i)
-                {
-                    randomize(L(i, j));
-                    if (i == j)
-                        L(i, j) += ET(1.);  // Improve conditioning
-                }
-                else
-                    blaze::reset(L(i, j));
+            A(i, i) += RM::columns();  // Improve conditioning
 
         randomize(B);
 
         ker.load(ptr(B));
-        ker.trsm(Side::Right, UpLo::Upper, trans(ptr(L)));
+        ker.trsm(Side::Right, UpLo::Upper, trans(ptr(A)));
+
+        reference::trsm(X, trans(A), UpLo::Upper, false, ET(1.), B);
 
         // TODO: should be strictly equal?
-        BLAST_ASSERT_APPROX_EQ(ker, evaluate(B * inv(blaze::trans(L))), absTol<ET>(), relTol<ET>());
+        BLAST_ASSERT_APPROX_EQ(ker, X, absTol<ET>(), relTol<ET>());
     }
 
 
