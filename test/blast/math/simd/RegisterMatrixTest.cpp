@@ -373,7 +373,7 @@ namespace blast :: testing
         randomize(b);
         randomize(C);
         ET alpha {};
-        blaze::randomize(alpha);
+        randomize(alpha);
 
         TypeParam ker;
         ker.load(1., ptr(C));
