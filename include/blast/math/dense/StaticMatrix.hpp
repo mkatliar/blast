@@ -24,7 +24,7 @@ namespace blast
     /// @tparam M number of rows
     /// @tparam N number of columns
     /// @tparam SO storage order
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     class StaticMatrix
     {
     public:
@@ -166,61 +166,61 @@ namespace blast
     };
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     inline size_t constexpr rows(StaticMatrix<T, M, N, SO> const& m) noexcept
     {
         return m.rows();
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     inline size_t constexpr columns(StaticMatrix<T, M, N, SO> const& m) noexcept
     {
         return m.columns();
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     inline constexpr T * data(StaticMatrix<T, M, N, SO>& m) noexcept
     {
         return m.data();
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     inline constexpr T const * data(StaticMatrix<T, M, N, SO> const& m) noexcept
     {
         return m.data();
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     inline void reset(StaticMatrix<T, M, N, SO>& m) noexcept
     {
         m.reset();
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     struct IsDenseMatrix<StaticMatrix<T, M, N, SO>> : std::true_type {};
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     struct IsStatic<StaticMatrix<T, M, N, SO>> : std::true_type {};
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     struct Spacing<StaticMatrix<T, M, N, SO>> : std::integral_constant<size_t, StaticMatrix<T, M, N, SO>::spacing()> {};
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     struct StorageOrderHelper<StaticMatrix<T, M, N, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     struct IsAligned<StaticMatrix<T, M, N, SO>> : std::integral_constant<bool, true> {};
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     struct IsPadded<StaticMatrix<T, M, N, SO>> : std::integral_constant<bool, true> {};
 }

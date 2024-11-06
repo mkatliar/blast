@@ -30,7 +30,7 @@ namespace blast
         if (rows(matrix) != N)
             BLAST_THROW_EXCEPTION(std::invalid_argument {"Non-square matrix provided"});
 
-        DynamicMatrix<ET> tmp(N, N);
+        DynamicMatrix<ET, columnMajor> tmp(N, N);
         randomize(tmp);
 
         reset(matrix);

@@ -17,7 +17,7 @@
 
 namespace blast
 {
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     class StaticMatrixPointer
     {
     public:
@@ -198,7 +198,7 @@ namespace blast
         {
             return p + (SO == columnMajor ? i + spacing() * j : spacing() * i + j);
         }
-		
+
 
         static size_t constexpr SS = SimdVecType::size();
         static TransposeFlag constexpr majorOrientation = SO == columnMajor ? columnVector : rowVector;
@@ -210,25 +210,25 @@ namespace blast
     /**
      * @brief Specialization for StaticMatrixPointer
      */
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     struct StorageOrderHelper<StaticMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 
 
     /**
      * @brief Specialization for StaticMatrixPointer
      */
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     struct IsAligned<StaticMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<bool, AF> {};
 
 
     /**
      * @brief Specialization for StaticMatrixPointer
      */
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     struct IsPadded<StaticMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<bool, PF> {};
 
 
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     BLAZE_ALWAYS_INLINE auto trans(StaticMatrixPointer<T, S, SO, AF, PF> const& p) noexcept
     {
         return p.trans();

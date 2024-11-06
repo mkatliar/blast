@@ -24,7 +24,7 @@ namespace blast :: testing
         using Real = T;
 
 
-        template <bool SOA, bool SOB>
+        template <StorageOrder SOA, StorageOrder SOB>
         void testAlignedImpl()
         {
             for (size_t m = 1; m <= 20; m += 1)
@@ -53,7 +53,7 @@ namespace blast :: testing
         }
 
 
-        template <bool SOA, bool SOB>
+        template <StorageOrder SOA, StorageOrder SOB>
         void testUnalignedImpl()
         {
             size_t constexpr S_MAX = 20;

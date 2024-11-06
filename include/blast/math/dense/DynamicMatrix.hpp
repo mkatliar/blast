@@ -23,7 +23,7 @@ namespace blast
     /// @tparam T element type of the matrix
     /// @tparam SO storage order of panel elements
     ///
-    template <typename T, bool SO = columnMajor>
+    template <typename T, StorageOrder SO>
     class DynamicMatrix
     {
     public:
@@ -151,64 +151,64 @@ namespace blast
     };
 
 
-    template <typename T, bool SO>
+    template <typename T, StorageOrder SO>
     inline size_t constexpr rows(DynamicMatrix<T, SO> const& m) noexcept
     {
         return m.rows();
     }
 
 
-    template <typename T, bool SO>
+    template <typename T, StorageOrder SO>
     inline size_t constexpr columns(DynamicMatrix<T, SO> const& m) noexcept
     {
         return m.columns();
     }
 
 
-    template <typename T, bool SO>
+    template <typename T, StorageOrder SO>
     inline size_t constexpr spacing(DynamicMatrix<T, SO> const& m) noexcept
     {
         return m.spacing();
     }
 
 
-    template <typename T, bool SO>
+    template <typename T, StorageOrder SO>
     inline constexpr T * data(DynamicMatrix<T, SO>& m) noexcept
     {
         return m.data();
     }
 
 
-    template <typename T, bool SO>
+    template <typename T, StorageOrder SO>
     inline constexpr T const * data(DynamicMatrix<T, SO> const& m) noexcept
     {
         return m.data();
     }
 
 
-    template <typename T, bool SO>
+    template <typename T, StorageOrder SO>
     inline void reset(DynamicMatrix<T, SO>& m) noexcept
     {
         m.reset();
     }
 
 
-    template <typename T, bool SO>
+    template <typename T, StorageOrder SO>
     struct IsDenseMatrix<DynamicMatrix<T, SO>> : std::true_type {};
 
 
-    template <typename T, bool SO>
+    template <typename T, StorageOrder SO>
     struct IsStatic<DynamicMatrix<T, SO>> : std::false_type {};
 
 
-    template <typename T, bool SO>
+    template <typename T, StorageOrder SO>
     struct StorageOrderHelper<DynamicMatrix<T, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 
 
-    template <typename T, bool SO>
+    template <typename T, StorageOrder SO>
     struct IsAligned<DynamicMatrix<T, SO>> : std::integral_constant<bool, true> {};
 
 
-    template <typename T, bool SO>
+    template <typename T, StorageOrder SO>
     struct IsPadded<DynamicMatrix<T, SO>> : std::integral_constant<bool, true> {};
 }

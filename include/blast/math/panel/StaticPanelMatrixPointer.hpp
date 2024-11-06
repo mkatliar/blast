@@ -14,7 +14,7 @@
 
 namespace blast
 {
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     class StaticPanelMatrixPointer
     {
     public:
@@ -247,19 +247,19 @@ namespace blast
     /**
      * @brief Specialization for @a StaticPanelMatrixPointer
      */
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     struct StorageOrderHelper<StaticPanelMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 
 
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     struct IsAligned<StaticPanelMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<bool, AF> {};
 
 
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     struct IsPadded<StaticPanelMatrixPointer<T, S, SO, AF, PF>> : std::integral_constant<bool, PF> {};
 
 
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     BLAST_ALWAYS_INLINE auto trans(StaticPanelMatrixPointer<T, S, SO, AF, PF> const& p) noexcept
     {
         return p.trans();

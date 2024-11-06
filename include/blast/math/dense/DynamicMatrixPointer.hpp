@@ -16,7 +16,7 @@
 
 namespace blast
 {
-    template <typename T, bool SO, bool AF, bool PF>
+    template <typename T, StorageOrder SO, bool AF, bool PF>
     class DynamicMatrixPointer
     {
     public:
@@ -214,25 +214,25 @@ namespace blast
     /**
      * @brief Specialization for @a DynamicMatrixPointer
      */
-    template <typename T, bool SO, bool AF, bool PF>
+    template <typename T, StorageOrder SO, bool AF, bool PF>
     struct StorageOrderHelper<DynamicMatrixPointer<T, SO, AF, PF>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 
 
     /**
      * @brief Specialization for @a DynamicMatrixPointer
      */
-    template <typename T, bool SO, bool AF, bool PF>
+    template <typename T, StorageOrder SO, bool AF, bool PF>
     struct IsAligned<DynamicMatrixPointer<T, SO, AF, PF>> : std::integral_constant<bool, AF> {};
 
 
     /**
      * @brief Specialization for @a DynamicMatrixPointer
      */
-    template <typename T, bool SO, bool AF, bool PF>
+    template <typename T, StorageOrder SO, bool AF, bool PF>
     struct IsPadded<DynamicMatrixPointer<T, SO, AF, PF>> : std::integral_constant<bool, PF> {};
 
 
-    template <typename T, bool SO, bool AF, bool PF>
+    template <typename T, StorageOrder SO, bool AF, bool PF>
     BLAST_ALWAYS_INLINE auto trans(DynamicMatrixPointer<T, SO, AF, PF> const& p) noexcept
     {
         return p.trans();

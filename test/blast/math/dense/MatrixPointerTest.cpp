@@ -24,14 +24,14 @@ namespace blast :: testing
     struct MatrixType;
 
 
-    template <typename T, bool SO, bool AF, bool PF>
+    template <typename T, StorageOrder SO, bool AF, bool PF>
     struct MatrixType<DynamicMatrixPointer<T, SO, AF, PF>>
     {
         using type = DynamicMatrix<T, SO>;
     };
 
 
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     struct MatrixType<StaticMatrixPointer<T, S, SO, AF, PF>>
     {
     private:
@@ -46,14 +46,14 @@ namespace blast :: testing
     };
 
 
-    template <typename T, bool SO, bool AF, bool PF>
+    template <typename T, StorageOrder SO, bool AF, bool PF>
     struct MatrixType<DynamicPanelMatrixPointer<T, SO, AF, PF>>
     {
         using type = DynamicPanelMatrix<T, SO>;
     };
 
 
-    template <typename T, size_t S, bool SO, bool AF, bool PF>
+    template <typename T, size_t S, StorageOrder SO, bool AF, bool PF>
     struct MatrixType<StaticPanelMatrixPointer<T, S, SO, AF, PF>>
     {
     private:
