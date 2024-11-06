@@ -14,18 +14,13 @@
 
 namespace blast :: benchmark
 {
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     static void BM_RegisterMatrix_potrf(State& state)
     {
-        using Kernel = RegisterMatrix<T, M, N, SO>;
-        using Traits = RegisterMatrixTraits<Kernel>;
-        size_t constexpr m = Traits::rows;
-        size_t constexpr n = Traits::columns;
-
-        DynamicPanelMatrix<T> a(m, n);
+        DynamicPanelMatrix<T> a(M, N);
         randomize(a);
 
-        Kernel ker;
+        RegisterMatrix<T, M, N, SO> ker;
         ker.load(ptr(a));
 
         for (auto _ : state)
@@ -34,8 +29,8 @@ namespace blast :: benchmark
             DoNotOptimize(ker);
         }
 
-        if (m >= n)
-            setCounters(state.counters, complexityPotrf(m, n));
+        if (M >= N)
+            setCounters(state.counters, complexityPotrf(M, N));
     }
 
 

@@ -11,18 +11,13 @@
 
 #include <blast/math/algorithm/Randomize.hpp>
 
-#include <blaze/Math.h>
-
 
 namespace blast :: benchmark
 {
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     static void BM_RegisterMatrix_load_dynamic_panel(State& state)
     {
-        using Kernel = RegisterMatrix<T, M, N, SO>;
-        using Traits = RegisterMatrixTraits<Kernel>;
-
-        Kernel ker;
+        RegisterMatrix<T, M, N, SO> ker;
 
         DynamicPanelMatrix<double> c(ker.rows(), ker.columns());
         randomize(c);
@@ -37,13 +32,10 @@ namespace blast :: benchmark
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     static void BM_RegisterMatrix_load_dynamic_dense(State& state)
     {
-        using Kernel = RegisterMatrix<T, M, N, SO>;
-        using Traits = RegisterMatrixTraits<Kernel>;
-
-        Kernel ker;
+        RegisterMatrix<T, M, N, SO> ker;
 
         DynamicMatrix<double, SO> c(ker.rows(), ker.columns());
         randomize(c);
@@ -58,13 +50,10 @@ namespace blast :: benchmark
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     static void BM_RegisterMatrix_load_static_dense(State& state)
     {
-        using Kernel = RegisterMatrix<T, M, N, SO>;
-        using Traits = RegisterMatrixTraits<Kernel>;
-
-        Kernel ker;
+        RegisterMatrix<T, M, N, SO> ker;
 
         StaticMatrix<double, M, N, SO> c;
         randomize(c);

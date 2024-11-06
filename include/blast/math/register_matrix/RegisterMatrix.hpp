@@ -32,14 +32,13 @@ namespace blast
     /// @tparam N number of columns of the matrix.
     /// @tparam SO orientation of SIMD registers.
     ///
-    template <typename T, size_t M, size_t N, bool SO = columnMajor>
+    template <typename T, size_t M, size_t N, StorageOrder SO = columnMajor>
     class RegisterMatrix
     {
     public:
         static_assert(SO == columnMajor, "Only column-major register matrices are currently supported");
 
-        // TODO: change bool to StorageOrder
-        static constexpr bool storageOrder = SO;
+        static constexpr StorageOrder storageOrder = SO;
 
         /// @brief Type of matrix elements
         using ElementType = T;
@@ -409,25 +408,25 @@ namespace blast
      * @tparam N number of columns of the matrix.
      * @tparam SO orientation of SIMD registers.
      */
-    template <typename T, size_t M, size_t N, bool SO>
-    struct StorageOrderHelper<RegisterMatrix<T, M, N, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
+    template <typename T, size_t M, size_t N, StorageOrder SO>
+    struct StorageOrderHelper<RegisterMatrix<T, M, N, SO>> : std::integral_constant<StorageOrder, SO> {};
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     inline size_t constexpr rows(RegisterMatrix<T, M, N, SO> const& m) noexcept
     {
         return m.rows();
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     inline size_t constexpr columns(RegisterMatrix<T, M, N, SO> const& m) noexcept
     {
         return m.columns();
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename P>
     requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::load(P p) noexcept
@@ -440,7 +439,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename P>
     requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::load(T beta, P p) noexcept
@@ -453,7 +452,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename P>
     requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::load(T beta, P p, size_t m, size_t n) noexcept
@@ -481,7 +480,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename P>
     requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::store(P p) const noexcept
@@ -494,7 +493,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename P>
     requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::store(P p, size_t m, size_t n) const noexcept
@@ -516,7 +515,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename P>
     requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::storeLower(P p) const noexcept
@@ -539,7 +538,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename P>
     requires MatrixPointer<P, T> && (P::storageOrder == columnMajor)
     inline void RegisterMatrix<T, M, N, SO>::storeLower(P p, size_t m, size_t n) const noexcept
@@ -561,7 +560,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename P>
     requires MatrixPointer<P, T>
     BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsm(Side side, UpLo uplo, P A) noexcept
@@ -603,7 +602,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename PA, typename PB>
     requires
         VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
@@ -630,7 +629,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename PA, typename PB>
     requires
         VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
@@ -657,7 +656,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename PA, typename PB>
     requires
         VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
@@ -682,7 +681,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename PA, typename PB>
     requires
         VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
@@ -707,7 +706,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::potrf() noexcept
     {
         static_assert(M >= N, "potrf() not implemented for register matrices with columns more than rows");
@@ -740,7 +739,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename P1, typename P2>
     requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
     BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, P1 a, UpLo uplo, bool diagonal_unit, P2 b) noexcept
@@ -790,7 +789,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename PB, typename PA>
     requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
     BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, PB b, PA a, UpLo uplo, bool diagonal_unit) noexcept
@@ -839,7 +838,7 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     template <typename PB, typename PA>
     requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
     BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, PB b, PA a, UpLo uplo, bool diagonal_unit, size_t m, size_t n) noexcept
@@ -881,8 +880,8 @@ namespace blast
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO1, Matrix MT>
-    inline bool operator==(RegisterMatrix<T, M, N, SO1> const& rm, MT const& m)
+    template <typename T, size_t M, size_t N, StorageOrder SO, Matrix MT>
+    inline bool operator==(RegisterMatrix<T, M, N, SO> const& rm, MT const& m)
     {
         if (rows(m) != rm.rows() || columns(m) != rm.columns())
             return false;
@@ -896,8 +895,8 @@ namespace blast
     }
 
 
-    template <Matrix MT, typename T, size_t M, size_t N, bool SO2>
-    inline bool operator==(MT const& m, RegisterMatrix<T, M, N, SO2> const& rm)
+    template <Matrix MT, typename T, size_t M, size_t N, StorageOrder SO>
+    inline bool operator==(MT const& m, RegisterMatrix<T, M, N, SO> const& rm)
     {
         return rm == m;
     }

@@ -5,24 +5,23 @@
 #include <blast/math/DynamicPanelMatrix.hpp>
 #include <blast/math/RegisterMatrix.hpp>
 #include <blast/math/dense/StaticMatrixPointer.hpp>
+#include <blast/math/dense/StaticMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
 
 #include <blast/math/algorithm/Randomize.hpp>
 
-#include <blaze/math/StaticMatrix.h>
-
 
 namespace blast :: benchmark
 {
-    template <typename T, size_t M, size_t N, bool SO, size_t MM, size_t NN>
+    template <typename T, size_t M, size_t N, StorageOrder SO, size_t MM, size_t NN>
     static void BM_RegisterMatrix_partialGemm_static(State& state)
     {
         size_t constexpr K = 5;
 
-        blaze::StaticMatrix<T, M, K, SO> A;
-        blaze::StaticMatrix<T, K, N, SO> B;
-        blaze::StaticMatrix<T, M, N, SO> C, D;
+        StaticMatrix<T, M, K, SO> A;
+        StaticMatrix<T, K, N, SO> B;
+        StaticMatrix<T, M, N, SO> C, D;
 
         randomize(A);
         randomize(B);

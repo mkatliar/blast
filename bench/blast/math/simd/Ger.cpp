@@ -12,17 +12,16 @@
 
 namespace blast :: benchmark
 {
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     static void BM_RegisterMatrix_ger_nt(State& state)
     {
         using Kernel = RegisterMatrix<T, M, N, SO>;
-        using Traits = RegisterMatrixTraits<Kernel>;
         using ET = ElementType_t<Kernel>;
         size_t constexpr K = 100;
 
-        DynamicPanelMatrix<ET> a(Traits::rows, K);
-        DynamicPanelMatrix<ET> b(Traits::columns, K);
-        DynamicPanelMatrix<ET> c(Traits::rows, Traits::columns);
+        DynamicPanelMatrix<ET> a(Kernel::rows(), K);
+        DynamicPanelMatrix<ET> b(Kernel::columns(), K);
+        DynamicPanelMatrix<ET> c(Kernel::rows(), Kernel::columns());
 
         randomize(a);
         randomize(b);

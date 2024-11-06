@@ -13,18 +13,15 @@
 
 namespace blast :: benchmark
 {
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     static void BM_RegisterMatrix_trsm(State& state)
     {
         using Kernel = RegisterMatrix<T, M, N, SO>;
-        using Traits = RegisterMatrixTraits<Kernel>;
-        size_t constexpr m = Traits::rows;
-        size_t constexpr n = Traits::columns;
 
-        StaticPanelMatrix<double, m, n, columnMajor> L;
+        StaticPanelMatrix<double, M, N, columnMajor> L;
         randomize(L);
 
-        StaticPanelMatrix<double, m, n, columnMajor> A;
+        StaticPanelMatrix<double, M, N, columnMajor> A;
         randomize(A);
 
         Kernel ker;
@@ -36,7 +33,7 @@ namespace blast :: benchmark
             DoNotOptimize(ker);
         }
 
-        setCounters(state.counters, complexity(trsmTag, false, m, n));
+        setCounters(state.counters, complexity(trsmTag, false, M, N));
     }
 
 

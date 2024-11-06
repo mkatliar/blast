@@ -25,7 +25,7 @@ namespace blast
     /// R += alpha * A * B,
     /// where R is M by N, A is M by K, and B is K by N.
     ///
-    template <typename T, size_t M, size_t N, bool SO, typename PA, typename PB>
+    template <typename T, size_t M, size_t N, StorageOrder SO, typename PA, typename PB>
     requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
         && MatrixPointer<PB, T>
     inline void gemm(RegisterMatrix<T, M, N, SO>& r, size_t K, T alpha, PA a, PB b) noexcept
@@ -40,7 +40,7 @@ namespace blast
     /// R(0:md-1, 0:nd-1) += alpha * A * B,
     /// where R is M by N, A is md by K, and B is K by nd.
     ///
-    template <typename T, size_t M, size_t N, bool SO, typename PA, typename PB>
+    template <typename T, size_t M, size_t N, StorageOrder SO, typename PA, typename PB>
     requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
         && MatrixPointer<PB, T>
     inline void gemm(RegisterMatrix<T, M, N, SO>& r, size_t K,
@@ -62,7 +62,7 @@ namespace blast
     /// T and SO could be inferred from the argument types.
     ///
     template <
-        typename T, size_t M, size_t N, bool SO,
+        typename T, size_t M, size_t N, StorageOrder SO,
         typename PA, typename PB, typename PC, typename PD
     >
     requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
@@ -103,7 +103,7 @@ namespace blast
     /// T and SO could be inferred from the argument types.
     ///
     template <
-        typename T, size_t M, size_t N, bool SO,
+        typename T, size_t M, size_t N, StorageOrder SO,
         typename PA, typename PB, typename PC, typename PD
     >
     requires
@@ -135,7 +135,7 @@ namespace blast
     /// T and SO could be inferred from the argument types.
     ///
     template <
-        typename T, size_t M, size_t N, bool SO,
+        typename T, size_t M, size_t N, StorageOrder SO,
         typename PA, typename PB, typename PC, typename PD
     >
     requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)
@@ -164,7 +164,7 @@ namespace blast
     /// T and SO could be inferred from the argument types.
     ///
     template <
-        typename T, size_t M, size_t N, bool SO,
+        typename T, size_t M, size_t N, StorageOrder SO,
         typename PA, typename PB, typename PC, typename PD
     >
     requires MatrixPointer<PA, T> && (PA::storageOrder == columnMajor)

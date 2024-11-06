@@ -5,19 +5,18 @@
 #include <blast/math/DynamicPanelMatrix.hpp>
 #include <blast/math/RegisterMatrix.hpp>
 #include <blast/math/dense/StaticMatrixPointer.hpp>
+#include <blast/math/dense/StaticMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
 
 #include <blast/math/algorithm/Randomize.hpp>
-
-#include <blaze/Math.h>
 
 #include <functional>
 
 
 namespace blast :: benchmark
 {
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     static void BM_RegisterMatrix_partialLoad_static_dense(State& state)
     {
         using Kernel = RegisterMatrix<T, M, N, SO>;

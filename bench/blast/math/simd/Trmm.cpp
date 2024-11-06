@@ -4,29 +4,27 @@
 
 #include <blast/math/Matrix.hpp>
 #include <blast/math/RegisterMatrix.hpp>
+#include <blast/math/dense/StaticMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
 
 #include <blast/math/algorithm/Randomize.hpp>
 
-#include <blast/blaze/Math.hpp>
-
 
 namespace blast :: benchmark
 {
-    template <typename T, size_t M, size_t N, bool SO, UpLo UPLO>
+    template <typename T, size_t M, size_t N, StorageOrder SO, UpLo UPLO>
     static void BM_RegisterMatrix_trmmLeft(State& state)
     {
-        using Kernel = RegisterMatrix<T, M, N, SO>;
         size_t constexpr K = 100;
 
-        blaze::StaticMatrix<T, Kernel::rows(), Kernel::rows(), SO> A;
-        blaze::StaticMatrix<T, Kernel::rows(), Kernel::columns(), columnMajor> B;
+        StaticMatrix<T, M, M, SO> A;
+        StaticMatrix<T, M, N, columnMajor> B;
 
         randomize(A);
         randomize(B);
 
-        Kernel ker;
+        RegisterMatrix<T, M, N, SO> ker;
 
         for (auto _ : state)
         {
@@ -38,19 +36,18 @@ namespace blast :: benchmark
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO, UpLo UPLO>
+    template <typename T, size_t M, size_t N, StorageOrder SO, UpLo UPLO>
     static void BM_RegisterMatrix_trmmRight(State& state)
     {
-        using Kernel = RegisterMatrix<T, M, N, SO>;
         size_t constexpr K = 100;
 
-        blaze::StaticMatrix<T, Kernel::columns(), Kernel::columns(), SO> A;
-        blaze::StaticMatrix<T, Kernel::rows(), Kernel::columns(), columnMajor> B;
+        StaticMatrix<T, N, N, SO> A;
+        StaticMatrix<T, M, N, columnMajor> B;
 
         randomize(A);
         randomize(B);
 
-        Kernel ker;
+        RegisterMatrix<T, M, N, SO> ker;
 
         for (auto _ : state)
         {
