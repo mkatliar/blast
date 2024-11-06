@@ -52,7 +52,6 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testDefaultCtor)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
         RM ker;
@@ -66,10 +65,9 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testReset)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
+        StaticPanelMatrix<ET, RM::rows(), RM::columns(), columnMajor> A;
         randomize(A);
 
         RM ker;
@@ -90,18 +88,17 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testLoadPanel)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
+        StaticPanelMatrix<ET, RM::rows(), RM::columns(), columnMajor> A;
         randomize(A);
 
         RM ker;
         ET const beta = 0.1;
         ker.load(beta, ptr<aligned>(A, 0, 0));
 
-        for (size_t i = 0; i < Traits::rows; ++i)
-            for (size_t j = 0; j < Traits::columns; ++j)
+        for (size_t i = 0; i < RM::rows(); ++i)
+            for (size_t j = 0; j < RM::columns(); ++j)
                 EXPECT_EQ(ker(i, j), beta * A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
     }
 
@@ -109,10 +106,9 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testPartialLoadPanel)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
+        StaticPanelMatrix<ET, RM::rows(), RM::columns(), columnMajor> A;
         randomize(A);
 
         for (size_t m = 0; m <= rows(A); ++m)
@@ -136,10 +132,9 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testPartialLoadDense)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A;
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> A;
         for (size_t i = 0; i < rows(A); ++i)
             for (size_t j = 0; j < columns(A); ++j)
                 A(i, j) = 1000 * i + j;
@@ -167,18 +162,17 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testLoadStore)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
+        StaticPanelMatrix<ET, RM::rows(), RM::columns(), columnMajor> A, B;
         randomize(A);
 
         RM ker;
         ker.load(ptr(A));
         ker.store(ptr(B));
 
-        for (size_t i = 0; i < Traits::rows; ++i)
-            for (size_t j = 0; j < Traits::columns; ++j)
+        for (size_t i = 0; i < RM::rows(); ++i)
+            for (size_t j = 0; j < RM::columns(); ++j)
                 EXPECT_EQ(B(i, j), A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
     }
 
@@ -186,18 +180,17 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testLoadStore2)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B(0.);
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> A, B(0.);
         randomize(A);
 
         RM ker;
         ker.load(1., ptr<aligned>(A, 0, 0));
         ker.store(ptr<aligned>(B, 0, 0));
 
-        for (size_t i = 0; i < Traits::rows; ++i)
-            for (size_t j = 0; j < Traits::columns; ++j)
+        for (size_t i = 0; i < RM::rows(); ++i)
+            for (size_t j = 0; j < RM::columns(); ++j)
                 EXPECT_EQ(B(i, j), A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
     }
 
@@ -216,10 +209,6 @@ namespace blast :: testing
         // store2(ker, B.data(), B.spacing());
 
         EXPECT_EQ(ker, A);
-
-        // for (size_t i = 0; i < ker.rows(); ++i)
-        //     for (size_t j = 0; j < ker.columns(); ++j)
-        //         EXPECT_EQ(ker(i, j), A(i, j)) << "element mismatch at (" << i << ", " << j << ")";
     }
 
 
@@ -280,28 +269,27 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testPartialStore)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A_ref;
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> A_ref;
         randomize(A_ref);
 
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
+        StaticPanelMatrix<ET, RM::rows(), RM::columns(), columnMajor> A, B;
         assign(A, A_ref);
 
         RM ker;
         ker.load(ptr(A));
 
-        for (size_t m = ker.rows() + 1 - ker.simdSize(); m <= Traits::rows; ++m)
-            for (size_t n = 1; n <= Traits::columns; ++n)
+        for (size_t m = ker.rows() + 1 - SimdSize_v<ET>; m <= RM::rows(); ++m)
+            for (size_t n = 1; n <= RM::columns(); ++n)
             {
-                if (m != Traits::rows && n != Traits::columns)
+                if (m != RM::rows() && n != RM::columns())
                 {
                     B = 0.;
                     ker.store(ptr(B), m, n);
 
-                    for (size_t i = 0; i < Traits::rows; ++i)
-                        for (size_t j = 0; j < Traits::columns; ++j)
+                    for (size_t i = 0; i < RM::rows(); ++i)
+                        for (size_t j = 0; j < RM::columns(); ++j)
                             ASSERT_EQ(B(i, j), i < m && j < n ? A_ref(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), "
                                 << "store size = " << m << "x" << n;
                 }
@@ -312,23 +300,22 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testPartialStore2)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> A, B;
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> A, B;
         randomize(A);
 
         RM ker;
         ker.load(1., ptr<aligned>(A, 0, 0));
 
-        for (size_t m = 0; m <= Traits::rows; ++m)
-            for (size_t n = 0; n <= Traits::columns; ++n)
+        for (size_t m = 0; m <= RM::rows(); ++m)
+            for (size_t n = 0; n <= RM::columns(); ++n)
             {
                 B = 0.;
                 ker.store(ptr<aligned>(B, 0, 0), m, n);
 
-                for (size_t i = 0; i < Traits::rows; ++i)
-                    for (size_t j = 0; j < Traits::columns; ++j)
+                for (size_t i = 0; i < RM::rows(); ++i)
+                    for (size_t j = 0; j < RM::columns(); ++j)
                         ASSERT_EQ(B(i, j), i < m && j < n ? A(i, j) : 0.) << "element mismatch at (" << i << ", " << j << "), "
                             << "store size = " << m << "x" << n;
             }
@@ -338,12 +325,11 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testGerNT)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        StaticPanelMatrix<ET, Traits::rows, 1, columnMajor> A;
-        StaticPanelMatrix<ET, Traits::columns, 1, columnMajor> B;
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
+        StaticPanelMatrix<ET, RM::rows(), 1, columnMajor> A;
+        StaticPanelMatrix<ET, RM::columns(), 1, columnMajor> B;
+        StaticPanelMatrix<ET, RM::rows(), RM::columns(), columnMajor> C;
 
         randomize(A);
         randomize(B);
@@ -362,12 +348,11 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testGer)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        DynamicVector<ET, columnVector> a(Traits::rows);
-        DynamicVector<ET, rowVector> b(Traits::columns);
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
+        DynamicVector<ET, columnVector> a(RM::rows());
+        DynamicVector<ET, rowVector> b(RM::columns());
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> C;
 
         randomize(a);
         randomize(b);
@@ -388,19 +373,18 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testPartialGerNT)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        StaticPanelMatrix<ET, Traits::rows, 1, columnMajor> A;
-        StaticPanelMatrix<ET, Traits::columns, 1, columnMajor> B;
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
+        StaticPanelMatrix<ET, RM::rows(), 1, columnMajor> A;
+        StaticPanelMatrix<ET, RM::columns(), 1, columnMajor> B;
+        StaticPanelMatrix<ET, RM::rows(), RM::columns(), columnMajor> C;
 
         randomize(A);
         randomize(B);
         randomize(C);
 
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> D;
-        reference::ger(Traits::rows, Traits::columns, 1., column(ptr(A)), column(ptr(B)).trans(), ptr(C), ptr(D));
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> D;
+        reference::ger(RM::rows(), RM::columns(), 1., column(ptr(A)), column(ptr(B)).trans(), ptr(C), ptr(D));
 
         for (size_t m = 0; m <= rows(C); ++m)
         {
@@ -423,19 +407,18 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testPartialGerNT2)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        DynamicVector<ET, columnVector> a(Traits::rows);
-        DynamicVector<ET, columnVector> b(Traits::columns);
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C;
+        DynamicVector<ET, columnVector> a(RM::rows());
+        DynamicVector<ET, columnVector> b(RM::columns());
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> C;
 
         randomize(a);
         randomize(b);
         randomize(C);
 
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> D;
-        reference::ger(Traits::rows, Traits::columns, 1., ptr(a), ptr(trans(b)), ptr(C), ptr(D));
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> D;
+        reference::ger(RM::rows(), RM::columns(), 1., ptr(a), ptr(trans(b)), ptr(C), ptr(D));
 
         for (size_t m = 0; m <= rows(C); ++m)
         {
@@ -458,12 +441,11 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testGerNT2)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
-        DynamicVector<ET, columnVector> a(Traits::rows);
-        DynamicVector<ET, columnVector> b(Traits::columns);
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> C, D;
+        DynamicVector<ET, columnVector> a(RM::rows());
+        DynamicVector<ET, columnVector> b(RM::columns());
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> C, D;
 
         randomize(a);
         randomize(b);
@@ -474,18 +456,19 @@ namespace blast :: testing
         ker.ger(ET(1.), ptr(a), ptr(trans(b)));
         ker.store(ptr(D));
 
-        StaticMatrix<ET, Traits::rows, Traits::columns, columnMajor> D_ref;
-        reference::ger(Traits::rows, Traits::columns, 1., ptr(a), ptr(trans(b)), ptr(C), ptr(D_ref));
+        StaticMatrix<ET, RM::rows(), RM::columns(), columnMajor> D_ref;
+        reference::ger(RM::rows(), RM::columns(), 1., ptr(a), ptr(trans(b)), ptr(C), ptr(D_ref));
         BLAST_EXPECT_APPROX_EQ(D, D_ref, absTol<ET>(), relTol<ET>());
     }
 
 
     TYPED_TEST(RegisterMatrixTest, testPotrf)
     {
-        using Traits = RegisterMatrixTraits<TypeParam>;
-        using ET = typename Traits::ElementType;
-        static size_t constexpr m = Traits::rows;
-        static size_t constexpr n = Traits::columns;
+        using RM = TypeParam;
+        using ET = ElementType_t<RM>;
+
+        static size_t constexpr m = RM::rows();
+        static size_t constexpr n = RM::columns();
 
         if constexpr (m >= n)
         {
@@ -513,17 +496,16 @@ namespace blast :: testing
     TYPED_TEST(RegisterMatrixTest, testTrsmRightLowerTransposePanel)
     {
         using RM = TypeParam;
-        using Traits = RegisterMatrixTraits<RM>;
         using ET = ElementType_t<RM>;
 
         RM ker;
 
-        StaticPanelMatrix<ET, Traits::columns, Traits::columns, columnMajor> A;
-        StaticPanelMatrix<ET, Traits::rows, Traits::columns, columnMajor> B, X;
+        StaticPanelMatrix<ET, RM::columns(), RM::columns(), columnMajor> A;
+        StaticPanelMatrix<ET, RM::rows(), RM::columns(), columnMajor> B, X;
 
         randomize(A);
-        for (size_t i = 0; i < Traits::columns; ++i)
-            A(i, i) += Traits::columns;  // Improve conditioning
+        for (size_t i = 0; i < RM::columns(); ++i)
+            A(i, i) += RM::columns();  // Improve conditioning
 
         randomize(B);
 

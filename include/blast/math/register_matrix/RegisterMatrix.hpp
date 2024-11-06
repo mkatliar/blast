@@ -74,30 +74,10 @@ namespace blast
         }
 
 
-        /// @brief Number of matrix panels
-        ///
-        /// TODO: do we need it? deprecate?
-        ///
-        static size_t constexpr panels()
-        {
-            return RM;
-        }
-
-
         /// @brief Number of registers used
         static size_t constexpr registers()
         {
             return RM * N;
-        }
-
-
-        /// @brief SIMD size
-        ///
-        /// TODO: do we need it? deprecate?
-        ///
-        static size_t constexpr simdSize()
-        {
-            return SS;
         }
 
 
@@ -431,24 +411,6 @@ namespace blast
      */
     template <typename T, size_t M, size_t N, bool SO>
     struct StorageOrderHelper<RegisterMatrix<T, M, N, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
-
-
-    // TODO: deprecate
-    template <typename Ker>
-    struct RegisterMatrixTraits;
-
-
-    // TODO: deprecate
-    template <typename T, size_t M, size_t N, bool SO>
-    struct RegisterMatrixTraits<RegisterMatrix<T, M, N, SO>>
-    {
-        static size_t constexpr simdSize = RegisterMatrix<T, M, N, SO>::SS;
-        static size_t constexpr rows = M;
-        static size_t constexpr columns = N;
-        static size_t constexpr elementCount = rows * columns;
-
-        using ElementType = T;
-    };
 
 
     template <typename T, size_t M, size_t N, bool SO>
