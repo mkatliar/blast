@@ -12,14 +12,7 @@
 #include <blast/math/StorageOrder.hpp>
 #include <blast/util/Types.hpp>
 #include <blast/util/Exception.hpp>
-
-#include <blaze/math/StorageOrder.h>
-#include <blaze/math/Matrix.h>
-#include <blaze/system/Inline.h>
-#include <blaze/util/Types.h>
-#include <blaze/util/Exception.h>
-#include <blaze/util/Assert.h>
-#include <blaze/util/StaticAssert.h>
+#include <blast/system/Inline.hpp>
 
 #include <stdexcept>
 #include <type_traits>
@@ -41,17 +34,15 @@ namespace blast
     ///
     template <typename T, size_t M, size_t N, bool SO = columnMajor>
     class RegisterMatrix
-    :   public blaze::Matrix<RegisterMatrix<T, M, N, SO>, SO>
     {
     public:
         static_assert(SO == columnMajor, "Only column-major register matrices are currently supported");
 
-        using BaseType = blaze::Matrix<RegisterMatrix<T, M, N, SO>, SO>;
-        using BaseType::storageOrder;
+        // TODO: change bool to StorageOrder
+        static constexpr bool storageOrder = SO;
 
         /// @brief Type of matrix elements
         using ElementType = T;
-        using CompositeType = RegisterMatrix const&;              //!< Data type for composite expression templates.
 
 
         /// @brief Default ctor
@@ -84,6 +75,9 @@ namespace blast
 
 
         /// @brief Number of matrix panels
+        ///
+        /// TODO: do we need it? deprecate?
+        ///
         static size_t constexpr panels()
         {
             return RM;
@@ -98,6 +92,9 @@ namespace blast
 
 
         /// @brief SIMD size
+        ///
+        /// TODO: do we need it? deprecate?
+        ///
         static size_t constexpr simdSize()
         {
             return SS;
@@ -114,7 +111,9 @@ namespace blast
         /// @brief Set all elements to 0.
         void reset() noexcept
         {
+            #pragma unroll
             for (size_t i = 0; i < RM; ++i)
+                #pragma unroll
                 for (size_t j = 0; j < N; ++j)
                     v_[i][j].reset();
         }
@@ -399,10 +398,10 @@ namespace blast
         static size_t constexpr RM = M / SS;
         static size_t constexpr RN = N;
 
-        BLAZE_STATIC_ASSERT_MSG((RM > 0), "Number of rows must be not less than SIMD size");
-        BLAZE_STATIC_ASSERT_MSG((RN > 0), "Number of columns must be positive");
-        BLAZE_STATIC_ASSERT_MSG((M % SS == 0), "Number of rows must be a multiple of SIMD size");
-        BLAZE_STATIC_ASSERT_MSG((RM * RN <= registerCapacity(Arch {})), "Not enough registers for a RegisterMatrix");
+        static_assert(RM > 0, "Number of rows must be not less than SIMD size");
+        static_assert(RN > 0, "Number of columns must be positive");
+        static_assert(M % SS == 0, "Number of rows must be a multiple of SIMD size");
+        static_assert(RM * RN <= registerCapacity(Arch {}), "Not enough registers for a RegisterMatrix");
 
         SimdVecType v_[RM][RN];
 
@@ -434,6 +433,7 @@ namespace blast
     struct StorageOrderHelper<RegisterMatrix<T, M, N, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 
 
+    // TODO: deprecate
     template <typename Ker>
     struct RegisterMatrixTraits;
 
@@ -449,6 +449,20 @@ namespace blast
 
         using ElementType = T;
     };
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    inline size_t constexpr rows(RegisterMatrix<T, M, N, SO> const& m) noexcept
+    {
+        return m.rows();
+    }
+
+
+    template <typename T, size_t M, size_t N, bool SO>
+    inline size_t constexpr columns(RegisterMatrix<T, M, N, SO> const& m) noexcept
+    {
+        return m.columns();
+    }
 
 
     template <typename T, size_t M, size_t N, bool SO>
@@ -588,7 +602,7 @@ namespace blast
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P>
     requires MatrixPointer<P, T>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsm(Side side, UpLo uplo, P A) noexcept
+    BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trsm(Side side, UpLo uplo, P A) noexcept
     {
         if constexpr (SO == columnMajor)
         {
@@ -632,7 +646,7 @@ namespace blast
     requires
         VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
         VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b) noexcept
+    BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b) noexcept
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= registerCapacity(Arch {})), "Not enough registers for ger()");
 
@@ -659,7 +673,7 @@ namespace blast
     requires
         VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
         VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b) noexcept
+    BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b) noexcept
     {
         BLAZE_STATIC_ASSERT_MSG((RM * RN + RM + 1 <= registerCapacity(Arch {})), "Not enough registers for ger()");
 
@@ -686,7 +700,7 @@ namespace blast
     requires
         VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
         VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept
+    BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(T alpha, PA a, PB b, size_t m, size_t n) noexcept
     {
         SimdVecType ax[RM];
 
@@ -711,7 +725,7 @@ namespace blast
     requires
         VectorPointer<PA, T> && (PA::transposeFlag == columnVector) &&
         VectorPointer<PB, T> && (PB::transposeFlag == rowVector)
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b, size_t m, size_t n) noexcept
+    BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::ger(PA a, PB b, size_t m, size_t n) noexcept
     {
         SimdVecType ax[RM];
 
@@ -732,7 +746,7 @@ namespace blast
 
 
     template <typename T, size_t M, size_t N, bool SO>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::potrf() noexcept
+    BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::potrf() noexcept
     {
         static_assert(M >= N, "potrf() not implemented for register matrices with columns more than rows");
         static_assert(RM * RN + 2 <= registerCapacity(Arch {}), "Not enough registers");
@@ -767,7 +781,7 @@ namespace blast
     template <typename T, size_t M, size_t N, bool SO>
     template <typename P1, typename P2>
     requires MatrixPointer<P1, T> && (P1::storageOrder == columnMajor) && MatrixPointer<P2, T>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, P1 a, UpLo uplo, bool diagonal_unit, P2 b) noexcept
+    BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, P1 a, UpLo uplo, bool diagonal_unit, P2 b) noexcept
     {
         if (diagonal_unit)
             BLAST_THROW_EXCEPTION(std::logic_error {"Unit diagonal matrices support not implemented in RegisterMatrix::trmm()"});
@@ -817,7 +831,7 @@ namespace blast
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PB, typename PA>
     requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, PB b, PA a, UpLo uplo, bool diagonal_unit) noexcept
+    BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, PB b, PA a, UpLo uplo, bool diagonal_unit) noexcept
     {
         if (diagonal_unit)
             BLAST_THROW_EXCEPTION(std::logic_error {"Unit diagonal matrices support not implemented in RegisterMatrix::trmm()"});
@@ -866,9 +880,9 @@ namespace blast
     template <typename T, size_t M, size_t N, bool SO>
     template <typename PB, typename PA>
     requires MatrixPointer<PB, T> && (PB::storageOrder == columnMajor) && MatrixPointer<PA, T>
-    BLAZE_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, PB b, PA a, UpLo uplo, bool diagonal_unit, size_t m, size_t n) noexcept
+    BLAST_ALWAYS_INLINE void RegisterMatrix<T, M, N, SO>::trmm(T alpha, PB b, PA a, UpLo uplo, bool diagonal_unit, size_t m, size_t n) noexcept
     {
-        // NOTE: this implementation does uses unmasked loads from the matrix a,
+        // NOTE: this implementation uses unmasked loads from the matrix a,
         // and therefore will access rows of a beyond m-1.
         // This will result in undefined behavior on unpadded matrices.
         auto au = ~a;
