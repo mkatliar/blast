@@ -1,23 +1,22 @@
-// Copyright (c) 2019-2020 Mikhail Katliar All rights reserved.
+// Copyright (c) 2019-2024 Mikhail Katliar All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 #include <blast/math/DynamicPanelMatrix.hpp>
 #include <blast/math/RegisterMatrix.hpp>
 #include <blast/math/dense/StaticMatrixPointer.hpp>
+#include <blast/math/dense/StaticMatrix.hpp>
 
 #include <bench/Benchmark.hpp>
 
 #include <blast/math/algorithm/Randomize.hpp>
-
-#include <blaze/math/StaticMatrix.h>
 
 #include <functional>
 
 
 namespace blast :: benchmark
 {
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     static void BM_RegisterMatrix_partialStore_panel(State& state)
     {
         using Kernel = RegisterMatrix<T, M, N, SO>;
@@ -44,7 +43,7 @@ namespace blast :: benchmark
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     static void BM_RegisterMatrix_partialStore(State& state)
     {
         using Kernel = RegisterMatrix<T, M, N, SO>;
@@ -71,7 +70,7 @@ namespace blast :: benchmark
     }
 
 
-    template <typename T, size_t M, size_t N, bool SO, size_t MM, size_t NN>
+    template <typename T, size_t M, size_t N, StorageOrder SO, size_t MM, size_t NN>
     static void BM_RegisterMatrix_partialStore_static(State& state)
     {
         RegisterMatrix<T, M, N, SO> ker;
