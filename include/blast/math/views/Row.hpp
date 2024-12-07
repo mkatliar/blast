@@ -15,6 +15,12 @@ namespace blast
      * @brief Row view of a matrix
      *
      * NOTE: this implementation is not optimized!
+     * It holds a refrerence to the matrix, as well as a raw pointer,
+     * the row index, and the column index of the first element.
+     * Instead it could be just a matrix pointer and the length.
+     * This would reduce the amount of data needed to represent the @a Row object,
+     * increasig the possibility of storing everything in registers and reducing
+     * the number of registers needed.
      *
      * @tparam MT viewed matrix type
      */
