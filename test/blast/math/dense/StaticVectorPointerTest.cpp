@@ -3,7 +3,10 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/Vector.hpp>
-#include <blast/blaze/Math.hpp>
+#include <blast/math/Matrix.hpp>
+#include <blast/math/dense/StaticVector.hpp>
+#include <blast/math/dense/StaticMatrix.hpp>
+#include <blast/math/views/Row.hpp>
 
 #include <test/Testing.hpp>
 
@@ -18,7 +21,7 @@ namespace blast :: testing
         using Real = Scalar;
 
 
-        template <bool TF>
+        template <TransposeFlag TF>
         void testSpacingImpl()
         {
             StaticVector<Real, 3, TF> v;
@@ -27,7 +30,7 @@ namespace blast :: testing
         }
 
 
-        template <bool TF>
+        template <TransposeFlag TF>
         void testGetImpl()
         {
             StaticVector<Real, 3, TF> v;
@@ -37,7 +40,7 @@ namespace blast :: testing
         }
 
 
-        template <bool TF>
+        template <TransposeFlag TF>
         void testOffsetImpl()
         {
             StaticVector<Real, 5, TF> v;
@@ -56,7 +59,7 @@ namespace blast :: testing
             StaticMatrix<Real, 5, 5, SO> A;
 
             size_t constexpr i = 1, j = 2;
-            auto p = ptr<unaligned>(blaze::subvector<j, columns(A) - j>(blaze::row<i>(A)), 0);
+            auto p = ptr<unaligned>(subvector(row(A, i), j, columns(A) - j), 0);
             ASSERT_EQ(p.get(), &A(i, j));
             ASSERT_EQ(p.spacing(), SO == columnMajor ? A.spacing() : 1);
         }
