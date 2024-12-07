@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/Vector.hpp>
+#include <blast/math/dense/StaticMatrix.hpp>
 #include <blast/blaze/Math.hpp>
 
 #include <test/Testing.hpp>
@@ -21,7 +22,7 @@ namespace blast :: testing
         template <bool TF>
         void testSpacingImpl()
         {
-            StaticVector<Real, 3, TF> v;
+            blaze::StaticVector<Real, 3, TF> v;
             auto p = ptr<aligned>(v, 0);
             EXPECT_EQ(p.spacing(), 1);
         }
@@ -30,7 +31,7 @@ namespace blast :: testing
         template <bool TF>
         void testGetImpl()
         {
-            StaticVector<Real, 3, TF> v;
+            blaze::StaticVector<Real, 3, TF> v;
             size_t const i = 1;
             auto p = ptr<unaligned>(v, i);
             EXPECT_EQ(p.get(), &v[i]);
@@ -40,7 +41,7 @@ namespace blast :: testing
         template <bool TF>
         void testOffsetImpl()
         {
-            StaticVector<Real, 5, TF> v;
+            blaze::StaticVector<Real, 5, TF> v;
             size_t const i = 1;
             size_t const delta = 2;
             auto p = ptr<unaligned>(v, i);

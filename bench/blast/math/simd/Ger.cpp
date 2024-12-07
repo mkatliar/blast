@@ -19,9 +19,9 @@ namespace blast :: benchmark
         using ET = ElementType_t<Kernel>;
         size_t constexpr K = 100;
 
-        DynamicPanelMatrix<ET> a(Kernel::rows(), K);
-        DynamicPanelMatrix<ET> b(Kernel::columns(), K);
-        DynamicPanelMatrix<ET> c(Kernel::rows(), Kernel::columns());
+        DynamicPanelMatrix<ET, columnMajor> a(Kernel::rows(), K);
+        DynamicPanelMatrix<ET, columnMajor> b(Kernel::columns(), K);
+        DynamicPanelMatrix<ET, columnMajor> c(Kernel::rows(), Kernel::columns());
 
         randomize(a);
         randomize(b);

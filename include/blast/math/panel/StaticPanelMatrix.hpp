@@ -4,18 +4,11 @@
 
 #pragma once
 
-#include <blast/math/Forward.hpp>
 #include <blast/math/views/submatrix/BaseTemplate.hpp>
 #include <blast/math/expressions/PanelMatrix.hpp>
 #include <blast/math/panel/PanelSize.hpp>
 #include <blast/math/TypeTraits.hpp>
 #include <blast/system/CacheLine.hpp>
-
-#include <blaze/math/shims/NextMultiple.h>
-#include <blaze/math/dense/DenseIterator.h>
-#include <blaze/util/typetraits/AlignmentOf.h>
-#include <blaze/math/typetraits/HasMutableDataAccess.h>
-#include <blaze/math/traits/SubmatrixTrait.h>
 
 #include <initializer_list>
 #include <type_traits>
@@ -23,38 +16,20 @@
 
 namespace blast
 {
-    using namespace blaze;
-
-
     /// @brief Panel matrix with statically defined size.
     ///
     /// @tparam Type element type of the matrix
     /// @tparam M number of rows
     /// @tparam N number of columns
     /// @tparam SO storage order of panel elements
-    template <typename Type, size_t M, size_t N, bool SO = columnMajor>
+    ///
+    template <typename Type, size_t M, size_t N, StorageOrder SO = columnMajor>
     class StaticPanelMatrix
-    :   public PanelMatrix<StaticPanelMatrix<Type, M, N, SO>, SO>
     {
     public:
-        //**Type definitions****************************************************************************
-        using This          = StaticPanelMatrix<Type, M, N, SO>;   //!< Type of this StaticPanelMatrix instance.
-        using BaseType      = PanelMatrix<This, SO>;        //!< Base type of this StaticPanelMatrix instance.
-        using ResultType    = This;                        //!< Result type for expression template evaluations.
-        using OppositeType  = StaticPanelMatrix<Type, M, N, !SO>;  //!< Result type with opposite storage order for expression template evaluations.
-        using TransposeType = StaticPanelMatrix<Type, N, M, !SO>;  //!< Transpose type for expression template evaluations.
         using ElementType   = Type;                        //!< Type of the matrix elements.
-        // using SIMDType      = SIMDTrait_t<ElementType>;    //!< SIMD type of the matrix elements.
-        using ReturnType    = const Type&;                 //!< Return type for expression template evaluations.
-        using CompositeType = const This&;                 //!< Data type for composite expression templates.
-
         using Reference      = Type&;        //!< Reference to a non-constant matrix value.
         using ConstReference = const Type&;  //!< Reference to a constant matrix value.
-        using Pointer        = Type*;        //!< Pointer to a non-constant matrix value.
-        using ConstPointer   = const Type*;  //!< Pointer to a constant matrix value.
-
-        using Iterator      = DenseIterator<Type, aligned>;        //!< Iterator over non-constant elements.
-        using ConstIterator = DenseIterator<const Type, aligned>;  //!< Iterator over constant elements.
 
 
         StaticPanelMatrix()
@@ -99,9 +74,8 @@ namespace blast
         }
 
 
-        template< typename MT    // Type of the right-hand side matrix
-                , bool SO2 >      // Storage order of the right-hand side matrix
-        StaticPanelMatrix& operator=(blaze::Matrix<MT, SO2> const& rhs);
+        template <Matrix MT>      // Storage order of the right-hand side matrix
+        StaticPanelMatrix& operator=(MT const& rhs);
 
 
         constexpr ConstReference operator()(size_t i, size_t j) const
@@ -185,10 +159,9 @@ namespace blast
     };
 
 
-    template <typename Type, size_t M, size_t N, bool SO>
-    template< typename MT    // Type of the right-hand side matrix
-            , bool SO2 >      // Storage order of the right-hand side matrix
-    inline StaticPanelMatrix<Type, M, N, SO>& StaticPanelMatrix<Type, M, N, SO>::operator=(blaze::Matrix<MT, SO2> const& rhs)
+    template <typename Type, size_t M, size_t N, StorageOrder SO>
+    template <Matrix MT>
+    inline StaticPanelMatrix<Type, M, N, SO>& StaticPanelMatrix<Type, M, N, SO>::operator=(MT const& rhs)
     {
         // using blaze::assign;
 
@@ -224,6 +197,34 @@ namespace blast
     }
 
 
+    template <typename Type, size_t M, size_t N, StorageOrder SO>
+    inline size_t constexpr rows(StaticPanelMatrix<Type, M, N, SO> const& m) noexcept
+    {
+        return m.rows();
+    }
+
+
+    template <typename Type, size_t M, size_t N, StorageOrder SO>
+    inline size_t constexpr columns(StaticPanelMatrix<Type, M, N, SO> const& m) noexcept
+    {
+        return m.columns();
+    }
+
+
+    template <typename Type, size_t M, size_t N, StorageOrder SO>
+    inline Type const * data(StaticPanelMatrix<Type, M, N, SO> const& m) noexcept
+    {
+        return m.data();
+    }
+
+
+    template <typename Type, size_t M, size_t N, StorageOrder SO>
+    inline Type * data(StaticPanelMatrix<Type, M, N, SO>& m) noexcept
+    {
+        return m.data();
+    }
+
+
     /**
      * @brief Specialization for @a StaticPanelMatrix
      *
@@ -232,7 +233,19 @@ namespace blast
      * @tparam N number of columns
      * @tparam SO storage order
      */
-    template <typename Type, size_t M, size_t N, bool SO>
+    template <typename Type, size_t M, size_t N, StorageOrder SO>
+    struct IsPanelMatrix<StaticPanelMatrix<Type, M, N, SO>> : std::true_type {};
+
+
+    /**
+     * @brief Specialization for @a StaticPanelMatrix
+     *
+     * @tparam Type element type
+     * @tparam M number of rows
+     * @tparam N number of columns
+     * @tparam SO storage order
+     */
+    template <typename Type, size_t M, size_t N, StorageOrder SO>
     struct Spacing<StaticPanelMatrix<Type, M, N, SO>> : std::integral_constant<size_t, StaticPanelMatrix<Type, M, N, SO>::spacing()> {};
 
 
@@ -244,26 +257,8 @@ namespace blast
      * @tparam N number of columns
      * @tparam SO storage order
      */
-    template <typename Type, size_t M, size_t N, bool SO>
+    template <typename Type, size_t M, size_t N, StorageOrder SO>
     struct StorageOrderHelper<StaticPanelMatrix<Type, M, N, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
-}
-
-namespace blaze
-{
-    //=================================================================================================
-    //
-    //  HASMUTABLEDATAACCESS SPECIALIZATIONS
-    //
-    //=================================================================================================
-
-    //*************************************************************************************************
-    /*! \cond BLAZE_INTERNAL */
-    template <typename T, size_t M, size_t N, bool SO>
-    struct HasMutableDataAccess<blast::StaticPanelMatrix<T, M, N, SO>>
-    :   public TrueType
-    {};
-    /*! \endcond */
-    //*************************************************************************************************
 
 
     //=================================================================================================
@@ -271,9 +266,9 @@ namespace blaze
     //  IsStatic specialization
     //
     //=================================================================================================
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     struct IsStatic<blast::StaticPanelMatrix<T, M, N, SO>>
-    :   public TrueType
+    :   public std::true_type
     {};
 
 
@@ -282,9 +277,9 @@ namespace blaze
     //  IsAligned specialization
     //
     //=================================================================================================
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     struct IsAligned<blast::StaticPanelMatrix<T, M, N, SO>>
-    :   public TrueType
+    :   public std::true_type
     {};
 
 
@@ -293,23 +288,8 @@ namespace blaze
     //  IsPadded specialization
     //
     //=================================================================================================
-
-    //*************************************************************************************************
-    /*! \cond BLAZE_INTERNAL */
-    template <typename T, size_t M, size_t N, bool SO>
+    template <typename T, size_t M, size_t N, StorageOrder SO>
     struct IsPadded<blast::StaticPanelMatrix<T, M, N, SO>>
-    : public TrueType
+    : public std::true_type
     {};
-
-
-    //=================================================================================================
-    //
-    //  SubmatrixTrait specialization
-    //
-    //=================================================================================================
-    template <typename T, size_t M, size_t N, bool SO>
-    struct SubmatrixTrait<blast::StaticPanelMatrix<T, M, N, SO>>
-    {
-        using Type = blast::StaticPanelMatrix<T, M, N, SO>;
-    };
 }

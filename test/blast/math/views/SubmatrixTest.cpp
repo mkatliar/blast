@@ -15,7 +15,7 @@ namespace blast :: testing
     TEST(SubmatrixTest, testSubmatrixOfStaticPanelMatrix)
     {
         StaticPanelMatrix<double, 12, 12, columnMajor> A;
-        auto B = submatrix(A, 4, 0, 8, 8);
+        auto B = submatrix<aligned>(A, 4, 0, 8, 8);
         EXPECT_EQ(IsAligned_v<decltype(B)>, false);
     }
 
@@ -23,7 +23,7 @@ namespace blast :: testing
     TEST(SubmatrixTest, testSubmatrixOfConstStaticPanelMatrix)
     {
         StaticPanelMatrix<double, 12, 12, columnMajor> const A;
-        auto B = submatrix(A, 4, 0, 8, 8);
+        auto B = submatrix<aligned>(A, 4, 0, 8, 8);
         EXPECT_EQ(IsAligned_v<decltype(B)>, false);
     }
 
@@ -31,7 +31,7 @@ namespace blast :: testing
     TEST(SubmatrixTest, testSubmatrixOfDynamicPanelMatrix)
     {
         DynamicPanelMatrix<double, columnMajor> A(12, 12);
-        auto B = submatrix(A, 4, 0, 8, 8);
+        auto B = submatrix<aligned>(A, 4, 0, 8, 8);
 
         static_assert(std::is_same_v<decltype(&B(0, 0)), double *>);
         EXPECT_EQ(IsAligned_v<decltype(B)>, false);
@@ -41,7 +41,7 @@ namespace blast :: testing
     TEST(SubmatrixTest, testSubmatrixOfConstDynamicPanelMatrix)
     {
         DynamicPanelMatrix<double, columnMajor> const A(12, 12);
-        auto B = submatrix(A, 4, 0, 8, 8);
+        auto B = submatrix<aligned>(A, 4, 0, 8, 8);
 
         static_assert(std::is_same_v<decltype(&B(0, 0)), double const *>);
         EXPECT_EQ(IsAligned_v<decltype(B)>, false);
@@ -55,10 +55,10 @@ namespace blast :: testing
             for (size_t j = 0; j < columns(A); ++j)
                 A(i, j) = -(100. * i + j);
 
-        auto B = submatrix(A, 4, 0, 8, 8);
+        auto B = submatrix<aligned>(A, 4, 0, 8, 8);
         ASSERT_EQ(&B.operand(), &A);
 
-        auto B1 = submatrix(B, 4, 1, 2, 2);
+        auto B1 = submatrix<aligned>(B, 4, 1, 2, 2);
         EXPECT_EQ(&B1.operand(), &A);
         EXPECT_EQ(B1.row(), B.row() + 4);
         EXPECT_EQ(B1.column(), B.column() + 1);

@@ -9,19 +9,14 @@
 #include <blast/math/constraints/Submatrix.hpp>
 #include <blast/math/panel/PanelSize.hpp>
 #include <blast/math/constraints/PanelMatrix.hpp>
-
-#include <blaze/math/constraints/Submatrix.h>
-#include <blaze/math/constraints/Symmetric.h>
-#include <blaze/math/traits/SubmatrixTrait.h>
-#include <blaze/util/constraints/Pointer.h>
-#include <blaze/util/constraints/Reference.h>
+#include <blast/math/TypeTraits.hpp>
 
 
 namespace blast
 {
-    template <typename MT, bool SO>
-    class PanelMatrixRow<MT, SO>
-    :   public View<PanelMatrix<PanelMatrixRow<MT, SO>, SO>>
+    template <Matrix MT>
+    requires IsPanelMatrix_v<MT>
+    class PanelMatrixRow
     {
     private:
         //**Type definitions****************************************************************************
@@ -30,15 +25,7 @@ namespace blast
 
 
     public:
-        //**Type definitions****************************************************************************
-        //! Type of this PanelMatrixRow instance.
-        using This = PanelMatrixRow<MT, SO>;
-
-        using BaseType      = PanelMatrix<This, SO>;       //!< Base type of this PanelMatrixRow instance.
         using ViewedType    = MT;                            //!< The type viewed by this PanelMatrixRow instance.
-        // using ResultType    = SubmatrixTrait_t<MT>;  //!< Result type for expression template evaluations.
-        // using OppositeType  = OppositeType_t<ResultType>;    //!< Result type with opposite storage order for expression template evaluations.
-        // using TransposeType = TransposeType_t<ResultType>;   //!< Transpose type for expression template evaluations.
         using ElementType   = ElementType_t<MT>;             //!< Type of the submatrix elements.
         // using SIMDType      = SIMDTrait_t<ElementType>;      //!< SIMD type of the submatrix elements.
         using ReturnType    = ReturnType_t<MT>;              //!< Return type for expression template evaluations

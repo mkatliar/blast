@@ -8,31 +8,6 @@
 #include <blast/math/expressions/PanelMatrix.hpp>
 #include <blast/math/TypeTraits.hpp>
 
-#include <blaze/math/Aliases.h>
-#include <blaze/math/constraints/RequiresEvaluation.h>
-#include <blaze/math/constraints/StorageOrder.h>
-#include <blaze/math/Exception.h>
-#include <blaze/math/expressions/Computation.h>
-#include <blaze/math/expressions/Forward.h>
-#include <blaze/math/expressions/MatTransExpr.h>
-#include <blaze/math/expressions/Transformation.h>
-#include <blaze/math/shims/Serial.h>
-#include <blaze/math/simd/SIMDTrait.h>
-#include <blaze/math/typetraits/HasConstDataAccess.h>
-#include <blaze/math/typetraits/IsAligned.h>
-#include <blaze/math/typetraits/IsComputation.h>
-#include <blaze/math/typetraits/IsExpression.h>
-#include <blaze/math/typetraits/IsPadded.h>
-#include <blaze/math/typetraits/RequiresEvaluation.h>
-#include <blaze/system/Inline.h>
-#include <blaze/util/Assert.h>
-#include <blaze/util/EnableIf.h>
-#include <blaze/util/FunctionTrace.h>
-#include <blaze/util/InvalidType.h>
-#include <blaze/util/mpl/If.h>
-#include <blaze/util/Types.h>
-#include <blaze/util/typetraits/GetMemberType.h>
-
 #include <type_traits>
 
 
@@ -45,30 +20,15 @@ namespace blast
     // The PMatTransExpr class represents the compile time expression for transpositions of
     // panel matrices.
     */
-    template <typename MT, bool SO>
+    template <typename MT, StorageOrder SO>
     class PMatTransExpr
-    :   public MatTransExpr< PanelMatrix< PMatTransExpr<MT,SO>, SO > >
-    ,   private If_t< IsComputation_v<MT>, Computation, Transformation >
     {
     public:
-        //**Type definitions****************************************************************************
-        using This          = PMatTransExpr<MT, SO>;        //!< Type of this PMatTransExpr instance.
-        using BaseType      = PanelMatrix<This, SO>;        //!< Base type of this PMatTransExpr instance.
-        using ResultType    = TransposeType_t<MT>;         //!< Result type for expression template evaluations.
-        using OppositeType  = OppositeType_t<ResultType>;  //!< Result type with opposite storage order for expression template evaluations.
-        using TransposeType = ResultType_t<MT>;            //!< Transpose type for expression template evaluations.
-        using ElementType   = ElementType_t<MT>;           //!< Resulting element type.
-        using ReturnType    = ReturnType_t<MT>;            //!< Return type for expression template evaluations.
+        using ElementType = ElementType_t<MT>;
+        using Operand = MT const&;
 
-        //! Data type for composite expression templates.
-        using CompositeType = const PMatTransExpr&;
+        static StorageOrder constexpr storageOrder = SO;
 
-        //! Iterator over the elements of the panel matrix.
-        // using ConstIterator = GetConstIterator_t<MT>;
-
-        //! Composite data type of the panel matrix expression.
-        using Operand = If_t< IsExpression_v<MT>, const MT, const MT& >;
-        //**********************************************************************************************
 
         explicit PMatTransExpr( const MT& pm ) noexcept
             : pm_( pm )
@@ -82,10 +42,10 @@ namespace blast
         // \param j Access index for the column. The index has to be in the range \f$[0..N-1]\f$.
         // \return The resulting value.
         */
-        ReturnType operator()(size_t i, size_t j) const
+        ElementType operator()(size_t i, size_t j) const
         {
-            BLAZE_INTERNAL_ASSERT( i < pm_.columns(), "Invalid row access index"    );
-            BLAZE_INTERNAL_ASSERT( j < pm_.rows()   , "Invalid column access index" );
+            assert(i < pm_.columns());
+            assert(j < pm_.rows());
             return pm_(j, i);
         }
 
@@ -98,7 +58,7 @@ namespace blast
         // \return The resulting value.
         // \exception std::out_of_range Invalid matrix access index.
         */
-        ReturnType at(size_t i, size_t j) const
+        ElementType at(size_t i, size_t j) const
         {
             if (i >= pm_.columns())
                 BLAZE_THROW_OUT_OF_RANGE( "Invalid row access index" );
@@ -171,36 +131,9 @@ namespace blast
             return pm_;
         }
 
-        /*!\brief Returns whether the expression can alias with the given address \a alias.
-        //
-        // \param alias The alias to be checked.
-        // \return \a true in case the expression can alias, \a false otherwise.
-        */
-        template< typename T >
-        inline bool canAlias( const T* alias ) const noexcept
-        {
-            return pm_.isAliased( alias );
-        }
-
-
-        /*!\brief Returns whether the expression is aliased with the given address \a alias.
-        //
-        // \param alias The alias to be checked.
-        // \return \a true in case an alias effect is detected, \a false otherwise.
-        */
-        template< typename T >
-        inline bool isAliased( const T* alias ) const noexcept
-        {
-            return pm_.isAliased( alias );
-        }
-
 
     private:
-        Operand pm_;  //!< Panel matrix of the transposition expression.
-
-
-        BLAST_CONSTRAINT_MUST_BE_PANEL_MATRIX_TYPE(MT);
-        BLAZE_CONSTRAINT_MUST_BE_MATRIX_WITH_STORAGE_ORDER(MT, !SO);
+        Operand pm_;
     };
 
 
@@ -229,29 +162,28 @@ namespace blast
     B = trans( A );
     \endcode
     */
-    template <typename MT, bool SO>
-    inline decltype(auto) trans(PanelMatrix<MT, SO> const& pm)
+    template <Matrix MT>
+    requires IsPanelMatrix_v<MT>
+    inline decltype(auto) trans(MT const& pm)
     {
-        BLAZE_FUNCTION_TRACE;
-
-        using ReturnType = const PMatTransExpr<MT, !SO>;
-        return ReturnType(*pm);
+        using ReturnType = const PMatTransExpr<MT, !StorageOrder_v<MT>>;
+        return ReturnType(pm);
     }
 
 
-    template <typename MT, bool SO>
+    template <typename MT, StorageOrder SO>
     struct IsPanelMatrix<PMatTransExpr<MT, SO>> : std::true_type {};
 
 
-    template <typename MT, bool SO>
+    template <typename MT, StorageOrder SO>
     struct IsStatic<PMatTransExpr<MT, SO>> : IsStatic<MT> {};
 
 
-    template <typename MT, bool SO>
+    template <typename MT, StorageOrder SO>
     struct IsAligned<PMatTransExpr<MT, SO>> : IsAligned<MT> {};
 
 
-    template <typename MT, bool SO>
+    template <typename MT, StorageOrder SO>
     struct IsPadded<PMatTransExpr<MT, SO>> : IsPadded<MT> {};
 
 
@@ -261,7 +193,7 @@ namespace blast
      * @tparam expression operand type
      * @tparam SO storage order
      */
-    template <typename MT, bool SO>
+    template <typename MT, StorageOrder SO>
     struct Spacing<PMatTransExpr<MT, SO>> : Spacing<MT> {};
 
 
@@ -271,6 +203,6 @@ namespace blast
      * @tparam expression operand type
      * @tparam SO storage order
      */
-    template <typename MT, bool SO>
+    template <typename MT, StorageOrder SO>
     struct StorageOrderHelper<PMatTransExpr<MT, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
 }

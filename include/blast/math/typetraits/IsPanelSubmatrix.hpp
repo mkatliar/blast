@@ -6,38 +6,34 @@
 
 #include <blast/math/views/Forward.hpp>
 
-#include <blaze/util/IntegralConstant.h>
+#include <type_traits>
 
 
 namespace blast
 {
     template< typename T >
     struct IsPanelSubmatrix
-    : public FalseType
+    :   public std::false_type
     {};
 
 
     //*************************************************************************************************
-    /*! \cond BLAZE_INTERNAL */
     /*!\brief Specialization of the IsPanelSubmatrix type trait for 'Submatrix'.
-    // \ingroup math_type_traits
     */
     template< typename MT, bool SO, size_t... CSAs >
     struct IsPanelSubmatrix< PanelSubmatrix<MT,SO,CSAs...> >
-    : public TrueType
+    :   public std::true_type
     {};
     /*! \endcond */
     //*************************************************************************************************
 
 
     //*************************************************************************************************
-    /*! \cond BLAZE_INTERNAL */
     /*!\brief Specialization of the IsPanelSubmatrix type trait for 'const Submatrix'.
-    // \ingroup math_type_traits
     */
     template< typename MT, bool SO, size_t... CSAs >
     struct IsPanelSubmatrix< const PanelSubmatrix<MT,SO,CSAs...> >
-    : public TrueType
+    :   public std::true_type
     {};
     /*! \endcond */
     //*************************************************************************************************
@@ -50,7 +46,7 @@ namespace blast
     */
     template< typename MT, bool SO, size_t... CSAs >
     struct IsPanelSubmatrix< volatile PanelSubmatrix<MT,SO,CSAs...> >
-    : public TrueType
+    :   public std::true_type
     {};
     /*! \endcond */
     //*************************************************************************************************
@@ -63,7 +59,7 @@ namespace blast
     */
     template< typename MT, bool SO, size_t... CSAs >
     struct IsPanelSubmatrix< const volatile PanelSubmatrix<MT,SO,CSAs...> >
-    : public TrueType
+    :   public std::true_type
     {};
     /*! \endcond */
     //*************************************************************************************************
@@ -86,4 +82,4 @@ namespace blast
     constexpr bool IsPanelSubmatrix_v = IsPanelSubmatrix<T>::value;
     //*************************************************************************************************
 
-} // namespace blaze
+}

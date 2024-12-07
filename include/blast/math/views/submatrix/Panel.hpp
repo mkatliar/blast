@@ -42,46 +42,31 @@ namespace blast
     */
     template <typename MT, bool SO>
     class PanelSubmatrix<MT, SO>
-    : public View<PanelMatrix<PanelSubmatrix<MT, SO>, SO>>
     {
     private:
-        //**Type definitions****************************************************************************
-        using Operand  = If_t< IsExpression_v<MT>, MT, MT& >;  //!< Composite data type of the matrix expression.
-        //**********************************************************************************************
-
+        using Operand  = MT&;
 
     public:
-        //**Type definitions****************************************************************************
-        //! Type of this PanelSubmatrix instance.
         using This = PanelSubmatrix<MT, SO>;
-
-        using BaseType      = PanelMatrix<This, SO>;       //!< Base type of this PanelSubmatrix instance.
         using ViewedType    = MT;                            //!< The type viewed by this PanelSubmatrix instance.
-        // using ResultType    = SubmatrixTrait_t<MT>;  //!< Result type for expression template evaluations.
-        // using OppositeType  = OppositeType_t<ResultType>;    //!< Result type with opposite storage order for expression template evaluations.
-        // using TransposeType = TransposeType_t<ResultType>;   //!< Transpose type for expression template evaluations.
         using ElementType   = ElementType_t<MT>;             //!< Type of the submatrix elements.
-        // using SIMDType      = SIMDTrait_t<ElementType>;      //!< SIMD type of the submatrix elements.
-        using ReturnType    = ReturnType_t<MT>;              //!< Return type for expression template evaluations
-        using CompositeType = const PanelSubmatrix&;              //!< Data type for composite expression templates.
 
         //! Reference to a constant submatrix value.
-        using ConstReference = ConstReference_t<MT>;
+        using ConstReference = ElementType const&;
 
         //! Reference to a non-constant submatrix value.
-        using Reference = If_t< IsConst_v<MT>, ConstReference, Reference_t<MT> >;
+        using Reference = std::conditional<std::is_const_v<MT>, ElementType const&, ElementType&>;
 
         //! Pointer to a constant submatrix value.
-        using ConstPointer = ConstPointer_t<MT>;
+        using ConstPointer = ElementType const *;
 
         //! Pointer to a non-constant submatrix value.
-        using Pointer = If_t< IsConst_v<MT> || !HasMutableDataAccess_v<MT>, ConstPointer, Pointer_t<MT> >;
+        using Pointer = std::conditional<std::is_const_v<MT>, ElementType const *, ElementType *>;
         //**********************************************************************************************
 
 
         //**Constructors********************************************************************************
-        template <typename... RSAs>
-        explicit inline constexpr PanelSubmatrix(MT& matrix, size_t i, size_t j, size_t m, size_t n, RSAs... args)
+        explicit inline constexpr PanelSubmatrix(MT& matrix, size_t i, size_t j, size_t m, size_t n)
         :   matrix_   ( matrix  )  // The matrix containing the submatrix
         ,   i_(i)
         ,   j_(j)
@@ -89,25 +74,8 @@ namespace blast
         ,   n_(n)
         ,   data_(&matrix_(row(), column()))
         {
-            if( !Contains_v< TypeList<RSAs...>, Unchecked > )
-            {
-                if( ( row() + rows() > matrix_.rows() ) || ( column() + columns() > matrix_.columns() ) ) {
-                    BLAZE_THROW_INVALID_ARGUMENT( "Invalid submatrix specification" );
-                }
-
-                if (IsRowMajorMatrix_v<MT> && column() % panelSize_ > 0)
-                    BLAZE_THROW_LOGIC_ERROR("Submatrices of a row-major panel matrix which are not horizontally aligned on panel boundary "
-                        "are currently not supported");
-
-                if (IsColumnMajorMatrix_v<MT> && row() % panelSize_ > 0)
-                    BLAZE_THROW_LOGIC_ERROR("Submatrices of a column-major panel matrix which are not vertically aligned on panel boundary "
-                        "are currently not supported");
-            }
-            else
-            {
-                BLAST_USER_ASSERT( row()    + rows()    <= matrix_.rows()   , "Invalid submatrix specification" );
-                BLAST_USER_ASSERT( column() + columns() <= matrix_.columns(), "Invalid submatrix specification" );
-            }
+            BLAST_USER_ASSERT( row()    + rows()    <= matrix_.rows()   , "Invalid submatrix specification" );
+            BLAST_USER_ASSERT( column() + columns() <= matrix_.columns(), "Invalid submatrix specification" );
         }
 
 
@@ -182,16 +150,16 @@ namespace blast
         //
         //=================================================================================================
 
-        Reference operator()( size_t i, size_t j )
+        Reference operator()(size_t i, size_t j)
         {
             BLAST_USER_ASSERT( i < rows()   , "Invalid row access index"    );
             BLAST_USER_ASSERT( j < columns(), "Invalid column access index" );
 
-            return matrix_(row()+i,column()+j);
+            return matrix_(row()+i, column()+j);
         }
 
 
-        ConstReference operator()( size_t i, size_t j ) const
+        ConstReference operator()(size_t i, size_t j) const
         {
             BLAST_USER_ASSERT( i < rows()   , "Invalid row access index"    );
             BLAST_USER_ASSERT( j < columns(), "Invalid column access index" );
@@ -200,19 +168,19 @@ namespace blast
         }
 
 
-        Reference at( size_t i, size_t j )
+        Reference at(size_t i, size_t j)
         {
-            if( i >= rows() ) {
-                BLAZE_THROW_OUT_OF_RANGE( "Invalid row access index" );
-            }
-            if( j >= columns() ) {
-                BLAZE_THROW_OUT_OF_RANGE( "Invalid column access index" );
-            }
-            return (*this)(i,j);
+            if (i >= rows())
+                throw std::out_of_range {"Invalid row access index"};
+
+            if (j >= columns())
+                throw std::out_of_range {"Invalid column access index"};
+
+            return (*this)(i, j);
         }
 
 
-        ConstReference at( size_t i, size_t j ) const
+        ConstReference at(size_t i, size_t j) const
         {
             if( i >= rows() ) {
                 BLAZE_THROW_OUT_OF_RANGE( "Invalid row access index" );

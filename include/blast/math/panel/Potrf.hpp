@@ -8,9 +8,8 @@
 #include <blast/math/views/submatrix/Panel.hpp>
 #include <blast/math/algorithm/Gemm.hpp>
 #include <blast/math/Simd.hpp>
-
-#include <blaze/util/Exception.h>
-#include <blaze/util/constraints/SameType.h>
+#include <blast/math/TypeTraits.hpp>
+#include <blast/system/Inline.hpp>
 
 #include <algorithm>
 
@@ -20,9 +19,10 @@ namespace blast
     using namespace blaze;
 
 
-    template <size_t KM, size_t KN, typename MT1, typename MT2>
-    BLAZE_ALWAYS_INLINE void potrf_backend(size_t k, size_t i,
-        PanelMatrix<MT1, columnMajor> const& A, PanelMatrix<MT2, columnMajor>& L)
+    template <size_t KM, size_t KN, Matrix MT1, Matrix MT2>
+    requires IsPanelMatrix_v<MT1> && (StorageOrder_v<MT1> == columnMajor)
+        && IsPanelMatrix_v<MT2> && (StorageOrder_v<MT2> == columnMajor)
+    BLAST_ALWAYS_INLINE void potrf_backend(size_t k, size_t i, MT1 const& A, MT2& L)
     {
         using ET = ElementType_t<MT1>;
         size_t constexpr PANEL_SIZE = PanelSize_v<ET>;
@@ -35,10 +35,10 @@ namespace blast
 
         RegisterMatrix<ET, KM, KN, columnMajor> ker;
 
-        ker.load(ptr<aligned>(*A, i, k));
+        ker.load(ptr<aligned>(A, i, k));
 
-        auto const a = ptr<aligned>(*L, i, 0);
-        auto const b = ptr<aligned>(*L, k, 0);
+        auto const a = ptr<aligned>(L, i, 0);
+        auto const b = ptr<aligned>(L, k, 0);
 
         // TODO: this is a gemm(), replace by gemm()
         for (size_t l = 0; l < k; ++l)
@@ -47,18 +47,19 @@ namespace blast
         if (i == k)
             ker.potrf();
         else
-            ker.trsm(Side::Right, UpLo::Upper, ptr<aligned>(*L, k, k).trans());
+            ker.trsm(Side::Right, UpLo::Upper, ptr<aligned>(L, k, k).trans());
 
         if (k + KN <= N)
-            ker.store(ptr<aligned>(*L, i, k));
+            ker.store(ptr<aligned>(L, i, k));
         else
-            ker.store(ptr<aligned>(*L, i, k), std::min(M - i, KM), N - k);
+            ker.store(ptr<aligned>(L, i, k), std::min(M - i, KM), N - k);
     }
 
 
-    template <typename MT1, typename MT2>
-    inline void potrf(
-        PanelMatrix<MT1, columnMajor> const& A, PanelMatrix<MT2, columnMajor>& L)
+    template <Matrix MT1, Matrix MT2>
+    requires IsPanelMatrix_v<MT1> && (StorageOrder_v<MT1> == columnMajor)
+        && IsPanelMatrix_v<MT2> && (StorageOrder_v<MT2> == columnMajor)
+    inline void potrf(MT1 const& A, MT2& L)
     {
         using ET = ElementType_t<MT1>;
         size_t constexpr SS = SimdSize_v<ET>;

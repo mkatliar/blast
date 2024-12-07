@@ -3,6 +3,9 @@
 // license that can be found in the LICENSE file.
 
 #include <blast/math/Vector.hpp>
+#include <blast/math/TypeTraits.hpp>
+#include <blast/dense/DynamicMatrix.hpp>
+
 #include <blast/blaze/Math.hpp>
 
 #include <test/Testing.hpp>
@@ -21,7 +24,7 @@ namespace blast :: testing
         template <bool TF>
         void testSpacingImpl()
         {
-            DynamicVector<Real, TF> v(3);
+            blaze::DynamicVector<Real, TF> v(3);
             auto p = ptr<aligned>(v, 0);
             EXPECT_EQ(p.spacing(), 1);
         }
@@ -30,7 +33,7 @@ namespace blast :: testing
         template <bool TF>
         void testGetImpl()
         {
-            DynamicVector<Real, TF> v(3);
+            blaze::DynamicVector<Real, TF> v(3);
             size_t const i = 1;
             auto p = ptr<unaligned>(v, i);
             EXPECT_EQ(p.get(), &v[i]);
@@ -40,7 +43,7 @@ namespace blast :: testing
         template <bool TF>
         void testOffsetImpl()
         {
-            DynamicVector<Real, TF> v(5);
+            blaze::DynamicVector<Real, TF> v(5);
             size_t const i = 1;
             size_t const delta = 2;
             auto p = ptr<unaligned>(v, i);
@@ -50,7 +53,7 @@ namespace blast :: testing
         }
 
 
-        template <bool SO>
+        template <StorageOrder SO>
         void testMatrixRowImpl()
         {
             DynamicMatrix<Real, SO> A(5, 5);
@@ -68,7 +71,7 @@ namespace blast :: testing
         }
 
 
-        template <bool SO>
+        template <StorageOrder SO>
         void testMatrixRowSubvectorImpl()
         {
             DynamicMatrix<Real, SO> A(5, 5);
@@ -86,7 +89,7 @@ namespace blast :: testing
         }
 
 
-        template <bool SO>
+        template <StorageOrder SO>
         void testMatrixColumnImpl()
         {
             DynamicMatrix<Real, SO> A(5, 5);
@@ -104,7 +107,7 @@ namespace blast :: testing
         }
 
 
-        template <bool SO>
+        template <StorageOrder SO>
         void testMatrixColumnSubvectorImpl()
         {
             DynamicMatrix<Real, SO> A(5, 5);

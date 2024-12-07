@@ -15,7 +15,7 @@ namespace blast :: testing
     class PMatTransExprTest;
 
 
-    template <typename ET, size_t M, size_t N, bool SO>
+    template <typename ET, size_t M, size_t N, StorageOrder SO>
     class PMatTransExprTest<StaticPanelMatrix<ET, M, N, SO>>
     :   public ::testing::Test
     {
@@ -30,7 +30,7 @@ namespace blast :: testing
     };
 
 
-    template <typename ET, bool SO>
+    template <typename ET, StorageOrder SO>
     class PMatTransExprTest<DynamicPanelMatrix<ET, SO>>
     :   public ::testing::Test
     {

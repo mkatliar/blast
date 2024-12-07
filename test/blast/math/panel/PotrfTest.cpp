@@ -7,6 +7,7 @@
 #include <blast/math/panel/Potrf.hpp>
 #include <blast/math/algorithm/Gemm.hpp>
 #include <blast/math/algorithm/Randomize.hpp>
+#include <blast/math/algorithm/MakePositiveDefinite.hpp>
 #include <blast/math/reference/Gemm.hpp>
 
 #include <test/Testing.hpp>

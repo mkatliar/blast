@@ -4,11 +4,12 @@
 
 #pragma once
 
+#include <blast/math/TypeTraits.hpp>
+
 
 namespace blast
 {
-    template <typename MT, bool SO, size_t... CSAs>
-    class PanelMatrixRow
-    {
-    };
+    template <Matrix MT>
+    requires IsPanelMatrix_v<MT>
+    class PanelMatrixRow;
 }

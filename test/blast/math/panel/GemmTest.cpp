@@ -38,10 +38,10 @@ namespace blast :: testing
             {
                 for (size_t K = 1; K <= K_max; ++K)
                 {
-                    DynamicPanelMatrix<Real> A(M, K);
-                    DynamicPanelMatrix<Real> B(N, K);
-                    DynamicPanelMatrix<Real> C(M, N);
-                    DynamicPanelMatrix<Real> D(M, N);
+                    DynamicPanelMatrix<Real, columnMajor> A(M, K);
+                    DynamicPanelMatrix<Real, columnMajor> B(N, K);
+                    DynamicPanelMatrix<Real, columnMajor> C(M, N);
+                    DynamicPanelMatrix<Real, columnMajor> D(M, N);
 
                     randomize(A);
                     randomize(B);
@@ -50,7 +50,7 @@ namespace blast :: testing
                     // Do gemm with BLAST
                     gemm(A, trans(B), C, D);
 
-                    DynamicPanelMatrix<Real> D_ref(M, N);
+                    DynamicPanelMatrix<Real, columnMajor> D_ref(M, N);
                     reference::gemm(1., A, trans(B), 1., C, D_ref);
 
                     BLAST_ASSERT_APPROX_EQ(D, D_ref, absTol<Real>(), relTol<Real>())

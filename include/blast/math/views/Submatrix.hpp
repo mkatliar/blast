@@ -30,13 +30,13 @@ namespace blast
         using ConstReference = ElementType const&;
 
         //! Reference to a non-constant submatrix value.
-        using Reference = std::conditional_t<IsConst_v<MT>, ConstReference, ElementType&>;
+        using Reference = std::conditional_t<std::is_const_v<MT>, ConstReference, ElementType&>;
 
         //! Pointer to a constant submatrix value.
         using ConstPointer = ElementType const *;
 
         //! Pointer to a non-constant submatrix value.
-        using Pointer = std::conditional_t<IsConst_v<MT>, ConstPointer, ElementType *>;
+        using Pointer = std::conditional_t<std::is_const_v<MT>, ConstPointer, ElementType *>;
 
 
         /**
@@ -200,7 +200,7 @@ namespace blast
      * @brief Specialization for @a Submatrix class
      */
     template <typename MT, AlignmentFlag AF>
-    struct IsView<Submatrix<MT, AF>> : std::integral_constant<bool, true> {};
+    struct IsView<Submatrix<MT, AF>> : std::true_type {};
 
 
     /**

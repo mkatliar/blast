@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <blast/math/Forward.hpp>
 #include <blast/math/StorageOrder.hpp>
 #include <blast/math/Simd.hpp>
 #include <blast/math/TypeTraits.hpp>
@@ -214,13 +213,13 @@ namespace blast
 
 
     template <typename T, size_t M, size_t N, StorageOrder SO>
-    struct StorageOrderHelper<StaticMatrix<T, M, N, SO>> : std::integral_constant<StorageOrder, StorageOrder(SO)> {};
+    struct StorageOrderHelper<StaticMatrix<T, M, N, SO>> : std::integral_constant<StorageOrder, SO> {};
 
 
     template <typename T, size_t M, size_t N, StorageOrder SO>
-    struct IsAligned<StaticMatrix<T, M, N, SO>> : std::integral_constant<bool, true> {};
+    struct IsAligned<StaticMatrix<T, M, N, SO>> : std::true_type {};
 
 
     template <typename T, size_t M, size_t N, StorageOrder SO>
-    struct IsPadded<StaticMatrix<T, M, N, SO>> : std::integral_constant<bool, true> {};
+    struct IsPadded<StaticMatrix<T, M, N, SO>> : std::true_type {};
 }
