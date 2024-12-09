@@ -28,8 +28,10 @@ namespace blast
      *
      * For each tile one of the two specified functors @a f_full, @a f_partial is called:
      *
-     * 1) @a f_full (ker, i, j);  // if tile size equals ker.columns() by ker.rows()
-     * 2) @a f_partial (ker, i, j, km, kn);  // if tile size is smaller than ker.columns() by ker.rows()
+     * 1) @a f_full (SizeConstant<size_t, M>, SizeConstant<size_t, N>, size_t i, size_t j);
+     *      // process tile of size (M, M) placed at (i, j)
+     * 2) @a f_partial (SizeConstant<size_t, M>, SizeConstant<size_t, N>, size_t i, size_t j, size_t km, size_t kn);
+     *      // process subtile of size (km, kn) of a tile of size (M, M) placed at (i, j). km <= M, kn <= N.
      *
      * where ker is a RegisterMatrix object, (i, j) are indices of top left corner of the tile,
      * and (km, kn) are dimensions of the tile.

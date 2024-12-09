@@ -5,38 +5,35 @@
 #include <blast/system/Tile.hpp>
 #include <blast/system/Inline.hpp>
 #include <blast/math/StorageOrder.hpp>
-#include <blast/math/RegisterMatrix.hpp>
 #include <blast/util/Types.hpp>
+#include <blast/util/SizeConstant.hpp>
 
 #include <blast/math/Simd.hpp>
-
 
 namespace blast :: detail
 {
     template <typename ET, size_t KM, size_t KN, StorageOrder SO, typename FF, typename FP>
     BLAST_ALWAYS_INLINE void tile_backend(xsimd::avx2, size_t m, size_t n, size_t i, FF&& f_full, FP&& f_partial)
     {
-        RegisterMatrix<ET, KM, KN, SO> ker;
-
         if (i + KM <= m)
         {
             size_t j = 0;
 
             for (; j + KN <= n; j += KN)
-                f_full(ker, i, j);
+                f_full(SizeConstant<KM> {}, SizeConstant<KN> {}, i, j);
 
             if (j < n)
-                f_partial(ker, i, j, KM, n - j);
+                f_partial(SizeConstant<KM> {}, SizeConstant<KN> {}, i, j, KM, n - j);
         }
         else
         {
             size_t j = 0;
 
             for (; j + KN <= n; j += KN)
-                f_partial(ker, i, j, m - i, KN);
+                f_partial(SizeConstant<KM> {}, SizeConstant<KN> {}, i, j, m - i, KN);
 
             if (j < n)
-                f_partial(ker, i, j, m - i, n - j);
+                f_partial(SizeConstant<KM> {}, SizeConstant<KN> {}, i, j, m - i, n - j);
         }
     }
 
@@ -61,29 +58,17 @@ namespace blast :: detail
                 // i + 4 * TILE_SIZE != M is to improve performance in case when the remaining number of rows is 4 * TILE_SIZE:
                 // it is more efficient to apply 2 * TILE_SIZE kernel 2 times than 3 * TILE_SIZE + 1 * TILE_SIZE kernel.
                 for (; i + 3 * SS <= m && i + 4 * SS != m; i += 3 * SS)
-                {
-                    RegisterMatrix<ET, 3 * SS, TILE_STEP, SO> ker;
-                    f_full(ker, i, j);
-                }
+                    f_full(SizeConstant<3 * SS> {}, SizeConstant<TILE_STEP> {}, i, j);
 
                 for (; i + 2 * SS <= m; i += 2 * SS)
-                {
-                    RegisterMatrix<ET, 2 * SS, TILE_STEP, SO> ker;
-                    f_full(ker, i, j);
-                }
+                    f_full(SizeConstant<2 * SS> {}, SizeConstant<TILE_STEP> {}, i, j);
 
                 for (; i + 1 * SS <= m; i += 1 * SS)
-                {
-                    RegisterMatrix<ET, 1 * SS, TILE_STEP, SO> ker;
-                    f_full(ker, i, j);
-                }
+                    f_full(SizeConstant<1 * SS> {}, SizeConstant<TILE_STEP> {}, i, j);
 
                 // Bottom side
                 if (i < m)
-                {
-                    RegisterMatrix<ET, SS, TILE_STEP, SO> ker;
-                    f_partial(ker, i, j, m - i, ker.columns());
-                }
+                    f_partial(SizeConstant<SS> {}, SizeConstant<TILE_STEP> {}, i, j, m - i, TILE_STEP);
             }
 
 
@@ -95,29 +80,17 @@ namespace blast :: detail
                 // i + 4 * TILE_STEP != M is to improve performance in case when the remaining number of rows is 4 * TILE_STEP:
                 // it is more efficient to apply 2 * TILE_STEP kernel 2 times than 3 * TILE_STEP + 1 * TILE_STEP kernel.
                 for (; i + 3 * SS <= m && i + 4 * SS != m; i += 3 * SS)
-                {
-                    RegisterMatrix<ET, 3 * SS, TILE_STEP, SO> ker;
-                    f_partial(ker, i, j, ker.rows(), n - j);
-                }
+                    f_partial(SizeConstant<3 * SS> {}, SizeConstant<TILE_STEP> {}, i, j, 3 * SS, n - j);
 
                 for (; i + 2 * SS <= m; i += 2 * SS)
-                {
-                    RegisterMatrix<ET, 2 * SS, TILE_STEP, SO> ker;
-                    f_partial(ker, i, j, ker.rows(), n - j);
-                }
+                    f_partial(SizeConstant<2 * SS> {}, SizeConstant<TILE_STEP> {}, i, j, 2 * SS, n - j);
 
                 for (; i + 1 * SS <= m; i += 1 * SS)
-                {
-                    RegisterMatrix<ET, 1 * SS, TILE_STEP, SO> ker;
-                    f_partial(ker, i, j, ker.rows(), n - j);
-                }
+                    f_partial(SizeConstant<1 * SS> {}, SizeConstant<TILE_STEP> {}, i, j, 1 * SS, n - j);
 
                 // Bottom-right corner
                 if (i < m)
-                {
-                    RegisterMatrix<ET, SS, TILE_STEP, SO> ker;
-                    f_partial(ker, i, j, m - i, n - j);
-                }
+                    f_partial(SizeConstant<SS> {}, SizeConstant<TILE_STEP> {}, i, j, m - i, n - j);
             }
         }
         else

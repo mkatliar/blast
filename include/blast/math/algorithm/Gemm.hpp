@@ -45,17 +45,20 @@ namespace blast
     inline void gemm(size_t M, size_t N, size_t K, ST1 alpha, MPA A, MPB B, ST2 beta, MPC C, MPD D)
     {
         using ET = std::remove_cv_t<ElementType_t<MPD>>;
+        StorageOrder constexpr SO = StorageOrder_v<MPD>;
 
-        tile<ET, StorageOrder_v<MPD>>(
+        tile<ET, SO>(
             xsimd::default_arch {},
             D.cachePreferredTraversal,
             M, N,
-            [&] (auto& ker, size_t i, size_t j)
+            [&] (auto km, auto kn, size_t i, size_t j)
             {
+                RegisterMatrix<ET, km(), kn(), SO> ker;
                 gemm(ker, K, alpha, A(i, 0), (~B)(0, j), beta, C(i, j), D(i, j));
             },
-            [&] (auto& ker, size_t i, size_t j, size_t m, size_t n)
+            [&] (auto km, auto kn, size_t i, size_t j, size_t m, size_t n)
             {
+                RegisterMatrix<ET, km(), kn(), SO> ker;
                 gemm(ker, K, alpha, A(i, 0), (~B)(0, j), beta, C(i, j), D(i, j), m, n);
             }
         );
