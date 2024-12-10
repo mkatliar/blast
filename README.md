@@ -108,6 +108,7 @@ So far, we haven't been able to make the benchmarks give always the same results
 - use performance governor (see https://google.github.io/benchmark/reducing_variance.html)
 - turn off Intel Boost (see https://llvm.org/docs/Benchmarking.html)
 - use benchmark repetitions, random interleaving, warmup time (these are options of Google benchmark)
+- fixing the CPU frequency by setting `sudo cpupower frequency-set -g userspace`
 
 ## Docker image
 To automate building and running benchmarks, a [Dockerfile](Dockerfile) is provided. Use the following commands to build a Docker image and run benchmarks in a Docker container:
