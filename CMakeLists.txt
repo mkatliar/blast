@@ -40,7 +40,12 @@ target_link_libraries(blast
 )
 
 target_compile_options(blast
-    INTERFACE "-Wno-ignored-attributes" "-fno-math-errno" "-ftemplate-backtrace-limit=0"
+    INTERFACE "-Wno-ignored-attributes" "-fno-math-errno"
+)
+
+target_compile_options(blast
+    INTERFACE
+        $<$<COMPILE_LANGUAGE:CXX>:-ftemplate-backtrace-limit=0>
 )
 
 # BLAST_WITH_BLASFEO
