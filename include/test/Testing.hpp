@@ -21,32 +21,6 @@ namespace blast :: testing
 	using namespace ::testing;
 
 
-	namespace detail
-	{
-		template <typename T>
-		class ForcePrintImpl
-		: 	public T
-		{
-			friend void PrintTo(const ForcePrintImpl &m, ::std::ostream *o)
-			{
-				*o << "\n" << m;
-			}
-		};
-	}
-
-
-	/*
-	* Makes the Eigen3 matrix classes printable from GTest checking macros like EXPECT_EQ.
-	* Usage: EXPECT_EQ(forcePrint(a), forcePrint(b))
-	* Taken from this post: http://stackoverflow.com/questions/25146997/teach-google-test-how-to-print-eigen-matrix
-	*/
-	template <typename T>
-	decltype(auto) forcePrint(T const& val)
-	{
-		return static_cast<detail::ForcePrintImpl<T> const&>(val);
-	}
-
-
 	MATCHER_P(FloatNearPointwise, tol, "Out of range")
 	{
 		return (std::get<0>(arg) > std::get<1>(arg) - tol && std::get<0>(arg) < std::get<1>(arg) + tol) ;
@@ -202,7 +176,7 @@ namespace blast :: testing
 	ASSERT_TRUE(::blast::testing::approxEqual(val, expected, abs_tol, rel_tol))
 
 #define BLAST_EXPECT_EQ(val, expected) \
-	EXPECT_EQ(::blast::testing::forcePrint(val), ::blast::testing::forcePrint(expected))
+	EXPECT_EQ(val, expected)
 
 #define BLAST_ASSERT_EQ(val, expected) \
-	ASSERT_EQ(::blast::testing::forcePrint(val), ::blast::testing::forcePrint(expected))
+	ASSERT_EQ(val, expected)
